@@ -1,0 +1,89 @@
+﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{85D3984F-6945-482D-BAF4-1B27E87A5BB1}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UT3GlobalStatsPlugin</RootNamespace>
+    <AssemblyName>UT3GlobalStatsPlugin</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SourceAnalysisOverrideSettingsFile>C:\Users\apophis\AppData\Roaming\ICSharpCode/SharpDevelop3.0\Settings.SourceAnalysis</SourceAnalysisOverrideSettingsFile>
+    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+    <NoStdLib>False</NoStdLib>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>bin\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>Full</DebugType>
+    <Optimize>False</Optimize>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>bin\</OutputPath>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>None</DebugType>
+    <Optimize>True</Optimize>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+    <RegisterForComInterop>False</RegisterForComInterop>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <BaseAddress>4194304</BaseAddress>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <FileAlignment>4096</FileAlignment>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GameSpyClient.cs" />
+    <Compile Include="UT3GlobalStatsPlugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Web References\gameSpyWebService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <None Include="Web References\gameSpyWebService\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\gameSpyWebService\StorageServer.disco" />
+    <None Include="Web References\gameSpyWebService\StorageServer.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Huffelpuff\Huffelpuff.csproj">
+      <Project>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</Project>
+      <Name>Huffelpuff</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SmartIrc4net\SmartIrc4net.csproj">
+      <Project>{5E33EE9C-DEA5-4593-B812-C51D59D0CBE1}</Project>
+      <Name>SmartIrc4net</Name>
+    </ProjectReference>
+    <WebReferences Include="Web References\" />
+    <WebReferenceUrl Include="http://ut3pc.sake.gamespy.com/SakeStorageServer/StorageServer.asmx">
+      <UrlBehavior>Static</UrlBehavior>
+      <UpdateFromURL>http://ut3pc.sake.gamespy.com/SakeStorageServer/StorageServer.asmx</UpdateFromURL>
+      <RelPath>Web References\gameSpyWebService</RelPath>
+      <Namespace>Plugin</Namespace>
+    </WebReferenceUrl>
+  </ItemGroup>
+  <PropertyGroup>
+    <PostBuildEvent>xcopy .\UT3GlobalStatsPlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
+  </PropertyGroup>
+</Project>

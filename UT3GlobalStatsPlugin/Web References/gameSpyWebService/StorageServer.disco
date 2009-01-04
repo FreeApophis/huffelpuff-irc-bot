@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<discovery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.xmlsoap.org/disco/">
+  <contractRef ref="http://ut3pc.sake.gamespy.com/SakeStorageServer/StorageServer.asmx?wsdl" docRef="http://ut3pc.sake.gamespy.com/SakeStorageServer/StorageServer.asmx" xmlns="http://schemas.xmlsoap.org/disco/scl/" />
+  <soap address="http://ut3pc.sake.gamespy.com/SakeStorageServer/StorageServer.asmx" xmlns:q1="http://gamespy.net/sake" binding="q1:StorageServerSoap" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+  <soap address="http://ut3pc.sake.gamespy.com/SakeStorageServer/StorageServer.asmx" xmlns:q2="http://gamespy.net/sake" binding="q2:StorageServerSoap12" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+</discovery>

@@ -1,0 +1,129 @@
+﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{F662345E-3D7E-4AA9-BDE9-51026A2858FE}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>Library</OutputType>
+    <RootNamespace>AIMLPlugin</RootNamespace>
+    <AssemblyName>AIMLPlugin</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SourceAnalysisOverrideSettingsFile>C:\Users\apophis\AppData\Roaming\ICSharpCode/SharpDevelop3.0\Settings.SourceAnalysis</SourceAnalysisOverrideSettingsFile>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+    <NoStdLib>False</NoStdLib>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>bin\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>Full</DebugType>
+    <Optimize>False</Optimize>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>bin\</OutputPath>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>None</DebugType>
+    <Optimize>True</Optimize>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+    <RegisterForComInterop>False</RegisterForComInterop>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <BaseAddress>4194304</BaseAddress>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <FileAlignment>4096</FileAlignment>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AIMLbot\AIMLTagHandlers\bot.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\condition.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\date.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\formal.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\gender.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\get.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\gossip.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\id.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\input.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\javascript.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\learn.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\lowercase.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\person.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\person2.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\random.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\sentence.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\set.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\size.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\sr.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\srai.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\star.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\system.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\that.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\thatstar.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\think.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\topicstar.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\uppercase.cs" />
+    <Compile Include="AIMLbot\AIMLTagHandlers\version.cs" />
+    <Compile Include="AIMLbot\Bot.cs" />
+    <Compile Include="AIMLbot\Normalize\ApplySubstitutions.cs" />
+    <Compile Include="AIMLbot\Normalize\MakeCaseInsensitive.cs" />
+    <Compile Include="AIMLbot\Normalize\SplitIntoSentences.cs" />
+    <Compile Include="AIMLbot\Normalize\StripIllegalCharacters.cs" />
+    <Compile Include="AIMLbot\Request.cs" />
+    <Compile Include="AIMLbot\Result.cs" />
+    <Compile Include="AIMLbot\User.cs" />
+    <Compile Include="AIMLbot\Utils\AIMLLoader.cs" />
+    <Compile Include="AIMLbot\Utils\AIMLTagHandler.cs" />
+    <Compile Include="AIMLbot\Utils\CustomTag.cs" />
+    <Compile Include="AIMLbot\Utils\Gender.cs" />
+    <Compile Include="AIMLbot\Utils\MatchState.cs" />
+    <Compile Include="AIMLbot\Utils\Node.cs" />
+    <Compile Include="AIMLbot\Utils\SettingsDictionary.cs" />
+    <Compile Include="AIMLbot\Utils\SubQuery.cs" />
+    <Compile Include="AIMLbot\Utils\TagHandler.cs" />
+    <Compile Include="AIMLbot\Utils\TextTransformer.cs" />
+    <Compile Include="AIMLPlugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="AIMLbot\ConfigurationFiles\DefaultPredicates.xml" />
+    <Content Include="AIMLbot\ConfigurationFiles\GenderSubstitutions.xml" />
+    <Content Include="AIMLbot\ConfigurationFiles\Person2Substitutions.xml" />
+    <Content Include="AIMLbot\ConfigurationFiles\PersonSubstitutions.xml" />
+    <Content Include="AIMLbot\ConfigurationFiles\Settings.xml" />
+    <Content Include="AIMLbot\ConfigurationFiles\Splitters.xml" />
+    <Content Include="AIMLbot\ConfigurationFiles\Substitutions.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Huffelpuff\Huffelpuff.csproj">
+      <Project>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</Project>
+      <Name>Huffelpuff</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SmartIrc4net\SmartIrc4net.csproj">
+      <Project>{5E33EE9C-DEA5-4593-B812-C51D59D0CBE1}</Project>
+      <Name>SmartIrc4net</Name>
+    </ProjectReference>
+    <Folder Include="AIMLbot" />
+    <Folder Include="AIMLbot\AIMLTagHandlers" />
+    <Folder Include="AIMLbot\ConfigurationFiles" />
+    <Folder Include="AIMLbot\Normalize" />
+    <Folder Include="AIMLbot\Utils" />
+  </ItemGroup>
+  <PropertyGroup>
+    <PostBuildEvent>xcopy .\AIMLPlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
+  </PropertyGroup>
+</Project>

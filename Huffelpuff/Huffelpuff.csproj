@@ -1,0 +1,80 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Huffelpuff</RootNamespace>
+    <AssemblyName>Huffelpuff</AssemblyName>
+    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+    <NoStdLib>False</NoStdLib>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <SourceAnalysisOverrideSettingsFile>C:\Users\apophis\Documents\SharpDevelop Projects\Huffelpuff\Settings.SourceAnalysis</SourceAnalysisOverrideSettingsFile>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <SignAssembly>False</SignAssembly>
+    <DelaySign>False</DelaySign>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>bin\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>Full</DebugType>
+    <Optimize>False</Optimize>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>bin\</OutputPath>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>None</DebugType>
+    <Optimize>True</Optimize>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+    <RegisterForComInterop>True</RegisterForComInterop>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <BaseAddress>4194304</BaseAddress>
+    <PlatformTarget>x86</PlatformTarget>
+    <FileAlignment>4096</FileAlignment>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
+  <ItemGroup>
+    <Reference Include="Microsoft.JScript" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AccessControlList.cs" />
+    <Compile Include="Commandlet.cs" />
+    <Compile Include="ComplexPlugins\ComplexPluginManager.cs" />
+    <Compile Include="Engine.cs" />
+    <Compile Include="IrcBot.cs" />
+    <Compile Include="PersistentMemory.cs" />
+    <Compile Include="ComplexPlugins\AbstractPlugin.cs" />
+    <Compile Include="ComplexPlugins\AssemblyFactory.cs" />
+    <Compile Include="ComplexPlugins\LocalLoader.cs" />
+    <Compile Include="ComplexPlugins\PluginManager.cs" />
+    <Compile Include="ComplexPlugins\PluginSourceEnum.cs" />
+    <Compile Include="ComplexPlugins\RemoteLoader.cs" />
+    <Compile Include="ComplexPlugins\SharedClientSide.cs" />
+    <Compile Include="ComplexPlugins\SharedServerSide.cs" />
+    <Compile Include="SimplePlugins\IAccessPlugin.cs" />
+    <Compile Include="SimplePlugins\IPlugin.cs" />
+    <Compile Include="SimplePlugins\SimplePluginManager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools.cs" />
+    <Content Include="Huffelpuff.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SmartIrc4net\SmartIrc4net.csproj">
+      <Project>{5E33EE9C-DEA5-4593-B812-C51D59D0CBE1}</Project>
+      <Name>SmartIrc4net</Name>
+    </ProjectReference>
+    <Folder Include="Properties" />
+    <Folder Include="ComplexPlugins" />
+    <Folder Include="SimplePlugins" />
+  </ItemGroup>
+</Project>
