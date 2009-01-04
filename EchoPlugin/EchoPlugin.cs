@@ -17,59 +17,59 @@ using Meebey.SmartIrc4net;
 
 namespace Plugin
 {
-	/// <summary>
-	/// This is a very simple Plugin Example: The Echo Plugin
-	/// </summary>
-	public class EchoPlugin : AbstractPlugin
-	{
-		
-		public EchoPlugin(IrcBot botInstance) 
-			: base(botInstance) {}
-		
-		private bool ready = false;
-		public override bool Ready {
-			get {
-				return ready;
-			}
-		}
-		
-		private bool active = false;	
-		public override bool Active {
-			get {
-				return active;
-			}
-		}		
-		public override string Name {
-			get {
-				return Assembly.GetExecutingAssembly().FullName;
-			}
-		}
-			
-		public override void Init() {
-			ready = true;
-		}
-		
-		
-		
-		public override void Activate() {
-			//this.AddPublicCommand(new Commandlet("!say", "!say <your text>, says whatever text you want it to say", sayHandler, this));
-			//this.RegisterEvent(bot.OnJoin, this.sayHandler);
-			BotEvents.OnChannelMessage  +=  new IrcEventHandler(sayHandler);
-			active = true;
-		}
+    /// <summary>
+    /// This is a very simple Plugin Example: The Echo Plugin
+    /// </summary>
+    public class EchoPlugin : AbstractPlugin
+    {
+        
+        public EchoPlugin(IrcBot botInstance) 
+            : base(botInstance) {}
+        
+        private bool ready = false;
+        public override bool Ready {
+            get {
+                return ready;
+            }
+        }
+        
+        private bool active = false;    
+        public override bool Active {
+            get {
+                return active;
+            }
+        }        
+        public override string Name {
+            get {
+                return Assembly.GetExecutingAssembly().FullName;
+            }
+        }
+            
+        public override void Init() {
+            ready = true;
+        }
+        
+        
+        
+        public override void Activate() {
+            //this.AddPublicCommand(new Commandlet("!say", "!say <your text>, says whatever text you want it to say", sayHandler, this));
+            //this.RegisterEvent(bot.OnJoin, this.sayHandler);
+            BotEvents.OnChannelMessage  +=  new IrcEventHandler(sayHandler);
+            active = true;
+        }
 
-		
-		public override void Deactivate() {
-			//this.RemovePublicCommand("!say");
-			active = false;
-		}
-		
-		public override string AboutHelp() {
-			return "This is a very simple Plugin which repeats the message you said";
-		}
-				
-		private void sayHandler(object sender, IrcEventArgs e) {
-			BotMethods.SendMessage(SendType.Message, e.Data.Channel, e.Data.Message.Substring(5));
-		}
-	}
+        
+        public override void Deactivate() {
+            //this.RemovePublicCommand("!say");
+            active = false;
+        }
+        
+        public override string AboutHelp() {
+            return "This is a very simple Plugin which repeats the message you said";
+        }
+                
+        private void sayHandler(object sender, IrcEventArgs e) {
+            BotMethods.SendMessage(SendType.Message, e.Data.Channel, e.Data.Message.Substring(5));
+        }
+    }
 }

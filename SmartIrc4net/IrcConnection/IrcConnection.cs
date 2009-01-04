@@ -471,7 +471,7 @@ namespace Meebey.SmartIrc4net
                 
                 
                 Stream stream = _TcpClient.GetStream();
-				
+                
 #if NET_2_0
                 if (_UseSsl) {
                     SslStream sslStream = new SslStream(stream, false, delegate {

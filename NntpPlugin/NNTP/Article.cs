@@ -59,24 +59,24 @@ namespace Nntp
 		public DateTime LastReply
 		{
 			get
-			{
-				return lastReply;
-			}
-			set
-			{
-				lastReply = value;
-			}
-		}
-		public ArrayList Children
-		{
-			get
-			{
-				return children;
-			}
-			set
-			{
-				children = value;
-			}
-		}
-	}
+            {
+                return lastReply;
+            }
+            set
+            {
+                lastReply = value;
+            }
+        }
+        public ArrayList Children
+        {
+            get
+            {
+                return children;
+            }
+            set
+            {
+                children = value;
+            }
+        }
+    }
 }

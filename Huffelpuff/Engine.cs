@@ -10,14 +10,14 @@ using Meebey.SmartIrc4net;
 
 namespace Huffelpuff
 {
-	class Engine
-	{
-		public static void Main(string[] args)
-		{
-			Tools.RunOnMono();
-			Tools.getMyIPs();
-			IrcBot bot = new IrcBot();
-			bot.Start();  /*blocking*/
-		}	
-	}
+    class Engine
+    {
+        public static void Main(string[] args)
+        {
+            Tools.RunOnMono();
+            Tools.getMyIPs();
+            IrcBot bot = new IrcBot();
+            bot.Start();  /*blocking*/
+        }    
+    }
 }

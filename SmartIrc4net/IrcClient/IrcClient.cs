@@ -100,7 +100,7 @@ namespace Meebey.SmartIrc4net
         public event IrcEventHandler            OnRawMessage;
         public event ErrorEventHandler          OnError;
         public event IrcEventHandler            OnErrorMessage;
-        public event JoinEventHandler           OnJoin;        	
+        public event JoinEventHandler           OnJoin;            
         public event NamesEventHandler          OnNames;
         public event ListEventHandler           OnList;
         public event PartEventHandler           OnPart;
@@ -130,7 +130,7 @@ namespace Meebey.SmartIrc4net
         public event IrcEventHandler            OnModeChange;
         public event IrcEventHandler            OnUserModeChange;
         public event IrcEventHandler            OnChannelModeChange;
-        public event IrcEventHandler			OnChannelMessage;
+        public event IrcEventHandler            OnChannelMessage;
         public event ActionEventHandler         OnChannelAction;
         public event IrcEventHandler            OnChannelNotice;
         public event IrcEventHandler            OnChannelActiveSynced;
@@ -315,14 +315,14 @@ namespace Meebey.SmartIrc4net
                 }
 #endif
                 _SupportNonRfc = value;
-            	
-				if (SupportNonRfcChanged != null) {
-					SupportNonRfcChanged(this, EventArgs.Empty);
-				}
+                
+                if (SupportNonRfcChanged != null) {
+                    SupportNonRfcChanged(this, EventArgs.Empty);
+                }
             }
         }
         
-		public event EventHandler SupportNonRfcChanged;
+        public event EventHandler SupportNonRfcChanged;
 
         /// <summary>
         /// Gets the nickname of us.
@@ -2057,8 +2057,8 @@ namespace Meebey.SmartIrc4net
         /// <param name="ircdata">Message data containing private message information</param>
         private void _Event_PRIVMSG(IrcMessageData ircdata)
         {
-        	
-        	switch (ircdata.Type) {
+            
+            switch (ircdata.Type) {
                 case ReceiveType.ChannelMessage:
                     if (OnChannelMessage != null) {
                         OnChannelMessage(this, new IrcEventArgs(ircdata));
@@ -2215,18 +2215,18 @@ namespace Meebey.SmartIrc4net
                         }
                         if (SupportNonRfc) {
                             NonRfcChannel nchannel = (NonRfcChannel)channel;
-                        	if (((NonRfcChannelUser)channeluser).IsAdmin) {
-    	                        nchannel.UnsafeAdmins.Remove(oldnickname);
-        	                    nchannel.UnsafeAdmins.Add(newnickname, channeluser);            		
-                        	}
-                        	if (((NonRfcChannelUser)channeluser).IsHalfop) {
-    	                        nchannel.UnsafeHalfops.Remove(oldnickname);
-        	                    nchannel.UnsafeHalfops.Add(newnickname, channeluser);            		
-                        	}
-                        	if (((NonRfcChannelUser)channeluser).IsOwner) {
-    	                        nchannel.UnsafeOwners.Remove(oldnickname);
-        	                    nchannel.UnsafeOwners.Add(newnickname, channeluser);            		
-                        	}
+                            if (((NonRfcChannelUser)channeluser).IsAdmin) {
+                                nchannel.UnsafeAdmins.Remove(oldnickname);
+                                nchannel.UnsafeAdmins.Add(newnickname, channeluser);                    
+                            }
+                            if (((NonRfcChannelUser)channeluser).IsHalfop) {
+                                nchannel.UnsafeHalfops.Remove(oldnickname);
+                                nchannel.UnsafeHalfops.Add(newnickname, channeluser);                    
+                            }
+                            if (((NonRfcChannelUser)channeluser).IsOwner) {
+                                nchannel.UnsafeOwners.Remove(oldnickname);
+                                nchannel.UnsafeOwners.Add(newnickname, channeluser);                    
+                            }
                         }
 
                     }
@@ -2449,24 +2449,24 @@ namespace Meebey.SmartIrc4net
 #endif
                         }
                         if (SupportNonRfc) {
-                        	if (admin)  {
-	                            ((NonRfcChannel)channel).UnsafeAdmins.Add(nickname, channeluser);
+                            if (admin)  {
+                                ((NonRfcChannel)channel).UnsafeAdmins.Add(nickname, channeluser);
 #if LOG4NET
-    	                        Logger.ChannelSyncing.Debug("added admin: "+nickname+" to: "+channelname);
+                                Logger.ChannelSyncing.Debug("added admin: "+nickname+" to: "+channelname);
 #endif
-                        	}
-                        	if (halfop)  {
-	                            ((NonRfcChannel)channel).UnsafeHalfops.Add(nickname, channeluser);
+                            }
+                            if (halfop)  {
+                                ((NonRfcChannel)channel).UnsafeHalfops.Add(nickname, channeluser);
 #if LOG4NET
-    	                        Logger.ChannelSyncing.Debug("added halfop: "+nickname+" to: "+channelname);
+                                Logger.ChannelSyncing.Debug("added halfop: "+nickname+" to: "+channelname);
 #endif
-                        	}
-                        	if (owner)  {
-	                            ((NonRfcChannel)channel).UnsafeOwners.Add(nickname, channeluser);
+                            }
+                            if (owner)  {
+                                ((NonRfcChannel)channel).UnsafeOwners.Add(nickname, channeluser);
 #if LOG4NET
-    	                        Logger.ChannelSyncing.Debug("added owner: "+nickname+" to: "+channelname);
+                                Logger.ChannelSyncing.Debug("added owner: "+nickname+" to: "+channelname);
 #endif
-                        	}
+                            }
 
                         }
                     }

@@ -139,7 +139,7 @@ namespace Meebey.SmartIrc4net
         IsOn =                           303,
         UnAway =                         305,
         NowAway =                        306,
-        WhoIsRegistered = 				 307,
+        WhoIsRegistered =                  307,
         WhoIsUser =                      311,
         WhoIsServer =                    312,
         WhoIsOperator =                  313,
