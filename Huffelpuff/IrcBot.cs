@@ -33,8 +33,8 @@ namespace Huffelpuff
         private ComplexPluginManager complexPM;
         
         private AccessControlList acl;
-        private Dictionary<string, Commandlet>  _privateCommands = new Dictionary<string, Commandlet>();
-        private Dictionary<string, Commandlet>  _publicCommands = new Dictionary<string, Commandlet>();
+        private Dictionary<string, Commandlet>  _privateCommands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
+        private Dictionary<string, Commandlet>  _publicCommands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
 
         private PluginManager nextGenPlugins;
         public IrcBot()
@@ -107,9 +107,9 @@ namespace Huffelpuff
         
         public bool AddPrivateCommand(Commandlet cmd)
         {
-            if(!_privateCommands.ContainsKey(cmd.Command.ToLower()))
+        	if(!_privateCommands.ContainsKey(cmd.Command))
             {
-                   _privateCommands.Add(cmd.Command.ToLower(), cmd);
+                   _privateCommands.Add(cmd.Command, cmd);
                    return true;
             }
             return false;
@@ -117,9 +117,9 @@ namespace Huffelpuff
         
         public bool RemovePrivateCommand(string command)
         {
-            if(_privateCommands.ContainsKey(command.ToLower()))
+            if(_privateCommands.ContainsKey(command))
             {
-                _privateCommands.Remove(command.ToLower());
+            	_privateCommands.Remove(command);
                    return true;
             }
             return false;
@@ -127,18 +127,18 @@ namespace Huffelpuff
         
         public bool AddPublicCommand(Commandlet cmd)
         {
-            if(!_publicCommands.ContainsKey(cmd.Command.ToLower()))
+            if(!_publicCommands.ContainsKey(cmd.Command))
             {
-                _publicCommands.Add(cmd.Command.ToLower(), cmd);
+                _publicCommands.Add(cmd.Command, cmd);
                    return true;
             }
             return false;        }
         
         public bool RemovePublicCommand(string command)
         {
-            if(_publicCommands.ContainsKey(command.ToLower()))
+            if(_publicCommands.ContainsKey(command))
             {
-                _publicCommands.Remove(command.ToLower());
+                _publicCommands.Remove(command);
                    return true;
             }
             return false;
@@ -146,16 +146,16 @@ namespace Huffelpuff
         
         private void PrivateCommandDispatcher(object sender, IrcEventArgs e)
         {
-            if (_privateCommands.ContainsKey(e.Data.MessageArray[0].ToLower())) {
-                _privateCommands[e.Data.MessageArray[0].ToLower()].Handler.Invoke(sender, e);
+            if (_privateCommands.ContainsKey(e.Data.MessageArray[0])) {
+                _privateCommands[e.Data.MessageArray[0]].Handler.Invoke(sender, e);
             }
         }
 
 
         private void PublicCommandDispatcher(object sender, IrcEventArgs e)
         {
-            if (_publicCommands.ContainsKey(e.Data.MessageArray[0].ToLower())) {
-                _publicCommands[e.Data.MessageArray[0].ToLower()].Handler.Invoke(sender, e);
+            if (_publicCommands.ContainsKey(e.Data.MessageArray[0])) {
+                _publicCommands[e.Data.MessageArray[0]].Handler.Invoke(sender, e);
             }
         }
         

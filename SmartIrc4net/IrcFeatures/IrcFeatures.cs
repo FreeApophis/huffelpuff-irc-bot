@@ -110,7 +110,7 @@ namespace Meebey.SmartIrc4net
         #region private variables
         private IPAddress _ExternalIpAdress;
         private List<DccConnection> _DccConnections = new List<DccConnection>();
-        private Dictionary<string, ctcpDelagte>  _CtcpDelagtes = new Dictionary<string, ctcpDelagte>();
+        private Dictionary<string, ctcpDelagte>  _CtcpDelagtes = new Dictionary<string, ctcpDelagte>(StringComparer.CurrentCultureIgnoreCase);
         private string _CtcpUserInfo;
         private string _CtcpUrl;
         private string _CtcpSource;
@@ -293,8 +293,8 @@ namespace Meebey.SmartIrc4net
         #region Private Methods
         private void CtcpRequestsHandler(object sender, CtcpEventArgs e)
         {
-            if (_CtcpDelagtes.ContainsKey(e.CtcpCommand.ToLower())) {
-                _CtcpDelagtes[e.CtcpCommand.ToLower()].Invoke(e);
+        	if (_CtcpDelagtes.ContainsKey(e.CtcpCommand)) {
+                _CtcpDelagtes[e.CtcpCommand].Invoke(e);
             } else {
                 /* No CTCP Handler for this Command */
             }
