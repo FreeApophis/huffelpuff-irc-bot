@@ -293,7 +293,7 @@ namespace Meebey.SmartIrc4net
         #region Private Methods
         private void CtcpRequestsHandler(object sender, CtcpEventArgs e)
         {
-        	if (_CtcpDelagtes.ContainsKey(e.CtcpCommand)) {
+            if (_CtcpDelagtes.ContainsKey(e.CtcpCommand)) {
                 _CtcpDelagtes[e.CtcpCommand].Invoke(e);
             } else {
                 /* No CTCP Handler for this Command */
