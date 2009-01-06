@@ -100,7 +100,7 @@ namespace Meebey.SmartIrc4net
         public event IrcEventHandler            OnRawMessage;
         public event ErrorEventHandler          OnError;
         public event IrcEventHandler            OnErrorMessage;
-        public event JoinEventHandler           OnJoin;            
+        public event JoinEventHandler           OnJoin;
         public event NamesEventHandler          OnNames;
         public event ListEventHandler           OnList;
         public event PartEventHandler           OnPart;
@@ -141,6 +141,13 @@ namespace Meebey.SmartIrc4net
         public event CtcpEventHandler           OnCtcpRequest;
         public event CtcpEventHandler           OnCtcpReply;
 
+        private ServerProperties _Properties = new ServerProperties();
+        public ServerProperties Properties {
+            get {
+                return _Properties;
+            }
+        }
+        
         /// <summary>
         /// Enables/disables the active channel sync feature.
         /// Default: false
@@ -886,6 +893,14 @@ namespace Meebey.SmartIrc4net
                 case ReplyCode.ErrorNoChannelModes:
                     channel = linear[3];
                     break;
+                case ReplyCode.Bounce:
+                    if(!line.StartsWith("Try server")) {
+                        // RPL_ISUPPORT (Very common enhancement)
+                        ParseServerProperties(line.Substring(0, colonpos-1));
+                    } else {
+                        // RPL_BOUNCE (Rfc 2812)
+                    }
+                    break;
             }
 
             if ((channel != null) &&
@@ -907,6 +922,131 @@ namespace Meebey.SmartIrc4net
                                        );
 #endif
             return data;
+        }
+        
+        private void ParseServerProperties(string line)
+        {
+            string[] parameters = line.Split(new char[] {' '});
+            int i = 0;
+            foreach(string s in parameters)
+            {
+                if(i<3) {
+                    i++; continue;
+                }
+                
+                string[] pv = s.Split(new char[] {'='});
+                Properties._Raw.Add(pv[0],((pv.Length>1)?pv[1]:"TRUE"));
+
+                // Boolean value;
+                switch(pv[0]) {
+                    case "EXCEPTS": Properties._BanException = true;
+                        break;
+                    case "INVEX": Properties._InviteExceptions = true;
+                        break;
+                    case "WALLCHOPS": Properties._WAllChannelOps = true;
+                        break;
+                    case "WALLVOICES": Properties._WAllVoices = true;
+                        break;
+                    case "RFC2812": Properties._Rfc2812 = true;
+                        break;
+                    case "PENALTY": Properties._Penalty = true;
+                        break;
+                    case "FNC": Properties._ForcedNickChange = true;
+                        break;
+                    case "SAFELIST": Properties._SafeList = true;
+                        break;
+                    case "NOQUIT": Properties._NoQuit = true;
+                        break;
+                    case "USERIP": Properties._UserIp = true;
+                        break;
+                    case "CPRIVMSG": Properties._CPrivateMessage = true;
+                        break;
+                    case "CNOTICE": Properties._CNotice = true;
+                        break;
+                    case "KNOCK": Properties._Knock = true;
+                        break;
+                    case "VCHANS": Properties._VirtualChannels = true;
+                        break;
+                    case "WHOX": Properties._WhoX = true;
+                        break;
+                    case "CALLERID": Properties._ModeG = true;
+                        break;
+                    case "IRCD": Properties._IrcDaemon = pv[1];
+                        break;
+                    case "PREFIX": Properties._NickPrefix = pv[1];
+                        break;
+                    case "CHANTYPES": Properties._ChannelTypes = pv[1];
+                        break;
+                    case "CHANMODES": Properties._ChannelModes = pv[1];
+                        break;
+                    case "MODES": Properties._MaxChannelModes = int.Parse(pv[1]);
+                        break;
+                    case "MAXCHANNELS": Properties._MaxChannels = int.Parse(pv[1]);
+                        break;
+                    case "CHANLIMIT": Properties._MaxChannelsByType = pv[1];
+                        break;
+                    case "NICKLEN": Properties._MaxNickLength = int.Parse(pv[1]);
+                        break;
+                    case "MAXBANS": Properties._MaxBans = int.Parse(pv[1]);
+                        break;
+                    case "MAXLIST": Properties._MaxList = pv[1];
+                        break;
+                    case "NETWORK": Properties._NetworkName = pv[1];
+                        break;
+                    case "STATUSMSG": Properties._StatusMessage = pv[1];
+                        break;
+                    case "CASEMAPPING":
+                        if (pv[1]=="ascii") Properties._CaseMapping = CaseMappingType.Ascii;
+                        if (pv[1]=="rfc1459") Properties._CaseMapping = CaseMappingType.Rfc1459;
+                        if (pv[1]=="strict-rfc1459") Properties._CaseMapping = CaseMappingType.Rfc1459Strict;
+                        break;
+                    case "ELIST": Properties._ExtendedListCommand = pv[1];
+                        break;
+                    case "TOPICLEN": Properties._MaxTopicLength = int.Parse(pv[1]);
+                        break;
+                    case "KICKLEN": Properties._MaxKickLength = int.Parse(pv[1]);
+                        break;
+                    case "CHANNELLEN": Properties._MaxChannelLength = int.Parse(pv[1]);
+                        break;
+                    case "CHIDLEN": Properties._ChannelIDLength = int.Parse(pv[1]);
+                        break;
+                    case "IDCHAN": Properties._ChannelIDLengthByType = pv[1];
+                        break;
+                    case "STD": Properties._IrcStandard = pv[1];
+                        break;
+                    case "SILENCE": Properties._MaxSilence = int.Parse(pv[1]);
+                        break;
+                    case "AWAYLEN": Properties._MaxAwayLength = int.Parse(pv[1]);
+                        break;
+                    case "MAXTARGETS": Properties._MaxTargets = int.Parse(pv[1]);
+                        break;
+                    case "WATCH": Properties._MaxWatch = int.Parse(pv[1]);
+                        break;
+                    case "LANGUAGE": Properties._Language = pv[1];
+                        break;
+                    case "KEYLEN": Properties._MaxKeyLength = int.Parse(pv[1]);
+                        break;
+                    case "USERLEN": Properties._MaxUserLength = int.Parse(pv[1]);
+                        break;
+                    case "HOSTLEN": Properties._MaxHostLength = int.Parse(pv[1]);
+                        break;
+                    case "CMDS": Properties.SetCommands(pv[1]);
+                        break;
+                    case "MAXNICKLEN": Properties._MaxNickLength = int.Parse(pv[1]);
+                        break;
+                    case "MAXCHANNELLEN": Properties._MaxChannelLength = int.Parse(pv[1]);
+                        break;
+                    case "MAP": Properties._Map = true;
+                        break;
+                    case "TARGMAX": Properties._MaxTargetsByCommand = pv[1];
+                        break;
+                    default:
+#if LOG4NET
+                        Logger.MessageParser.Warn(pv[0] + " is not parsed yet but has value: " + ((pv.Length>1)?pv[1]:"true"));
+#endif
+                    break;
+                }
+            }
         }
         
         protected virtual IrcUser CreateIrcUser(string nickname)
