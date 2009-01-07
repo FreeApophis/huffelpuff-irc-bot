@@ -83,8 +83,8 @@ namespace Meebey.SmartIrc4net
         private TimeSpan         _Lag;
         private IPEndPoint       _ProxyEndPoint;
         private ProxyTypes       _ProxyType = ProxyTypes.None;
-        private string           _ProxyUser;
-        private string           _ProxyPass;
+        private string           _ProxyUser = "";
+        private string           _ProxyPass = "";
         
         /// <event cref="OnReadLine">
         /// Raised when a \r\n terminated line is read from the socket
@@ -436,7 +436,8 @@ namespace Meebey.SmartIrc4net
                 return _ProxyUser;
             }
             set {
-                _ProxyUser = value;
+                
+                _ProxyUser = (value!=null)?value:"";
             }
         }
         
@@ -448,7 +449,7 @@ namespace Meebey.SmartIrc4net
                 return _ProxyPass;
             }
             set {
-                _ProxyPass = value;
+                _ProxyPass = (value!=null)?value:"";
             }
         }
 
