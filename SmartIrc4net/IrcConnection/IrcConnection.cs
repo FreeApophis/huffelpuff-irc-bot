@@ -33,6 +33,8 @@ using System.Collections;
 using System.Threading;
 using System.Reflection;
 using System.Net.Sockets;
+using System.Net;
+using Org.Mentalis.Network.ProxySocket;
 #if NET_2_0
 using System.Net.Security;
 #endif
@@ -78,6 +80,10 @@ namespace Meebey.SmartIrc4net
         private DateTime         _LastPingSent;
         private DateTime         _LastPongReceived;
         private TimeSpan         _Lag;
+        private IPEndPoint       _ProxyEndPoint;
+        private ProxyTypes       _ProxyType = ProxyTypes.None;
+        private string           _ProxyUser;
+        private string           _ProxyPass;
         
         /// <event cref="OnReadLine">
         /// Raised when a \r\n terminated line is read from the socket
@@ -393,6 +399,57 @@ namespace Meebey.SmartIrc4net
                 return _Lag;
             }
         }
+        
+        /// <summary>
+        /// If you want to use a Proxy, set the ProxyEndPoint to Adress and Port of the Proxy you want to use.
+        /// </summary>
+        public IPEndPoint ProxyEndPoint {
+            get {
+                return _ProxyEndPoint;
+            }
+            set {
+                _ProxyEndPoint = value;
+            }
+        }
+        
+        /// <summary>
+        /// Standard Setting is to use no Proxy Server, if you Set this to any other value, 
+        /// you have to set the ProxyEndPoint aswell (and give credentials if needed)
+        /// Default: Org.Mentalis.Network.ProxySocket.ProxyTypes.None
+        /// </summary>
+        public ProxyTypes ProxyType {
+            get {
+                
+                return _ProxyType;
+            }
+            set {
+                _ProxyType = value;
+            }
+        }
+        
+        /// <summary>
+        /// Username to your Proxy Server
+        /// </summary>
+        public string ProxyUser {
+            get {
+                return _ProxyUser;
+            }
+            set {
+                _ProxyUser = value;
+            }
+        }
+        
+        /// <summary>
+        /// Password to your Proxy Server
+        /// </summary>
+        public string ProxyPass {
+            get {
+                return _ProxyPass;
+            }
+            set {
+                _ProxyPass = value;
+            }
+        }
 
         /// <summary>
         /// Initializes the message queues, read and write thread
@@ -460,18 +517,34 @@ namespace Meebey.SmartIrc4net
                 OnConnecting(this, EventArgs.Empty);
             }
             try {
-                System.Net.IPAddress ip = System.Net.Dns.Resolve(Address).AddressList[0];
                 _TcpClient = new IrcTcpClient();
                 _TcpClient.NoDelay = true;
+
+                // Socks 4/5 Proxy
+                ProxySocket socksProxy = new ProxySocket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                socksProxy.ProxyEndPoint = _ProxyEndPoint;
+                socksProxy.ProxyType = _ProxyType;
+                socksProxy.ProxyUser = _ProxyUser;
+                socksProxy.ProxyPass = _ProxyPass;
+                _TcpClient.Client = socksProxy;
+                
+                
                 _TcpClient.Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, 1);
                 // set timeout, after this the connection will be aborted
                 _TcpClient.ReceiveTimeout = _SocketReceiveTimeout * 1000;
                 _TcpClient.SendTimeout = _SocketSendTimeout * 1000;
-                _TcpClient.Connect(ip, port);
+                if (_ProxyType == ProxyTypes.None) {
+                    //TODO: use multiple ports too!
+                    socksProxy.Connect(Address, port);
+                } else {
+                    // FIXME: this is not needed but should help merging the IPv6 changes! (just use always the if case!)
+                    System.Net.IPAddress ip = System.Net.Dns.Resolve(Address).AddressList[0];
+                    _TcpClient.Connect(ip, port);
+                }
                 
                 
                 Stream stream = _TcpClient.GetStream();
-                
+   
 #if NET_2_0
                 if (_UseSsl) {
                     SslStream sslStream = new SslStream(stream, false, delegate {

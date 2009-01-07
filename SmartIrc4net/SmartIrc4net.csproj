@@ -75,12 +75,22 @@
     <Compile Include="IrcFeatures\IrcConstants.cs" />
     <Compile Include="IrcFeatures\IrcFeatures.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="SocksProxy\AuthMethod.cs" />
+    <Compile Include="SocksProxy\AuthNone.cs" />
+    <Compile Include="SocksProxy\AuthUserPass.cs" />
+    <Compile Include="SocksProxy\IAsyncProxyResult.cs" />
+    <Compile Include="SocksProxy\ProxyException.cs" />
+    <Compile Include="SocksProxy\ProxySocket.cs" />
+    <Compile Include="SocksProxy\Socks4Handler.cs" />
+    <Compile Include="SocksProxy\Socks5Handler.cs" />
+    <Compile Include="SocksProxy\SocksHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="IrcConnection" />
     <Folder Include="IrcClient" />
     <Folder Include="IrcCommands" />
     <Folder Include="IrcFeatures" />
+    <Folder Include="SocksProxy" />
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy .\SmartIrc4net.* ..\..\Huffelpuff\bin /y</PostBuildEvent>
