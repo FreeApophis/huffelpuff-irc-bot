@@ -34,6 +34,7 @@ namespace Meebey.SmartIrc4net
     /// <summary>
     ///
     /// </summary>
+     [Serializable]
     public class ReadLineEventArgs : EventArgs
     {
         private string _Line;
@@ -53,6 +54,7 @@ namespace Meebey.SmartIrc4net
     /// <summary>
     ///
     /// </summary>
+     [Serializable] 
     public class WriteLineEventArgs : EventArgs
     {
         private string _Line;
@@ -72,6 +74,7 @@ namespace Meebey.SmartIrc4net
     /// <summary>
     /// 
     /// </summary>
+     [Serializable]
     public class AutoConnectErrorEventArgs : EventArgs
     {
         private Exception           _Exception;

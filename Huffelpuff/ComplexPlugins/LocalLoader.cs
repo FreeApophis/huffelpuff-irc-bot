@@ -41,7 +41,7 @@ namespace Huffelpuff.ComplexPlugins
 			
 			remoteLoader = (RemoteLoader)appDomain.CreateInstanceAndUnwrap(
 				"Huffelpuff",
-				"rapid.Plugins.RemoteLoader");
+				"Huffelpuff.ComplexPlugins.RemoteLoader");
 		}
 
 		/// <summary>

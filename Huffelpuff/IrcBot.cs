@@ -46,14 +46,14 @@ namespace Huffelpuff
             this.OnRawMessage += new IrcEventHandler(RawMessageHandler);
             
             
-            //this.OnChannelMessage += new IrcEventHandler(PublicCommandDispatcher);
+            this.OnChannelMessage += new IrcEventHandler(PublicCommandDispatcher);
             this.OnQueryMessage +=  new IrcEventHandler(PrivateCommandDispatcher);
             
             this.AddPublicCommand(new Commandlet("!join", "HELP ON JOIN", JoinCommand, this));
             this.AddPublicCommand(new Commandlet("!part", "HELP ON PART", PartCommand, this));
             this.AddPublicCommand(new Commandlet("!quit", "HELP ON QUIT", QuitCommand, this));
             this.AddPublicCommand(new Commandlet("!help", "HELP ON HELP", HelpCommand, this));
-            
+                        
             this.CtcpVersion = "Huffelpuff Testing Bot: Based on SmartIRC4net 4.5.0svn + DCC";
             
             if (PersistentMemory.GetValue("external_ip")!=null)
@@ -66,13 +66,12 @@ namespace Huffelpuff
             //plugins.ActivatePlugins();
             
             //New Plugins
-//            nextGenPlugins = new PluginManager();    
-//            nextGenPlugins.PluginsReloaded += new EventHandler(Plugins_PluginsReloaded);
-//            nextGenPlugins.IgnoreErrors = true;
-//            nextGenPlugins.PluginSources =  PluginSourceEnum.Both;
-//            
-//            
-//            nextGenPlugins.Start();
+            nextGenPlugins = new PluginManager();    
+            nextGenPlugins.PluginsReloaded += new EventHandler(Plugins_PluginsReloaded);
+            nextGenPlugins.IgnoreErrors = true;
+            nextGenPlugins.PluginSources =  PluginSourceEnum.Both;
+
+            nextGenPlugins.Start();
             
             
             //Access Control
@@ -84,7 +83,7 @@ namespace Huffelpuff
         private void Plugins_PluginsReloaded(object sender, EventArgs e)
         {
         
-            foreach(string pluginName in nextGenPlugins.GetSubclasses("Huffelpuff.AbstractPlugin"))
+            foreach(string pluginName in nextGenPlugins.GetSubclasses("Huffelpuff.ComplexPlugins.AbstractPlugin"))
             {
                 
                 Console.Write(pluginName + " ... ");
@@ -200,6 +199,12 @@ namespace Huffelpuff
         {    
             topic = topic.ToLower();
             bool helped = false;
+            
+            if (topic == "test")
+            {
+
+            }
+            
             if (topic == "commands") {
                 List<string> commands = new List<string>();
                 commands.AddRange(_publicCommands.Keys);

@@ -69,7 +69,8 @@ namespace Plugin
         }
                 
         private void sayHandler(object sender, IrcEventArgs e) {
-            BotMethods.SendMessage(SendType.Message, e.Data.Channel, e.Data.Message.Substring(5));
+            if (e.Data.MessageArray[0]=="!say")
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, e.Data.Message.Substring(5));            
         }
     }
 }

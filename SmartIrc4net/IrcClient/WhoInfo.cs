@@ -31,6 +31,7 @@ using System;
 
 namespace Meebey.SmartIrc4net
 {
+    [Serializable]
     public class WhoInfo
     {
         private string   f_Channel;
