@@ -8,6 +8,7 @@
  */
 
 using System;
+using System.Net;
 using System.Threading;
 using System.Reflection;
 using System.Collections.Generic;
@@ -36,7 +37,6 @@ namespace Huffelpuff
         private Dictionary<string, Commandlet>  _privateCommands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
         private Dictionary<string, Commandlet>  _publicCommands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
 
-        private PluginManager nextGenPlugins;
         public IrcBot()
         {           
             this.Encoding = System.Text.Encoding.UTF8;
@@ -49,10 +49,13 @@ namespace Huffelpuff
             this.OnChannelMessage += new IrcEventHandler(PublicCommandDispatcher);
             this.OnQueryMessage +=  new IrcEventHandler(PrivateCommandDispatcher);
             
-            this.AddPublicCommand(new Commandlet("!join", "HELP ON JOIN", JoinCommand, this));
-            this.AddPublicCommand(new Commandlet("!part", "HELP ON PART", PartCommand, this));
-            this.AddPublicCommand(new Commandlet("!quit", "HELP ON QUIT", QuitCommand, this));
-            this.AddPublicCommand(new Commandlet("!help", "HELP ON HELP", HelpCommand, this));
+            this.AddPublicCommand(new Commandlet("!join", "The command !join <channel> lets the bot join Channel <channel>", JoinCommand, this));
+            this.AddPublicCommand(new Commandlet("!part", "The command !part <channel> lets the bot part Channel <channel>", PartCommand, this));
+            this.AddPublicCommand(new Commandlet("!quit", "The command !quit lets the bot quit himself", QuitCommand, this));
+            this.AddPublicCommand(new Commandlet("!help", "The command !help <topic> gives you help about <topic> (special topics: commands, more)", HelpCommand, this));
+			this.AddPublicCommand(new Commandlet("!plugins", "The command !plugins lists all the plugins", this.PluginsCommand, this));
+			this.AddPublicCommand(new Commandlet("!activate", "The command !activate <plugin> activates the Plugin <plugin>", this.ActivateCommand, this));
+			this.AddPublicCommand(new Commandlet("!deactivate", "The command !deactivate <plugin> deactivates the Plugin <plugin>", this.DeactivateCommand, this));
                         
             this.CtcpVersion = "Huffelpuff Testing Bot: Based on SmartIRC4net 4.5.0svn + DCC";
             
@@ -62,41 +65,12 @@ namespace Huffelpuff
                 this.ExternalIpAdress = System.Net.IPAddress.Parse("127.0.0.1");
             
             // Plugin needs the Handlers from IRC we load the plugins after we set everything up
-            //plugins = new PluginManager(this);
-            //plugins.ActivatePlugins();
-            
-            //New Plugins
-            nextGenPlugins = new PluginManager();    
-            nextGenPlugins.PluginsReloaded += new EventHandler(Plugins_PluginsReloaded);
-            nextGenPlugins.IgnoreErrors = true;
-            nextGenPlugins.PluginSources =  PluginSourceEnum.Both;
-
-            nextGenPlugins.Start();
-            
+            simplePM = new SimplePluginManager(this);
+            complexPM = new ComplexPluginManager(this);
+           
             
             //Access Control
             acl = new AccessControlList();
-        }
-
-        
-        private List<AbstractPlugin> newPlug = new List<AbstractPlugin>();
-        private void Plugins_PluginsReloaded(object sender, EventArgs e)
-        {
-        
-            foreach(string pluginName in nextGenPlugins.GetSubclasses("Huffelpuff.ComplexPlugins.AbstractPlugin"))
-            {
-                
-                Console.Write(pluginName + " ... ");
-                AbstractPlugin o = (AbstractPlugin)nextGenPlugins.CreateInstance(pluginName, BindingFlags.CreateInstance, new object[] {this});
-                newPlug.Add(o);
-                Console.Write("(" + o.Name + ") ");
-                Console.Write("Created ... ");
-                o.Init();
-                Console.Write("Initialized ... ");                
-                o.Activate();
-                Console.WriteLine("Activated");                
-            }            
-            return;
         }
 
         private void RawMessageHandler(object sender, IrcEventArgs e)
@@ -146,7 +120,18 @@ namespace Huffelpuff
         private void PrivateCommandDispatcher(object sender, IrcEventArgs e)
         {
             if (_privateCommands.ContainsKey(e.Data.MessageArray[0])) {
-                _privateCommands[e.Data.MessageArray[0]].Handler.Invoke(sender, e);
+                if (_privateCommands[e.Data.MessageArray[0]].Handler != null) {
+                    _privateCommands[e.Data.MessageArray[0]].Handler.Invoke(sender, e);
+                } else {
+                    foreach(AbstractPlugin complexPlug in complexPM.Plugins) {
+                        Console.WriteLine(complexPlug.FullName + " == " + (string)_privateCommands[e.Data.MessageArray[0]].Owner);
+                        if (complexPlug.FullName == (string)_privateCommands[e.Data.MessageArray[0]].Owner)
+                        {
+                            complexPlug.InvokeHandler(_privateCommands[e.Data.MessageArray[0]].HandlerName, e);
+                        }
+                    }
+                }
+                
             }
         }
 
@@ -154,9 +139,74 @@ namespace Huffelpuff
         private void PublicCommandDispatcher(object sender, IrcEventArgs e)
         {
             if (_publicCommands.ContainsKey(e.Data.MessageArray[0])) {
-                _publicCommands[e.Data.MessageArray[0]].Handler.Invoke(sender, e);
+                if (_publicCommands[e.Data.MessageArray[0]].Handler != null) {
+                    _publicCommands[e.Data.MessageArray[0]].Handler.Invoke(sender, e);
+                } else {
+                    foreach(AbstractPlugin complexPlug in complexPM.Plugins) {
+                        Console.WriteLine(complexPlug.FullName + " == " + (string)_publicCommands[e.Data.MessageArray[0]].Owner);
+                        if (complexPlug.FullName == (string)_publicCommands[e.Data.MessageArray[0]].Owner)
+                        {
+                            complexPlug.InvokeHandler(_publicCommands[e.Data.MessageArray[0]].HandlerName, e);
+                        }
+                    }
+                }
+                
             }
         }
+        
+        private void PluginsCommand(object sender, IrcEventArgs e)
+		{
+			foreach(IPlugin p in simplePM.Plugins) {	
+				SendMessage(SendType.Notice, e.Data.Channel, "Simple Plugin: "+IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+			}
+			foreach(AbstractPlugin p in complexPM.Plugins) {	
+				SendMessage(SendType.Notice, e.Data.Channel, "Complex Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+			}
+		}
+	
+		private void ActivateCommand(object sender, IrcEventArgs e)
+		{
+			if (e.Data.MessageArray.Length < 2)
+				return;
+			foreach(IPlugin p in simplePM.Plugins) {
+				if (e.Data.MessageArray[1]==p.GetType().ToString()) {
+					PersistentMemory.SetValue("plugin", p.GetType().ToString());
+					PersistentMemory.Flush();
+					p.Activate();
+					SendMessage(SendType.Notice, e.Data.Channel, "Simple Plugin: "+IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+				}
+			}
+			foreach(AbstractPlugin p in complexPM.Plugins) {
+			    if (e.Data.MessageArray[1]==p.FullName) {
+					PersistentMemory.SetValue("plugin", p.FullName);
+					PersistentMemory.Flush();
+					p.Activate();
+					SendMessage(SendType.Notice, e.Data.Channel, "Complex Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+				}
+			}
+		}
+
+		private void DeactivateCommand(object sender, IrcEventArgs e)
+		{
+			if (e.Data.MessageArray.Length < 2)
+				return;
+			foreach(IPlugin p in simplePM.Plugins) {
+				if (e.Data.MessageArray[1]==p.GetType().ToString()) {
+					PersistentMemory.RemoveValue("plugin", p.GetType().ToString());
+					PersistentMemory.Flush();
+					p.Deactivate();
+					SendMessage(SendType.Notice, e.Data.Channel, "Simple Plugin: "+IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+				}
+			}
+			foreach(AbstractPlugin p in complexPM.Plugins) {
+			    if (e.Data.MessageArray[1]==p.FullName) {
+					PersistentMemory.RemoveValue("plugin", p.FullName);
+					PersistentMemory.Flush();
+					p.Deactivate();
+					SendMessage(SendType.Notice, e.Data.Channel, "Complex Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+				}
+			}
+		}
         
         private void JoinCommand(object sender, IrcEventArgs e)
         {
@@ -218,12 +268,14 @@ namespace Huffelpuff
             if(topic == "more") {
                 foreach(KeyValuePair<string, Commandlet> cmd in _publicCommands)
                 {
-                    this.SendMessage(SendType.Message, channel, "Public Command:" + cmd.Value.Command + ", offered by " + cmd.Value.Owner.GetType().ToString() + " and help provided: " + cmd.Value.HelpText);
+                    string owner = (cmd.Value.Handler==null)?(string)cmd.Value.Owner + "~":cmd.Value.Owner.GetType().ToString();
+                    this.SendMessage(SendType.Message, channel, "Public Command:" + cmd.Value.Command + ", offered by " + owner + " and help provided: " + cmd.Value.HelpText);
                 }
                 
                 foreach(KeyValuePair<string, Commandlet> cmd in _privateCommands)
                 {
-                    this.SendMessage(SendType.Message, channel, "Private Command:" + cmd.Value.Command + ", offered by " + cmd.Value.Owner.GetType().ToString() + " and help provided: " + cmd.Value.HelpText);
+                    string owner = (cmd.Value.Handler==null)?(string)cmd.Value.Owner:cmd.Value.Owner.GetType().ToString();
+                    this.SendMessage(SendType.Message, channel, "Private Command:" + cmd.Value.Command + ", offered by " + owner + " and help provided: " + cmd.Value.HelpText);
                 }
                 helped = true;                        
             }
@@ -254,6 +306,7 @@ namespace Huffelpuff
                     helped = true;
                 }
             }
+            // TODO: same for complex Plugin
             
             if (!helped)
                 this.SendMessage(SendType.Message, channel, "Your Helptopic was not found");
@@ -311,6 +364,8 @@ namespace Huffelpuff
         {
             //this.plugins.ShutDown();
             PersistentMemory.Flush();
+            simplePM.ShutDown();
+            complexPM.ShutDown();
             
             // we are done, lets exit...
             System.Console.WriteLine("Exiting...");
@@ -324,7 +379,13 @@ namespace Huffelpuff
         {
             Thread.CurrentThread.Name = "Main";
                         
-            Console.WriteLine("Start...");
+            if (PersistentMemory.GetValue("ProxyServer") != null) {
+                Console.WriteLine("Using Proxy Server: " + PersistentMemory.GetValue("ProxyServer"));
+                this.ProxyType = Org.Mentalis.Network.ProxySocket.ProxyTypes.Socks5;
+                this.ProxyEndPoint = new IPEndPoint(IPAddress.Parse(PersistentMemory.GetValue("ProxyServer").Split(new char[] {':'})[0]), int.Parse(PersistentMemory.GetValue("ProxyServer").Split(new char[] {':'})[1]));
+                this.ProxyUser = PersistentMemory.GetValue("ProxyUser");
+                this.ProxyPass = PersistentMemory.GetValue("ProxyPass");
+            }
 
             // the server we want to connect to
             string[] serverlist = PersistentMemory.GetValues("ServerHost").ToArray();

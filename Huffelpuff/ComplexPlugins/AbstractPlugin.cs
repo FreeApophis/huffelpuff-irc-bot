@@ -18,6 +18,7 @@
  */
 
 using System;
+using System.Reflection;
 using System.Collections.Generic;
 
 using Meebey.SmartIrc4net;
@@ -36,8 +37,31 @@ namespace Huffelpuff.ComplexPlugins
 		{
 			BotMethods = botInstance;
 			BotEvents = new SharedClientSide(botInstance);
+			
+			Console.WriteLine("current Appdomain = " + AppDomain.CurrentDomain);
+			
+			AppDomain.CurrentDomain.DomainUnload += new EventHandler(AppDomain_CurrentDomain_DomainUnload);
+		}
+
+		void AppDomain_CurrentDomain_DomainUnload(object sender, EventArgs e)
+		{
+		    Console.WriteLine("Domain unloading...");
+		    this.Deactivate();
+		    this.DeInit();
+		    
+		}
+		
+		public void InvokeHandler(string HandlerName, IrcEventArgs e) {
+		    object[] IrcEventParameters = new object[] {this, e};
+		    Console.WriteLine(this.GetType());
+		    this.GetType().GetMethod(HandlerName,  BindingFlags.Public |  BindingFlags.NonPublic | BindingFlags.Instance).Invoke(this, IrcEventParameters);
 		}
 	
+		public string FullName{
+		    get {
+		        return this.GetType().FullName;
+		    }
+		}
 		public abstract string Name{get;}
 		public abstract bool Ready{get;}
 		public abstract bool Active{get;}
@@ -45,7 +69,7 @@ namespace Huffelpuff.ComplexPlugins
 		public abstract void Init();
 		public abstract void Activate();
 		public abstract void Deactivate();
-		//public abstract void DeInit();
+		public abstract void DeInit();
 		    
 		public abstract string AboutHelp();
 

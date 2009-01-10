@@ -33,11 +33,7 @@ namespace Huffelpuff.SimplePlugins
 		public SimplePluginManager(IrcBot bot)
 		{
 			this.bot = bot;
-			
-			bot.AddPublicCommand(new Commandlet("!plugins", "HELP ON PLUGINS", this.PluginsCommand, this));
-			bot.AddPublicCommand(new Commandlet("!activate", "HELP ON ACTIVATE", this.ActivateCommand, this));
-			bot.AddPublicCommand(new Commandlet("!deactivate", "HELP ON DEACTIVATE", this.DeactivateCommand, this));
-			
+						
 			pluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 			pluginPath = pluginPath + Path.DirectorySeparatorChar + "plugins"+ Path.DirectorySeparatorChar;
 			FileInfo pldir = new FileInfo(pluginPath + Path.DirectorySeparatorChar + "plugins"+ Path.DirectorySeparatorChar);
@@ -53,7 +49,7 @@ namespace Huffelpuff.SimplePlugins
 				Assembly plugAssembly;
 				try {
 					plugAssembly = Assembly.LoadFile(filename);
-					if (plugAssembly != null) objTypes = plugAssembly.GetTypes();
+					if (plugAssembly != null) objTypes = plugAssembly.GetExportedTypes();
 				} catch (Exception e) {
 					Console.WriteLine(e.Message);
 				}
@@ -74,70 +70,21 @@ namespace Huffelpuff.SimplePlugins
 						}
 					} catch (MissingMethodException) {}
 				}
+			    foreach(string pluginname in PersistentMemory.GetValues("plugin")) {
+				    foreach(IPlugin p in plugins) {
+					    if (pluginname==p.GetType().ToString()) {
+						    p.Activate();
+					    }
+				    }
+                }
 			}
-		}
-			
-		/// <summary>
-		/// Activates the Plugins which have been activated the last time
-		/// </summary>
-		public void ActivatePlugins()
-		{
-	    	foreach(string pluginname in PersistentMemory.GetValues("plugin")) {
-				foreach(IPlugin p in plugins) {
-					if (pluginname==p.GetType().ToString()) {
-						p.Activate();
-					}
-				}
-            }
 		}
 		
 		public void ShutDown()
 		{
 			foreach(IPlugin p in plugins) {	
 				p.Deactivate();
-				//p.DeInit();
-			}
-
-		}
-
-		public void UpdatePlugins()
-		{
-			/* we only have one Appdomain, we need to restart the application to unload plugins */
-			throw new NotImplementedException();
-		}
-		
-		private void PluginsCommand(object sender, IrcEventArgs e)
-		{
-			foreach(IPlugin p in plugins) {	
-				bot.SendMessage(SendType.Notice, e.Data.Channel, "Plugin: "+IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
-			}
-		}
-	
-		private void ActivateCommand(object sender, IrcEventArgs e)
-		{
-			if (e.Data.MessageArray.Length < 2)
-				return;
-			foreach(IPlugin p in plugins) {
-				if (e.Data.MessageArray[1]==p.GetType().ToString()) {
-					PersistentMemory.SetValue("plugin", p.GetType().ToString());
-					PersistentMemory.Flush();
-					p.Activate();
-					bot.SendMessage(SendType.Notice, e.Data.Channel, "Plugin: "+IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
-				}
-			}
-		}
-
-		private void DeactivateCommand(object sender, IrcEventArgs e)
-		{
-			if (e.Data.MessageArray.Length < 2)
-				return;
-			foreach(IPlugin p in plugins) {
-				if (e.Data.MessageArray[1]==p.GetType().ToString()) {
-					PersistentMemory.RemoveValue("plugin", p.GetType().ToString());
-					PersistentMemory.Flush();
-					p.Deactivate();
-					bot.SendMessage(SendType.Notice, e.Data.Channel, "Plugin: "+IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
-				}
+				p.DeInit();
 			}
 		}
 	}

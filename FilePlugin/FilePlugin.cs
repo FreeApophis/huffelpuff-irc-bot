@@ -73,6 +73,11 @@ namespace Plugin
             active = false;
         }
         
+        public void DeInit()
+        {
+            ready = false;
+        } 
+        
         public string AboutHelp() {
             return "File Plugin Help";
         }

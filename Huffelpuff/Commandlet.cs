@@ -18,7 +18,9 @@
  */
 
 using System;
+
 using Meebey.SmartIrc4net;
+using Huffelpuff.ComplexPlugins;
 
 namespace Huffelpuff
 {
@@ -30,6 +32,7 @@ namespace Huffelpuff
         private string _Command;
         private string _HelpText;
         private IrcEventHandler _Handler;
+        private string _HandlerName;
         private object _Owner;
         private object _ACL;
 
@@ -50,6 +53,12 @@ namespace Huffelpuff
                 return _Handler;
             }
         }
+        
+        public string HandlerName {
+            get {
+                return _HandlerName;
+            }
+        }
             
         public object Owner {
             get {
@@ -57,12 +66,23 @@ namespace Huffelpuff
             }
         }
             
-        public Commandlet(string command, string helptext, IrcEventHandler handler, object owner)
+        public Commandlet(string command, string helptext, IrcEventHandler handler, object owner) : 
+            this(command, helptext, handler, owner, "*")
+        {}
+        
+        public Commandlet(string command, string helptext, IrcEventHandler handler, object owner, string channelList)
         {
             _Command = command;
             _HelpText = helptext;
-            _Handler = handler;
-            _Owner = owner;
+            
+            if (owner is AbstractPlugin) {
+                _Handler = null;
+                _HandlerName = handler.Method.Name;
+                _Owner = owner.GetType().FullName;
+            } else {
+                _Handler = handler;
+                _Owner = owner;
+            }
             _ACL = null;
         }
     }

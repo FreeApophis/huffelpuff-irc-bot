@@ -198,6 +198,11 @@ namespace Plugin
             active = false;
         }
         
+        public void DeInit()
+        {
+            ready = false;
+        } 
+        
         public string AboutHelp()
         {
             return "The FMS Module uses the public nntp Gateway to the FMS groups.";

@@ -24,7 +24,7 @@ namespace Huffelpuff.SimplePlugins
 		    void Init(IrcBot botInstance);
 		    void Activate();
 		    void Deactivate();
-		    //void DeInit();
+		    void DeInit();
 		    
 		    string AboutHelp();
 	}

@@ -108,11 +108,6 @@
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>plugin</baseKey>
-    <baseValue>Plugin.EchoPlugin</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>plugin</baseKey>
     <baseValue>Plugin.UT3GlobalStatsPlugin</baseValue>
   </baseTBL>
   <baseTBL>
@@ -123,11 +118,11 @@
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>plugin</baseKey>
-    <baseValue>Plugin.FileServer</baseValue>
+    <baseValue>Plugin.RadioPlugin</baseValue>
   </baseTBL>
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>plugin</baseKey>
-    <baseValue>Plugin.RadioPlugin</baseValue>
+    <baseValue>Plugin.EchoPlugin</baseValue>
   </baseTBL>
 </NewDataSet>

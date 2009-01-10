@@ -63,16 +63,20 @@ namespace Plugin
         
         
         public override void Activate() {
-            //this.AddPublicCommand(new Commandlet("!say", "!say <your text>, says whatever text you want it to say", sayHandler, this));
-            //this.RegisterEvent(bot.OnJoin, this.sayHandler);
-            BotEvents.OnChannelMessage  +=  new IrcEventHandler(sayHandler);
+            //BotEvents.OnChannelMessage  +=  new IrcEventHandler(sayHandler);
+            BotMethods.AddPublicCommand(new Commandlet("!say", "The command !say <your text>, says whatever text you want it to say", sayHandler, this));
             active = true;
         }
 
         
         public override void Deactivate() {
-            //this.RemovePublicCommand("!say");
+            BotMethods.RemovePublicCommand("!say");
             active = false;
+        }
+        
+        public override void DeInit()
+        {
+            ready = false;
         }
         
         public override string AboutHelp() {
@@ -80,8 +84,7 @@ namespace Plugin
         }
                 
         private void sayHandler(object sender, IrcEventArgs e) {
-            if (e.Data.MessageArray[0]=="!say")
-                BotMethods.SendMessage(SendType.Message, e.Data.Channel, e.Data.Message.Substring(5));            
+            BotMethods.SendMessage(SendType.Message, e.Data.Channel, e.Data.Message.Substring(5));            
         }
     }
 }

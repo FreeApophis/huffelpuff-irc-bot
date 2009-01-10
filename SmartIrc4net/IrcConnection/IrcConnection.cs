@@ -535,7 +535,7 @@ namespace Meebey.SmartIrc4net
                 // set timeout, after this the connection will be aborted
                 _TcpClient.ReceiveTimeout = _SocketReceiveTimeout * 1000;
                 _TcpClient.SendTimeout = _SocketSendTimeout * 1000;
-                if (_ProxyType == ProxyTypes.None) {
+                if (_ProxyType != ProxyTypes.None) {
                     //TODO: use multiple ports too!
                     socksProxy.Connect(Address, port);
                 } else {

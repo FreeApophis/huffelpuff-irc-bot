@@ -224,7 +224,10 @@ namespace Plugin
         public void Init(IrcBot botInstance)
         {
             bot = botInstance;
-            
+            if (PersistentMemory.GetValue("MySQLConnection") == null) {
+                return;
+            }
+                
             // *** Artists Table ***
             Artists = new Dictionary<int, Artist>();
             MySqlCommand ArtistsCommand = new MySqlCommand("SELECT * FROM artists_new", connection);
@@ -365,6 +368,11 @@ namespace Plugin
             scheduler.Enabled = false;
             active = false;
         }
+
+        public void DeInit()
+        {
+            ready = false;
+        }         
         
         public string AboutHelp()
         {

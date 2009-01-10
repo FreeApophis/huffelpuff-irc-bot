@@ -93,6 +93,11 @@ namespace Plugins
             active = false;
         }
         
+        public void DeInit()
+        {
+            ready = false;
+        } 
+        
         public string AboutHelp()
         {
             return "This is the basic Last Seen Plugin";

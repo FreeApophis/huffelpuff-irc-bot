@@ -18,6 +18,9 @@
  */
 
 using System;
+using System.Reflection;
+using System.Collections.Generic;
+
 
 namespace Huffelpuff.ComplexPlugins
 {
@@ -26,8 +29,56 @@ namespace Huffelpuff.ComplexPlugins
 	/// </summary>
 	public class ComplexPluginManager
 	{
-		public ComplexPluginManager()
+	    private PluginManager pluginManager;
+        private IrcBot bot;
+		private List<AbstractPlugin> plugins = new List<AbstractPlugin>();
+		public List<AbstractPlugin> Plugins {
+		    get {
+		        return plugins;
+		    }
+		}
+		
+		public ComplexPluginManager(IrcBot bot)
 		{
+		    this.bot = bot;
+		    
+		    pluginManager = new PluginManager();
+            pluginManager.PluginsReloaded += new EventHandler(Plugins_PluginsReloaded);
+            pluginManager.IgnoreErrors = true;
+            pluginManager.PluginSources =  PluginSourceEnum.Both;
+
+            pluginManager.Start();
+		}
+		
+
+		
+        private void Plugins_PluginsReloaded(object sender, EventArgs e)
+        {
+            plugins.Clear();
+            
+            foreach(string pluginName in pluginManager.GetSubclasses("Huffelpuff.ComplexPlugins.AbstractPlugin"))
+            {
+                AbstractPlugin p = (AbstractPlugin)pluginManager.CreateInstance(pluginName, BindingFlags.CreateInstance, new object[] {bot});
+                plugins.Add(p);
+                p.Init();
+            }       
+            
+            foreach(string pluginname in PersistentMemory.GetValues("plugin")) {
+                foreach(AbstractPlugin p in plugins) {
+                    if (pluginname==p.FullName) {
+                        p.Activate();
+                    }
+                }
+            }
+        }
+        
+        public void ShutDown()
+		{
+			foreach(AbstractPlugin p in plugins) {	
+				p.Deactivate();
+				p.DeInit();
+			}
+
 		}
 	}
 }
