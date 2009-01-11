@@ -32,6 +32,8 @@ namespace Huffelpuff.ComplexPlugins
 	{
 		protected IrcBot BotMethods;
 		protected SharedClientSide BotEvents;
+		protected bool ready;
+		protected bool active;
 		
 		public AbstractPlugin(IrcBot botInstance)
 		{
@@ -63,13 +65,29 @@ namespace Huffelpuff.ComplexPlugins
 		    }
 		}
 		public abstract string Name{get;}
-		public abstract bool Ready{get;}
-		public abstract bool Active{get;}
+		
+		public virtual bool Ready{
+		    get {
+		        return ready;
+		    }
+		}
+		public virtual bool Active{
+		    get {
+		        return active;
+		    }
+		}
 			
-		public abstract void Init();
+		public virtual void Init() {
+		    ready = true;
+		}
+		
 		public abstract void Activate();
+		
 		public abstract void Deactivate();
-		public abstract void DeInit();
+		
+		public virtual void DeInit() {
+		    ready = false;
+		}
 		    
 		public abstract string AboutHelp();
 
