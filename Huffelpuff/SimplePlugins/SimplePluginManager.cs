@@ -21,8 +21,8 @@ namespace Huffelpuff.SimplePlugins
 	/// </summary>
 	public class SimplePluginManager
 	{
-		private string pluginPath;
 		private IrcBot bot;
+		private string pluginPath;
 		private List<IPlugin> plugins = new List<IPlugin>();
 		public List<IPlugin> Plugins {
 			get {
@@ -30,15 +30,15 @@ namespace Huffelpuff.SimplePlugins
 			}
 		}
 		
-		public SimplePluginManager(IrcBot bot)
+		public SimplePluginManager(IrcBot bot, string relPluginPath)
 		{
 			this.bot = bot;
 						
 			pluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-			pluginPath = pluginPath + Path.DirectorySeparatorChar + "plugins"+ Path.DirectorySeparatorChar;
-			FileInfo pldir = new FileInfo(pluginPath + Path.DirectorySeparatorChar + "plugins"+ Path.DirectorySeparatorChar);
+			pluginPath = pluginPath + Path.DirectorySeparatorChar + relPluginPath + Path.DirectorySeparatorChar;
+			FileInfo pldir = new FileInfo(pluginPath + Path.DirectorySeparatorChar + relPluginPath + Path.DirectorySeparatorChar);
 			if(!pldir.Exists) {
-				Directory.CreateDirectory(pluginPath + Path.DirectorySeparatorChar + "plugins"+ Path.DirectorySeparatorChar);
+				Directory.CreateDirectory(pluginPath + Path.DirectorySeparatorChar + relPluginPath + Path.DirectorySeparatorChar);
 			}		
 				
 			string[] pluginFiles = Directory.GetFiles(pluginPath, "*.dll");

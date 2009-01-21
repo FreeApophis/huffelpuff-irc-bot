@@ -38,11 +38,11 @@ namespace Huffelpuff.ComplexPlugins
 		    }
 		}
 		
-		public ComplexPluginManager(IrcBot bot)
+		public ComplexPluginManager(IrcBot bot, string relPluginPath)
 		{
 		    this.bot = bot;
 		    
-		    pluginManager = new PluginManager();
+		    pluginManager = new PluginManager(relPluginPath);
             pluginManager.PluginsReloaded += new EventHandler(Plugins_PluginsReloaded);
             pluginManager.IgnoreErrors = true;
             pluginManager.PluginSources =  PluginSourceEnum.Both;

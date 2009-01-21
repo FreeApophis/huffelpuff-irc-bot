@@ -26,9 +26,9 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("Huffelpuff")]
 [assembly: AssemblyDescription("Huffelpuff IRC Bot")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyCompany("apophis.ch")]
+[assembly: AssemblyProduct("Huffelpuff Irc Bot")]
+[assembly: AssemblyCopyright("2008-2009 (c) Thomas Bruderer <apophis@apophis.ch>")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

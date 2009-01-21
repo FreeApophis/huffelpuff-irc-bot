@@ -44,7 +44,9 @@ namespace Huffelpuff
             this.PingInterval = 120;
             this.ActiveChannelSyncing = true;        
             this.OnRawMessage += new IrcEventHandler(RawMessageHandler);
-            
+            this.AutoRejoin = true;
+            this.AutoRetry = true;
+            this.AutoRetryDelay = 5;
             
             this.OnChannelMessage += new IrcEventHandler(PublicCommandDispatcher);
             this.OnQueryMessage +=  new IrcEventHandler(PrivateCommandDispatcher);
@@ -57,18 +59,20 @@ namespace Huffelpuff
 			this.AddPublicCommand(new Commandlet("!activate", "The command !activate <plugin> activates the Plugin <plugin>", this.ActivateCommand, this));
 			this.AddPublicCommand(new Commandlet("!deactivate", "The command !deactivate <plugin> deactivates the Plugin <plugin>", this.DeactivateCommand, this));
                         
-            this.CtcpVersion = "Huffelpuff Testing Bot: Based on SmartIRC4net 4.5.0svn + DCC";
-            
+			
+			this.CtcpVersion = this.VersionString + " (SmartIrc4Net " + Assembly.GetAssembly(typeof(IrcFeatures)).GetName(false).Version + ")";
+            this.CtcpUrl = "http://huffelpuff-irc-bot.origo.ethz.ch/";
+            this.CtcpSource = "https://svn.origo.ethz.ch/huffelpuff-irc-bot/";
+
             if (PersistentMemory.GetValue("external_ip")!=null)
                 this.ExternalIpAdress = System.Net.IPAddress.Parse(PersistentMemory.GetValue("external_ip"));
             else 
                 this.ExternalIpAdress = System.Net.IPAddress.Parse("127.0.0.1");
             
             // Plugin needs the Handlers from IRC we load the plugins after we set everything up
-            simplePM = new SimplePluginManager(this);
-            complexPM = new ComplexPluginManager(this);
-           
-            
+            simplePM = new SimplePluginManager(this, "plugins");
+            complexPM = new ComplexPluginManager(this, "cplugins");
+			            
             //Access Control
             acl = new AccessControlList();
         }

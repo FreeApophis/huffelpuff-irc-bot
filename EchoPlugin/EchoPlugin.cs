@@ -34,8 +34,8 @@ namespace Plugin
     public class EchoPlugin : AbstractPlugin
     {
         
-        public EchoPlugin(IrcBot botInstance) 
-            : base(botInstance) {}
+        public EchoPlugin(IrcBot botInstance) : 
+            base(botInstance) {}
         
         private bool ready = false;
         public override bool Ready {

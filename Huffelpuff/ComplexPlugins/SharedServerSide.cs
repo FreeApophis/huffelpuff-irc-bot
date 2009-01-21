@@ -19,8 +19,12 @@ namespace Huffelpuff.ComplexPlugins
 	/// </summary>
 	public class SharedServerSide : MarshalByRefObject
 	{
-		public SharedServerSide(IrcBot botInstance)
+		
+	    private IrcBot bot;
+	    public SharedServerSide(IrcBot botInstance)
 		{
+	        this.bot = botInstance;
+	        
 			botInstance.OnAdmin += new AdminEventHandler(PluginsOnAdmin);
 			botInstance.OnAutoConnectError += new AutoConnectErrorEventHandler(PluginsOnAutoConnectError);
 			botInstance.OnAway += new AwayEventHandler(PluginsOnAway);
@@ -86,6 +90,75 @@ namespace Huffelpuff.ComplexPlugins
 			botInstance.OnWho += new WhoEventHandler(PluginsOnWho);
 			botInstance.OnWriteLine += new WriteLineEventHandler(PluginsOnWriteLine);
 			botInstance.SupportNonRfcChanged += new EventHandler(PluginsSupportNonRfcChanged);
+		}
+		
+		public void Unload()
+		{
+		    bot.OnAdmin -= new AdminEventHandler(PluginsOnAdmin);
+			bot.OnAutoConnectError -= new AutoConnectErrorEventHandler(PluginsOnAutoConnectError);
+			bot.OnAway -= new AwayEventHandler(PluginsOnAway);
+			bot.OnBan -= new BanEventHandler(PluginsOnBan);
+			bot.OnChannelAction -= new ActionEventHandler(PluginsOnChannelAction);
+			bot.OnChannelActiveSynced -= new IrcEventHandler(PluginsOnChannelActiveSynced);
+			bot.OnChannelMessage -= new IrcEventHandler(PluginsOnChannelMessage);
+			bot.OnChannelModeChange -= new IrcEventHandler(PluginsOnChannelModeChange);
+			bot.OnChannelNotice -= new IrcEventHandler(PluginsOnChannelNotice);
+			bot.OnChannelPassiveSynced -= new IrcEventHandler(PluginsOnChannelPassiveSynced);
+			bot.OnConnected -= new EventHandler(PluginsOnConnected);
+			bot.OnConnecting -= new EventHandler(PluginsOnConnecting);
+			bot.OnConnectionError -= new EventHandler(PluginsOnConnectionError);
+			bot.OnCtcpReply -= new CtcpEventHandler(PluginsOnCtcpReply);
+			bot.OnCtcpRequest -= new CtcpEventHandler(PluginsOnCtcpRequest);
+			bot.OnDccChatReceiveLineEvent -= new DccChatLineHandler(PluginsOnDccChatReceiveLineEvent);
+			bot.OnDccChatRequestEvent -= new DccConnectionHandler(PluginsOnDccChatRequestEvent);
+			bot.OnDccChatSentLineEvent -= new DccChatLineHandler(PluginsOnDccChatSentLineEvent);
+			bot.OnDccChatStartEvent -= new DccConnectionHandler(PluginsOnDccChatStartEvent);
+			bot.OnDccChatStopEvent -= new DccConnectionHandler(PluginsOnDccChatStopEvent);
+			bot.OnDccSendReceiveBlockEvent -= new DccSendPacketHandler(PluginsOnDccSendReceiveBlockEvent);
+			bot.OnDccSendRequestEvent -= new DccSendRequestHandler(PluginsOnDccSendRequestEvent);
+			bot.OnDccSendSentBlockEvent -= new DccSendPacketHandler(PluginsOnDccSendSentBlockEvent);
+			bot.OnDccSendStartEvent -= new DccConnectionHandler(PluginsOnDccSendStartEvent);
+			bot.OnDccSendStopEvent -= new DccConnectionHandler(PluginsOnDccSendStopEvent);
+			bot.OnDeadmin -= new DeadminEventHandler(PluginsOnDeadmin);
+			bot.OnDehalfop -= new DehalfopEventHandler(PluginsOnDehalfop);
+			bot.OnDeop -= new DeopEventHandler(PluginsOnDeop);
+			bot.OnDeowner -= new DeownerEventHandler(PluginsOnDeowner);
+			bot.OnDevoice -= new DevoiceEventHandler(PluginsOnDevoice);
+			bot.OnDisconnected -= new EventHandler(PluginsOnDisconnected);
+			bot.OnDisconnecting -= new EventHandler(PluginsOnDisconnecting);
+			bot.OnError -= new ErrorEventHandler(PluginsOnError);
+			bot.OnErrorMessage -= new IrcEventHandler(PluginsOnErrorMessage);
+			bot.OnHalfop -= new HalfopEventHandler(PluginsOnHalfop);
+			bot.OnInvite -= new InviteEventHandler(PluginsOnInvite);
+			bot.OnJoin -= new JoinEventHandler(PluginsOnJoin);
+			bot.OnKick -= new KickEventHandler(PluginsOnKick);
+			bot.OnList -= new ListEventHandler(PluginsOnList);
+			bot.OnModeChange -= new IrcEventHandler(PluginsOnModeChange);
+			bot.OnMotd -= new MotdEventHandler(PluginsOnMotd);
+			bot.OnNames -= new NamesEventHandler(PluginsOnNames);
+			bot.OnNickChange -= new NickChangeEventHandler(PluginsOnNickChange);
+			bot.OnNowAway -= new IrcEventHandler(PluginsOnNowAway);
+			bot.OnOp -= new OpEventHandler(PluginsOnOp);
+			bot.OnOwner -= new OwnerEventHandler(PluginsOnOwner);
+			bot.OnPart -= new PartEventHandler(PluginsOnPart);
+			bot.OnPing -= new PingEventHandler(PluginsOnPing);
+			bot.OnPong -= new PongEventHandler(PluginsOnPong);
+			bot.OnQueryAction -= new ActionEventHandler(PluginsOnQueryAction);
+			bot.OnQueryMessage -= new IrcEventHandler(PluginsOnQueryMessage);
+			bot.OnQueryNotice -= new IrcEventHandler(PluginsOnQueryNotice);
+			bot.OnQuit -= new QuitEventHandler(PluginsOnQuit);
+			bot.OnRawMessage -= new IrcEventHandler(PluginsOnRawMessage);
+			bot.OnReadLine -= new ReadLineEventHandler(PluginsOnReadLine);
+			bot.OnRegistered -= new EventHandler(PluginsOnRegistered);
+			bot.OnTopic -= new TopicEventHandler(PluginsOnTopic);
+			bot.OnTopicChange -= new TopicChangeEventHandler(PluginsOnTopicChange);
+			bot.OnUnAway -= new IrcEventHandler(PluginsOnUnAway);
+			bot.OnUnban -= new UnbanEventHandler(PluginsOnUnban);
+			bot.OnUserModeChange -= new IrcEventHandler(PluginsOnUserModeChange);
+			bot.OnVoice -= new VoiceEventHandler(PluginsOnVoice);
+			bot.OnWho -= new WhoEventHandler(PluginsOnWho);
+			bot.OnWriteLine -= new WriteLineEventHandler(PluginsOnWriteLine);
+			bot.SupportNonRfcChanged -= new EventHandler(PluginsSupportNonRfcChanged);		    
 		}
 		
         public event AdminEventHandler          	OnAdmin;

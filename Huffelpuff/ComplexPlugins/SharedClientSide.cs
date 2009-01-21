@@ -89,6 +89,77 @@ namespace Huffelpuff.ComplexPlugins
 			this.serverSide.OnWriteLine += new WriteLineEventHandler(HandleOnWriteLine);
 			this.serverSide.SupportNonRfcChanged += new EventHandler(HandleSupportNonRfcChanged);
         }
+        
+        public void Unload() {
+            
+            this.serverSide.Unload();
+
+            this.serverSide.OnAdmin -= new AdminEventHandler(HandleOnAdmin);
+			this.serverSide.OnAutoConnectError -= new AutoConnectErrorEventHandler(HandleOnAutoConnectError);
+			this.serverSide.OnAway -= new AwayEventHandler(HandleOnAway);
+			this.serverSide.OnBan -= new BanEventHandler(HandleOnBan);
+			this.serverSide.OnChannelAction -= new ActionEventHandler(HandleOnChannelAction);
+			this.serverSide.OnChannelActiveSynced -= new IrcEventHandler(HandleOnChannelActiveSynced);
+			this.serverSide.OnChannelMessage -= new IrcEventHandler(HandleOnChannelMessage);
+			this.serverSide.OnChannelModeChange -= new IrcEventHandler(HandleOnChannelModeChange);
+			this.serverSide.OnChannelNotice -= new IrcEventHandler(HandleOnChannelNotice);
+			this.serverSide.OnChannelPassiveSynced -= new IrcEventHandler(HandleOnChannelPassiveSynced);
+			this.serverSide.OnConnected -= new EventHandler(HandleOnConnected);
+			this.serverSide.OnConnecting -= new EventHandler(HandleOnConnecting);
+			this.serverSide.OnConnectionError -= new EventHandler(HandleOnConnectionError);
+			this.serverSide.OnCtcpReply -= new CtcpEventHandler(HandleOnCtcpReply);
+			this.serverSide.OnCtcpRequest -= new CtcpEventHandler(HandleOnCtcpRequest);
+			this.serverSide.OnDccChatReceiveLineEvent -= new DccChatLineHandler(HandleOnDccChatReceiveLineEvent);
+			this.serverSide.OnDccChatRequestEvent -= new DccConnectionHandler(HandleOnDccChatRequestEvent);
+			this.serverSide.OnDccChatSentLineEvent -= new DccChatLineHandler(HandleOnDccChatSentLineEvent);
+			this.serverSide.OnDccChatStartEvent -= new DccConnectionHandler(HandleOnDccChatStartEvent);
+			this.serverSide.OnDccChatStopEvent -= new DccConnectionHandler(HandleOnDccChatStopEvent);
+			this.serverSide.OnDccSendReceiveBlockEvent -= new DccSendPacketHandler(HandleOnDccSendReceiveBlockEvent);
+			this.serverSide.OnDccSendRequestEvent -= new DccSendRequestHandler(HandleOnDccSendRequestEvent);
+			this.serverSide.OnDccSendSentBlockEvent -= new DccSendPacketHandler(HandleOnDccSendSentBlockEvent);
+			this.serverSide.OnDccSendStartEvent -= new DccConnectionHandler(HandleOnDccSendStartEvent);
+			this.serverSide.OnDccSendStopEvent -= new DccConnectionHandler(HandleOnDccSendStopEvent);
+			this.serverSide.OnDeadmin -= new DeadminEventHandler(HandleOnDeadmin);
+			this.serverSide.OnDehalfop -= new DehalfopEventHandler(HandleOnDehalfop);
+			this.serverSide.OnDeop -= new DeopEventHandler(HandleOnDeop);
+			this.serverSide.OnDeowner -= new DeownerEventHandler(HandleOnDeowner);
+			this.serverSide.OnDevoice -= new DevoiceEventHandler(HandleOnDevoice);
+			this.serverSide.OnDisconnected -= new EventHandler(HandleOnDisconnected);
+			this.serverSide.OnDisconnecting -= new EventHandler(HandleOnDisconnecting);
+			this.serverSide.OnError -= new ErrorEventHandler(HandleOnError);
+			this.serverSide.OnErrorMessage -= new IrcEventHandler(HandleOnErrorMessage);
+			this.serverSide.OnHalfop -= new HalfopEventHandler(HandleOnHalfop);
+			this.serverSide.OnInvite -= new InviteEventHandler(HandleOnInvite);
+			this.serverSide.OnJoin -= new JoinEventHandler(HandleOnJoin);
+			this.serverSide.OnKick -= new KickEventHandler(HandleOnKick);
+			this.serverSide.OnList -= new ListEventHandler(HandleOnList);
+			this.serverSide.OnModeChange -= new IrcEventHandler(HandleOnModeChange);
+			this.serverSide.OnMotd -= new MotdEventHandler(HandleOnMotd);
+			this.serverSide.OnNames -= new NamesEventHandler(HandleOnNames);
+			this.serverSide.OnNickChange -= new NickChangeEventHandler(HandleOnNickChange);
+			this.serverSide.OnNowAway -= new IrcEventHandler(HandleOnNowAway);
+			this.serverSide.OnOp -= new OpEventHandler(HandleOnOp);
+			this.serverSide.OnOwner -= new OwnerEventHandler(HandleOnOwner);
+			this.serverSide.OnPart -= new PartEventHandler(HandleOnPart);
+			this.serverSide.OnPing -= new PingEventHandler(HandleOnPing);
+			this.serverSide.OnPong -= new PongEventHandler(HandleOnPong);
+			this.serverSide.OnQueryAction -= new ActionEventHandler(HandleOnQueryAction);
+			this.serverSide.OnQueryMessage -= new IrcEventHandler(HandleOnQueryMessage);
+			this.serverSide.OnQueryNotice -= new IrcEventHandler(HandleOnQueryNotice);
+			this.serverSide.OnQuit -= new QuitEventHandler(HandleOnQuit);
+			this.serverSide.OnRawMessage -= new IrcEventHandler(HandleOnRawMessage);
+			this.serverSide.OnReadLine -= new ReadLineEventHandler(HandleOnReadLine);
+			this.serverSide.OnRegistered -= new EventHandler(HandleOnRegistered);
+			this.serverSide.OnTopic -= new TopicEventHandler(HandleOnTopic);
+			this.serverSide.OnTopicChange -= new TopicChangeEventHandler(HandleOnTopicChange);
+			this.serverSide.OnUnAway -= new IrcEventHandler(HandleOnUnAway);
+			this.serverSide.OnUnban -= new UnbanEventHandler(HandleOnUnban);
+			this.serverSide.OnUserModeChange -= new IrcEventHandler(HandleOnUserModeChange);
+			this.serverSide.OnVoice -= new VoiceEventHandler(HandleOnVoice);
+			this.serverSide.OnWho -= new WhoEventHandler(HandleOnWho);
+			this.serverSide.OnWriteLine -= new WriteLineEventHandler(HandleOnWriteLine);
+			this.serverSide.SupportNonRfcChanged -= new EventHandler(HandleSupportNonRfcChanged);
+        }
   
         public event AdminEventHandler          	OnAdmin;
         public event AutoConnectErrorEventHandler   OnAutoConnectError;

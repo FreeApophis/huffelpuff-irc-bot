@@ -506,8 +506,9 @@ namespace Meebey.SmartIrc4net
             if (_IsConnected) {
                 throw new AlreadyConnectedException("Already connected to: " + Address + ":" + Port);
             }
-
+            
             _ConnectTries++;
+
 #if LOG4NET
             Logger.Connection.Info(String.Format("connecting... (attempt: {0})",
                                                  _ConnectTries));
@@ -537,6 +538,9 @@ namespace Meebey.SmartIrc4net
                 _TcpClient.SendTimeout = _SocketSendTimeout * 1000;
                 if (_ProxyType != ProxyTypes.None) {
                     //TODO: use multiple ports too!
+
+                    Console.WriteLine("Connecting [" + _ConnectTries + "] (" + Address + ":" + Port + ") (" + ProxyEndPoint.ToString() +") ");
+
                     socksProxy.Connect(Address, port);
                 } else {
                     // FIXME: this is not needed but should help merging the IPv6 changes! (just use always the if case!)
@@ -608,9 +612,9 @@ namespace Meebey.SmartIrc4net
                 Logger.Connection.Info("connection failed: "+e.Message);
 #endif
                 if (_AutoRetry &&
-                    _ConnectTries <= 3) {
+                    _ConnectTries <= 10) {
                     if (OnAutoConnectError != null) {
-                        OnAutoConnectError(this, new AutoConnectErrorEventArgs(Address, Port, e));
+                        //OnAutoConnectError(this, new AutoConnectErrorEventArgs(Address, Port, e));
                     }
 #if LOG4NET
                     Logger.Connection.Debug("delaying new connect attempt for "+_AutoRetryDelay+" sec");

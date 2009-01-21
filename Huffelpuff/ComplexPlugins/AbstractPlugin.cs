@@ -39,15 +39,16 @@ namespace Huffelpuff.ComplexPlugins
 		{
 			BotMethods = botInstance;
 			BotEvents = new SharedClientSide(botInstance);
-			
-			Console.WriteLine("current Appdomain = " + AppDomain.CurrentDomain);
-			
+						
 			AppDomain.CurrentDomain.DomainUnload += new EventHandler(AppDomain_CurrentDomain_DomainUnload);
 		}
 
 		void AppDomain_CurrentDomain_DomainUnload(object sender, EventArgs e)
 		{
-		    Console.WriteLine("Domain unloading...");
+		    AppDomain.CurrentDomain.DomainUnload -= new EventHandler(AppDomain_CurrentDomain_DomainUnload);
+
+		    BotEvents.Unload();
+		    
 		    this.Deactivate();
 		    this.DeInit();
 		    
