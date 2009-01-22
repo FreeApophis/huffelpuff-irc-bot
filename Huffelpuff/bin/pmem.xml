@@ -125,4 +125,9 @@
     <baseKey>plugin</baseKey>
     <baseValue>Plugin.EchoPlugin</baseValue>
   </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.ExamplePlugin</baseValue>
+  </baseTBL>
 </NewDataSet>

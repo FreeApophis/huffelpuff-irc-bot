@@ -76,7 +76,29 @@ namespace Huffelpuff
             //Access Control
             acl = new AccessControlList();
         }
-
+                
+        internal void CleanComplexPlugins()
+        {
+            List<string> del = new List<string>();
+            foreach(KeyValuePair<string, Commandlet> p in _privateCommands) {
+                if (p.Value.Handler==null) {
+                    del.Add(p.Key);
+                }
+            }
+            foreach(string s in del) {
+                _privateCommands.Remove(s);
+            }
+            del.Clear();
+            foreach(KeyValuePair<string, Commandlet> p in _publicCommands) {
+                if (p.Value.Handler==null) {
+                    del.Add(p.Key);
+                }
+            }
+            foreach(string s in del) {
+                _publicCommands.Remove(s);
+            }
+        }
+        
         private void RawMessageHandler(object sender, IrcEventArgs e)
         {
             Console.WriteLine(e.Data.RawMessage);

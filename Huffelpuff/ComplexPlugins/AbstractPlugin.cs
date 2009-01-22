@@ -56,7 +56,7 @@ namespace Huffelpuff.ComplexPlugins
 		
 		public void InvokeHandler(string HandlerName, IrcEventArgs e) {
 		    object[] IrcEventParameters = new object[] {this, e};
-		    Console.WriteLine(this.GetType());
+		    Console.WriteLine("InovkeHandler in " + this.GetType() + " calls " + HandlerName);
 		    this.GetType().GetMethod(HandlerName,  BindingFlags.Public |  BindingFlags.NonPublic | BindingFlags.Instance).Invoke(this, IrcEventParameters);
 		}
 	

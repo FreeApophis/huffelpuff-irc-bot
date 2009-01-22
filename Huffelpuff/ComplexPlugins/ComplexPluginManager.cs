@@ -55,6 +55,7 @@ namespace Huffelpuff.ComplexPlugins
         private void Plugins_PluginsReloaded(object sender, EventArgs e)
         {
             plugins.Clear();
+            bot.CleanComplexPlugins();
             
             foreach(string pluginName in pluginManager.GetSubclasses("Huffelpuff.ComplexPlugins.AbstractPlugin"))
             {
