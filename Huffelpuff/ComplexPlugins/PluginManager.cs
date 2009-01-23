@@ -99,6 +99,8 @@ namespace Huffelpuff.ComplexPlugins
 			AddReference("System.Web.Services.dll");
 			AddReference("System.Windows.Forms.Dll");
 			AddReference("System.XML.dll");
+			
+			// * mine maybe expose this * //
 			AddReference("Huffelpuff.exe");
 			AddReference("SmartIrc4net.dll");
 		}
@@ -181,7 +183,13 @@ namespace Huffelpuff.ComplexPlugins
 			{
 				localLoader.Unload();
 				localLoader = new LocalLoader(pluginDirectory);
-				LoadUserAssemblies();
+				try {
+				    LoadUserAssemblies();
+				} catch (Exception e) {
+				    Console.ForegroundColor = ConsoleColor.Red;
+				    Console.WriteLine(e.Message);
+				    Console.ForegroundColor = ConsoleColor.Gray;
+				}
 
 				changeTime = new DateTime(0);
 				if (PluginsReloaded != null)

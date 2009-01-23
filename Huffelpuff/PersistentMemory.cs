@@ -54,10 +54,10 @@ namespace Huffelpuff
 			if (!memory.Tables.Contains(baseTable))
 			{
 				try {
-				memory.Tables.Add(new DataTable(baseTable));
-				memory.Tables[baseTable].Columns.Add(new DataColumn(baseGroup));
-				memory.Tables[baseTable].Columns.Add(new DataColumn(baseKey));
-				memory.Tables[baseTable].Columns.Add(new DataColumn(baseValue));
+				    memory.Tables.Add(new DataTable(baseTable));
+				    memory.Tables[baseTable].Columns.Add(new DataColumn(baseGroup));
+				    memory.Tables[baseTable].Columns.Add(new DataColumn(baseKey));
+				    memory.Tables[baseTable].Columns.Add(new DataColumn(baseValue));
 				} catch (Exception e) {
 					Console.WriteLine(e.Message);
 					Console.WriteLine(e.StackTrace);
@@ -172,7 +172,6 @@ namespace Huffelpuff
 
 		private PersistentMemory()
 		{				
-			Console.WriteLine(filename);
 			FileInfo fi = new FileInfo(PersistentMemory.filename);
 			XmlDataDocument xdoc = new XmlDataDocument();
 			if (fi.Exists) {		

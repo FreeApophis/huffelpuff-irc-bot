@@ -29,7 +29,6 @@ namespace Huffelpuff
         public static void Main(string[] args)
         {
             Tools.RunOnMono();
-            Tools.getMyIPs();
             IrcBot bot = new IrcBot();
             bot.Start();  /*blocking*/
         }    

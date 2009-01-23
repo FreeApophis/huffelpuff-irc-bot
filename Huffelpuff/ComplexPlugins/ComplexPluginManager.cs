@@ -44,25 +44,57 @@ namespace Huffelpuff.ComplexPlugins
 		    
 		    pluginManager = new PluginManager(relPluginPath);
             pluginManager.PluginsReloaded += new EventHandler(Plugins_PluginsReloaded);
-            pluginManager.IgnoreErrors = true;
+            pluginManager.IgnoreErrors = false;
             pluginManager.PluginSources =  PluginSourceEnum.Both;
 
             pluginManager.Start();
 		}
 		
 
-		
+		private List<string> oldPlugs = new List<string>();
         private void Plugins_PluginsReloaded(object sender, EventArgs e)
         {
+                        
             plugins.Clear();
             bot.CleanComplexPlugins();
             
             foreach(string pluginName in pluginManager.GetSubclasses("Huffelpuff.ComplexPlugins.AbstractPlugin"))
             {
                 AbstractPlugin p = (AbstractPlugin)pluginManager.CreateInstance(pluginName, BindingFlags.CreateInstance, new object[] {bot});
-                plugins.Add(p);
                 p.Init();
+                
+                if (p.Ready) {
+                  plugins.Add(p);
+                } else {
+        			Console.WriteLine("Init Failed, Plugin not loaded");
+                }
             }       
+
+            foreach(AbstractPlugin ap in plugins)
+            {
+                if (oldPlugs.Contains(ap.AssemblyName)) {
+                    Console.ForegroundColor = ConsoleColor.DarkGreen;
+                    Console.WriteLine(" [RELOAD] " + ap.FullName);
+                    oldPlugs.Remove(ap.AssemblyName);
+                } else { 
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("  [LOAD]  " + ap.FullName);
+                }
+            }           
+            
+            foreach (string s in oldPlugs) {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(" [REMOVE] " + s);
+            }
+
+            Console.ForegroundColor = ConsoleColor.Gray;
+            
+            oldPlugs.Clear();
+            foreach(AbstractPlugin ap in plugins)
+            {
+                oldPlugs.Add(ap.AssemblyName);
+            }
+
             
             foreach(string pluginname in PersistentMemory.GetValues("plugin")) {
                 foreach(AbstractPlugin p in plugins) {
@@ -76,8 +108,13 @@ namespace Huffelpuff.ComplexPlugins
         public void ShutDown()
 		{
 			foreach(AbstractPlugin p in plugins) {	
-				p.Deactivate();
-				p.DeInit();
+                try {
+				    p.Deactivate();
+				    p.DeInit();
+                } catch (Exception) {
+                    /* Plugins Domain does not Exist */
+                }
+                    
 			}
 
 		}

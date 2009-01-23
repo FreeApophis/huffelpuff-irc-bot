@@ -47,20 +47,20 @@ namespace Huffelpuff
             this.AutoRejoin = true;
             this.AutoRetry = true;
             this.AutoRetryDelay = 5;
-            
+      
             this.OnChannelMessage += new IrcEventHandler(PublicCommandDispatcher);
             this.OnQueryMessage +=  new IrcEventHandler(PrivateCommandDispatcher);
             
-            this.AddPublicCommand(new Commandlet("!join", "The command !join <channel> lets the bot join Channel <channel>", JoinCommand, this));
-            this.AddPublicCommand(new Commandlet("!part", "The command !part <channel> lets the bot part Channel <channel>", PartCommand, this));
-            this.AddPublicCommand(new Commandlet("!quit", "The command !quit lets the bot quit himself", QuitCommand, this));
-            this.AddPublicCommand(new Commandlet("!help", "The command !help <topic> gives you help about <topic> (special topics: commands, more)", HelpCommand, this));
-			this.AddPublicCommand(new Commandlet("!plugins", "The command !plugins lists all the plugins", this.PluginsCommand, this));
-			this.AddPublicCommand(new Commandlet("!activate", "The command !activate <plugin> activates the Plugin <plugin>", this.ActivateCommand, this));
-			this.AddPublicCommand(new Commandlet("!deactivate", "The command !deactivate <plugin> deactivates the Plugin <plugin>", this.DeactivateCommand, this));
+            this.AddPublicCommand(new Commandlet("!join", "The command !join <channel> lets the bot join Channel <channel>", this.JoinCommand, this));
+            this.AddPublicCommand(new Commandlet("!part", "The command !part <channel> lets the bot part Channel <channel>", this.PartCommand, this));
+            this.AddPublicCommand(new Commandlet("!quit", "The command !quit lets the bot quit himself", this.QuitCommand, this));
+            this.AddPublicCommand(new Commandlet("!help", "The command !help <topic> gives you help about <topic> (special topics: commands, more)", this.HelpCommand, this));
+            this.AddPublicCommand(new Commandlet("!plugins", "The command !plugins lists all the plugins", this.PluginsCommand, this));
+            this.AddPublicCommand(new Commandlet("!activate", "The command !activate <plugin> activates the Plugin <plugin>", this.ActivateCommand, this));
+            this.AddPublicCommand(new Commandlet("!deactivate", "The command !deactivate <plugin> deactivates the Plugin <plugin>", this.DeactivateCommand, this));
                         
-			
-			this.CtcpVersion = this.VersionString + " (SmartIrc4Net " + Assembly.GetAssembly(typeof(IrcFeatures)).GetName(false).Version + ")";
+            
+            this.CtcpVersion = this.VersionString + " (SmartIrc4Net " + Assembly.GetAssembly(typeof(IrcFeatures)).GetName(false).Version + ")";
             this.CtcpUrl = "http://huffelpuff-irc-bot.origo.ethz.ch/";
             this.CtcpSource = "https://svn.origo.ethz.ch/huffelpuff-irc-bot/";
 
@@ -72,7 +72,7 @@ namespace Huffelpuff
             // Plugin needs the Handlers from IRC we load the plugins after we set everything up
             simplePM = new SimplePluginManager(this, "plugins");
             complexPM = new ComplexPluginManager(this, "cplugins");
-			            
+                        
             //Access Control
             acl = new AccessControlList();
         }
@@ -106,7 +106,7 @@ namespace Huffelpuff
         
         public bool AddPrivateCommand(Commandlet cmd)
         {
-        	if(!_privateCommands.ContainsKey(cmd.Command))
+            if(!_privateCommands.ContainsKey(cmd.Command))
             {
                    _privateCommands.Add(cmd.Command, cmd);
                    return true;
@@ -118,7 +118,7 @@ namespace Huffelpuff
         {
             if(_privateCommands.ContainsKey(command))
             {
-            	_privateCommands.Remove(command);
+                _privateCommands.Remove(command);
                    return true;
             }
             return false;
@@ -149,15 +149,22 @@ namespace Huffelpuff
                 if (_privateCommands[e.Data.MessageArray[0]].Handler != null) {
                     _privateCommands[e.Data.MessageArray[0]].Handler.Invoke(sender, e);
                 } else {
-                    foreach(AbstractPlugin complexPlug in complexPM.Plugins) {
-                        Console.WriteLine(complexPlug.FullName + " == " + (string)_privateCommands[e.Data.MessageArray[0]].Owner);
-                        if (complexPlug.FullName == (string)_privateCommands[e.Data.MessageArray[0]].Owner)
-                        {
-                            complexPlug.InvokeHandler(_privateCommands[e.Data.MessageArray[0]].HandlerName, e);
+                    try {
+                        foreach(AbstractPlugin complexPlug in complexPM.Plugins) {
+                            Console.WriteLine(complexPlug.FullName + " == " + (string)_privateCommands[e.Data.MessageArray[0]].Owner);
+                            if (complexPlug.FullName == (string)_privateCommands[e.Data.MessageArray[0]].Owner)
+                            {
+                                complexPlug.InvokeHandler(_privateCommands[e.Data.MessageArray[0]].HandlerName, e);
+                            }
                         }
-                    }
+                    } catch (Exception ex) {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("A Plugin " + (string)_publicCommands[e.Data.MessageArray[0]].Owner + " has generated an uncaught exception in Handler " + _publicCommands[e.Data.MessageArray[0]].HandlerName);
+                        Console.WriteLine("Exception thrwon:  " + ex.Message + " : " + ex.InnerException.Message);
+                        Console.WriteLine(ex.InnerException.StackTrace);
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                   }
                 }
-                
             }
         }
 
@@ -168,71 +175,76 @@ namespace Huffelpuff
                 if (_publicCommands[e.Data.MessageArray[0]].Handler != null) {
                     _publicCommands[e.Data.MessageArray[0]].Handler.Invoke(sender, e);
                 } else {
-                    foreach(AbstractPlugin complexPlug in complexPM.Plugins) {
-                        Console.WriteLine(complexPlug.FullName + " == " + (string)_publicCommands[e.Data.MessageArray[0]].Owner);
-                        if (complexPlug.FullName == (string)_publicCommands[e.Data.MessageArray[0]].Owner)
-                        {
-                            complexPlug.InvokeHandler(_publicCommands[e.Data.MessageArray[0]].HandlerName, e);
+                    try {
+                        foreach(AbstractPlugin complexPlug in complexPM.Plugins) {
+                            if (complexPlug.FullName == (string)_publicCommands[e.Data.MessageArray[0]].Owner) {
+                                complexPlug.InvokeHandler(_publicCommands[e.Data.MessageArray[0]].HandlerName, e); 
+                            }
                         }
-                    }
+                    } catch (Exception ex) {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("A Plugin " + (string)_publicCommands[e.Data.MessageArray[0]].Owner + " has generated an uncaught exception in Handler " + _publicCommands[e.Data.MessageArray[0]].HandlerName);
+                        Console.WriteLine("Exception thrwon:  " + ex.Message + " : " + ex.InnerException.Message);
+                        Console.WriteLine(ex.InnerException.StackTrace);
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                   }
                 }
-                
             }
         }
         
         private void PluginsCommand(object sender, IrcEventArgs e)
-		{
-			foreach(IPlugin p in simplePM.Plugins) {	
-				SendMessage(SendType.Notice, e.Data.Channel, "Simple Plugin: "+IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
-			}
-			foreach(AbstractPlugin p in complexPM.Plugins) {	
-				SendMessage(SendType.Notice, e.Data.Channel, "Complex Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
-			}
-		}
-	
-		private void ActivateCommand(object sender, IrcEventArgs e)
-		{
-			if (e.Data.MessageArray.Length < 2)
-				return;
-			foreach(IPlugin p in simplePM.Plugins) {
-				if (e.Data.MessageArray[1]==p.GetType().ToString()) {
-					PersistentMemory.SetValue("plugin", p.GetType().ToString());
-					PersistentMemory.Flush();
-					p.Activate();
-					SendMessage(SendType.Notice, e.Data.Channel, "Simple Plugin: "+IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
-				}
-			}
-			foreach(AbstractPlugin p in complexPM.Plugins) {
-			    if (e.Data.MessageArray[1]==p.FullName) {
-					PersistentMemory.SetValue("plugin", p.FullName);
-					PersistentMemory.Flush();
-					p.Activate();
-					SendMessage(SendType.Notice, e.Data.Channel, "Complex Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
-				}
-			}
-		}
+        {
+            foreach(IPlugin p in simplePM.Plugins) {    
+                SendMessage(SendType.Notice, e.Data.Channel, "Simple Plugin: "+IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+            }
+            foreach(AbstractPlugin p in complexPM.Plugins) {    
+                SendMessage(SendType.Notice, e.Data.Channel, "Complex Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+            }
+        }
+    
+        private void ActivateCommand(object sender, IrcEventArgs e)
+        {
+            if (e.Data.MessageArray.Length < 2)
+                return;
+            foreach(IPlugin p in simplePM.Plugins) {
+                if (e.Data.MessageArray[1]==p.GetType().ToString()) {
+                    PersistentMemory.SetValue("plugin", p.GetType().ToString());
+                    PersistentMemory.Flush();
+                    p.Activate();
+                    SendMessage(SendType.Notice, e.Data.Channel, "Simple Plugin: "+IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+                }
+            }
+            foreach(AbstractPlugin p in complexPM.Plugins) {
+                if (e.Data.MessageArray[1]==p.FullName) {
+                    PersistentMemory.SetValue("plugin", p.FullName);
+                    PersistentMemory.Flush();
+                    p.Activate();
+                    SendMessage(SendType.Notice, e.Data.Channel, "Complex Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+                }
+            }
+        }
 
-		private void DeactivateCommand(object sender, IrcEventArgs e)
-		{
-			if (e.Data.MessageArray.Length < 2)
-				return;
-			foreach(IPlugin p in simplePM.Plugins) {
-				if (e.Data.MessageArray[1]==p.GetType().ToString()) {
-					PersistentMemory.RemoveValue("plugin", p.GetType().ToString());
-					PersistentMemory.Flush();
-					p.Deactivate();
-					SendMessage(SendType.Notice, e.Data.Channel, "Simple Plugin: "+IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
-				}
-			}
-			foreach(AbstractPlugin p in complexPM.Plugins) {
-			    if (e.Data.MessageArray[1]==p.FullName) {
-					PersistentMemory.RemoveValue("plugin", p.FullName);
-					PersistentMemory.Flush();
-					p.Deactivate();
-					SendMessage(SendType.Notice, e.Data.Channel, "Complex Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
-				}
-			}
-		}
+        private void DeactivateCommand(object sender, IrcEventArgs e)
+        {
+            if (e.Data.MessageArray.Length < 2)
+                return;
+            foreach(IPlugin p in simplePM.Plugins) {
+                if (e.Data.MessageArray[1]==p.GetType().ToString()) {
+                    PersistentMemory.RemoveValue("plugin", p.GetType().ToString());
+                    PersistentMemory.Flush();
+                    p.Deactivate();
+                    SendMessage(SendType.Notice, e.Data.Channel, "Simple Plugin: "+IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+                }
+            }
+            foreach(AbstractPlugin p in complexPM.Plugins) {
+                if (e.Data.MessageArray[1]==p.FullName) {
+                    PersistentMemory.RemoveValue("plugin", p.FullName);
+                    PersistentMemory.Flush();
+                    p.Deactivate();
+                    SendMessage(SendType.Notice, e.Data.Channel, "Complex Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+                }
+            }
+        }
         
         private void JoinCommand(object sender, IrcEventArgs e)
         {
@@ -388,14 +400,17 @@ namespace Huffelpuff
         
         public void Exit()
         {
-            //this.plugins.ShutDown();
             PersistentMemory.Flush();
+            
             simplePM.ShutDown();
             complexPM.ShutDown();
             
             // we are done, lets exit...
             System.Console.WriteLine("Exiting...");
+#if DEBUG
             System.Threading.Thread.Sleep(60000);
+#endif
+            
             System.Environment.Exit(0);
         }
         
@@ -418,9 +433,8 @@ namespace Huffelpuff
             int port = int.Parse(PersistentMemory.GetValue("ServerPort"));
             try {
                 // here we try to connect to the server and exceptions get handled
-                Console.WriteLine("Connecting...");
                 this.Connect(serverlist, port);
-                Console.WriteLine("Connected.");
+                Console.WriteLine("successfull connected");
             } catch (ConnectionException e) {
                 // something went wrong, the reason will be shown
                 System.Console.WriteLine("couldn't connect! Reason: "+e.Message);

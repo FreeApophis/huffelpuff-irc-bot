@@ -65,7 +65,18 @@ namespace Huffelpuff.ComplexPlugins
 		        return this.GetType().FullName;
 		    }
 		}
-		public abstract string Name{get;}
+		
+		public string AssemblyName {
+		    get {
+		        return this.GetType().Assembly.FullName;
+		    }
+		}
+		
+		public virtual string Name{
+		    get {
+                return Assembly.GetExecutingAssembly().FullName;
+            }
+		}
 		
 		public virtual bool Ready{
 		    get {
