@@ -544,6 +544,8 @@ namespace Meebey.SmartIrc4net
                     socksProxy.Connect(Address, port);
                 } else {
                     // FIXME: this is not needed but should help merging the IPv6 changes! (just use always the if case!)
+                    Console.WriteLine("Connecting [" + _ConnectTries + "] (" + Address + ":" + Port + ")");
+
                     System.Net.IPAddress ip = System.Net.Dns.Resolve(Address).AddressList[0];
                     _TcpClient.Connect(ip, port);
                 }
