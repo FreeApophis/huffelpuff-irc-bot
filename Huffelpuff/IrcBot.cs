@@ -90,7 +90,11 @@ namespace Huffelpuff
             }
             del.Clear();
             foreach(KeyValuePair<string, Commandlet> p in _publicCommands) {
-                if (p.Value.Handler==null) {
+                try {
+                    if (p.Value.Handler==null) {
+                        del.Add(p.Key);
+                    }
+                } catch (Exception) {
                     del.Add(p.Key);
                 }
             }
@@ -151,7 +155,6 @@ namespace Huffelpuff
                 } else {
                     try {
                         foreach(AbstractPlugin complexPlug in complexPM.Plugins) {
-                            Console.WriteLine(complexPlug.FullName + " == " + (string)_privateCommands[e.Data.MessageArray[0]].Owner);
                             if (complexPlug.FullName == (string)_privateCommands[e.Data.MessageArray[0]].Owner)
                             {
                                 complexPlug.InvokeHandler(_privateCommands[e.Data.MessageArray[0]].HandlerName, e);
@@ -175,30 +178,27 @@ namespace Huffelpuff
                 if (_publicCommands[e.Data.MessageArray[0]].Handler != null) {
                     _publicCommands[e.Data.MessageArray[0]].Handler.Invoke(sender, e);
                 } else {
-                    try {
-                        foreach(AbstractPlugin complexPlug in complexPM.Plugins) {
-                            if (complexPlug.FullName == (string)_publicCommands[e.Data.MessageArray[0]].Owner) {
-                                complexPlug.InvokeHandler(_publicCommands[e.Data.MessageArray[0]].HandlerName, e); 
-                            }
+                    foreach(AbstractPlugin complexPlug in complexPM.Plugins) {
+                        if (complexPlug.FullName == (string)_publicCommands[e.Data.MessageArray[0]].Owner) {
+                            complexPlug.InvokeHandler(_publicCommands[e.Data.MessageArray[0]].HandlerName, e); 
                         }
-                    } catch (Exception ex) {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("A Plugin " + (string)_publicCommands[e.Data.MessageArray[0]].Owner + " has generated an uncaught exception in Handler " + _publicCommands[e.Data.MessageArray[0]].HandlerName);
-                        Console.WriteLine("Exception thrwon:  " + ex.Message + " : " + ex.InnerException.Message);
-                        Console.WriteLine(ex.InnerException.StackTrace);
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                   }
+                    }
                 }
             }
         }
         
         private void PluginsCommand(object sender, IrcEventArgs e)
         {
-            foreach(IPlugin p in simplePM.Plugins) {    
-                SendMessage(SendType.Notice, e.Data.Channel, "Simple Plugin: "+IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+            List<string> pluginsList = new List<string>();
+            
+            foreach(IPlugin p in simplePM.Plugins) {
+                pluginsList.Add(IrcConstants.IrcBold+p.GetType().ToString()+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
             }
             foreach(AbstractPlugin p in complexPM.Plugins) {    
-                SendMessage(SendType.Notice, e.Data.Channel, "Complex Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+                pluginsList.Add(IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"|~]");
+            }
+            foreach(string line in ListToLines(pluginsList, 300, ", ", "Plugins Loaded: ", " END.")) {
+                SendMessage(SendType.Notice, e.Data.Channel, line);
             }
         }
     
@@ -287,22 +287,20 @@ namespace Huffelpuff
         {    
             topic = topic.ToLower();
             bool helped = false;
-            
-            if (topic == "test")
-            {
-
-            }
-            
+                 
+            // List all commands
             if (topic == "commands") {
                 List<string> commands = new List<string>();
                 commands.AddRange(_publicCommands.Keys);
-                foreach(string com in ListToLines(commands, 100, ", ", "Active Commands: ", null))
+                
+                foreach(string com in ListToLines(commands, 300, ", ", "Active Commands: ", null))
                 {
                     this.SendMessage(SendType.Message, channel, com);
                 }
                 helped = true;
             }
             
+            // debug list of currently loaded commands
             if(topic == "more") {
                 foreach(KeyValuePair<string, Commandlet> cmd in _publicCommands)
                 {
@@ -326,7 +324,7 @@ namespace Huffelpuff
                 }
             }
             
-            // maybe a plugin
+            // maybe a simple plugin
             foreach(IPlugin p in simplePM.Plugins) {
                 bool plugHelp = false;
                 if (topic==p.GetType().ToString().ToLower()) {
@@ -344,7 +342,26 @@ namespace Huffelpuff
                     helped = true;
                 }
             }
-            // TODO: same for complex Plugin
+
+            // maybe a complex plugin
+            foreach(AbstractPlugin p in complexPM.Plugins) {
+                bool plugHelp = false;
+                if (topic==p.FullName.ToLower()) {
+                    plugHelp = true;    
+                }
+                foreach(string s in p.FullName.ToLower().Split(new char[] {'.'}))
+                {
+                    if((topic==s)&&(!helped)) {
+                        plugHelp = true;
+                    }
+                        
+                }
+                if(plugHelp) {
+                    this.SendMessage(SendType.Message, channel, p.AboutHelp());
+                    helped = true;
+                }
+            }
+
             
             if (!helped)
                 this.SendMessage(SendType.Message, channel, "Your Helptopic was not found");

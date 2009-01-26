@@ -19,90 +19,108 @@
 
 using System;
 using System.Reflection;
-using System.Collections.Generic;
-
 using Meebey.SmartIrc4net;
 
 namespace Huffelpuff.ComplexPlugins
 {
-	/// <summary>
-	/// Description of AbstractPlugin.
-	/// </summary>
-	public abstract class AbstractPlugin : MarshalByRefObject
-	{
-		protected IrcBot BotMethods;
-		protected SharedClientSide BotEvents;
-		protected bool ready;
-		protected bool active;
-		
-		public AbstractPlugin(IrcBot botInstance)
-		{
-			BotMethods = botInstance;
-			BotEvents = new SharedClientSide(botInstance);
-						
-			AppDomain.CurrentDomain.DomainUnload += new EventHandler(AppDomain_CurrentDomain_DomainUnload);
-		}
+    /// <summary>
+    /// Description of AbstractPlugin.
+    /// </summary>
+    public abstract class AbstractPlugin : MarshalByRefObject
+    {
+        protected IrcBot BotMethods;
+        protected SharedClientSide BotEvents;
+        protected bool ready;
+        protected bool active;
+        
+        /// <summary>
+        /// Please only implement a Constructor with one Argument of type IrcBot
+        /// </summary>
+        /// <param name="botInstance"></param>
+        public AbstractPlugin(IrcBot botInstance)
+        {
+            BotMethods = botInstance;
+            BotEvents = new SharedClientSide(botInstance);
+                        
+            AppDomain.CurrentDomain.DomainUnload += new EventHandler(AppDomain_CurrentDomain_DomainUnload);
+        }
+        
+        public override object InitializeLifetimeService()
+        {
+            return null;
+        }
 
-		void AppDomain_CurrentDomain_DomainUnload(object sender, EventArgs e)
-		{
-		    AppDomain.CurrentDomain.DomainUnload -= new EventHandler(AppDomain_CurrentDomain_DomainUnload);
+        /// <summary>
+        /// If we get unloaded we want to make sure that no references to this appDomain survive.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void AppDomain_CurrentDomain_DomainUnload(object sender, EventArgs e)
+        {
+            AppDomain.CurrentDomain.DomainUnload -= new EventHandler(AppDomain_CurrentDomain_DomainUnload);
 
-		    BotEvents.Unload();
-		    
-		    this.Deactivate();
-		    this.DeInit();
-		    
-		}
-		
-		public void InvokeHandler(string HandlerName, IrcEventArgs e) {
-		    object[] IrcEventParameters = new object[] {this, e};
-		    Console.WriteLine("InovkeHandler in " + this.GetType() + " calls " + HandlerName);
-		    this.GetType().GetMethod(HandlerName,  BindingFlags.Public |  BindingFlags.NonPublic | BindingFlags.Instance).Invoke(this, IrcEventParameters);
-		}
-	
-		public string FullName{
-		    get {
-		        return this.GetType().FullName;
-		    }
-		}
-		
-		public string AssemblyName {
-		    get {
-		        return this.GetType().Assembly.FullName;
-		    }
-		}
-		
-		public virtual string Name{
-		    get {
+            BotEvents.Unload();
+            
+            if (this.active) {
+                this.Deactivate();
+            }
+            this.DeInit();
+            
+        }
+        
+        public void InvokeHandler(string HandlerName, IrcEventArgs e) {
+            object[] IrcEventParameters = new object[] {this, e};
+            Console.WriteLine("InovkeHandler in " + this.GetType() + " calls " + HandlerName);
+            this.GetType().GetMethod(HandlerName,  BindingFlags.Public |  BindingFlags.NonPublic | BindingFlags.Instance).Invoke(this, IrcEventParameters);
+        }
+
+        public string FullName{
+            get {
+                return this.GetType().FullName;
+            }
+        }
+        
+        public string AssemblyName {
+            get {
+                return this.GetType().Assembly.FullName;
+            }
+        }
+        
+        public virtual string Name{
+            get {
                 return Assembly.GetExecutingAssembly().FullName;
             }
-		}
-		
-		public virtual bool Ready{
-		    get {
-		        return ready;
-		    }
-		}
-		public virtual bool Active{
-		    get {
-		        return active;
-		    }
-		}
-			
-		public virtual void Init() {
-		    ready = true;
-		}
-		
-		public abstract void Activate();
-		
-		public abstract void Deactivate();
-		
-		public virtual void DeInit() {
-		    ready = false;
-		}
-		    
-		public abstract string AboutHelp();
+        }
+        
+        public virtual bool Ready{
+            get {
+                return ready;
+            }
+        }
+        public virtual bool Active{
+            get {
+                return active;
+            }
+        }
+            
+        public virtual void Init() {
+            ready = true;
+        }
+        
+        public virtual void Activate() {
+            active = true;
+        }
+        
+        public virtual void Deactivate() {
+            active = false;
+        }
+        
+        public virtual void DeInit() {
+            ready = false;
+        }
+            
+        public abstract string AboutHelp();
 
-		
-	}
+        
+    }
 }

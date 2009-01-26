@@ -2,7 +2,7 @@
  *  UT3GlobalStatsPlugin, Access to the GameSpy Stats for UT3
  * 
  *  Copyright (c) 2007-2009 Thomas Bruderer <apophis@apophis.ch> <http://www.apophis.ch>
-    Copyright (c) 2005,2006 Luigi Auriemma <aluigi@autistici.org> <http://aluigi.org>
+ *  Copyright (c) 2005,2006 Luigi Auriemma <aluigi@autistici.org> <http://aluigi.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

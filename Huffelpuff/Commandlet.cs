@@ -85,5 +85,10 @@ namespace Huffelpuff
             }
             _ACL = null;
         }
+        
+        public override object InitializeLifetimeService()
+        {
+            return null;
+        }
     }
 }
