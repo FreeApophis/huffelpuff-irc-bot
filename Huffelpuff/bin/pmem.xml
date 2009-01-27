@@ -13,7 +13,7 @@
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>nick</baseKey>
-    <baseValue>HelgaTor</baseValue>
+    <baseValue>Helga</baseValue>
   </baseTBL>
   <baseTBL>
     <baseGroup>config</baseGroup>
@@ -37,8 +37,8 @@
   </baseTBL>
   <baseTBL>
     <baseGroup>config</baseGroup>
-    <baseKey>nntpChannel</baseKey>
-    <baseValue>#botwar</baseValue>
+    <baseKey>rssFeed</baseKey>
+    <baseValue>http://forum.vis.ethz.ch/external.php?type=RSS2</baseValue>
   </baseTBL>
   <baseTBL>
     <baseGroup>nntp</baseGroup>
@@ -129,5 +129,15 @@
     <baseGroup>config</baseGroup>
     <baseKey>plugin</baseKey>
     <baseValue>Plugin.ExamplePlugin</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.RssPlugin</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.RssPlugin</baseValue>
   </baseTBL>
 </NewDataSet>
