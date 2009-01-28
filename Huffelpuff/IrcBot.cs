@@ -153,20 +153,12 @@ namespace Huffelpuff
                 if (_privateCommands[e.Data.MessageArray[0]].Handler != null) {
                     _privateCommands[e.Data.MessageArray[0]].Handler.Invoke(sender, e);
                 } else {
-                    try {
-                        foreach(AbstractPlugin complexPlug in complexPM.Plugins) {
-                            if (complexPlug.FullName == (string)_privateCommands[e.Data.MessageArray[0]].Owner)
-                            {
-                                complexPlug.InvokeHandler(_privateCommands[e.Data.MessageArray[0]].HandlerName, e);
-                            }
+                    foreach(AbstractPlugin complexPlug in complexPM.Plugins) {
+                        if (complexPlug.FullName == (string)_privateCommands[e.Data.MessageArray[0]].Owner)
+                        {
+                            complexPlug.InvokeHandler(_privateCommands[e.Data.MessageArray[0]].HandlerName, e);
                         }
-                    } catch (Exception ex) {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("A Plugin " + (string)_publicCommands[e.Data.MessageArray[0]].Owner + " has generated an uncaught exception in Handler " + _publicCommands[e.Data.MessageArray[0]].HandlerName);
-                        Console.WriteLine("Exception thrwon:  " + ex.Message + " : " + ex.InnerException.Message);
-                        Console.WriteLine(ex.InnerException.StackTrace);
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                   }
+                    }
                 }
             }
         }

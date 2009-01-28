@@ -38,7 +38,7 @@
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>rssFeed</baseKey>
-    <baseValue>http://forum.vis.ethz.ch/external.php?type=RSS2</baseValue>
+    <baseValue>http://forum.vis.ethz.ch/external.php?type=RSS2&amp;lastpost=1</baseValue>
   </baseTBL>
   <baseTBL>
     <baseGroup>nntp</baseGroup>

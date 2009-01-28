@@ -19,6 +19,7 @@
  
 using System;
 using System.Xml;
+using System.Timers;
 using System.Collections.Generic;
 
 using Huffelpuff;
@@ -35,9 +36,40 @@ namespace Plugin
         public RssPlugin(IrcBot botInstance) :
             base(botInstance) {}
         
+        private Timer checkInterval;
+        private bool firstrun = true;
+        private DateTime lastpost = DateTime.MinValue;
+        
+        
+        public override void Init()
+        {
+            checkInterval = new Timer();
+            checkInterval.Elapsed += new ElapsedEventHandler(checkInterval_Elapsed);
+            checkInterval.Interval = 1 * 60 * 1000; // 3 minutes
+            base.Init();
+        }
+
+        void checkInterval_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (!BotMethods.IsConnected)
+                return;
+            List<RssItem> rss = getRss(PersistentMemory.GetValue("rssFeed"));
+            if (firstrun) {
+                firstrun = false;    
+                BotMethods.SendMessage(SendType.Message, "#botwar", "RSS Plugin loaded with Feed: " + PersistentMemory.GetValue("rssFeed"));
+                BotMethods.SendMessage(SendType.Message, "#botwar", "Last Post: " + IrcConstants.IrcBold + rss[0].Title + IrcConstants.IrcBold  + " was published on " + rss[0].Published.ToString() + " by " + IrcConstants.IrcBold + IrcConstants.IrcColor + ((int)IrcColors.Blue) + rss[0].Author + IrcConstants.IrcBold + IrcConstants.IrcColor + " in " + rss[0].Category + " -> " + rss[0].Link);
+                lastpost = rss[0].Published;
+            } else if (lastpost < rss[0].Published) {
+                BotMethods.SendMessage(SendType.Message, "#botwar", "New Post: " + IrcConstants.IrcBold + rss[0].Title + IrcConstants.IrcBold  + " was published on " + rss[0].Published.ToString() + " by " + IrcConstants.IrcBold + IrcConstants.IrcColor + ((int)IrcColors.Blue) + rss[0].Author + IrcConstants.IrcBold + IrcConstants.IrcColor + " in " + rss[0].Category + " -> " + rss[0].Link);
+                lastpost = rss[0].Published;
+            }
+            
+        }
+        
         public override void Activate()
         {
-            BotMethods.AddPublicCommand(new Commandlet("!rss", "RSS_HELP", showRss, this));
+            BotMethods.AddPublicCommand(new Commandlet("!rss", "With the command !rss you'll get a list of the bots configured RSS feed.", showRss, this));
+            checkInterval.Enabled = true;
             
             base.Activate();
         }
@@ -51,21 +83,21 @@ namespace Plugin
         
         public override string AboutHelp()
         {
-            return "RSS_PLUGIN_HELP";
+            return "The Rss Plugins reports new posts on the configured RSS feed to the channel, and it provides access to the complete rss via the !rss command";
         }
         
         private void showRss(object sender, IrcEventArgs e) {
-            foreach(RssItem item in getRss()) {
+            foreach(RssItem item in getRss(PersistentMemory.GetValue("rssFeed"))) {
                 BotMethods.SendMessage(SendType.Message, e.Data.Channel, item.Title + " was published on " + item.Published.ToString() + " by " + item.Author + " in " + item.Category + " -> " + item.Link);
             }
         }
 
         
-        private List<RssItem> getRss() 
+        private List<RssItem> getRss(string uri) 
         {
             List<RssItem> rss = new List<RssItem>();
 
-            XmlReader feed = XmlReader.Create("http://forum.vis.ethz.ch/external.php?type=RSS2");
+            XmlReader feed = XmlReader.Create(uri);
             while(feed.Read()){
                 if ((feed.NodeType == XmlNodeType.Element) && (feed.Name == "item")) {
                     rss.Add(getItem(feed));
