@@ -897,7 +897,9 @@ namespace Meebey.SmartIrc4net
                 case ReplyCode.Bounce:
                     if(!line.StartsWith("Try server")) {
                         // RPL_ISUPPORT (Very common enhancement)
-                        ParseServerProperties(line.Substring(0, colonpos-1));
+                        if (colonpos>0) {
+                            ParseServerProperties(line.Substring(0, colonpos-1));
+                        }
                     } else {
                         // RPL_BOUNCE (Rfc 2812)
                     }
