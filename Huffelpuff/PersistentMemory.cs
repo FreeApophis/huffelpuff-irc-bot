@@ -27,7 +27,15 @@ using System.Collections.Generic;
 namespace Huffelpuff
 {
 	/// <summary>
-	/// Description of PersistentMemory.
+	/// Easy access to persistent data through an easy OO interface.
+	/// 
+	/// Its mainly intended as a very simple config tool, but can also be used 
+	/// to track data over multiple sessions!
+	/// 
+	/// Very simple implementation with DataSet and XML Documents.
+	/// Other Interfaces like SQL should be easy to implement.
+	/// The usability is very restricted due the simplicity of the DB Scheme. 
+	/// This is intended! dont use it for huge Databases, use a Database instead!
 	/// </summary>
 	public sealed class PersistentMemory
 	{
@@ -66,23 +74,50 @@ namespace Huffelpuff
 			Flush();
 		}
 		
+		/// <summary>
+		/// Makes sure that the Database is written to disk (ie. XML)
+		/// </summary>
 		public static void Flush()
 		{
 			memory.WriteXml(filename);
 		}
 
+		/// <summary>
+		/// Does this key-value pair exists?
+		/// </summary>
+		/// <param name="key">Key</param>
+		/// <param name="value">Value</param>
+		/// <returns>True if it exists</returns>
 		public static bool Exists(string key, string value) {
 			return Exists(config, key, value);
 		}
 
+		/// <summary>
+		/// Does this key-value pair exists in domain group?
+		/// </summary>
+		/// <param name="group">Data Domain</param>
+		/// <param name="key">Key</param>
+		/// <param name="value">Value</param>
+		/// <returns>True if it exists</returns>
 		public static bool Exists(string group, string key, string value) {
-			return (0!=memory.Tables[baseTable].Select(baseGroup + " = " + group + " AND " + baseKey + " = " + key + " AND " + baseValue + " = " + value).Length);
+			return (0!=memory.Tables[baseTable].Select(baseGroup + " = '" + group + "' AND " + baseKey + " = '" + key + "' AND " + baseValue + " = '" + value + "'").Length);
 		}
 		
+		/// <summary>
+		/// Returns Value (first if there are multiple) for default domain, or null if it does not exist.
+		/// </summary>
+		/// <param name="key">Key</param>
+		/// <returns>Single Value</returns>
 		public static string GetValue(string key) {
 			return GetValue(config, key);
 		}
-
+        
+		/// <summary>
+		/// Returns Value (first if there are multiple) for key in domain group, or null if it does not exist.
+		/// </summary>
+		/// <param name="group">Data Domain</param>
+		/// <param name="key">Key</param>
+		/// <returns>Single Value</returns>
 		public static string GetValue(string group, string key) {
 			List<string> t = GetValues(group, key);
 			if (t.Count == 0)
@@ -91,10 +126,21 @@ namespace Huffelpuff
 				return t[0];
 		}
 
+		/// <summary>
+		/// Returns Values as a List for a key in default domain, or the empty list if it does not exist.
+		/// </summary>
+		/// <param name="key">Key</param>
+		/// <returns>List of Values</returns>
 		public static List<string> GetValues(string key) {
 			return GetValues(config, key);
 		}
-
+        
+		/// <summary>
+		/// Returns Values as a List for a key in the domain group, or the empty list if it does not exist.
+		/// </summary>
+		/// <param name="group">Data Domain</param>
+		/// <param name="key">Key</param>
+		/// <returns>List of Values</returns>
 		public static List<string> GetValues(string group, string key) {
 			List<string> vals = new List<string>();
 			DataRow[] rows = memory.Tables[baseTable].Select(baseGroup + " = '" + group + "' AND " + baseKey + " = '" + key + "'");
@@ -105,16 +151,23 @@ namespace Huffelpuff
 		}
 		
 		/// <summary>
-		/// Non-Idempotent Set Value (if you set twice,you'll get a list back)
+		/// Non-Idempotent Set Value (if you set twice,you'll get a list back) in default domain
 		/// </summary>
-		/// <param name="key"></param>
+		/// <param name="key">Key Value</param>
 		/// <param name="value"></param>
-		/// <returns></returns>
+		/// <returns>Returns true when successfull</returns>
 		public static bool SetValue(string key, string value)
 		{
 			return SetValue(config, key, value);
 		}
 		
+		/// <summary>
+		/// Non-Idempotent Set Value (if you set twice,you'll get a list back) in Domain group
+		/// </summary>
+		/// <param name="group">Data Domain</param>
+		/// <param name="key">Key</param>
+		/// <param name="value">Value</param>
+		/// <returns>Returns true when successfull</returns>
 		public static bool SetValue(string group, string key, string value)
 		{
 			if (memory.Tables.Contains(baseTable))
@@ -130,10 +183,23 @@ namespace Huffelpuff
 				return false;
 		}
 		
+		/// <summary>
+		/// Remove Key Value Pair in default Domain
+		/// </summary>
+		/// <param name="key">Key</param>
+		/// <param name="value">Value</param>
+		/// <returns>True if at least on element was removed</returns>
 		public static bool RemoveValue(string key, string value) {
 			return RemoveValue(config, key, value);
 		}
-		
+
+		/// <summary>
+		/// Remove Key Value Pair in default Domain
+		/// </summary>
+		/// <param name="group">Data Domain</param>
+		/// <param name="key">Key</param>
+		/// <param name="value">Value</param>
+		/// <returns>True if at least on element was removed</returns>
 		public static bool RemoveValue(string group, string key, string value) {		
 			if (memory.Tables.Contains(baseTable))
 			{
@@ -149,11 +215,45 @@ namespace Huffelpuff
 				return false;
 		}
 		
+		/// <summary>
+		/// Replaces key with a new value in the default Domain, if multiple old values exist only one new value will exist after this operation
+		/// </summary>
+		/// <param name="key">Key</param>
+		/// <param name="value">Value</param>
+		/// <returns>True if at least one Value was removed, false if the key is new</returns>
+		public static bool ReplaceValue(string key, string value) {
+		    return ReplaceValue(config, key, value);
+		}
+		
+		/// <summary>
+		/// Replaces key with a new value in the Domain group, if multiple old values exist only one new value will exist after this operation
+		/// </summary>
+		/// <param name="group">Data Domain</param>
+		/// <param name="key">Key</param>
+		/// <param name="value">Value</param>
+		/// <returns>True if at least one Value was removed, false if the key is new</returns>
+		public static bool ReplaceValue(string group, string key, string value) {
+		    bool removed = RemoveKey(group, key);
+		    SetValue(group, key, value);
+		    return removed;
+		}
+		
+		/// <summary>
+		/// Removes all values with the specified key in default Domain
+		/// </summary>
+		/// <param name="key">Key</param>
+		/// <returns>True if at least one element was removed</returns>
 		public static bool RemoveKey(string key)
 		{
 			return RemoveKey(config, key);
 		}
 
+		/// <summary>
+		/// Removes all values with the specified key in the Domain group
+		/// </summary>
+		/// <param name="group">Data Domain</param>
+		/// <param name="key">Key</param>
+		/// <returns>True if at least one element was removed</returns>
 		public static bool RemoveKey(string group, string key)
 		{
 			if (memory.Tables.Contains(baseTable))
@@ -170,6 +270,9 @@ namespace Huffelpuff
 				return false;
 		}
 
+		/// <summary>
+		/// Constructor
+		/// </summary>
 		private PersistentMemory()
 		{				
 			FileInfo fi = new FileInfo(PersistentMemory.filename);
