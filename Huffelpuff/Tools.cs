@@ -30,14 +30,23 @@ namespace Huffelpuff
 		public static bool RunOnMono() {
     		Type t = Type.GetType ("Mono.Runtime");
            	if (t != null)
-            		Console.WriteLine ("You are running with the Mono VM");
+            		Console.WriteLine ("Runtime: Mono VM");
        		else
-           		Console.WriteLine ("You are running something else (probably .NET)");
+           		Console.WriteLine ("Runtime: (unkown) MS.NET?");
+       		       		
+       		Console.WriteLine("OS     : " + System.Environment.OSVersion.VersionString);
+       		Console.WriteLine("CWD    : " + System.Environment.CurrentDirectory);
+       		Console.WriteLine("Machine: " + System.Environment.MachineName);
+       		Console.WriteLine("CPUs   : " + System.Environment.ProcessorCount);
+       		Console.WriteLine("User   : " + System.Environment.UserName);
+       		
        		return (t != null);
+       		
 		}
 		
 		public static IPAddress[] getMyIPs()
 		{
+		    
 			IPHostEntry IPHost = Dns.GetHostEntry(Dns.GetHostName());		
 			foreach(IPAddress addr in IPHost.AddressList) {
 				Console.WriteLine(addr.ToString());
