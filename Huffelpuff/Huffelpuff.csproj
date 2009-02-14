@@ -47,7 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccessControlList.cs" />
+    <Compile Include="AccessControl\AccessControlList.cs" />
+    <Compile Include="AccessControl\HostIdentify.cs" />
+    <Compile Include="AccessControl\IdentifyUser.cs" />
+    <Compile Include="AccessControl\NickServIdentify.cs" />
+    <Compile Include="AccessControl\PasswordIdentify.cs" />
     <Compile Include="Commandlet.cs" />
     <Compile Include="ComplexPlugins\ComplexPluginManager.cs" />
     <Compile Include="Engine.cs" />
@@ -72,6 +76,7 @@
       <Project>{5E33EE9C-DEA5-4593-B812-C51D59D0CBE1}</Project>
       <Name>SmartIrc4net</Name>
     </ProjectReference>
+    <Folder Include="AccessControl" />
     <Folder Include="Properties" />
     <Folder Include="ComplexPlugins" />
     <Folder Include="SimplePlugins" />

@@ -30,9 +30,9 @@ namespace Huffelpuff
 		public static bool RunOnMono() {
     		Type t = Type.GetType ("Mono.Runtime");
            	if (t != null)
-            		Console.WriteLine ("Runtime: Mono VM");
+            		Console.WriteLine ("Runtime: Mono VM v" + System.Environment.Version);
        		else
-           		Console.WriteLine ("Runtime: (unkown) MS.NET?");
+           		Console.WriteLine ("Runtime: (unkown) MS.NET? v" + System.Environment.Version);
        		       		
        		Console.WriteLine("OS     : " + System.Environment.OSVersion.VersionString);
        		Console.WriteLine("CWD    : " + System.Environment.CurrentDirectory);

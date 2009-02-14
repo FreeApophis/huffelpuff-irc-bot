@@ -47,7 +47,7 @@ namespace Huffelpuff
             this.AutoRejoin = true;
             this.AutoRetry = true;
             this.AutoRetryDelay = 5;
-      
+     
             this.OnChannelMessage += new IrcEventHandler(PublicCommandDispatcher);
             this.OnQueryMessage +=  new IrcEventHandler(PrivateCommandDispatcher);
             
@@ -73,8 +73,11 @@ namespace Huffelpuff
             simplePM = new SimplePluginManager(this, "plugins");
             complexPM = new ComplexPluginManager(this, "cplugins");
                         
-            //Access Control
-            acl = new AccessControlList();
+            //Setting up Access Control
+            acl = new AccessControlList(this);
+            acl.AddIdentifyPlugin(new NickServIdentify(this));
+            acl.AddIdentifyPlugin(new HostIdentify(this));
+            acl.AddIdentifyPlugin(new PasswordIdentify(this));
         }
                 
         internal void CleanComplexPlugins()

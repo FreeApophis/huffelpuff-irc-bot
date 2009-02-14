@@ -16,53 +16,33 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
-
+ 
 using System;
 
 namespace Huffelpuff
 {
     /// <summary>
-    /// Description of AccessControlList.
+    /// Description of NickServ.
     /// </summary>
-    public class AccessControlList
+    public class NickServIdentify : IdentifyUser
     {
-        public AccessControlList()
+
+        public NickServIdentify(IrcBot bot) : base(bot) { }
+        
+        public override string IdentifyString(string nick) {
+               return "/nickserv/" + nick;
+        }
+        
+        
+        public override bool Identified(string nick)
         {
+            return base.Identified(nick);
         }
         
-        public bool Access(string nick, string command)
+        public override string UserNotIdentifiedHelp(string nick)
         {
-            return false;
+            return "You would have the rights for this command if your nick would be identified";
         }
-    }
-    
-    public class AccessRights
-    {
-        public virtual bool hasAccess(string Nick) {
-            return false;
-        }
-    }
-    
-    public class ChannelRightAccess : AccessRights
-    {
         
     }
-    
-    public class NickServAccess : AccessRights
-    {    
-        
-    }
-    
-    public class PasswordAccess : AccessRights
-    {
-        
-    }
-    
-    public class GuestAccess : AccessRights
-    {
-        public override bool hasAccess(string Nick) {
-            return true;
-        }
-    }
-    
 }
