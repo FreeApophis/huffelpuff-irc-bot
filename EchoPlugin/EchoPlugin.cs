@@ -37,48 +37,23 @@ namespace Plugin
         public EchoPlugin(IrcBot botInstance) : 
             base(botInstance) {}
         
-        private bool ready = false;
-        public override bool Ready {
-            get {
-                return ready;
-            }
-        }
-        
-        private bool active = false;    
-        public override bool Active {
-            get {
-                return active;
-            }
-        }        
         public override string Name {
             get {
                 return Assembly.GetExecutingAssembly().FullName;
             }
         }
-            
-        public override void Init() {
-            ready = true;
-        }
-        
-        
         
         public override void Activate() {
-            //BotEvents.OnChannelMessage  +=  new IrcEventHandler(sayHandler);
             BotMethods.AddPublicCommand(new Commandlet("!say", "The command !say <your text>, says whatever text you want it to say", sayHandler, this));
-            active = true;
+            base.Activate();
         }
 
         
         public override void Deactivate() {
             BotMethods.RemovePublicCommand("!say");
-            active = false;
+            base.Deactivate();
         }
-        
-        public override void DeInit()
-        {
-            ready = false;
-        }
-        
+                
         public override string AboutHelp() {
             return "This is a very simple Plugin which repeats the message you said";
         }
