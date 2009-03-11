@@ -9,7 +9,7 @@
 using System;
 using Meebey.SmartIrc4net;
 
-namespace Huffelpuff.ComplexPlugins
+namespace Huffelpuff.Plugins
 {
     /// <summary>
     /// Description of SharedClientSide.

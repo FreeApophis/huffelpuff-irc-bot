@@ -24,7 +24,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using Huffelpuff;
-using Huffelpuff.SimplePlugins;
+using Huffelpuff.Plugins;
 
 using Nntp;
 using Meebey.SmartIrc4net;
@@ -34,51 +34,31 @@ namespace Plugin
     /// <summary>
     /// Description of MyClass.
     /// </summary>
-    public class NntpPlugin : IPlugin
+    public class NntpPlugin : AbstractPlugin
     {
+        public NntpPlugin(IrcBot botInstance) : base(botInstance) {}
         
         private NntpConnection nntp;
-        private IrcBot bot;
         private Timer interval;
         private Dictionary<string, Dictionary<string, Article>> nntpCache = new Dictionary<string, Dictionary<string, Article>>();
         private bool firstTime = true;
         private List<string> filterGroups;
         private List<string> filterWords;
-        private DccChat chat;
+        // TODO: look at this
+        // private DccChat chat;
         
         
-        public string Name {
-            get {
-                return Assembly.GetExecutingAssembly().FullName;
-            }
-        }
-        
-        private bool ready = false;
-        public bool Ready {
-            get {
-                return ready;
-            }
-        }
-        
-        private bool active;
-        public bool Active {
-            get {
-                return active;
-            }
-        }
-        
-        
-        public void Init(IrcBot botInstance)
+        public override void Init()
         {
-            bot = botInstance;
             nntp = new NntpConnection();
             interval = new System.Timers.Timer(30000);
             interval.Elapsed += new ElapsedEventHandler(interval_Elapsed);
             
             filterGroups = PersistentMemory.GetValues("nntp", "GroupFilter");
             filterWords = PersistentMemory.GetValues("nntp", "WordFilter");
-            ready = true;
+            base.Init();
         }
+        
         
         private bool lock_interval = false;
         
@@ -102,7 +82,7 @@ namespace Plugin
                     
                     try {
                         list = nntp.GetArticleList(cng.Low, cng.High);
-                    } catch(Exception ex) { list = new ArrayList(); }
+                    } catch(Exception) { list = new ArrayList(); }
                     Random r = new Random();
                     foreach(Article a in list)
                     {
@@ -123,8 +103,8 @@ namespace Plugin
                         t = (DateTime.Now - kvp.Key);
                     }
                     foreach(string channel in PersistentMemory.GetValues("nntpChannel")) {
-                        bot.SendMessage(SendType.Message, channel, "New FMS Posts will be reported: There are "+newMessages.Count+" Messages in the repository");
-                        bot.SendMessage(SendType.Message, channel, "Last Post on FMS was " + Math.Round(t.TotalMinutes) + " minutes ago.");
+                        BotMethods.SendMessage(SendType.Message, channel, "New FMS Posts will be reported: There are "+newMessages.Count+" Messages in the repository");
+                        BotMethods.SendMessage(SendType.Message, channel, "Last Post on FMS was " + Math.Round(t.TotalMinutes) + " minutes ago.");
                     }
                     nntp.Disconnect();
                     firstTime = false;
@@ -139,11 +119,11 @@ namespace Plugin
                         if (t < new TimeSpan(4,0,0)) {
                             if(WordFilter(m.Value.Key))
                             {
-                                bot.SendMessage(SendType.Message, channel, "New Post on FMS: " + IrcConstants.IrcBold + "*** Word Filtered ***" + IrcConstants.IrcBold + " by " + m.Value.Key.Header.From.Split(new char[] {'@'})[0] + " in Board " + m.Value.Value + " (" + Math.Round(t.TotalMinutes) + " minutes ago)");
+                                BotMethods.SendMessage(SendType.Message, channel, "New Post on FMS: " + IrcConstants.IrcBold + "*** Word Filtered ***" + IrcConstants.IrcBold + " by " + m.Value.Key.Header.From.Split(new char[] {'@'})[0] + " in Board " + m.Value.Value + " (" + Math.Round(t.TotalMinutes) + " minutes ago)");
                             } else if (GroupFilter(m.Value.Value)) {
-                                bot.SendMessage(SendType.Message, channel, "New Post on FMS: " + IrcConstants.IrcBold + "*** Group Filtered ***" + IrcConstants.IrcBold + " by " + m.Value.Key.Header.From.Split(new char[] {'@'})[0] + " in Board " + m.Value.Value + " (" + Math.Round(t.TotalMinutes) + " minutes ago)");
+                                BotMethods.SendMessage(SendType.Message, channel, "New Post on FMS: " + IrcConstants.IrcBold + "*** Group Filtered ***" + IrcConstants.IrcBold + " by " + m.Value.Key.Header.From.Split(new char[] {'@'})[0] + " in Board " + m.Value.Value + " (" + Math.Round(t.TotalMinutes) + " minutes ago)");
                             } else {
-                                bot.SendMessage(SendType.Message, channel, "New Post on FMS: " + IrcConstants.IrcBold + m.Value.Key.Header.Subject + IrcConstants.IrcBold + " by " + m.Value.Key.Header.From.Split(new char[] {'@'})[0] + " in Board " + m.Value.Value + " (" + Math.Round(t.TotalMinutes) + " minutes ago)");
+                                BotMethods.SendMessage(SendType.Message, channel, "New Post on FMS: " + IrcConstants.IrcBold + m.Value.Key.Header.Subject + IrcConstants.IrcBold + " by " + m.Value.Key.Header.From.Split(new char[] {'@'})[0] + " in Board " + m.Value.Value + " (" + Math.Round(t.TotalMinutes) + " minutes ago)");
                             }
                         }
                     }
@@ -176,34 +156,29 @@ namespace Plugin
             }
             return filter;
         }
-
-        public void Activate()
+        
+        public override void Activate()
         {
-            bot.AddPublicCommand(new Commandlet("!poster", "!poster <name> : Queries Stats about FMS User <name>", PosterCommand, this));
-            bot.AddPublicCommand(new Commandlet("!group", "!group <name> : Queries Stats about FMS Group <name>", GroupCommand, this));
-            bot.AddPublicCommand(new Commandlet("!24h", "!24h : Stats about the last 24 hours", lastDayCommand, this));
+            BotMethods.AddCommand(new Commandlet("!poster", "!poster <name> : Queries Stats about FMS User <name>", PosterCommand, this));
+            BotMethods.AddCommand(new Commandlet("!group", "!group <name> : Queries Stats about FMS Group <name>", GroupCommand, this));
+            BotMethods.AddCommand(new Commandlet("!24h", "!24h : Stats about the last 24 hours", lastDayCommand, this));
             //bot.AddPublicCommand(new Commandlet("!lastmsg", "!poster <name> : Queries Stats about FMS User <name>", LastMessageCommand, this));
                                  
             interval.Enabled = true;
-            active = true;
+            base.Activate();
         }
-        
-        public void Deactivate()
+
+        public override void Deactivate()
         {
-            bot.RemovePublicCommand("!poster");
-            bot.RemovePublicCommand("!group");
-            bot.RemovePublicCommand("!24h");
+            BotMethods.RemoveCommand("!poster");
+            BotMethods.RemoveCommand("!group");
+            BotMethods.RemoveCommand("!24h");
             //bot.RemovePublicCommand("!lastmsg");
             interval.Enabled = false;
-            active = false;
+            base.Deactivate();
         }
         
-        public void DeInit()
-        {
-            ready = false;
-        } 
-        
-        public string AboutHelp()
+        public override string AboutHelp()
         {
             return "The FMS Module uses the public nntp Gateway to the FMS groups.";
         }
@@ -234,7 +209,7 @@ namespace Plugin
         private void GroupStats(IrcEventArgs e)
         {
             if (!nntpCache.ContainsKey(e.Data.MessageArray[1])) {
-                bot.SendMessage(SendType.Message, e.Data.Channel, "Group " + e.Data.MessageArray[1] + " does not exist");
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Group " + e.Data.MessageArray[1] + " does not exist");
                 return;
             }
             int posts = 0;
@@ -252,18 +227,18 @@ namespace Plugin
             }
             if (GroupFilter(e.Data.MessageArray[1])) {
                 if (LastArticle == null) {
-                    bot.SendMessage(SendType.Message, e.Data.Channel, "Group " + e.Data.MessageArray[1] + " has no posts.  (*** Group Filtered ***)");
+                    BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Group " + e.Data.MessageArray[1] + " has no posts.  (*** Group Filtered ***)");
                 }
                 else {
-                    bot.SendMessage(SendType.Message, e.Data.Channel, "Group " + e.Data.MessageArray[1] + " : " + posts + " Posts, Last Post " + Math.Round(t.TotalHours) + " hours ago by " + LastArticle.Header.From.Split(new char[] { '@' })[0] + " (*** Group Filtered ***)");
+                    BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Group " + e.Data.MessageArray[1] + " : " + posts + " Posts, Last Post " + Math.Round(t.TotalHours) + " hours ago by " + LastArticle.Header.From.Split(new char[] { '@' })[0] + " (*** Group Filtered ***)");
                 }
             }
             else {
                 if (LastArticle == null) {
-                    bot.SendMessage(SendType.Message, e.Data.Channel, "Group " + e.Data.MessageArray[1] + " has no posts.");
+                    BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Group " + e.Data.MessageArray[1] + " has no posts.");
                 }
                 else {
-                    bot.SendMessage(SendType.Message, e.Data.Channel, "Group " + e.Data.MessageArray[1] + " : " + posts + " Posts, Last Post " + Math.Round(t.TotalHours) + " hours ago by " + LastArticle.Header.From.Split(new char[] { '@' })[0] + " (" + LastArticle.Header.Subject + ")");
+                    BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Group " + e.Data.MessageArray[1] + " : " + posts + " Posts, Last Post " + Math.Round(t.TotalHours) + " hours ago by " + LastArticle.Header.From.Split(new char[] { '@' })[0] + " (" + LastArticle.Header.Subject + ")");
                 }
             }
         }
@@ -271,8 +246,8 @@ namespace Plugin
 
         private void ListGroups(IrcEventArgs e)
         {
-            foreach (string s in bot.ListToLines(nntpCache.Keys, 350)) {
-                bot.SendMessage(SendType.Message, e.Data.Channel, s);
+            foreach (string s in BotMethods.ListToLines(nntpCache.Keys, 350)) {
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, s);
             }
         }
 
@@ -301,10 +276,10 @@ namespace Plugin
             }
             if (posts > 0) {
                 TimeSpan t = (DateTime.Now - LastArticle.Header.Date);
-                bot.SendMessage(SendType.Message, e.Data.Channel, "Poster " + e.Data.MessageArray[1] + " has posted " + posts + " times, in " + groups.Count + " groups and wrote " + lines + " lines of text. Last post: " + IrcConstants.IrcBold + LastArticle.Header.Subject + IrcConstants.IrcBold + " in Board " + LastGroup + " (" + Math.Round(t.TotalHours) + " hours ago)");
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Poster " + e.Data.MessageArray[1] + " has posted " + posts + " times, in " + groups.Count + " groups and wrote " + lines + " lines of text. Last post: " + IrcConstants.IrcBold + LastArticle.Header.Subject + IrcConstants.IrcBold + " in Board " + LastGroup + " (" + Math.Round(t.TotalHours) + " hours ago)");
             }
             else {
-                bot.SendMessage(SendType.Message, e.Data.Channel, "Poster " + e.Data.MessageArray[1] + " not found.");
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Poster " + e.Data.MessageArray[1] + " not found.");
             }
         }
 
@@ -329,7 +304,7 @@ namespace Plugin
                     }
                 }
             }
-            bot.SendMessage(SendType.Message, e.Data.Channel, "In the last 24hours there have been (at least) " + posts + " posts in " + groups.Count + " groups by " + posters.Count + " posters in FMS.");
+            BotMethods.SendMessage(SendType.Message, e.Data.Channel, "In the last 24hours there have been (at least) " + posts + " posts in " + groups.Count + " groups by " + posters.Count + " posters in FMS.");
         }
     }
 }

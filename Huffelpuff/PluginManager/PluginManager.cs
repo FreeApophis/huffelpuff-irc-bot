@@ -11,7 +11,7 @@ using System.Security;
 using System.Security.Permissions;
 using System.Security.Policy;
 
-namespace Huffelpuff.ComplexPlugins
+namespace Huffelpuff.Plugins
 {
 	/// <summary>
 	/// The PluginManager tracks changes to the plugin directory, handles reloading of the plugins,

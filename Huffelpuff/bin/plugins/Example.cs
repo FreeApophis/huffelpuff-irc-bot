@@ -21,45 +21,41 @@ using System;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Runtime.Remoting;
+using System.Runtime.CompilerServices;
 
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
+
 
 namespace Plugin
 {
     /// <summary>
     /// This is a very simple Plugin Example: The Echo Plugin
     /// </summary>
-    public class EchoPlugin : AbstractPlugin
+    public class ExamplePlugin : AbstractPlugin
     {
         
-        public EchoPlugin(IrcBot botInstance) : 
+        public ExamplePlugin(IrcBot botInstance) : 
             base(botInstance) {}
-        
-        public override string Name {
-            get {
-                return Assembly.GetExecutingAssembly().FullName;
-            }
-        }
-        
-        public override void Activate() {
-            BotMethods.AddCommand(new Commandlet("!say", "The command !say <your text>, says whatever text you want it to say", sayHandler, this));
-            base.Activate();
-        }
 
         
+        public override void Activate() {
+            BotMethods.AddCommand(new Commandlet("!example", "The command !example will send a message with Version to the Channel", exampleHandler, this, CommandScope.Public));
+            active = true;
+        }
+
         public override void Deactivate() {
-            BotMethods.RemoveCommand("!say");
-            base.Deactivate();
+            BotMethods.RemoveCommand("!example");
+            active = false;
         }
                 
         public override string AboutHelp() {
-            return "This is a very simple Plugin which repeats the message you said";
+            return "This is a very simple Plugin which gives its version on !example.";
         }
                 
-        private void sayHandler(object sender, IrcEventArgs e) {
-            BotMethods.SendMessage(SendType.Message, e.Data.Channel, e.Data.Message.Substring(5));            
+        private void exampleHandler(object sender, IrcEventArgs e) {
+        	BotMethods.SendMessage(SendType.Message, e.Data.Channel, "This is a dynamically compiled Plugin: " + Assembly.GetExecutingAssembly().FullName);
         }
     }
 }

@@ -56,6 +56,6 @@
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy .\EchoPlugin.* ..\..\Huffelpuff\bin\cplugins /y</PostBuildEvent>
+    <PostBuildEvent>xcopy .\EchoPlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
   </PropertyGroup>
 </Project>

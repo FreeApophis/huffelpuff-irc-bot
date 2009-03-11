@@ -1,6 +1,6 @@
 using System;
 
-namespace Huffelpuff.ComplexPlugins
+namespace Huffelpuff.Plugins
 {
 	/// <summary>
 	/// Determines whether the PluginManager will dynamically load assemblies, dynamically compile them, or

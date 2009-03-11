@@ -13,7 +13,7 @@ using System.Security.Policy;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 
-namespace Huffelpuff.ComplexPlugins
+namespace Huffelpuff.Plugins
 {
 	/// <summary>
 	/// The remote loader loads assumblies into a remote <see cref="AppDomain"/>

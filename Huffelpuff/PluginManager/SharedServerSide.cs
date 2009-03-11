@@ -12,7 +12,7 @@ using System.Runtime.Remoting;
 
 using Meebey.SmartIrc4net;
 
-namespace Huffelpuff.ComplexPlugins  
+namespace Huffelpuff.Plugins  
 {
     /// <summary>
     /// Description of SharedServerSide.

@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 
 using Huffelpuff;
-using Huffelpuff.ComplexPlugins;
+using Huffelpuff.Plugins;
 
 using Meebey.SmartIrc4net;
 

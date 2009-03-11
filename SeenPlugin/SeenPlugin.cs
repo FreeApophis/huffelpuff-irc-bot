@@ -27,7 +27,7 @@ using System.Xml;
 using System.IO;
 
 using Huffelpuff;
-using Huffelpuff.SimplePlugins;
+using Huffelpuff.Plugins;
 
 using Meebey.SmartIrc4net;
 
@@ -36,39 +36,18 @@ namespace Plugin
     /// <summary>
     /// Description of MyClass.
     /// </summary>
-    public class SeenPlugin : IPlugin
+    public class SeenPlugin : AbstractPlugin
     {
-        
-        
-        public string Name {
-            get {
-                return Assembly.GetExecutingAssembly().FullName;
-            }
-        }
-        
-        private bool ready = false;
-        public bool Ready {
-            get {
-                return ready;
-            }
-        }
-        
-        private bool active;
-        public bool Active {
-            get {
-                return active;
-            }
-        }
-        
-        private IrcBot bot;
+        public SeenPlugin(IrcBot botInstance) : base(botInstance) {}        
+
         private DataSet db;
         
         private const string filename = "seen.db";
         private const string seentable = "seen";
         private const string aliastable = "alias";
-        public void Init(IrcBot botInstance)
+        
+        public override void Init()
         {
-            bot = botInstance;
             // Seen: Nick, LastSeenTime, LastAction, LastMessage
             
             FileInfo fi = new FileInfo(filename);
@@ -95,20 +74,19 @@ namespace Plugin
                 db.Tables[aliastable].Columns.Add("Nick", typeof(string));
                 db.Tables[aliastable].Columns.Add("Alias", typeof(string));
             }
-            
-            ready = true;
+            base.Init();
         }
         
-        public void Activate()
+        public override void Activate()
         {
-            bot.AddPublicCommand(new Commandlet("!seen", "The command !seen <nick> tells you when a certain nick was last seen in this channel ", seenCommand, this));
-            bot.OnChannelMessage += new IrcEventHandler(messageHandler);
-            bot.OnNickChange += new NickChangeEventHandler(nickChangeHandler);
-            bot.OnNames += new NamesEventHandler(namesHandler);
-            bot.OnJoin += new JoinEventHandler(joinHandler);
-            bot.OnPart += new PartEventHandler(partHandler);
-            bot.OnQuit += new QuitEventHandler(quitHandler);
-            bot.OnKick += new KickEventHandler(kickHandler);
+            BotMethods.AddCommand(new Commandlet("!seen", "The command !seen <nick> tells you when a certain nick was last seen in this channel ", seenCommand, this));
+            BotEvents.OnChannelMessage += new IrcEventHandler(messageHandler);
+            BotEvents.OnNickChange += new NickChangeEventHandler(nickChangeHandler);
+            BotEvents.OnNames += new NamesEventHandler(namesHandler);
+            BotEvents.OnJoin += new JoinEventHandler(joinHandler);
+            BotEvents.OnPart += new PartEventHandler(partHandler);
+            BotEvents.OnQuit += new QuitEventHandler(quitHandler);
+            BotEvents.OnKick += new KickEventHandler(kickHandler);
             
             foreach(DataRow dr in db.Tables[seentable].Rows) {
                 dr["OnStatus"] = false;
@@ -116,36 +94,30 @@ namespace Plugin
             
             foreach(string channel in PersistentMemory.GetValues("channel"))
             {
-                bot.RfcNames(channel);
+                BotMethods.RfcNames(channel);
             }
-            
-            active = true;
+            base.Activate();
         }
-        
-        public void Deactivate()
+
+        public override void Deactivate()
         {
-            bot.RemovePublicCommand("!seen");
-            bot.OnChannelMessage -= new IrcEventHandler(messageHandler);
-            bot.OnNickChange -= new NickChangeEventHandler(nickChangeHandler);
-            bot.OnNames -= new NamesEventHandler(namesHandler);
-            bot.OnJoin -= new JoinEventHandler(joinHandler);
-            bot.OnPart -= new PartEventHandler(partHandler);
-            bot.OnQuit -= new QuitEventHandler(quitHandler);
-            bot.OnKick -= new KickEventHandler(kickHandler);
+            BotMethods.RemoveCommand("!seen");
+            BotEvents.OnChannelMessage -= new IrcEventHandler(messageHandler);
+            BotEvents.OnNickChange -= new NickChangeEventHandler(nickChangeHandler);
+            BotEvents.OnNames -= new NamesEventHandler(namesHandler);
+            BotEvents.OnJoin -= new JoinEventHandler(joinHandler);
+            BotEvents.OnPart -= new PartEventHandler(partHandler);
+            BotEvents.OnQuit -= new QuitEventHandler(quitHandler);
+            BotEvents.OnKick -= new KickEventHandler(kickHandler);
             
             foreach(DataRow dr in db.Tables[seentable].Rows) {
                 dr["OnStatus"] = false;
             }
-
-            active = false;
+            base.Deactivate();
         }
         
-        public void DeInit()
-        {
-            ready = false;
-        }
         
-        public string AboutHelp()
+        public override string AboutHelp()
         {
             return "This is the basic Last Seen Plugin";
         }
@@ -157,16 +129,16 @@ namespace Plugin
                 DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Data.MessageArray[1] + "'");
                 if(datarows.Length > 0) {
                     if((bool)datarows[0]["OnStatus"]) {
-                        bot.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' is on right now (Last Action: " + datarows[0]["LastAction"] + " (" + datarows[0]["LastSeenTime"] + ") Lastmessage: " + datarows[0]["LastMessage"] + " !seen#: " + datarows[0]["TimesSeen"] + ")");
+                        BotMethods.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' is on right now (Last Action: " + datarows[0]["LastAction"] + " (" + datarows[0]["LastSeenTime"] + ") Lastmessage: " + datarows[0]["LastMessage"] + " !seen#: " + datarows[0]["TimesSeen"] + ")");
                     } else {
-                        bot.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' was last seen at " + datarows[0]["LastSeenTime"] + " (Last Action: " + datarows[0]["LastAction"] + " Lastmessage: " + datarows[0]["LastMessage"] + " !seen#: " + datarows[0]["TimesSeen"] + ")");
+                        BotMethods.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' was last seen at " + datarows[0]["LastSeenTime"] + " (Last Action: " + datarows[0]["LastAction"] + " Lastmessage: " + datarows[0]["LastMessage"] + " !seen#: " + datarows[0]["TimesSeen"] + ")");
                     }
                     datarows[0]["TimesSeen"] = ((int)datarows[0]["TimesSeen"] + 1);
                 } else {
-                    bot.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' was never seen");
+                    BotMethods.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' was never seen");
                 }
             } else {
-                bot.SendMessage(SendType.Notice, destination, "Seen " + db.Tables[seentable].Rows.Count + " unique nicknames. Use !seen <nick> for query.");
+                BotMethods.SendMessage(SendType.Notice, destination, "Seen " + db.Tables[seentable].Rows.Count + " unique nicknames. Use !seen <nick> for query.");
             }
             
             SaveDB();

@@ -14,14 +14,14 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 using System;
 using System.Collections.Generic;
 
 using Huffelpuff;
-using Huffelpuff.SimplePlugins;
+using Huffelpuff.Plugins;
 
 using Meebey.SmartIrc4net;
 
@@ -30,11 +30,10 @@ namespace Plugin
     /// <summary>
     /// Description of MyClass.
     /// </summary>
-    public class UT3GlobalStatsPlugin : IPlugin
+    public class UT3GlobalStatsPlugin : AbstractPlugin
     {
-        
-        
-        private IrcBot bot;
+        public UT3GlobalStatsPlugin(IrcBot botInstance) : base(botInstance) {}
+
         private GameSpyClient gsClient;
         private StorageServer gsStorage;
         
@@ -44,56 +43,41 @@ namespace Plugin
         private const int ut3gameID = 1727;
         private const string statsTable = "PlayerStats_v2";
         
-        public string Name {
+        public override string Name {
             get {
-                return "UT3 Global Player Stats (alpha 1)";
+                return "UT3 Global Player Stats (alpha 2)";
             }
         }
         
-        private bool ready = false;
-        public bool Ready {
-            get {
-                return ready;
-            }
-        }
-        
-        private bool active;
-        public bool Active {
-            get {
-                return active;
-            }
-        }
-        
-        
-        public void Init(IrcBot botInstance)
+        public override void Init()
         {
-            bot = botInstance;
             gsClient = new GameSpyClient();
             gsStorage = new StorageServer();
-            ready = true;
+            base.Init();
         }
         
-        public void Activate()
+        public override void Activate()
         {
-            
-            bot.AddPublicCommand(new Commandlet("!top10", "The !top10 Command shows the UT3 Players with the highest ELO Ranking on Pure Servers", TopTenHandler, this));
-            bot.AddPublicCommand(new Commandlet("!player", "The !player <nick> Command shows Stats about a Certain Player", PlayerHandler, this));
-            active = true;
+            BotMethods.AddCommand(new Commandlet("!top10", "The !top10 Command shows the UT3 Players with the highest ELO Ranking on Pure Servers", TopTenHandler, this));
+            BotMethods.AddCommand(new Commandlet("!player", "The !player <nick> Command shows Stats about a Certain Player", PlayerHandler, this));
+            base.Activate();
         }
         
-        public void Deactivate()
+        public override void Deactivate()
         {
-            bot.RemovePublicCommand("!top10");
-            bot.RemovePublicCommand("!player");
-            active = false;
+            BotMethods.RemoveCommand("!top10");
+            BotMethods.RemoveCommand("!player");
+            base.Deactivate();
         }
         
-        public void DeInit()
+        
+        public override void DeInit()
         {
             gsClient.logOut();
+            base.DeInit();
         }
         
-        public string AboutHelp()
+        public override string AboutHelp()
         {
             return "The UT3 Global Stats Plugin can be used to directly query the Global UT3 Stats from GameSpy";
         }
@@ -144,7 +128,7 @@ namespace Plugin
                     " ELO: " + RecordValueToString(perPlayerValues[2]) +
                     " Kills: " + RecordValueToString(perPlayerValues[3]) +
                     " Deaths: " + RecordValueToString(perPlayerValues[4]);
-                bot.SendMessage(SendType.Message, e.Data.Channel, msg);
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, msg);
                 foreach (RecordValue singleValue in perPlayerValues)
                 {
                 }
@@ -194,7 +178,7 @@ namespace Plugin
                     " ELO: " + RecordValueToString(perPlayerValues[2]) +
                     " Kills: " + RecordValueToString(perPlayerValues[3]) +
                     " Deaths: " + RecordValueToString(perPlayerValues[4]);
-                bot.SendMessage(SendType.Message, e.Data.Channel, msg);
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, msg);
                 foreach (RecordValue singleValue in perPlayerValues)
                 {
                 }

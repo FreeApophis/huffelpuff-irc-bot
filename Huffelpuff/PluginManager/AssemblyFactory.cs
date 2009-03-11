@@ -15,7 +15,7 @@ using System.ComponentModel;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 
-namespace Huffelpuff.ComplexPlugins
+namespace Huffelpuff.Plugins
 {
 	/// <summary>
 	/// Generates an Assembly from a script filename

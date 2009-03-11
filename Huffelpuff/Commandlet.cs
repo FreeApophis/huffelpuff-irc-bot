@@ -20,70 +20,90 @@
 using System;
 
 using Meebey.SmartIrc4net;
-using Huffelpuff.ComplexPlugins;
+using Huffelpuff.Plugins;
 
 namespace Huffelpuff
 {
+    public enum CommandScope {
+        Private,
+        Public,
+        Both
+    }
+    
     /// <summary>
     /// Description of Commandlet.
     /// </summary>
     public class Commandlet : MarshalByRefObject
     {
-        private string _Command;
-        private string _HelpText;
-        private IrcEventHandler _Handler;
-        private string _HandlerName;
-        private object _Owner;
-        private object _ACL;
+        private string command;
+        private string helpText;
+        private IrcEventHandler handler;
+        private string handlerName;
+        private object owner;
+        private CommandScope scope;
+
+        private object acl;
 
         public string Command {
             get {
-                return _Command;
+                return command;
             }
         }
             
         public string HelpText {
             get {
-                return _HelpText;
+                return helpText;
             }
         }
         
         public IrcEventHandler Handler {
             get {
-                return _Handler;
+                return handler;
             }
         }
         
         public string HandlerName {
             get {
-                return _HandlerName;
+                return handlerName;
             }
         }
             
         public object Owner {
             get {
-                return _Owner;
+                return owner;
             }
         }
-            
+
+        public CommandScope Scope {
+            get { 
+                return scope; 
+            }
+        }
+        
         public Commandlet(string command, string helptext, IrcEventHandler handler, object owner) : 
-            this(command, helptext, handler, owner, "*")
+            this(command, helptext, handler, owner, CommandScope.Both)
+        {}
+
+        public Commandlet(string command, string helptext, IrcEventHandler handler, object owner, CommandScope scope) : 
+            this(command, helptext, handler, owner, scope, "*")
         {}
         
-        public Commandlet(string command, string helptext, IrcEventHandler handler, object owner, string channelList)
+        public Commandlet(string command, string helptext, IrcEventHandler handler, object owner, CommandScope scope, string channelList)
         {
-            _Command = command;
-            _HelpText = helptext;
+            this.command = command;
+            this.helpText = helptext;
             
             if (owner is AbstractPlugin) {
-                _Handler = null;
-                _HandlerName = handler.Method.Name;
-                _Owner = owner.GetType().FullName;
+                this.handler = null;
+                this.handlerName = handler.Method.Name;
+                this.owner = owner.GetType().FullName;
             } else {
-                _Handler = handler;
-                _Owner = owner;
+                this.handler = handler;
+                this.owner = owner;
             }
-            _ACL = null;
+            
+            this.scope = scope;
+            this.acl = null;
         }
         
         public override object InitializeLifetimeService()

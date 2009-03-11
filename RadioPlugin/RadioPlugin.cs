@@ -27,7 +27,7 @@ using System.Net.Sockets;
 using System.Collections.Generic;
 
 using Huffelpuff;
-using Huffelpuff.SimplePlugins;
+using Huffelpuff.Plugins;
 
 using Meebey.SmartIrc4net;
 
@@ -36,8 +36,10 @@ using MySql.Data.MySqlClient;
 
 namespace Plugin
 {
-    class RadioPlugin : IPlugin
+    class RadioPlugin : AbstractPlugin
     {
+        public RadioPlugin(IrcBot botInstance) : base(botInstance) {}
+        
         private static string[] GenreArray = {
             "Blues", "Classic Rock", "Country", "Dance", "Disco", "Funk", "Grunge", "Hip-Hop", "Jazz", "Metal",
             "New Age", "Oldies", "Other", "Pop", "R&B", "Rap", "Reggae", "Rock", "Techno", "Industrial",
@@ -198,32 +200,11 @@ namespace Plugin
         private Dictionary<int, Track> Tracks;
 
         
-        public string Name {
-            get {
-                return Assembly.GetExecutingAssembly().FullName;
-            }
-        }
-        
-        private bool ready = false;
-        public bool Ready {
-            get {
-                return ready;
-            }
-        }
-        
-        private bool active = false;
-        
-        public bool Active {
-            get {
-                return active;
-            }
-        }
         
         private MySqlConnection connection = new MySqlConnection(PersistentMemory.GetValue("MySQLConnection"));
-        private IrcBot bot;
-        public void Init(IrcBot botInstance)
+
+        public override void Init()
         {
-            bot = botInstance;
             if (PersistentMemory.GetValue("MySQLConnection") == null) {
                 return;
             }
@@ -329,7 +310,7 @@ namespace Plugin
 
             scheduler.Elapsed += new ElapsedEventHandler(mainScheduler);
 
-            ready = true;
+            base.Init();
         }
         
         private string GetPath(int albumID)
@@ -355,26 +336,23 @@ namespace Plugin
         }
         
         private Timer scheduler = new Timer(22200);
-        public void Activate()
+        
+        public override void Activate()
         {
             scheduler.Enabled = true;
-            active = true;
-            bot.AddPublicCommand(new Commandlet("!request", "With !request <Song|Album|Artist> [Greetings] you can request a Song to be played on the Radio", HandleRequest, this));
+            BotMethods.AddCommand(new Commandlet("!request", "With !request <Song|Album|Artist> [Greetings] you can request a Song to be played on the Radio", HandleRequest, this));
+            base.Activate();
         }
 
-        
-        public void Deactivate()
+        public override void Deactivate()
         {
-            scheduler.Enabled = false;
-            active = false;
+            scheduler.Enabled = true;
+            BotMethods.RemoveCommand("!request");
+            base.Deactivate();
         }
-
-        public void DeInit()
-        {
-            ready = false;
-        }         
         
-        public string AboutHelp()
+        
+        public override string AboutHelp()
         {
             return "The Plugin which brings Jamendo to your radio!";
         }
@@ -422,15 +400,15 @@ namespace Plugin
                     Track song = scheduledSongs[currentSong];
                     
                     //bot.SendMessage
-                    bot.SendMessage(SendType.Message, "Apophis", "SONG PLAYING: " + song.name + "(" + song.album.name + " by " + song.album.artist.name + ") Rating: " + song.rating + " Genre:" + song.Genre);
+                    BotMethods.SendMessage(SendType.Message, "Apophis", "SONG PLAYING: " + song.name + "(" + song.album.name + " by " + song.album.artist.name + ") Rating: " + song.rating + " Genre:" + song.Genre);
                     string s = "";
                     foreach(Tag tag in song.tags) {
                         s =  tag.tagIdstr + " [" + tag.weight + "] | ";
                     }
-                    bot.SendMessage(SendType.Message, "Apophis", "Released:" + song.album.releasedate + "Tags: " + s);
-                    bot.SendMessage(SendType.Message, "Apophis", "License: " + song.license);
-                    bot.SendMessage(SendType.Message, "Apophis", "Cover: http://imgjam.com/albums/" + song.albumID + "/covers/1.300.jpg licensed as: "  + song.album.license_artwork);
-                    bot.SendMessage(SendType.Message, "Apophis", "Artist: " + song.album.artist.image + " From: " + song.album.artist.city + "/" + song.album.artist.state + "/" + song.album.artist.country);
+                    BotMethods.SendMessage(SendType.Message, "Apophis", "Released:" + song.album.releasedate + "Tags: " + s);
+                    BotMethods.SendMessage(SendType.Message, "Apophis", "License: " + song.license);
+                    BotMethods.SendMessage(SendType.Message, "Apophis", "Cover: http://imgjam.com/albums/" + song.albumID + "/covers/1.300.jpg licensed as: "  + song.album.license_artwork);
+                    BotMethods.SendMessage(SendType.Message, "Apophis", "Artist: " + song.album.artist.image + " From: " + song.album.artist.city + "/" + song.album.artist.state + "/" + song.album.artist.country);
                     
                 }
                 lastLiqID = currentSong;

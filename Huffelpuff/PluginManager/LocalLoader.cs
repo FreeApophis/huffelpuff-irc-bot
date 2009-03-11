@@ -11,7 +11,7 @@ using System.Security;
 using System.Security.Permissions;
 using System.Security.Policy;
 
-namespace Huffelpuff.ComplexPlugins
+namespace Huffelpuff.Plugins
 {
     /// <summary>
     /// Local loader class
@@ -44,7 +44,7 @@ namespace Huffelpuff.ComplexPlugins
             
             remoteLoader = (RemoteLoader)appDomain.CreateInstanceAndUnwrap(
                 "Huffelpuff",
-                "Huffelpuff.ComplexPlugins.RemoteLoader");
+                "Huffelpuff.Plugins.RemoteLoader");
         }
 
         void appDomain_UnhandledException(object sender, UnhandledExceptionEventArgs ex)

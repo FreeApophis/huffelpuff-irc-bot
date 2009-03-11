@@ -53,21 +53,18 @@
     <Compile Include="AccessControl\NickServIdentify.cs" />
     <Compile Include="AccessControl\PasswordIdentify.cs" />
     <Compile Include="Commandlet.cs" />
-    <Compile Include="ComplexPlugins\ComplexPluginManager.cs" />
+    <Compile Include="PluginManager\ComplexPluginManager.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="IrcBot.cs" />
     <Compile Include="PersistentMemory.cs" />
-    <Compile Include="ComplexPlugins\AbstractPlugin.cs" />
-    <Compile Include="ComplexPlugins\AssemblyFactory.cs" />
-    <Compile Include="ComplexPlugins\LocalLoader.cs" />
-    <Compile Include="ComplexPlugins\PluginManager.cs" />
-    <Compile Include="ComplexPlugins\PluginSourceEnum.cs" />
-    <Compile Include="ComplexPlugins\RemoteLoader.cs" />
-    <Compile Include="ComplexPlugins\SharedClientSide.cs" />
-    <Compile Include="ComplexPlugins\SharedServerSide.cs" />
-    <Compile Include="SimplePlugins\IAccessPlugin.cs" />
-    <Compile Include="SimplePlugins\IPlugin.cs" />
-    <Compile Include="SimplePlugins\SimplePluginManager.cs" />
+    <Compile Include="PluginManager\AbstractPlugin.cs" />
+    <Compile Include="PluginManager\AssemblyFactory.cs" />
+    <Compile Include="PluginManager\LocalLoader.cs" />
+    <Compile Include="PluginManager\PluginManager.cs" />
+    <Compile Include="PluginManager\PluginSourceEnum.cs" />
+    <Compile Include="PluginManager\RemoteLoader.cs" />
+    <Compile Include="PluginManager\SharedClientSide.cs" />
+    <Compile Include="PluginManager\SharedServerSide.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools.cs" />
   </ItemGroup>
@@ -78,7 +75,6 @@
     </ProjectReference>
     <Folder Include="AccessControl" />
     <Folder Include="Properties" />
-    <Folder Include="ComplexPlugins" />
-    <Folder Include="SimplePlugins" />
+    <Folder Include="PluginManager" />
   </ItemGroup>
 </Project>

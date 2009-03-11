@@ -56,7 +56,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy .\TranslatePlugin.* ..\..\Huffelpuff\bin\cplugins /y</PostBuildEvent>
+    <PostBuildEvent>xcopy .\TranslatePlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Huffelpuff\Huffelpuff.csproj">

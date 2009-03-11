@@ -65,6 +65,6 @@
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy .\RssPlugin.* ..\..\Huffelpuff\bin\cplugins /y</PostBuildEvent>
+    <PostBuildEvent>xcopy .\RssPlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
   </PropertyGroup>
 </Project>

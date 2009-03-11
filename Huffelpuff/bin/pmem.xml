@@ -133,11 +133,16 @@
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>plugin</baseKey>
-    <baseValue>Plugin.RssPlugin</baseValue>
+    <baseValue>Plugin.SeenPlugin</baseValue>
   </baseTBL>
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>plugin</baseKey>
-    <baseValue>Plugin.RssPlugin</baseValue>
+    <baseValue>Plugin.TranslatePlugin</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>channel</baseKey>
+    <baseValue>#freenet-chat</baseValue>
   </baseTBL>
 </NewDataSet>

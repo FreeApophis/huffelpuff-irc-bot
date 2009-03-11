@@ -22,7 +22,7 @@ using System;
 using System.Collections.Generic;
 
 using Huffelpuff;
-using Huffelpuff.SimplePlugins;
+using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
 using AIMLbot;
 
@@ -31,98 +31,68 @@ namespace Plugin
     /// <summary>
     /// Description of MyClass.
     /// </summary>
-    public class AIMLPlugin : IPlugin
+    public class AIMLPlugin : AbstractPlugin
     {
+        public AIMLPlugin(IrcBot botInstance) : base(botInstance) {}
         
-        
-        public string Name {
-            get {
-                return "Artificial Intelligence Markup Language Plugin";
+        public override string Name {
+            get { 
+                return "Artificial Intelligence Markup Language Plugin"; 
             }
-        }
-        
-        private IrcBot bot = null;
-        private bool ready = false;
-        public bool Ready {
-            get {
-                return ready;
-            }
-        }
-        
-        private bool active = false;    
-        public bool Active {
-            get {
-                return active;
-            }
-        }        
+        }           
 
-        Bot myBot;
+        Bot myAimlBot;
         Dictionary<string, User> myUsers = new Dictionary<string, User>();
         
-        public void Init(IrcBot botInstance)
+        public override void Init()
         {
-            bot = botInstance;
+            myAimlBot = new Bot();
+            myAimlBot.loadSettings();
+            myAimlBot.isAcceptingUserInput = false;
+            myAimlBot.loadAIMLFromFiles();
+            myAimlBot.isAcceptingUserInput = true;
             
-            myBot = new Bot();
-            myBot.loadSettings();
-            myBot.isAcceptingUserInput = false;
-            myBot.loadAIMLFromFiles();
-            myBot.isAcceptingUserInput = true;
-            
-            ready = true;
+            base.Init();
         }
         
-        public void Activate()
+        public override void Activate()
         {
-            bot.OnChannelMessage += new IrcEventHandler(messageHandler);
-            active = true;
+            BotEvents.OnChannelMessage += new IrcEventHandler(messageHandler);
+            base.Activate();
         }
         
-        public void Deactivate()
+        public override  void Deactivate()
         {
-            bot.OnChannelMessage -= new IrcEventHandler(messageHandler);
-            active = false;
+            BotEvents.OnChannelMessage -= new IrcEventHandler(messageHandler);
+            base.Deactivate();
         }
-        
-        public void DeInit()
-        {
-            ready = false;
-        }        
-        
-        public string AboutHelp()
+                
+        public override  string AboutHelp()
         {
             return "Artificial Intelligence Markup Language Plugin";
         }
-        
-        public List<KeyValuePair<string, string>> Commands()
-        {
-            return new List<KeyValuePair<string, string>>();
-        }
-        
+                
         private void messageHandler(object sender, IrcEventArgs e) {
-            
-            
             string msg;
-            if(e.Data.Message.ToLower().Contains(bot.Nickname.ToLower()))
+            if(e.Data.Message.ToLower().Contains(BotMethods.Nickname.ToLower()))
             {
-                if (e.Data.Message.ToLower().Trim().StartsWith(bot.Nickname.ToLower()))
-                    msg = e.Data.Message.Trim().Substring(bot.Nickname.Length+1);
+                if (e.Data.Message.ToLower().Trim().StartsWith(BotMethods.Nickname.ToLower()))
+                    msg = e.Data.Message.Trim().Substring(BotMethods.Nickname.Length+1);
                 else 
                     msg = e.Data.Message.Trim();
                 User myUser = null;
                 if (myUsers.ContainsKey(e.Data.Nick)) {
                     myUser = myUsers[e.Data.Nick];
                 } else {
-                    myUser = new User(e.Data.Nick, myBot);
+                    myUser = new User(e.Data.Nick, myAimlBot);
                     myUser.Predicates.addSetting("name", e.Data.Nick);
                     
                     myUsers.Add(e.Data.Nick, myUser);
                 }
-                Request r = new Request(msg, myUser, myBot);
-                Result res = myBot.Chat(r);
-                bot.SendMessage(SendType.Message, e.Data.Channel, res.Output);
+                Request r = new Request(msg, myUser, myAimlBot);
+                Result res = myAimlBot.Chat(r);
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, res.Output);
             }
         }
     }
-
 }

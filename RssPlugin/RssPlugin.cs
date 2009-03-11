@@ -23,7 +23,7 @@ using System.Timers;
 using System.Collections.Generic;
 
 using Huffelpuff;
-using Huffelpuff.ComplexPlugins;
+using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
 
 namespace Plugin
@@ -68,7 +68,7 @@ namespace Plugin
         
         public override void Activate()
         {
-            BotMethods.AddPublicCommand(new Commandlet("!rss", "With the command !rss you'll get a list of the bots configured RSS feed.", showRss, this));
+            BotMethods.AddCommand(new Commandlet("!rss", "With the command !rss you'll get a list of the bots configured RSS feed.", showRss, this));
             checkInterval.Enabled = true;
             
             base.Activate();
@@ -76,7 +76,7 @@ namespace Plugin
         
         public override void Deactivate()
         {
-            BotMethods.RemovePublicCommand("!rss");
+            BotMethods.RemoveCommand("!rss");
             
             base.Deactivate();
         }
