@@ -69,5 +69,6 @@
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy .\RadioPlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
+    <PreBuildEvent>xcopy ..\MySql.Data.dll ..\..\Huffelpuff\bin /y</PreBuildEvent>
   </PropertyGroup>
 </Project>
