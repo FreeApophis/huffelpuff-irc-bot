@@ -2,29 +2,29 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 # SharpDevelop 3.0.0.3437
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartIrc4net", "SmartIrc4net.csproj", "{5E33EE9C-DEA5-4593-B812-C51D59D0CBE1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartIrc4net", "SmartIrc4net\SmartIrc4net.csproj", "{5E33EE9C-DEA5-4593-B812-C51D59D0CBE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Huffelpuff", "..\Huffelpuff\Huffelpuff.csproj", "{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Huffelpuff", "Huffelpuff\Huffelpuff.csproj", "{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoPlugin", "..\EchoPlugin\EchoPlugin.csproj", "{DD1D95FD-3E44-4651-877F-DA5DC41A334B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoPlugin", "EchoPlugin\EchoPlugin.csproj", "{DD1D95FD-3E44-4651-877F-DA5DC41A334B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeenPlugin", "..\SeenPlugin\SeenPlugin.csproj", "{FFFA980F-D17E-43DD-AC3D-A989EDBC680A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeenPlugin", "SeenPlugin\SeenPlugin.csproj", "{FFFA980F-D17E-43DD-AC3D-A989EDBC680A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilePlugin", "..\FilePlugin\FilePlugin.csproj", "{D6454C93-D557-45B4-A26E-CA1B55D47AAD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilePlugin", "FilePlugin\FilePlugin.csproj", "{D6454C93-D557-45B4-A26E-CA1B55D47AAD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NntpPlugin", "..\NntpPlugin\NntpPlugin.csproj", "{CEB01EC1-0AD7-4E6E-95A0-E755233F37E4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NntpPlugin", "NntpPlugin\NntpPlugin.csproj", "{CEB01EC1-0AD7-4E6E-95A0-E755233F37E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioPlugin", "..\RadioPlugin\RadioPlugin.csproj", "{D50FF217-DA4C-4E0B-848C-47DD70D2CD5B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioPlugin", "RadioPlugin\RadioPlugin.csproj", "{D50FF217-DA4C-4E0B-848C-47DD70D2CD5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIMLPlugin", "..\AIMLPlugin\AIMLPlugin.csproj", "{F662345E-3D7E-4AA9-BDE9-51026A2858FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIMLPlugin", "AIMLPlugin\AIMLPlugin.csproj", "{F662345E-3D7E-4AA9-BDE9-51026A2858FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UT3GlobalStatsPlugin", "..\UT3GlobalStatsPlugin\UT3GlobalStatsPlugin.csproj", "{85D3984F-6945-482D-BAF4-1B27E87A5BB1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UT3GlobalStatsPlugin", "UT3GlobalStatsPlugin\UT3GlobalStatsPlugin.csproj", "{85D3984F-6945-482D-BAF4-1B27E87A5BB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuizPlugin", "..\QuizPlugin\QuizPlugin.csproj", "{B132AE6E-0D60-4EE8-9202-84106BA64C84}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuizPlugin", "QuizPlugin\QuizPlugin.csproj", "{B132AE6E-0D60-4EE8-9202-84106BA64C84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RssPlugin", "..\RssPlugin\RssPlugin.csproj", "{88C2E8CA-5B17-44C5-AA7D-69ED7A9194A0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RssPlugin", "RssPlugin\RssPlugin.csproj", "{88C2E8CA-5B17-44C5-AA7D-69ED7A9194A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TranslatePlugin", "..\TranslatePlugin\TranslatePlugin.csproj", "{0E45CCBE-BF42-46A8-9B91-ADA4F1620FF6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TranslatePlugin", "TranslatePlugin\TranslatePlugin.csproj", "{0E45CCBE-BF42-46A8-9B91-ADA4F1620FF6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
