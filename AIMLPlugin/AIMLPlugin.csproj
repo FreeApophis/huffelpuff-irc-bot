@@ -125,5 +125,6 @@
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy .\AIMLPlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
+    <PreBuildEvent>xcopy ..\AIMLexample\* ..\..\Huffelpuff\bin /y /s</PreBuildEvent>
   </PropertyGroup>
 </Project>
