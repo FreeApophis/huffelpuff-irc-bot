@@ -18,6 +18,7 @@
  */
  
 using System;
+using Meebey.SmartIrc4net;
 
 namespace Huffelpuff
 {
@@ -26,21 +27,19 @@ namespace Huffelpuff
     /// </summary>
     public class PasswordIdentify : IdentifyUser
     {
-        public PasswordIdentify(IrcBot bot) : base(bot) { }
+        public PasswordIdentify(IrcBot bot) : base(bot) { 
+            bot.AddCommand(new Commandlet("!identify", "You can identify your nick with the !identify <pass> command", passHandler, this, CommandScope.Both));
+            
+        }
         
         public override bool Identified(string nick)
         {
             return base.Identified(nick);
         }
         
-        public override string IdentifyString(string nick)
-        {
-            return "/pass/" + nick;
+        public void passHandler(object sender, IrcEventArgs e) {
+            
         }
         
-        public override string UserNotIdentifiedHelp(string nick)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

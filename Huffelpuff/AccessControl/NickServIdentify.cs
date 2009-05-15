@@ -28,21 +28,10 @@ namespace Huffelpuff
     {
 
         public NickServIdentify(IrcBot bot) : base(bot) { }
-        
-        public override string IdentifyString(string nick) {
-               return "/nickserv/" + nick;
-        }
-        
-        
+
         public override bool Identified(string nick)
         {
             return base.Identified(nick);
         }
-        
-        public override string UserNotIdentifiedHelp(string nick)
-        {
-            return "You would have the rights for this command if your nick would be identified";
-        }
-        
     }
 }

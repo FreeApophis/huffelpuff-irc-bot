@@ -26,18 +26,14 @@ namespace Huffelpuff
     /// </summary>
     public abstract class IdentifyUser
     {
-        private IrcBot bot;
+        protected IrcBot bot;
         
         public IdentifyUser(IrcBot bot) {
             this.bot = bot;
         }
         
-        public abstract string IdentifyString(string nick);
-        
         public virtual bool Identified(string nick) {
                 return false;
         }
-        
-        public abstract string UserNotIdentifiedHelp(string nick);
     }
 }

@@ -29,18 +29,8 @@ namespace Huffelpuff
         public HostIdentify(IrcBot bot) : base(bot) { }
         
         public override bool Identified(string nick)
-        {
+        {            
             return base.Identified(nick);
-        }
-        
-        public override string IdentifyString(string nick)
-        {
-            throw new NotImplementedException();
-        }
-        
-        public override string UserNotIdentifiedHelp(string nick)
-        {
-            throw new NotImplementedException();
         }
     }
 }
