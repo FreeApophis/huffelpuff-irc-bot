@@ -6,7 +6,7 @@ using System.Net;
 using System.Xml;
 using System.IO;
 
-namespace UPnP
+namespace Huffelpuff.UPnP
 {
 	public class NAT
 	{
@@ -91,13 +91,13 @@ namespace UPnP
 			return resp.Substring(0, n) + p;
 		}
 
-		public static void ForwardPort(int port, ProtocolType protocol, string description)
+		public static void ForwardPort(int externalPort,int internalPort, ProtocolType protocol, IPAddress localIP, string description)
 		{
 			if (string.IsNullOrEmpty(_serviceUrl))
 				throw new Exception("No UPnP service available or Discover() has not been called");
 			XmlDocument xdoc = SOAPRequest(_serviceUrl, "<u:AddPortMapping xmlns:u=\"urn:schemas-upnp-org:service:WANIPConnection:1\">" +
-			                               "<NewRemoteHost></NewRemoteHost><NewExternalPort>" + port.ToString() + "</NewExternalPort><NewProtocol>" + protocol.ToString().ToUpper() + "</NewProtocol>" +
-			                               "<NewInternalPort>" + port.ToString() + "</NewInternalPort><NewInternalClient>" + Dns.GetHostAddresses(Dns.GetHostName())[0].ToString() +
+			                               "<NewRemoteHost></NewRemoteHost><NewExternalPort>" + externalPort.ToString() + "</NewExternalPort><NewProtocol>" + protocol.ToString().ToUpper() + "</NewProtocol>" +
+			                               "<NewInternalPort>" + internalPort.ToString() + "</NewInternalPort><NewInternalClient>" + localIP.ToString() +
 			                               "</NewInternalClient><NewEnabled>1</NewEnabled><NewPortMappingDescription>" + description +
 			                               "</NewPortMappingDescription><NewLeaseDuration>0</NewLeaseDuration></u:AddPortMapping>", "AddPortMapping");
 		}

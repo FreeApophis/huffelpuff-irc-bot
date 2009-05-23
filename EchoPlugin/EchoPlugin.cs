@@ -1,5 +1,5 @@
 /*
- *  <one line to give the program's name and a brief idea of what it does.>
+ *  This is an example Plugin, you can use it as a base for your own plugins.
  * 
  *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
  *

@@ -71,10 +71,6 @@
       <Project>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</Project>
       <Name>Huffelpuff</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SmartIrc4net\SmartIrc4net.csproj">
-      <Project>{5E33EE9C-DEA5-4593-B812-C51D59D0CBE1}</Project>
-      <Name>SmartIrc4net</Name>
-    </ProjectReference>
     <WebReferences Include="Web References\" />
     <WebReferenceUrl Include="http://ut3pc.sake.gamespy.com/SakeStorageServer/StorageServer.asmx">
       <UrlBehavior>Static</UrlBehavior>

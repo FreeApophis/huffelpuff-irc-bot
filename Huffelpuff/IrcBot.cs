@@ -8,18 +8,13 @@
  */
 
 using System;
-using System.Net;
-using System.Threading;
-using System.Reflection;
 using System.Collections.Generic;
+using System.Net;
+using System.Reflection;
+using System.Threading;
 
-using System.Runtime.Remoting;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-
-
-using Meebey.SmartIrc4net;
 using Huffelpuff.Plugins;
+using Meebey.SmartIrc4net;
 
 namespace Huffelpuff
 {
@@ -33,6 +28,12 @@ namespace Huffelpuff
         
         private AccessControlList acl;
         private Dictionary<string, Commandlet>  commands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
+        
+        private bool uPnPSupport;
+        
+        public bool UPnPSupport {
+            get { return uPnPSupport; }
+        }
 
         public IrcBot()
         {
@@ -52,10 +53,14 @@ namespace Huffelpuff
             this.CtcpUrl = "http://huffelpuff-irc-bot.origo.ethz.ch/";
             this.CtcpSource = "https://svn.origo.ethz.ch/huffelpuff-irc-bot/";
 
-            if (PersistentMemory.GetValue("external_ip")!=null)
-                this.ExternalIpAdress = System.Net.IPAddress.Parse(PersistentMemory.GetValue("external_ip"));
-            else
-                this.ExternalIpAdress = System.Net.IPAddress.Parse("127.0.0.1");
+            // DCC Setup
+            this.uPnPSupport = UPnP.NAT.Discover();
+            this.ExternalIpAdress = Tools.TryGetExternalIP();
+            if(Tools.LocalIP != null) {
+                Console.WriteLine("Int IP : " + Tools.LocalIP);
+            }
+            Console.WriteLine("Ext IP : " + this.ExternalIpAdress);
+
             
             // Plugin needs the Handlers from IRC we load the plugins after we set everything up
             plugManager = new BotPluginManager(this, "plugins");
@@ -63,6 +68,7 @@ namespace Huffelpuff
             //Setting up Access Control
             acl = new AccessControlList(this);
             acl.Init();
+            
             // Add Identify Plugin suitable (or all)
             acl.AddIdentifyPlugin(new NickServIdentify(this));
             acl.AddIdentifyPlugin(new HostIdentify(this));
@@ -77,6 +83,7 @@ namespace Huffelpuff
             this.AddCommand(new Commandlet("!deactivate", "The command !deactivate <plugin> deactivates the Plugin <plugin>", this.DeactivateCommand, this, CommandScope.Both, "engine_deactivate"));
 
         }
+
         
         internal void CleanPlugins()
         {
@@ -105,8 +112,7 @@ namespace Huffelpuff
         public bool AddCommand(Commandlet cmd) {
             if (cmd.AccessString != null)
                 this.acl.AddAccessString(cmd.AccessString);
-            if(!commands.ContainsKey(cmd.Command))
-            {
+            if(!commands.ContainsKey(cmd.Command)) {
                 commands.Add(cmd.Command, cmd);
                 return true;
             }
@@ -134,8 +140,11 @@ namespace Huffelpuff
                 if((pub && (commands[e.Data.MessageArray[0]].Scope == CommandScope.Private)) ||
                    ((!pub) && (commands[e.Data.MessageArray[0]].Scope == CommandScope.Public)))
                     return;
-                if(!string.IsNullOrEmpty(commands[e.Data.MessageArray[0]].AccessString) && !this.acl.Access(e.Data.Nick, commands[e.Data.MessageArray[0]].AccessString))
-                    return;
+                
+                // check if access to function is allowed
+                //if(!string.IsNullOrEmpty(commands[e.Data.MessageArray[0]].AccessString) && !this.acl.Access(e.Data.Nick, commands[e.Data.MessageArray[0]].AccessString))
+                //    return;
+                
                 if((commands[e.Data.MessageArray[0]].ChannelList != null) && (!commands[e.Data.MessageArray[0]].ChannelList.Contains(e.Data.Channel)))
                     return;
                 
@@ -395,7 +404,6 @@ namespace Huffelpuff
                 // here we logon and register our nickname and so on
                 this.Login(PersistentMemory.GetValue("nick"), PersistentMemory.GetValue("realname"), 4, PersistentMemory.GetValue("username"), PersistentMemory.GetValue("serverpass"));
                 
-                this.RfcList("#freenet");
                 // join the channels
                 foreach(string channel in PersistentMemory.GetValues("channel"))
                 {

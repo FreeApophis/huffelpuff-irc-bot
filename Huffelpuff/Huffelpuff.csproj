@@ -53,10 +53,40 @@
     <Compile Include="AccessControl\NickServIdentify.cs" />
     <Compile Include="AccessControl\PasswordIdentify.cs" />
     <Compile Include="Commandlet.cs" />
+    <Compile Include="IrcCore\Consts.cs" />
+    <Compile Include="IrcCore\EventArgs.cs" />
+    <Compile Include="IrcCore\Exceptions.cs" />
+    <Compile Include="IrcCore\IrcClient\BanInfo.cs" />
+    <Compile Include="IrcCore\IrcClient\Channel.cs" />
+    <Compile Include="IrcCore\IrcClient\ChannelInfo.cs" />
+    <Compile Include="IrcCore\IrcClient\ChannelUser.cs" />
+    <Compile Include="IrcCore\IrcClient\Delegates.cs" />
+    <Compile Include="IrcCore\IrcClient\EventArgs.cs" />
+    <Compile Include="IrcCore\IrcClient\IrcClient.cs" />
+    <Compile Include="IrcCore\IrcClient\IrcMessageData.cs" />
+    <Compile Include="IrcCore\IrcClient\IrcUser.cs" />
+    <Compile Include="IrcCore\IrcClient\NonRfcChannel.cs" />
+    <Compile Include="IrcCore\IrcClient\NonRfcChannelUser.cs" />
+    <Compile Include="IrcCore\IrcClient\ServerProperties.cs" />
+    <Compile Include="IrcCore\IrcClient\WhoInfo.cs" />
+    <Compile Include="IrcCore\IrcCommands\IrcCommands.cs" />
+    <Compile Include="IrcCore\IrcCommands\Rfc2812.cs" />
+    <Compile Include="IrcCore\IrcConnection\Delegates.cs" />
+    <Compile Include="IrcCore\IrcConnection\EventArgs.cs" />
+    <Compile Include="IrcCore\IrcConnection\IrcConnection.cs" />
+    <Compile Include="IrcCore\IrcConnection\IrcProperties.cs" />
+    <Compile Include="IrcCore\IrcConnection\IrcTcpClient.cs" />
+    <Compile Include="IrcCore\IrcFeatures\DccChat.cs" />
+    <Compile Include="IrcCore\IrcFeatures\DccConnection.cs" />
+    <Compile Include="IrcCore\IrcFeatures\DccSend.cs" />
+    <Compile Include="IrcCore\IrcFeatures\Delegates.cs" />
+    <Compile Include="IrcCore\IrcFeatures\EventArgs.cs" />
+    <Compile Include="IrcCore\IrcFeatures\IrcConstants.cs" />
+    <Compile Include="IrcCore\IrcFeatures\IrcFeatures.cs" />
+    <Compile Include="IrcCore\Logger.cs" />
     <Compile Include="PluginManager\BotPluginManager.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="IrcBot.cs" />
-    <Compile Include="PersistentMemory.cs" />
     <Compile Include="PluginManager\AbstractPlugin.cs" />
     <Compile Include="PluginManager\AssemblyFactory.cs" />
     <Compile Include="PluginManager\LocalLoader.cs" />
@@ -66,15 +96,27 @@
     <Compile Include="PluginManager\SharedClientSide.cs" />
     <Compile Include="PluginManager\SharedServerSide.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SocksProxy\AuthMethod.cs" />
+    <Compile Include="SocksProxy\AuthNone.cs" />
+    <Compile Include="SocksProxy\AuthUserPass.cs" />
+    <Compile Include="SocksProxy\IAsyncProxyResult.cs" />
+    <Compile Include="SocksProxy\ProxyException.cs" />
+    <Compile Include="SocksProxy\ProxySocket.cs" />
+    <Compile Include="SocksProxy\Socks4Handler.cs" />
+    <Compile Include="SocksProxy\Socks5Handler.cs" />
+    <Compile Include="SocksProxy\SocksHandler.cs" />
+    <Compile Include="Tools\PersistentMemory.cs" />
     <Compile Include="Tools\Tools.cs" />
     <Compile Include="Tools\UPnP.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SmartIrc4net\SmartIrc4net.csproj">
-      <Project>{5E33EE9C-DEA5-4593-B812-C51D59D0CBE1}</Project>
-      <Name>SmartIrc4net</Name>
-    </ProjectReference>
     <Folder Include="AccessControl" />
+    <Folder Include="IrcCore" />
+    <Folder Include="IrcCore\IrcClient" />
+    <Folder Include="IrcCore\IrcCommands" />
+    <Folder Include="IrcCore\IrcConnection" />
+    <Folder Include="IrcCore\IrcFeatures" />
+    <Folder Include="SocksProxy" />
     <Folder Include="Tools" />
     <Folder Include="Properties" />
     <Folder Include="PluginManager" />

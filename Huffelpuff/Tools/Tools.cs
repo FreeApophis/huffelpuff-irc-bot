@@ -14,46 +14,141 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 using System;
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using Huffelpuff;
 
 namespace Huffelpuff
 {
-	/// <summary>
-	/// Description of Tools.
-	/// </summary>
-	public class Tools
-	{
-		public static bool RunOnMono() {
-    		Type t = Type.GetType ("Mono.Runtime");
-           	if (t != null)
-            		Console.WriteLine ("Runtime: Mono VM v" + System.Environment.Version);
-       		else
-           		Console.WriteLine ("Runtime: (unkown) MS.NET? v" + System.Environment.Version);
-       		       		
-       		Console.WriteLine("OS     : " + System.Environment.OSVersion.VersionString);
-       		Console.WriteLine("CWD    : " + System.Environment.CurrentDirectory);
-       		Console.WriteLine("Machine: " + System.Environment.MachineName);
-       		Console.WriteLine("CPUs   : " + System.Environment.ProcessorCount);
-       		Console.WriteLine("User   : " + System.Environment.UserName);
-       		
-       		return (t != null);
-       		
-		}
-		
-		public static IPAddress[] getMyIPs()
-		{
-		    
-			IPHostEntry IPHost = Dns.GetHostEntry(Dns.GetHostName());		
-			foreach(IPAddress addr in IPHost.AddressList) {
-				Console.WriteLine(addr.ToString());
-			}
-			return IPHost.AddressList;
-		}
+    /// <summary>
+    /// Description of Tools.
+    /// </summary>
+    public class Tools
+    {
+        public static bool RunOnMono() {
+            Type t = Type.GetType ("Mono.Runtime");
+            if (t != null)
+                Console.WriteLine ("Runtime: Mono VM v" + System.Environment.Version);
+            else
+                Console.WriteLine ("Runtime: (unkown) MS.NET? v" + System.Environment.Version);
+            
+            Console.WriteLine("OS     : " + System.Environment.OSVersion.VersionString);
+            Console.WriteLine("CWD    : " + System.Environment.CurrentDirectory);
+            Console.WriteLine("Machine: " + System.Environment.MachineName);
+            Console.WriteLine("CPUs   : " + System.Environment.ProcessorCount);
+            Console.WriteLine("User   : " + System.Environment.UserName);
+            
+            return (t != null);
+            
+        }
+        
+        private static IPAddress localIP;
+        
+        public static IPAddress LocalIP {
+            get { return localIP; }
+        }
+        
+        public static IPAddress TryGetExternalIP()
+        {
+            if (PersistentMemory.GetValue("external_ip") != null) {
+                
+                // external IP in settings overides any self detection
+                return System.Net.IPAddress.Parse(PersistentMemory.GetValue("external_ip"));
+            } else {
+                IPAddress currentBest = null;
+                NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
+                foreach(NetworkInterface adapter in  nics)
+                {
+                    if(adapter.OperationalStatus != OperationalStatus.Up) {
+                        continue;
+                    }
+                    
+                    IPInterfaceProperties prop = adapter.GetIPProperties();
+                    foreach(IPAddressInformation ip in prop.UnicastAddresses)
+                    {
+                        if(ip.Address.AddressFamily != AddressFamily.InterNetwork) {
+                            continue;
+                        }
+                        
+                        if(!IsLocalHostIP(ip.Address)) {
+                            if (currentBest == null) {
+                                currentBest = ip.Address;
+                            } else if (!IsLocalIP(ip.Address)) {
+                                currentBest = ip.Address;
+                            }
+                        }
+                    }
+                    
+                }
+                
+                if(IsLocalIP(currentBest)) {
+                    // we will use this for redirect ports;
+                    localIP = currentBest;
+                    if (UPnP.NAT.Discover()) {
+                        currentBest = UPnP.NAT.GetExternalIP();
+                    } else {
+                        // TODO: no upnp support on a local adress :: ugly
+                        // further ideas :: userip / whatismyip.com /manual port forward
+                    }
+                }
+                return currentBest;
+            }
+        }
 
-	
-	}
+        /// <summary>
+        /// Checks if a ipv4 address is a localhost address
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        public static bool IsLocalHostIP(IPAddress ip) {
+            if (ip.AddressFamily == AddressFamily.InterNetwork) {
+                byte[] ipBytes = ip.GetAddressBytes();
+                if ((ipBytes[0] == 127) && (ipBytes[1] == 0) && (ipBytes[2] == 0)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if a ipv4 address is a local network address / zeroconf
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        public static bool IsLocalIP(IPAddress ip) {
+            if (ip.AddressFamily == AddressFamily.InterNetwork) {
+                byte[] ipBytes = ip.GetAddressBytes();
+
+                //    10.0.0.0 bis  10.255.255.255 :: 10.0.0.0/8       (1 Class C)
+                if (ipBytes[0] == 10) {
+                    return true;
+                }
+                
+                //  172.16.0.0 bis  172.31.255.255 :: 172.16.0.0/12   (16 Class B)
+                if ((ipBytes[0] == 172) && (ipBytes[1] > 15) && (ipBytes[1] < 32)) {
+                    return true;
+                }
+                
+                // 192.168.0.0 bis 192.168.255.255 :: 192.168/16     (256 Class C)
+                if ((ipBytes[0] == 192) && (ipBytes[1] == 168)) {
+                    return true;
+                }
+
+                // 169.254.0.0 bis 169.254.255.255 :: 169.254.0.0/16    (Zeroconf)
+                if ((ipBytes[0] == 169) && (ipBytes[1] == 255)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+
+
+    }
 }
