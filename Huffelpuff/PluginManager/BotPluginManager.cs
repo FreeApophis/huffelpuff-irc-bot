@@ -46,9 +46,13 @@ namespace Huffelpuff.Plugins
             pluginManager.PluginsReloaded += new EventHandler(Plugins_PluginsReloaded);
             pluginManager.IgnoreErrors = false;
             pluginManager.PluginSources =  PluginSourceEnum.Both;
-
+            
+            pluginManager.AddReference("Huffelpuff.exe");
+            
             pluginManager.Start();
         }
+
+            
         
 
         private List<string> oldPlugs = new List<string>();

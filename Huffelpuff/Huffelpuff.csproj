@@ -108,6 +108,11 @@
     <Compile Include="Tools\PersistentMemory.cs" />
     <Compile Include="Tools\Tools.cs" />
     <Compile Include="Tools\UPnP.cs" />
+    <Compile Include="UPnP\UPnPDeviceFactory.cs" />
+    <Compile Include="UPnP\UPnPClient.cs" />
+    <Compile Include="UPnP\UPnPDevice.cs" />
+    <Compile Include="UPnP\UPnPGateway.cs" />
+    <Compile Include="UPnP\UPnPUknownDevice.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AccessControl" />
@@ -116,6 +121,7 @@
     <Folder Include="IrcCore\IrcCommands" />
     <Folder Include="IrcCore\IrcConnection" />
     <Folder Include="IrcCore\IrcFeatures" />
+    <Folder Include="UPnP" />
     <Folder Include="SocksProxy" />
     <Folder Include="Tools" />
     <Folder Include="Properties" />

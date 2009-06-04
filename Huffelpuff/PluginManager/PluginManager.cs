@@ -100,9 +100,6 @@ namespace Huffelpuff.Plugins
 			AddReference("System.Windows.Forms.Dll");
 			AddReference("System.XML.dll");
 			
-			// * mine maybe expose this * //
-			AddReference("Huffelpuff.exe");
-			AddReference("SmartIrc4net.dll");
 		}
 
 		/// <summary>
