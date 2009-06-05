@@ -2,7 +2,7 @@
  *  <project description>
  * 
  *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch> 
- *  File created by apophis at 04.06.2009 14:29
+ *  File created by apophis at 05.06.2009 02:35
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,11 +23,11 @@ using System.Xml;
 namespace Huffelpuff.UPnP
 {
     /// <summary>
-    /// Description of UPnPGateway.
+    /// Description of UPnPMediaServer.
     /// </summary>
-    public class UPnPGateway : UPnPDevice
+    public class UPnPMediaServer : UPnPDevice
     {
-        public UPnPGateway(string response, XmlDocument description) : base(response)
+        public UPnPMediaServer(string response, XmlDocument description) : base(response)
         {
         }
     }

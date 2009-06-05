@@ -18,6 +18,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
 using System;
+using System.Xml;
 
 namespace Huffelpuff.UPnP
 {
@@ -26,8 +27,15 @@ namespace Huffelpuff.UPnP
     /// </summary>
     public class UPnPUknownDevice : UPnPDevice
     {
-        public UPnPUknownDevice()
+        private XmlDocument description;
+        
+        public XmlDocument Description {
+            get { return description; }
+        }
+        
+        public UPnPUknownDevice(string response, XmlDocument description) : base(response)
         {
+            this.description = description;
         }
     }
 }

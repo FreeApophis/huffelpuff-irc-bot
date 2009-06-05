@@ -112,6 +112,7 @@
     <Compile Include="UPnP\UPnPClient.cs" />
     <Compile Include="UPnP\UPnPDevice.cs" />
     <Compile Include="UPnP\UPnPGateway.cs" />
+    <Compile Include="UPnP\UPnPMediaServer.cs" />
     <Compile Include="UPnP\UPnPUknownDevice.cs" />
   </ItemGroup>
   <ItemGroup>

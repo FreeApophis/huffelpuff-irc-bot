@@ -61,8 +61,8 @@ namespace Huffelpuff.UPnP
             do
             {
                 s.SendTo(data, ipe);
-                //s.SendTo(data, ipe);
-                //s.SendTo(data, ipe);
+                s.SendTo(data, ipe);
+                s.SendTo(data, ipe);
 
                 int length = 0;
                 do
@@ -81,8 +81,6 @@ namespace Huffelpuff.UPnP
                     if(!known) {
                         devices.Add(device);
                     }
-                    Console.WriteLine(resp);
-
                 } while (length > 0);
             } while (start.Subtract(DateTime.Now) < _timeout);
         }
