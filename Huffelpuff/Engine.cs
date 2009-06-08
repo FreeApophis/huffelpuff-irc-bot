@@ -19,7 +19,6 @@
 
 using System;
 using System.Threading;
-
 using Meebey.SmartIrc4net;
 
 namespace Huffelpuff

@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <ProjectGuid>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -14,6 +14,7 @@
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <SignAssembly>False</SignAssembly>
     <DelaySign>False</DelaySign>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <OutputPath>bin\</OutputPath>
@@ -42,9 +43,18 @@
   <ItemGroup>
     <Reference Include="Microsoft.JScript" />
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Security" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccessControl\AccessControlList.cs" />
@@ -108,12 +118,100 @@
     <Compile Include="Tools\PersistentMemory.cs" />
     <Compile Include="Tools\Tools.cs" />
     <Compile Include="Tools\UPnP.cs" />
-    <Compile Include="UPnP\UPnPDeviceFactory.cs" />
-    <Compile Include="UPnP\UPnPClient.cs" />
-    <Compile Include="UPnP\UPnPDevice.cs" />
-    <Compile Include="UPnP\UPnPGateway.cs" />
-    <Compile Include="UPnP\UPnPMediaServer.cs" />
-    <Compile Include="UPnP\UPnPUknownDevice.cs" />
+    <Compile Include="UPnP\Mono.Ssdp.Internal\AsyncReceiveBuffer.cs" />
+    <Compile Include="UPnP\Mono.Ssdp.Internal\HttpDatagram.cs" />
+    <Compile Include="UPnP\Mono.Ssdp.Internal\HttpDatagramType.cs" />
+    <Compile Include="UPnP\Mono.Ssdp.Internal\Log.cs" />
+    <Compile Include="UPnP\Mono.Ssdp.Internal\NotifyListener.cs" />
+    <Compile Include="UPnP\Mono.Ssdp.Internal\Protocol.cs" />
+    <Compile Include="UPnP\Mono.Ssdp.Internal\RequestListener.cs" />
+    <Compile Include="UPnP\Mono.Ssdp.Internal\ServiceCache.cs" />
+    <Compile Include="UPnP\Mono.Ssdp.Internal\SsdpSocket.cs" />
+    <Compile Include="UPnP\Mono.Ssdp.Internal\TimeoutDispatcher.cs" />
+    <Compile Include="UPnP\Mono.Ssdp\Announcer.cs" />
+    <Compile Include="UPnP\Mono.Ssdp\Browser.cs" />
+    <Compile Include="UPnP\Mono.Ssdp\BrowseService.cs" />
+    <Compile Include="UPnP\Mono.Ssdp\Client.cs" />
+    <Compile Include="UPnP\Mono.Ssdp\MulticastReader.cs" />
+    <Compile Include="UPnP\Mono.Ssdp\Server.cs" />
+    <Compile Include="UPnP\Mono.Ssdp\Service.cs" />
+    <Compile Include="UPnP\Mono.Ssdp\ServiceArgs.cs" />
+    <Compile Include="UPnP\Mono.Ssdp\ServiceHandler.cs" />
+    <Compile Include="UPnP\Mono.Ssdp\ServiceOptions.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\AllowedValueRange.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\Argument.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\ArgumentDirection.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\IMap.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\ServiceAction.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\ServiceActionExecutor.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\ServiceController.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\StateVariable.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\StateVariableChangedArgs.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\StateVariableEventer.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\UpnpActionAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\UpnpArgumentAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\UpnpControlException.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\UpnpControlExceptionStatus.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\UpnpEnumAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\UpnpRelatedStateVariableAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Control\UpnpStateVariableAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\Arguments.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\ControlClient.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\ControlServer.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\DataServer.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\EventClient.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\EventServer.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\Helper.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\Log.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\Map.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\Protocol.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\ServiceControllerBuilder.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\SoapEnvelope.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\SoapHeader.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\TimeoutDispatcher.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\UpnpClient.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\UpnpServer.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Internal\XmlServer.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\DoNotDeserializeAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\DoNotSerializeAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\IXmlDeserializable.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\IXmlSerializable.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlArrayAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlArrayItemAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlAttributeAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlAutomatable.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlDeserializable.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlDeserializationContext.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlDeserializer.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlElementAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlEnumAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlFlagAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlNamespaceAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlSerializable.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlSerializationContext.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlSerializer.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlTypeAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp.Xml\XmlTypeDeserializerAttribute.cs" />
+    <Compile Include="UPnP\Mono.Upnp\Client.cs" />
+    <Compile Include="UPnP\Mono.Upnp\Description.cs" />
+    <Compile Include="UPnP\Mono.Upnp\Deserializer.cs" />
+    <Compile Include="UPnP\Mono.Upnp\DeserializerFactory.cs" />
+    <Compile Include="UPnP\Mono.Upnp\Device.cs" />
+    <Compile Include="UPnP\Mono.Upnp\DeviceAnnouncement.cs" />
+    <Compile Include="UPnP\Mono.Upnp\DeviceSettings.cs" />
+    <Compile Include="UPnP\Mono.Upnp\DeviceType.cs" />
+    <Compile Include="UPnP\Mono.Upnp\DisposedEventArgs.cs" />
+    <Compile Include="UPnP\Mono.Upnp\Icon.cs" />
+    <Compile Include="UPnP\Mono.Upnp\Root.cs" />
+    <Compile Include="UPnP\Mono.Upnp\Server.cs" />
+    <Compile Include="UPnP\Mono.Upnp\Service.cs" />
+    <Compile Include="UPnP\Mono.Upnp\ServiceAnnouncement.cs" />
+    <Compile Include="UPnP\Mono.Upnp\ServiceType.cs" />
+    <Compile Include="UPnP\Mono.Upnp\SpecVersion.cs" />
+    <Compile Include="UPnP\Mono.Upnp\TypeInfo.cs" />
+    <Compile Include="UPnP\Mono.Upnp\UpnpDeserializationException.cs" />
+    <Compile Include="UPnP\Mono.Upnp\UpnpEventArgs.cs" />
+    <Compile Include="UPnP\Mono.Upnp\UpnpException.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AccessControl" />
@@ -127,5 +225,11 @@
     <Folder Include="Tools" />
     <Folder Include="Properties" />
     <Folder Include="PluginManager" />
+    <Folder Include="UPnP\Mono.Ssdp" />
+    <Folder Include="UPnP\Mono.Ssdp.Internal" />
+    <Folder Include="UPnP\Mono.Upnp" />
+    <Folder Include="UPnP\Mono.Upnp.Control" />
+    <Folder Include="UPnP\Mono.Upnp.Internal" />
+    <Folder Include="UPnP\Mono.Upnp.Xml" />
   </ItemGroup>
 </Project>

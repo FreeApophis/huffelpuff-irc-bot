@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-# SharpDevelop 3.0.0.3437
+# SharpDevelop 3.1.0.4077
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Huffelpuff", "Huffelpuff\Huffelpuff.csproj", "{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoPlugin", "EchoPlugin\EchoPlugin.csproj", "{DD1D95FD-3E44-4651-877F-DA5DC41A334B}"
