@@ -26,7 +26,7 @@ namespace Huffelpuff
     class Engine
     {
         public static void Main(string[] args)
-        {
+        {           
             Tools.RunOnMono();
             IrcBot bot = new IrcBot();
             bot.Start();  /*blocking*/
