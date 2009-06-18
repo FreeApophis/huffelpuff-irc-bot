@@ -7,12 +7,12 @@
  * Sie können diese Vorlage unter Extras > Optionen > Codeerstellung > Standardheader ändern.
  */
 
+using Mono.Nat;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
 using System.Threading;
-
 using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
 
@@ -54,13 +54,28 @@ namespace Huffelpuff
             this.CtcpSource = "https://svn.origo.ethz.ch/huffelpuff-irc-bot/";
 
             // DCC Setup
+            NatUtility.DeviceFound += delegate(object sender, DeviceEventArgs e) {
+                INatDevice device = e.Device;
+                Console.WriteLine("NAT Device found: " + e.Device.ToString());
+                Console.WriteLine("External IP: " + e.Device.GetExternalIP());
+                Console.WriteLine("LastSeen: " + e.Device.LastSeen);
+            };
+            
+            NatUtility.DeviceLost += delegate(object sender, DeviceEventArgs e) {
+                INatDevice device = e.Device;
+                Console.WriteLine ("Device Lost");
+                Console.WriteLine ("Type: {0}", device.GetType().Name);
+            };
+
+            
+            /*
             this.uPnPSupport = UPnP.NAT.Discover();
             this.ExternalIpAdress = Tools.TryGetExternalIP();
             if(Tools.LocalIP != null) {
                 Console.WriteLine("Int IP : " + Tools.LocalIP);
             }
             Console.WriteLine("Ext IP : " + this.ExternalIpAdress);
-
+             */
             
             // Plugin needs the Handlers from IRC we load the plugins after we set everything up
             plugManager = new BotPluginManager(this, "plugins");
@@ -77,8 +92,8 @@ namespace Huffelpuff
             this.AddCommand(new Commandlet("!join", "The command !join <channel> lets the bot join Channel <channel>", this.JoinCommand, this, CommandScope.Both, "engine_join"));
             this.AddCommand(new Commandlet("!part", "The command !part <channel> lets the bot part Channel <channel>", this.PartCommand, this, CommandScope.Both,"engine_part") );
             this.AddCommand(new Commandlet("!quit", "The command !quit lets the bot quit himself", this.QuitCommand, this, CommandScope.Both, "engine_quit"));
-            this.AddCommand(new Commandlet("!help", "The command !help <topic> gives you help about <topic> (special topics: commands, more)", this.HelpCommand, this));
-            this.AddCommand(new Commandlet("!plugins", "The command !plugins lists all the plugins", this.PluginsCommand, this));
+            this.AddCommand(new Commandlet("!help", "The command !help <topic> gives you help about <topic> (special topics: commands, more)", this.HelpCommand, this, CommandScope.Both));
+            this.AddCommand(new Commandlet("!plugins", "The command !plugins lists all the plugins", this.PluginsCommand, this, CommandScope.Both));
             this.AddCommand(new Commandlet("!activate", "The command !activate <plugin> activates the Plugin <plugin>", this.ActivateCommand, this, CommandScope.Both, "engine_activate"));
             this.AddCommand(new Commandlet("!deactivate", "The command !deactivate <plugin> deactivates the Plugin <plugin>", this.DeactivateCommand, this, CommandScope.Both, "engine_deactivate"));
 
@@ -230,15 +245,16 @@ namespace Huffelpuff
         
         private void HelpCommand(object sender, IrcEventArgs e)
         {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             if (e.Data.MessageArray.Length < 2) {
-                this.SendMessage(SendType.Message, e.Data.Channel, "You can use the help command to get information about Plugins and Commands:");
-                this.SendMessage(SendType.Message, e.Data.Channel, "Type !help commands (for commandlist), !plugins (for plugin list), !help <plugin> (for help about <plugin>), !help <command> (for help about <command>)");
+                this.SendMessage(SendType.Message, sendto, "You can use the help command to get information about Plugins and Commands:");
+                this.SendMessage(SendType.Message, sendto, "Type !help commands (for commandlist), !plugins (for plugin list), !help <plugin> (for help about <plugin>), !help <command> (for help about <command>)");
             } else {
-                sendHelp(e.Data.MessageArray[1], e.Data.Channel, e.Data.Nick);
+                sendHelp(e.Data.MessageArray[1], sendto, e.Data.Nick);
             }
         }
         
-        private void sendHelp(string topic, string channel, string nick)
+        private void sendHelp(string topic, string sendto, string nick)
         {
             Dictionary<CommandScope, string> scopeColor = new Dictionary<CommandScope, string>();
             scopeColor.Add(CommandScope.Private, ("" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.LightRed));
@@ -263,7 +279,7 @@ namespace Huffelpuff
                 
                 foreach(string com in ListToLines(commandlist, 350, ", ", "Active Commands (" + scopeColor[CommandScope.Public] + "public" + IrcConstants.IrcColor + IrcConstants.IrcBold + ", " + scopeColor[CommandScope.Private] + "private" + IrcConstants.IrcColor + IrcConstants.IrcBold + ") <restricted>: ", null))
                 {
-                    this.SendMessage(SendType.Message, channel, com);
+                    this.SendMessage(SendType.Message, sendto, com);
                 }
                 helped = true;
             }
@@ -273,7 +289,7 @@ namespace Huffelpuff
                 foreach(Commandlet cmd in commands.Values)
                 {
                     string owner = (cmd.Handler==null)?(string)cmd.Owner + "~":cmd.Owner.GetType().ToString();
-                    this.SendMessage(SendType.Message, channel, "Command (Scope:" + cmd.Scope.ToString() + "):" + cmd.Command + ", offered by " + owner + " and help provided: " + cmd.HelpText + ((string.IsNullOrEmpty(cmd.AccessString))?"":" (accessString=" + cmd.AccessString + ")"));
+                    this.SendMessage(SendType.Message, sendto, "Command (Scope:" + cmd.Scope.ToString() + "):" + cmd.Command + ", offered by " + owner + " and help provided: " + cmd.HelpText + ((string.IsNullOrEmpty(cmd.AccessString))?"":" (accessString=" + cmd.AccessString + ")"));
                 }
                 helped = true;
             }
@@ -281,7 +297,7 @@ namespace Huffelpuff
             // maybe in some command?
             foreach(Commandlet cmd in commands.Values) {
                 if ((cmd.Command==topic) || (cmd.Command.Substring(1)==topic) || (cmd.Command==topic.Substring(1))) {
-                    this.SendMessage(SendType.Message, channel, cmd.HelpText + ((string.IsNullOrEmpty(cmd.AccessString))?"":" (access restricted)"));
+                    this.SendMessage(SendType.Message, sendto, cmd.HelpText + ((string.IsNullOrEmpty(cmd.AccessString))?"":" (access restricted)"));
                     helped = true;
                 }
             }
@@ -300,14 +316,14 @@ namespace Huffelpuff
                     
                 }
                 if(plugHelp) {
-                    this.SendMessage(SendType.Message, channel, p.AboutHelp());
+                    this.SendMessage(SendType.Message, sendto, p.AboutHelp());
                     helped = true;
                 }
             }
 
             
             if (!helped)
-                this.SendMessage(SendType.Message, channel, "Your Helptopic was not found");
+                this.SendMessage(SendType.Message, sendto, "Your Helptopic was not found");
         }
 
         public List<string> ListToLines(IEnumerable<string> list, int maxlinelength)

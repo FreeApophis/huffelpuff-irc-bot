@@ -26,6 +26,7 @@ using Huffelpuff.Plugins;
 
 namespace Huffelpuff
 {
+    [Serializable]
     public enum CommandScope {
         Private,
         Public,
