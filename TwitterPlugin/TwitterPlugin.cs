@@ -64,7 +64,7 @@ namespace Plugin
         }
         
         private string baseUrl = "http://identi.ca/api/";
-        private string feedUrl = "http://identi.ca/apophis/"
+        private string feedUrl = "http://identi.ca/apophis/";
         private string user = "apophis";
         private string pass = "testpass";
         
