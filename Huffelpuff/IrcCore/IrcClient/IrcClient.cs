@@ -1078,7 +1078,11 @@ namespace Meebey.SmartIrc4net
         private void _Worker(object sender, ReadLineEventArgs e)
         {
             // lets see if we have events or internal messagehandler for it
-            _HandleEvents(MessageParser(e.Line));
+            
+            // TODO: Experimental Code... ThreadPool.
+            ThreadPool.QueueUserWorkItem(new WaitCallback(_HandleEvents), MessageParser(e.Line));
+            // Old Code
+            //_HandleEvents(MessageParser(e.Line));
         }
 
         private void _OnDisconnected(object sender, EventArgs e)
@@ -1366,8 +1370,11 @@ namespace Meebey.SmartIrc4net
             return ReceiveType.Unknown;
         }
         
-        private void _HandleEvents(IrcMessageData ircdata)
+        //private void _HandleEvents(IrcMessageData ircdata)
+        private void _HandleEvents(object obj)
         {
+            IrcMessageData ircdata = (IrcMessageData) obj;
+            // End new code
             if (OnRawMessage != null) {
                 OnRawMessage(this, new IrcEventArgs(ircdata));
             }

@@ -18,6 +18,7 @@
  */
  
 using System;
+using Meebey.SmartIrc4net;
 
 namespace Huffelpuff
 {
@@ -31,9 +32,9 @@ namespace Huffelpuff
         public IdentifyUser(IrcBot bot) {
             this.bot = bot;
         }
-        
-        public virtual bool Identified(string nick) {
-                return false;
+
+        public virtual string Identified(string nick) {
+                return null;
         }
     }
 }

@@ -38,7 +38,7 @@ namespace Plugin
     /// </summary>
     public class SeenPlugin : AbstractPlugin
     {
-        public SeenPlugin(IrcBot botInstance) : base(botInstance) {}        
+        public SeenPlugin(IrcBot botInstance) : base(botInstance) {}
 
         private DataSet db;
         
@@ -123,148 +123,165 @@ namespace Plugin
         }
         
         private void seenCommand(object sender, IrcEventArgs e) {
-            string destination = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
-
-            if(e.Data.MessageArray.Length > 1) {
-                DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Data.MessageArray[1] + "'");
-                if(datarows.Length > 0) {
-                    if((bool)datarows[0]["OnStatus"]) {
-                        BotMethods.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' is on right now (Last Action: " + datarows[0]["LastAction"] + " (" + datarows[0]["LastSeenTime"] + ") Lastmessage: " + datarows[0]["LastMessage"] + " !seen#: " + datarows[0]["TimesSeen"] + ")");
+            lock(db) {
+                string destination = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
+                
+                if(e.Data.MessageArray.Length > 1) {
+                    DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Data.MessageArray[1] + "'");
+                    if(datarows.Length > 0) {
+                        if((bool)datarows[0]["OnStatus"]) {
+                            BotMethods.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' is on right now (Last Action: " + datarows[0]["LastAction"] + " (" + datarows[0]["LastSeenTime"] + ") Lastmessage: " + datarows[0]["LastMessage"] + " !seen#: " + datarows[0]["TimesSeen"] + ")");
+                        } else {
+                            BotMethods.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' was last seen at " + datarows[0]["LastSeenTime"] + " (Last Action: " + datarows[0]["LastAction"] + " Lastmessage: " + datarows[0]["LastMessage"] + " !seen#: " + datarows[0]["TimesSeen"] + ")");
+                        }
+                        datarows[0]["TimesSeen"] = ((int)datarows[0]["TimesSeen"] + 1);
                     } else {
-                        BotMethods.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' was last seen at " + datarows[0]["LastSeenTime"] + " (Last Action: " + datarows[0]["LastAction"] + " Lastmessage: " + datarows[0]["LastMessage"] + " !seen#: " + datarows[0]["TimesSeen"] + ")");
+                        BotMethods.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' was never seen");
                     }
-                    datarows[0]["TimesSeen"] = ((int)datarows[0]["TimesSeen"] + 1);
                 } else {
-                    BotMethods.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' was never seen");
+                    BotMethods.SendMessage(SendType.Notice, destination, "Seen " + db.Tables[seentable].Rows.Count + " unique nicknames. Use !seen <nick> for query.");
                 }
-            } else {
-                BotMethods.SendMessage(SendType.Notice, destination, "Seen " + db.Tables[seentable].Rows.Count + " unique nicknames. Use !seen <nick> for query.");
+                
+                SaveDB();
             }
-            
-            SaveDB();
         }
         
         
-        private void nickChangeHandler(object sender, NickChangeEventArgs e) {         
-            DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.OldNickname + "'");
-            if (datarows.Length > 0) {
-                datarows[0]["LastSeenTime"] = DateTime.Now;
-                datarows[0]["LastAction"] = "(NICK) Nick changet to: " + e.NewNickname;
-                datarows[0]["OnStatus"] = false;
-            }
-            
-            datarows = db.Tables[seentable].Select("Nick='" + e.NewNickname + "'");
-            if (datarows.Length > 0) {
-                datarows[0]["LastSeenTime"] = DateTime.Now;
-                datarows[0]["LastAction"] = "(NICK) Nick changed from: " + e.OldNickname;
-                datarows[0]["OnStatus"] = true;
-            } else {
-                DataRow dr = db.Tables[seentable].NewRow();
-                dr["Nick"] = e.NewNickname;
-                dr["LastSeenTime"] = DateTime.Now;
-                dr["LastAction"] = "(NICK) Nick changed from: " + e.OldNickname;
-                dr["LastMessage"] = "<no message yet>";
-                dr["TimesSeen"] = 0;
-                dr["OnStatus"] = true;
-                db.Tables[seentable].Rows.Add(dr);
-            }
-
-            datarows = db.Tables[aliastable].Select("(Nick='" + e.OldNickname + "') AND (" + " Alias='" + e.NewNickname + "')");
-            if (datarows.Length == 0) {
-                DataRow dr = db.Tables[aliastable].NewRow();
-                dr["Nick"] = e.OldNickname;
-                dr["Alias"] = e.NewNickname;
-                db.Tables[aliastable].Rows.Add(dr);
-            }
-            
-            datarows = db.Tables[aliastable].Select("(Nick='" + e.NewNickname + "') AND (" + " Alias='" + e.OldNickname + "')");
-            if (datarows.Length == 0) {
-                DataRow dr = db.Tables[aliastable].NewRow();
-                dr["Nick"] = e.NewNickname;
-                dr["Alias"] = e.OldNickname;
-                db.Tables[aliastable].Rows.Add(dr);
-            }
-
-            SaveDB();
-        }
-
-        private void messageHandler(object sender, IrcEventArgs e) {
-            DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Data.Nick + "'");
-            if (datarows.Length > 0) {
-                datarows[0]["LastSeenTime"] = DateTime.Now;
-                datarows[0]["LastMessage"] = e.Data.Message;
-            }   
-            SaveDB();
-        }
-
-        private void namesHandler(object sender, NamesEventArgs e) {
-            foreach(string name in e.UserList) {
-                DataRow[] datarows = db.Tables[seentable].Select("Nick='" + name + "'");
+        private void nickChangeHandler(object sender, NickChangeEventArgs e) {
+            lock(db) {
+                DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.OldNickname + "'");
                 if (datarows.Length > 0) {
                     datarows[0]["LastSeenTime"] = DateTime.Now;
-                    datarows[0]["LastAction"] = "(ON)";
+                    datarows[0]["LastAction"] = "(NICK) Nick changet to: " + e.NewNickname;
+                    datarows[0]["OnStatus"] = false;
+                }
+                
+                datarows = db.Tables[seentable].Select("Nick='" + e.NewNickname + "'");
+                if (datarows.Length > 0) {
+                    datarows[0]["LastSeenTime"] = DateTime.Now;
+                    datarows[0]["LastAction"] = "(NICK) Nick changed from: " + e.OldNickname;
                     datarows[0]["OnStatus"] = true;
                 } else {
                     DataRow dr = db.Tables[seentable].NewRow();
-                    dr["Nick"] = name;
+                    dr["Nick"] = e.NewNickname;
                     dr["LastSeenTime"] = DateTime.Now;
-                    dr["LastAction"] = "(ON)";
+                    dr["LastAction"] = "(NICK) Nick changed from: " + e.OldNickname;
                     dr["LastMessage"] = "<no message yet>";
                     dr["TimesSeen"] = 0;
                     dr["OnStatus"] = true;
                     db.Tables[seentable].Rows.Add(dr);
                 }
+
+                datarows = db.Tables[aliastable].Select("(Nick='" + e.OldNickname + "') AND (" + " Alias='" + e.NewNickname + "')");
+                if (datarows.Length == 0) {
+                    DataRow dr = db.Tables[aliastable].NewRow();
+                    dr["Nick"] = e.OldNickname;
+                    dr["Alias"] = e.NewNickname;
+                    db.Tables[aliastable].Rows.Add(dr);
+                }
+                
+                datarows = db.Tables[aliastable].Select("(Nick='" + e.NewNickname + "') AND (" + " Alias='" + e.OldNickname + "')");
+                if (datarows.Length == 0) {
+                    DataRow dr = db.Tables[aliastable].NewRow();
+                    dr["Nick"] = e.NewNickname;
+                    dr["Alias"] = e.OldNickname;
+                    db.Tables[aliastable].Rows.Add(dr);
+                }
+
+                SaveDB();
             }
-            SaveDB();
+        }
+
+        private void messageHandler(object sender, IrcEventArgs e) {
+            lock(db) {
+                DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Data.Nick + "'");
+                if (datarows.Length > 0) {
+                    datarows[0]["LastSeenTime"] = DateTime.Now;
+                    datarows[0]["LastMessage"] = e.Data.Message;
+                }
+                SaveDB();
+            }
+        }
+
+        private void namesHandler(object sender, NamesEventArgs e) {
+            lock(db) {
+                foreach(string name in e.UserList) {
+                    DataRow[] datarows = db.Tables[seentable].Select("Nick='" + name + "'");
+                    if (datarows.Length > 0) {
+                        datarows[0]["LastSeenTime"] = DateTime.Now;
+                        datarows[0]["LastAction"] = "(ON)";
+                        datarows[0]["OnStatus"] = true;
+                    } else {
+                        DataRow dr = db.Tables[seentable].NewRow();
+                        dr["Nick"] = name;
+                        dr["LastSeenTime"] = DateTime.Now;
+                        dr["LastAction"] = "(ON)";
+                        dr["LastMessage"] = "<no message yet>";
+                        dr["TimesSeen"] = 0;
+                        dr["OnStatus"] = true;
+                        db.Tables[seentable].Rows.Add(dr);
+                    }
+                }
+                SaveDB();
+            }
         }
         
         private void joinHandler(object sender, JoinEventArgs e) {
-            DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Who + "'");
-            if (datarows.Length > 0) {
-                datarows[0]["LastSeenTime"] = DateTime.Now;
-                datarows[0]["LastAction"] = "(JOIN)";
-                datarows[0]["OnStatus"] = true;
-            } else {
-                DataRow dr = db.Tables[seentable].NewRow();
-                dr["Nick"] = e.Who;
-                dr["LastSeenTime"] = DateTime.Now;
-                dr["LastAction"] = "ON";
-                dr["LastMessage"] = "<no message yet>";
-                dr["TimesSeen"] = 0;
-                dr["OnStatus"] = true;
-                db.Tables[seentable].Rows.Add(dr);
+            lock(db) {
+
+                DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Who + "'");
+                if (datarows.Length > 0) {
+                    datarows[0]["LastSeenTime"] = DateTime.Now;
+                    datarows[0]["LastAction"] = "(JOIN)";
+                    datarows[0]["OnStatus"] = true;
+                } else {
+                    DataRow dr = db.Tables[seentable].NewRow();
+                    dr["Nick"] = e.Who;
+                    dr["LastSeenTime"] = DateTime.Now;
+                    dr["LastAction"] = "ON";
+                    dr["LastMessage"] = "<no message yet>";
+                    dr["TimesSeen"] = 0;
+                    dr["OnStatus"] = true;
+                    db.Tables[seentable].Rows.Add(dr);
+                }
+                SaveDB();
             }
-            SaveDB();
         }
 
         private void partHandler(object sender, PartEventArgs e) {
-            DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Who + "'");
-            if (datarows.Length > 0) {
-                datarows[0]["LastSeenTime"] = DateTime.Now;
-                datarows[0]["LastAction"] = "(PART) " + e.PartMessage;
-                datarows[0]["OnStatus"] = false;
-            }   
-            SaveDB();
+            lock(db) {
+                DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Who + "'");
+                if (datarows.Length > 0) {
+                    datarows[0]["LastSeenTime"] = DateTime.Now;
+                    datarows[0]["LastAction"] = "(PART) " + e.PartMessage;
+                    datarows[0]["OnStatus"] = false;
+                }
+                SaveDB();
+            }
         }
 
         private void quitHandler(object sender, QuitEventArgs e) {
-            DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Who + "'");
-            if (datarows.Length > 0) {
-                datarows[0]["LastSeenTime"] = DateTime.Now;
-                datarows[0]["LastAction"] = "(QUIT) " + e.QuitMessage;
-                datarows[0]["OnStatus"] = false;
-            }   
-            SaveDB();
+            lock(db) {
+                DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Who + "'");
+                if (datarows.Length > 0) {
+                    datarows[0]["LastSeenTime"] = DateTime.Now;
+                    datarows[0]["LastAction"] = "(QUIT) " + e.QuitMessage;
+                    datarows[0]["OnStatus"] = false;
+                }
+                SaveDB();
+            }
         }
 
         private void kickHandler(object sender, KickEventArgs e) {
-            DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Who + "'");
-            if (datarows.Length > 0) {
-                datarows[0]["LastSeenTime"] = DateTime.Now;
-                datarows[0]["LastAction"] = "(KICK) " + e.KickReason + " (by " + e.Whom + ")";
-                datarows[0]["OnStatus"] = false;
+            lock(db) {
+                DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Who + "'");
+                if (datarows.Length > 0) {
+                    datarows[0]["LastSeenTime"] = DateTime.Now;
+                    datarows[0]["LastAction"] = "(KICK) " + e.KickReason + " (by " + e.Whom + ")";
+                    datarows[0]["OnStatus"] = false;
+                }
+                SaveDB();
             }
-            SaveDB();
         }
         
         private void SaveDB() {

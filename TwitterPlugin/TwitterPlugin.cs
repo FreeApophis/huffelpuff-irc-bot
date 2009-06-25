@@ -49,7 +49,7 @@ namespace Plugin
         }
         
         public override void Activate() {
-            BotMethods.AddCommand(new Commandlet("!twitter", "The command !twitter <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!twitter", "The command !twitter <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Both, "twitter_access"));
             base.Activate();
         }
 
@@ -64,6 +64,7 @@ namespace Plugin
         }
         
         private string baseUrl = "http://identi.ca/api/";
+        private string feedUrl = "http://identi.ca/apophis/"
         private string user = "apophis";
         private string pass = "testpass";
         
@@ -75,24 +76,50 @@ namespace Plugin
                 request.Method = "POST";
 
                 string text = e.Data.Message.Substring(9);
-                ASCIIEncoding encoding=new ASCIIEncoding();
+                text = tinyUrlFilter(text);
                 
-                string postData = "status=" + HttpUtility.UrlEncode(e.Data.Nick + ":" + text);
+                
+                if(text.Length > 140) {
+                    BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Your message was too long (" + text.Length + "), please rephrase!");
+                    return;
+                }
+                ASCIIEncoding encoding=new ASCIIEncoding();
+                string postData = "status=" + HttpUtility.UrlEncode(text);
                 byte[]  data = encoding.GetBytes(postData);
-                                   
+                
                 request.ContentType="application/x-www-form-urlencoded";
                 request.ContentLength = data.Length;
                 
                 Stream newStream=request.GetRequestStream();
                 newStream.Write(data,0,data.Length);
-                newStream.Close();                               
+                newStream.Close();
                 WebResponse webResponse = request.GetResponse();
                 
-                BotMethods.SendMessage(SendType.Message, e.Data.Channel, "twittered your message!");                
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, "twittered your message! Feed: " + feedUrl);
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
                 Console.WriteLine(ex.StackTrace);
             }
+        }
+        
+        private string tinyUrlFilter(string text) {
+            Dictionary<string, string> replace = new Dictionary<string, string>();
+            foreach(string word in text.Split(new char[] {' '})) {
+                if ((word.Length > 25) && (word.StartsWith("http://"))) {
+                    WebClient tinyurl = new WebClient();
+                    tinyurl.QueryString.Add("url", word);
+                    string tiny = tinyurl.DownloadString("http://tinyurl.com/api-create.php");
+                    if (!replace.ContainsKey(word)) {
+                        replace.Add(word, tiny);
+                    }
+                }
+            }
+            
+            foreach(KeyValuePair<string, string> kvp in replace) {
+                text = text.Replace(kvp.Key, kvp.Value);
+            }
+            
+            return text;
         }
     }
 }

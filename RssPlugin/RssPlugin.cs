@@ -14,9 +14,9 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 using System;
 using System.Xml;
 using System.Timers;
@@ -55,12 +55,16 @@ namespace Plugin
                 return;
             List<RssItem> rss = getRss(PersistentMemory.GetValue("rssFeed"));
             if (firstrun) {
-                firstrun = false;    
-                BotMethods.SendMessage(SendType.Message, "#botwar", "RSS Plugin loaded with Feed: " + PersistentMemory.GetValue("rssFeed"));
-                BotMethods.SendMessage(SendType.Message, "#botwar", "Last Post: " + IrcConstants.IrcBold + rss[0].Title + IrcConstants.IrcBold  + " was published on " + rss[0].Published.ToString() + " by " + IrcConstants.IrcBold + IrcConstants.IrcColor + ((int)IrcColors.Blue) + rss[0].Author + IrcConstants.IrcBold + IrcConstants.IrcColor + " in " + rss[0].Category + " -> " + rss[0].Link);
+                firstrun = false;
+                foreach(string chan in this.BotMethods.GetChannels()) {
+                    BotMethods.SendMessage(SendType.Message, chan, "RSS Plugin loaded with Feed: " + PersistentMemory.GetValue("rssFeed"));
+                    BotMethods.SendMessage(SendType.Message, chan, "Last Post: " + IrcConstants.IrcBold + rss[0].Title + IrcConstants.IrcBold  + " was published on " + rss[0].Published.ToString() + " by " + IrcConstants.IrcBold + IrcConstants.IrcColor + ((int)IrcColors.Blue) + rss[0].Author + IrcConstants.IrcBold + IrcConstants.IrcColor + " in " + rss[0].Category + " -> " + rss[0].Link);
+                }
                 lastpost = rss[0].Published;
             } else if (lastpost < rss[0].Published) {
-                BotMethods.SendMessage(SendType.Message, "#botwar", "New Post: " + IrcConstants.IrcBold + rss[0].Title + IrcConstants.IrcBold  + " was published on " + rss[0].Published.ToString() + " by " + IrcConstants.IrcBold + IrcConstants.IrcColor + ((int)IrcColors.Blue) + rss[0].Author + IrcConstants.IrcBold + IrcConstants.IrcColor + " in " + rss[0].Category + " -> " + rss[0].Link);
+                foreach(string chan in this.BotMethods.GetChannels()) {
+                    BotMethods.SendMessage(SendType.Message, chan, "New Post: " + IrcConstants.IrcBold + rss[0].Title + IrcConstants.IrcBold  + " was published on " + rss[0].Published.ToString() + " by " + IrcConstants.IrcBold + IrcConstants.IrcColor + ((int)IrcColors.Blue) + rss[0].Author + IrcConstants.IrcBold + IrcConstants.IrcColor + " in " + rss[0].Category + " -> " + rss[0].Link);
+                }
                 lastpost = rss[0].Published;
             }
             
@@ -87,13 +91,25 @@ namespace Plugin
         }
         
         private void showRss(object sender, IrcEventArgs e) {
-            foreach(RssItem item in getRss(PersistentMemory.GetValue("rssFeed"))) {
-                BotMethods.SendMessage(SendType.Message, e.Data.Channel, item.Title + " was published on " + item.Published.ToString() + " by " + item.Author + " in " + item.Category + " -> " + item.Link);
+            int idx = 0;
+            if (e.Data.MessageArray.Length > 1) {
+                int.TryParse(e.Data.MessageArray[1], out idx);
+                List<RssItem> items = getRss(PersistentMemory.GetValue("rssFeed"));
+                if ((idx <= items.Count) && (idx > 0)) {
+                    idx--;
+                } else {
+                    idx = 0;
+                }
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, items[idx].Title + " was published on " + items[idx].Published.ToString() + " by " + items[idx].Author + " in " + items[idx].Category + " -> " + items[idx].Link);
+            } else {
+                foreach(RssItem item in getRss(PersistentMemory.GetValue("rssFeed"))) {
+                    BotMethods.SendMessage(SendType.Message, e.Data.Channel, item.Title + " was published on " + item.Published.ToString() + " by " + item.Author + " in " + item.Category + " -> " + item.Link);
+                }
             }
         }
 
         
-        private List<RssItem> getRss(string uri) 
+        private List<RssItem> getRss(string uri)
         {
             List<RssItem> rss = new List<RssItem>();
 
@@ -111,46 +127,52 @@ namespace Plugin
             string title = "", author = ""; string link = ""; string desc = ""; string category = ""; string content = "";
 
             DateTime published = DateTime.MinValue;
-                
+            
             while(feed.Read()){
                 if ((feed.NodeType == XmlNodeType.EndElement) && (feed.Name == "item")) {
                     break;
                 }
                 if (feed.NodeType == XmlNodeType.Element) {
                     switch(feed.Name) {
-                        // Main Items every RSS feed has
-                        case "title": feed.Read();
+                            // Main Items every RSS feed has
+                            case "title": feed.Read();
                             title = feed.ReadContentAsString();
-                        break;
-                        case "link":feed.Read();
+                            break;
+                            case "link":feed.Read();
                             link = feed.ReadContentAsString();
-                        break;
-                        case "description":feed.Read();
+                            break;
+                            case "description":feed.Read();
                             desc = feed.ReadContentAsString();
-                        break;
-                        // The pubDate is important for notifying
-                        case "pubDate":feed.Read();
+                            break;
+                            // The pubDate is important for notifying
+                            case "pubDate":feed.Read();
                             published = DateTime.Parse(feed.ReadContentAsString());
-                        break;
-                        // Some more RSS 2.0 Standard fields.
-                        case "category":feed.Read();
+                            break;
+                            // Some more RSS 2.0 Standard fields.
+                            case "category":feed.Read();
                             category = feed.ReadContentAsString();
-                        break;
-                        case "author":feed.Read();
+                            break;
+                            case "author":feed.Read();
                             author = feed.ReadContentAsString();
-                        break;
-                        case "guid":feed.Read();
-                            link = feed.ReadContentAsString();
-                        break;
-                        // Special ones (for vBulletin)
-                        case "content:encoded":feed.Read();
+                            break;
+                            case "guid":feed.Read();
+                            //link = feed.ReadContentAsString();
+                            break;
+                            // Special ones (for vBulletin)
+                            case "content:encoded":feed.Read();
                             content = feed.ReadContentAsString();
-                        break;
-                        case "dc:creator":feed.Read();
+                            break;
+                            case "dc:creator":feed.Read();
                             author = feed.ReadContentAsString();
-                        break;
-                        default: Console.WriteLine("unparsed Element: " + feed.Name);
-                        break;
+                            break;
+                            case "comments":feed.Read();
+                            //Comment
+                            break;
+                            case "wfw:commentRss":feed.Read();
+                            //Comment LInk
+                            break;
+                            default: Console.WriteLine("unparsed Element: " + feed.Name);
+                            break;
                     }
                 }
             }

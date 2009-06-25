@@ -19,11 +19,16 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Web;
+using System.Xml;
+
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
-using System.Text.RegularExpressions;
 
 namespace Plugin
 {
@@ -63,20 +68,126 @@ namespace Plugin
             base.Deactivate();
         }
         
-        private Regex titleMatch = new Regex("(?<=<title>)[^<]*(?=</title>)");
+        private Regex titleMatch = new Regex("(?<=<title>)[^<]*(?=</title>)", RegexOptions.IgnoreCase);
+        private Regex fMatch = new Regex("(?<=f=)[0-9]*");
+        private Regex tMatch = new Regex("(?<=t=)[0-9]*");
+        private Regex pMatch = new Regex("(?<=t=)[0-9]*");
+        private Regex charsetMatch = new Regex("(?<=charset=)[^(;\" )]*", RegexOptions.IgnoreCase);
+        
         private void BotEvents_OnChannelMessage(object sender, IrcEventArgs e)
         {
             try {
                 if (e.Data.MessageArray.Length == 1) {
-                    if (e.Data.Message.StartsWith("http://")) {
+                    if (e.Data.Message.StartsWith("http://forum.piraten-partei.ch/viewtopic.php?f=")) {
+                        string f = fMatch.Match(e.Data.Message).Value;
+                        string t = tMatch.Match(e.Data.Message).Value;
+                        ForumItem item = getTopic("http://forum.piraten-partei.ch/rss.php?f=" + f + "&t=" + t + "&start=last", false);
+                        BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Piratenforum - " + item.Title + " (by " + item.Author + ")");
+                    } else if (e.Data.Message.StartsWith("http://")) {
                         WebClient client = new WebClient();
+                        
                         string page = client.DownloadString(e.Data.Message);
-                        Match m = titleMatch.Match(page);
-                        BotMethods.SendMessage(SendType.Message, e.Data.Channel, m.Value);
+                        string charset = charsetMatch.Match(page).Value;
+                        string title = titleMatch.Match(page).Value;
+                        
+                        if (charset.ToLower()!="") {
+                            Encoding enc = System.Text.Encoding.GetEncoding(charset);
+                            byte[] encBytes = client.Encoding.GetBytes(title);
+                            byte[] utfBytes = System.Text.Encoding.Convert(enc, new System.Text.UTF8Encoding(), encBytes);
+                            char[] utfChars = System.Text.Encoding.UTF8.GetChars(utfBytes);
+                            title = new String(utfChars);
+                        }
+
+                        title = RemoveNewLine(title);
+                        title = HttpUtility.HtmlDecode(title);
+                        BotMethods.SendMessage(SendType.Message, e.Data.Channel, title);
+                        
                     }
                 }
             } catch {}
             
+        }
+        private char c10 = Convert.ToChar(10);
+        private char c13 = Convert.ToChar(13);
+        
+        private string RemoveNewLine(string s) {
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in s) {
+                if ((c != c10) && (c != c13)) {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString();
+        }
+        
+        private ForumItem getTopic(string uri, bool hack)
+        {
+
+            ForumItem item = null;
+            XmlReader feed = XmlReader.Create(uri);
+            while(feed.Read()){
+                if ((feed.NodeType == XmlNodeType.Element) && (feed.Name == "item")) {
+                    ForumItem temp = getItem(feed);
+                    if (temp.Published == DateTime.MinValue) {
+                        if (!hack) {
+                            item = getTopic(uri + "&start=" + getHack(item.Description), true);
+                        }
+                    } else {
+                        item = temp;
+                    }
+                }
+            }
+            return item;
+        }
+        
+        private Regex hackMatch = new Regex("(?<=Antworten )[0-9]*", RegexOptions.IgnoreCase);
+
+        private string getHack(string s) {
+            return hackMatch.Match(s).Value;
+        }
+        
+        private ForumItem getItem(XmlReader feed)  {
+
+            string title = "", author = "", desc = "";
+
+            DateTime published = DateTime.MinValue;
+            
+            while(feed.Read()){
+                if ((feed.NodeType == XmlNodeType.EndElement) && (feed.Name == "item")) {
+                    break;
+                }
+                if (feed.NodeType == XmlNodeType.Element) {
+                    switch(feed.Name) {
+                            case "title": feed.Read();
+                            title = feed.ReadContentAsString();
+                            break;
+                            case "link":feed.Read();
+                            //link = feed.ReadContentAsString();
+                            break;
+                            case "description":feed.Read();
+                            desc = feed.ReadContentAsString();
+                            break;
+                            case "content:encoded":feed.Read();
+                            //content
+                            break;
+                            case "category":feed.Read();
+                            //category = feed.ReadContentAsString();
+                            break;
+                            case "author":feed.Read();
+                            author = feed.ReadContentAsString();
+                            break;
+                            case "pubDate":feed.Read();
+                            published = DateTime.Parse(feed.ReadContentAsString());
+                            break;
+                            case "guid":feed.Read();
+                            //guid
+                            break;
+                            default: Console.WriteLine("unparsed Element: " + feed.Name);
+                            break;
+                    }
+                }
+            }
+            return new ForumItem(title, author, published, desc);
         }
     }
 }

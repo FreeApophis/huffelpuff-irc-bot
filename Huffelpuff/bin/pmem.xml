@@ -38,7 +38,7 @@
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>rssFeed</baseKey>
-    <baseValue>http://forum.vis.ethz.ch/external.php?type=RSS2&amp;lastpost=1</baseValue>
+    <baseValue>http://www.piraten-partei.ch/rss.xml</baseValue>
   </baseTBL>
   <baseTBL>
     <baseGroup>nntp</baseGroup>
@@ -133,16 +133,41 @@
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>plugin</baseKey>
-    <baseValue>Plugin.SeenPlugin</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>plugin</baseKey>
     <baseValue>Plugin.TranslatePlugin</baseValue>
   </baseTBL>
   <baseTBL>
     <baseGroup>config</baseGroup>
-    <baseKey>channel</baseKey>
-    <baseValue>#freenet-chat</baseValue>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.UrlToTitlePlugin</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.UrlToTitlePlugin</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.TwitterPlugin</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.RssPlugin</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>acl</baseGroup>
+    <baseKey>group</baseKey>
+    <baseValue>#piraten;ns/Apophis</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>acl</baseGroup>
+    <baseKey>accesslist</baseKey>
+    <baseValue>#piraten;twitter_access</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.SeenPlugin</baseValue>
   </baseTBL>
 </NewDataSet>

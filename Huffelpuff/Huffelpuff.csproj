@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccessControl\AccessControlList.cs" />
+    <Compile Include="AccessControl\BotConfigure.cs" />
     <Compile Include="AccessControl\HostIdentify.cs" />
     <Compile Include="AccessControl\IdentifyUser.cs" />
     <Compile Include="AccessControl\NickServIdentify.cs" />

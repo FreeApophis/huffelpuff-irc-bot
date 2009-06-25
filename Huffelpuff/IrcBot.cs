@@ -77,9 +77,6 @@ namespace Huffelpuff
             Console.WriteLine("Ext IP : " + this.ExternalIpAdress);
              */
             
-            // Plugin needs the Handlers from IRC we load the plugins after we set everything up
-            plugManager = new BotPluginManager(this, "plugins");
-            
             //Setting up Access Control
             acl = new AccessControlList(this);
             acl.Init();
@@ -88,6 +85,10 @@ namespace Huffelpuff
             acl.AddIdentifyPlugin(new NickServIdentify(this));
             acl.AddIdentifyPlugin(new HostIdentify(this));
             acl.AddIdentifyPlugin(new PasswordIdentify(this));
+
+            // Plugin needs the Handlers from IRC we load the plugins after we set everything up
+            plugManager = new BotPluginManager(this, "plugins");
+
             
             this.AddCommand(new Commandlet("!join", "The command !join <channel> lets the bot join Channel <channel>", this.JoinCommand, this, CommandScope.Both, "engine_join"));
             this.AddCommand(new Commandlet("!part", "The command !part <channel> lets the bot part Channel <channel>", this.PartCommand, this, CommandScope.Both,"engine_part") );
@@ -157,8 +158,8 @@ namespace Huffelpuff
                     return;
                 
                 // check if access to function is allowed
-                //if(!string.IsNullOrEmpty(commands[e.Data.MessageArray[0]].AccessString) && !this.acl.Access(e.Data.Nick, commands[e.Data.MessageArray[0]].AccessString))
-                //    return;
+                if(!string.IsNullOrEmpty(commands[e.Data.MessageArray[0]].AccessString) && !this.acl.Access(e.Data.Nick, commands[e.Data.MessageArray[0]].AccessString, true))
+                    return;
                 
                 if((commands[e.Data.MessageArray[0]].ChannelList != null) && (!commands[e.Data.MessageArray[0]].ChannelList.Contains(e.Data.Channel)))
                     return;
@@ -178,18 +179,20 @@ namespace Huffelpuff
         
         private void PluginsCommand(object sender, IrcEventArgs e)
         {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             List<string> pluginsList = new List<string>();
             
             foreach(AbstractPlugin p in plugManager.Plugins) {
                 pluginsList.Add(IrcConstants.IrcBold + p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]"+ IrcConstants.IrcBold);
             }
             foreach(string line in ListToLines(pluginsList, 300, ", ", "Plugins Loaded: " , " END.")) {
-                SendMessage(SendType.Notice, e.Data.Channel, line);
+                SendMessage(SendType.Notice, sendto, line);
             }
         }
         
         private void ActivateCommand(object sender, IrcEventArgs e)
         {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             if (e.Data.MessageArray.Length < 2)
                 return;
             foreach(AbstractPlugin p in plugManager.Plugins) {
@@ -197,13 +200,14 @@ namespace Huffelpuff
                     PersistentMemory.SetValue("plugin", p.FullName);
                     PersistentMemory.Flush();
                     p.Activate();
-                    SendMessage(SendType.Notice, e.Data.Channel, "Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+                    SendMessage(SendType.Notice, sendto, "Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
                 }
             }
         }
 
         private void DeactivateCommand(object sender, IrcEventArgs e)
         {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             if (e.Data.MessageArray.Length < 2)
                 return;
             foreach(AbstractPlugin p in plugManager.Plugins) {
@@ -211,7 +215,7 @@ namespace Huffelpuff
                     PersistentMemory.RemoveValue("plugin", p.FullName);
                     PersistentMemory.Flush();
                     p.Deactivate();
-                    SendMessage(SendType.Notice, e.Data.Channel, "Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+                    SendMessage(SendType.Notice, sendto, "Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
                 }
             }
         }
@@ -270,10 +274,11 @@ namespace Huffelpuff
                 foreach(Commandlet cmd in commands.Values) {
                     if(string.IsNullOrEmpty(cmd.AccessString)) {
                         commandlist.Add(scopeColor[cmd.Scope] + cmd.Command + IrcConstants.IrcColor + IrcConstants.IrcBold);
-                    } else if (this.acl.Access(nick, cmd.AccessString)) {
-                        commandlist.Add("" + IrcConstants.IrcColor + (int)IrcColors.Green + "<" + scopeColor[cmd.Scope] + cmd.Command + IrcConstants.IrcColor + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Green +  ">" + IrcConstants.IrcColor);
+                    } else if (this.acl.Access(nick, cmd.AccessString, false)) {
+                        commandlist.Add(scopeColor[cmd.Scope] + "<" + cmd.Command + ">" + IrcConstants.IrcColor + IrcConstants.IrcBold);
+                        //commandlist.Add("" + IrcConstants.IrcColor + (int)IrcColors.Green + "<" + scopeColor[cmd.Scope] + cmd.Command + IrcConstants.IrcColor + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Green +  ">" + IrcConstants.IrcColor);
                     } else {
-                        commandlist.Add("<" + scopeColor[cmd.Scope] + cmd.Command + IrcConstants.IrcColor + IrcConstants.IrcBold + ">");
+                        //commandlist.Add("<" + scopeColor[cmd.Scope] + cmd.Command + IrcConstants.IrcColor + IrcConstants.IrcBold + ">");
                     }
                 }
                 
