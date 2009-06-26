@@ -84,6 +84,7 @@ namespace Plugin
         
         private void PlayerHandler(object sender, IrcEventArgs e)
         {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             if (e.Data.MessageArray.Length < 2)
                 return;
             
@@ -128,7 +129,7 @@ namespace Plugin
                     " ELO: " + RecordValueToString(perPlayerValues[2]) +
                     " Kills: " + RecordValueToString(perPlayerValues[3]) +
                     " Deaths: " + RecordValueToString(perPlayerValues[4]);
-                BotMethods.SendMessage(SendType.Message, e.Data.Channel, msg);
+                BotMethods.SendMessage(SendType.Notice, sendto, msg);
                 foreach (RecordValue singleValue in perPlayerValues)
                 {
                 }
@@ -137,6 +138,7 @@ namespace Plugin
         
         private void TopTenHandler(object sender, IrcEventArgs e)
         {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             RecordValue[][] values = null;
             
             // *** hard coded query ***
@@ -178,7 +180,7 @@ namespace Plugin
                     " ELO: " + RecordValueToString(perPlayerValues[2]) +
                     " Kills: " + RecordValueToString(perPlayerValues[3]) +
                     " Deaths: " + RecordValueToString(perPlayerValues[4]);
-                BotMethods.SendMessage(SendType.Message, e.Data.Channel, msg);
+                BotMethods.SendMessage(SendType.Notice, sendto, msg);
                 foreach (RecordValue singleValue in perPlayerValues)
                 {
                 }

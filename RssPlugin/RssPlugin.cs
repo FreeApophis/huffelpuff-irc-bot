@@ -57,13 +57,13 @@ namespace Plugin
             if (firstrun) {
                 firstrun = false;
                 foreach(string chan in this.BotMethods.GetChannels()) {
-                    BotMethods.SendMessage(SendType.Message, chan, "RSS Plugin loaded with Feed: " + PersistentMemory.GetValue("rssFeed"));
-                    BotMethods.SendMessage(SendType.Message, chan, "Last Post: " + IrcConstants.IrcBold + rss[0].Title + IrcConstants.IrcBold  + " was published on " + rss[0].Published.ToString() + " by " + IrcConstants.IrcBold + IrcConstants.IrcColor + ((int)IrcColors.Blue) + rss[0].Author + IrcConstants.IrcBold + IrcConstants.IrcColor + " in " + rss[0].Category + " -> " + rss[0].Link);
+                    BotMethods.SendMessage(SendType.Notice, chan, "RSS Plugin loaded with Feed: " + PersistentMemory.GetValue("rssFeed"));
+                    BotMethods.SendMessage(SendType.Notice, chan, "Last Post: " + IrcConstants.IrcBold + rss[0].Title + IrcConstants.IrcBold  + " was published on " + rss[0].Published.ToString() + " by " + IrcConstants.IrcBold + IrcConstants.IrcColor + ((int)IrcColors.Blue) + rss[0].Author + IrcConstants.IrcBold + IrcConstants.IrcColor + " in " + rss[0].Category + " -> " + rss[0].Link);
                 }
                 lastpost = rss[0].Published;
             } else if (lastpost < rss[0].Published) {
                 foreach(string chan in this.BotMethods.GetChannels()) {
-                    BotMethods.SendMessage(SendType.Message, chan, "New Post: " + IrcConstants.IrcBold + rss[0].Title + IrcConstants.IrcBold  + " was published on " + rss[0].Published.ToString() + " by " + IrcConstants.IrcBold + IrcConstants.IrcColor + ((int)IrcColors.Blue) + rss[0].Author + IrcConstants.IrcBold + IrcConstants.IrcColor + " in " + rss[0].Category + " -> " + rss[0].Link);
+                    BotMethods.SendMessage(SendType.Notice, chan, "New Post: " + IrcConstants.IrcBold + rss[0].Title + IrcConstants.IrcBold  + " was published on " + rss[0].Published.ToString() + " by " + IrcConstants.IrcBold + IrcConstants.IrcColor + ((int)IrcColors.Blue) + rss[0].Author + IrcConstants.IrcBold + IrcConstants.IrcColor + " in " + rss[0].Category + " -> " + rss[0].Link);
                 }
                 lastpost = rss[0].Published;
             }
@@ -91,6 +91,7 @@ namespace Plugin
         }
         
         private void showRss(object sender, IrcEventArgs e) {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             int idx = 0;
             if (e.Data.MessageArray.Length > 1) {
                 int.TryParse(e.Data.MessageArray[1], out idx);
@@ -100,10 +101,10 @@ namespace Plugin
                 } else {
                     idx = 0;
                 }
-                BotMethods.SendMessage(SendType.Message, e.Data.Channel, items[idx].Title + " was published on " + items[idx].Published.ToString() + " by " + items[idx].Author + " in " + items[idx].Category + " -> " + items[idx].Link);
+                BotMethods.SendMessage(SendType.Notice, e.Data.Channel, items[idx].Title + " was published on " + items[idx].Published.ToString() + " by " + items[idx].Author + " in " + items[idx].Category + " -> " + items[idx].Link);
             } else {
                 foreach(RssItem item in getRss(PersistentMemory.GetValue("rssFeed"))) {
-                    BotMethods.SendMessage(SendType.Message, e.Data.Channel, item.Title + " was published on " + item.Published.ToString() + " by " + item.Author + " in " + item.Category + " -> " + item.Link);
+                    BotMethods.SendMessage(SendType.Notice, sendto, item.Title + " was published on " + item.Published.ToString() + " by " + item.Author + " in " + item.Category + " -> " + item.Link);
                 }
             }
         }

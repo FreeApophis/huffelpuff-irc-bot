@@ -169,7 +169,7 @@ namespace Plugin
             if(e.Data.MessageArray.Length > 1) {
                 if(activeTranslations.Select("(Nick='" + e.Data.Nick + "') AND (Channel='" + e.Data.Channel + "')").Length > 0) {
                     EndTranslate(e.Data.Nick, e.Data.Channel);
-                    BotMethods.SendMessage(SendType.Message, e.Data.Nick, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Brown + "You requested more than one language translation in a channel: the old request was canceled.");
+                    BotMethods.SendMessage(SendType.Notice, e.Data.Nick, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Brown + "You requested more than one language translation in a channel: the old request was canceled.");
                 }
                 
                 if(languages.ContainsKey(e.Data.MessageArray[1])) {
@@ -226,14 +226,14 @@ namespace Plugin
                 } catch(Exception) {
                     natlang = "";
                 }
-                BotMethods.SendMessage(SendType.Message, sendto, "This Text was in " + languages[lang] + " - " + natlang );
+                BotMethods.SendMessage(SendType.Notice, sendto, "This Text was in " + languages[lang] + " - " + natlang );
             }
         }
 
         private void LanguageTrigger(object sender, IrcEventArgs e) {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             foreach(string line in BotMethods.ListToLines(languages.Values, 400, ", ", "Languages: ", "")) {
-                BotMethods.SendMessage(SendType.Message, sendto, line);
+                BotMethods.SendMessage(SendType.Notice, sendto, line);
             }
         }
         
@@ -277,7 +277,7 @@ namespace Plugin
                 }
 
                 foreach(DataRow dr in activeTranslations.Select("Channel='" + e.Data.Channel + "'")) {
-                    BotMethods.SendMessage(SendType.Message, (string)dr["Nick"], langs[(string)dr["Language"]]);
+                    BotMethods.SendMessage(SendType.Notice, (string)dr["Nick"], langs[(string)dr["Language"]]);
                 }
                 
             }

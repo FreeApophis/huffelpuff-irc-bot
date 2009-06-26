@@ -222,9 +222,14 @@ namespace Huffelpuff
         
         private void JoinCommand(object sender, IrcEventArgs e)
         {
-            if (e.Data.MessageArray.Length < 2)
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
+            if (e.Data.MessageArray.Length < 2) {
+                SendMessage(SendType.Notice, sendto, "Too few arguments! Try !help.");
                 return;
+            }
+            
             this.RfcJoin(e.Data.MessageArray[1]);
+
             PersistentMemory.RemoveValue("channel", e.Data.MessageArray[1]);
             PersistentMemory.SetValue("channel", e.Data.MessageArray[1]);
             PersistentMemory.Flush();
@@ -232,9 +237,14 @@ namespace Huffelpuff
         
         private void PartCommand(object sender, IrcEventArgs e)
         {
-            if (e.Data.MessageArray.Length < 2)
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
+            if (e.Data.MessageArray.Length < 2) {
+                SendMessage(SendType.Notice, sendto, "Too few arguments! Try !help.");
                 return;
+            }
+            
             this.RfcPart(e.Data.MessageArray[1]);
+            
             PersistentMemory.RemoveValue("channel", e.Data.MessageArray[1]);
             PersistentMemory.Flush();
         }
@@ -251,8 +261,8 @@ namespace Huffelpuff
         {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             if (e.Data.MessageArray.Length < 2) {
-                this.SendMessage(SendType.Message, sendto, "You can use the help command to get information about Plugins and Commands:");
-                this.SendMessage(SendType.Message, sendto, "Type !help commands (for commandlist), !plugins (for plugin list), !help <plugin> (for help about <plugin>), !help <command> (for help about <command>)");
+                this.SendMessage(SendType.Notice, sendto, "You can use the help command to get information about Plugins and Commands:");
+                this.SendMessage(SendType.Notice, sendto, "Type !help commands (for commandlist), !plugins (for plugin list), !help <plugin> (for help about <plugin>), !help <command> (for help about <command>)");
             } else {
                 sendHelp(e.Data.MessageArray[1], sendto, e.Data.Nick);
             }
@@ -284,7 +294,7 @@ namespace Huffelpuff
                 
                 foreach(string com in ListToLines(commandlist, 350, ", ", "Active Commands (" + scopeColor[CommandScope.Public] + "public" + IrcConstants.IrcColor + IrcConstants.IrcBold + ", " + scopeColor[CommandScope.Private] + "private" + IrcConstants.IrcColor + IrcConstants.IrcBold + ") <restricted>: ", null))
                 {
-                    this.SendMessage(SendType.Message, sendto, com);
+                    this.SendMessage(SendType.Notice, sendto, com);
                 }
                 helped = true;
             }
@@ -294,7 +304,7 @@ namespace Huffelpuff
                 foreach(Commandlet cmd in commands.Values)
                 {
                     string owner = (cmd.Handler==null)?(string)cmd.Owner + "~":cmd.Owner.GetType().ToString();
-                    this.SendMessage(SendType.Message, sendto, "Command (Scope:" + cmd.Scope.ToString() + "):" + cmd.Command + ", offered by " + owner + " and help provided: " + cmd.HelpText + ((string.IsNullOrEmpty(cmd.AccessString))?"":" (accessString=" + cmd.AccessString + ")"));
+                    this.SendMessage(SendType.Notice, sendto, "Command (Scope:" + cmd.Scope.ToString() + "):" + cmd.Command + ", offered by " + owner + " and help provided: " + cmd.HelpText + ((string.IsNullOrEmpty(cmd.AccessString))?"":" (accessString=" + cmd.AccessString + ")"));
                 }
                 helped = true;
             }
@@ -302,7 +312,7 @@ namespace Huffelpuff
             // maybe in some command?
             foreach(Commandlet cmd in commands.Values) {
                 if ((cmd.Command==topic) || (cmd.Command.Substring(1)==topic) || (cmd.Command==topic.Substring(1))) {
-                    this.SendMessage(SendType.Message, sendto, cmd.HelpText + ((string.IsNullOrEmpty(cmd.AccessString))?"":" (access restricted)"));
+                    this.SendMessage(SendType.Notice, sendto, cmd.HelpText + ((string.IsNullOrEmpty(cmd.AccessString))?"":" (access restricted)"));
                     helped = true;
                 }
             }
@@ -321,14 +331,14 @@ namespace Huffelpuff
                     
                 }
                 if(plugHelp) {
-                    this.SendMessage(SendType.Message, sendto, p.AboutHelp());
+                    this.SendMessage(SendType.Notice, sendto, p.AboutHelp());
                     helped = true;
                 }
             }
 
             
             if (!helped)
-                this.SendMessage(SendType.Message, sendto, "Your Helptopic was not found");
+                this.SendMessage(SendType.Notice, sendto, "Your Helptopic was not found");
         }
 
         public List<string> ListToLines(IEnumerable<string> list, int maxlinelength)

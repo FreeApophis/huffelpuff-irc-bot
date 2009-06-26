@@ -49,7 +49,7 @@ namespace Plugin
         }
         
         public override void Activate() {
-            BotMethods.AddCommand(new Commandlet("!twitter", "The command !twitter <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Both, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!twitter", "The command !twitter <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Public, "twitter_access"));
             base.Activate();
         }
 
@@ -80,7 +80,7 @@ namespace Plugin
                 
                 
                 if(text.Length > 140) {
-                    BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Your message was too long (" + text.Length + "), please rephrase!");
+                    BotMethods.SendMessage(SendType.Notice, e.Data.Channel, "Your message was too long (" + text.Length + "), please rephrase!");
                     return;
                 }
                 ASCIIEncoding encoding=new ASCIIEncoding();
@@ -95,10 +95,10 @@ namespace Plugin
                 newStream.Close();
                 WebResponse webResponse = request.GetResponse();
                 
-                BotMethods.SendMessage(SendType.Message, e.Data.Channel, "twittered your message! Feed: " + feedUrl);
+                BotMethods.SendMessage(SendType.Notice, e.Data.Channel, "twittered your message! Feed: " + feedUrl);
             } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
+                Console.WriteLine();
+                BotMethods.SendMessage(SendType.Notice, e.Data.Channel, "Twitter Error: " + ex.Message);
             }
         }
         

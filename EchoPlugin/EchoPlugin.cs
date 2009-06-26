@@ -44,7 +44,7 @@ namespace Plugin
         }
         
         public override void Activate() {
-            BotMethods.AddCommand(new Commandlet("!say", "The command !say <your text>, says whatever text you want it to say", sayHandler, this));
+            BotMethods.AddCommand(new Commandlet("!say", "The command !say <your text>, says whatever text you want it to say", sayHandler, this, CommandScope.Both, "echo_access", null));
             base.Activate();
         }
 
