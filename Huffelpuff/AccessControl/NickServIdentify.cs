@@ -75,6 +75,11 @@ namespace Huffelpuff
             
             lastCheck = DateTime.Now;
             NickServIdentifyRequest nsir = new NickServIdentifyRequest(nick, bot);
+            
+            if (nickCache.ContainsKey(nick)) {
+                nickCache.Remove(nick);
+            }
+            
             lock (nsir) Monitor.Wait (nsir);
             
             nickCache.Add(nick, nsir.Identity);
