@@ -30,18 +30,50 @@ namespace Huffelpuff
     public class NickServIdentify : IdentifyUser
     {
         
-        public NickServIdentify(IrcBot bot) : base(bot) {}
+        public NickServIdentify(IrcBot bot) : base(bot) {
+            bot.OnPart += new PartEventHandler(bot_OnPart);
+            bot.OnKick += new KickEventHandler(bot_OnKick);
+            bot.OnQuit += new QuitEventHandler(bot_OnQuit);
+            bot.OnNickChange += new NickChangeEventHandler(bot_OnNickChange);
+        }
+
+        void bot_OnNickChange(object sender, NickChangeEventArgs e)
+        {
+            RemoveNick(e.OldNickname);
+        }
+
+        void bot_OnQuit(object sender, QuitEventArgs e)
+        {
+            RemoveNick(e.Who);
+        }
+
+        void bot_OnKick(object sender, KickEventArgs e)
+        {
+            RemoveNick(e.Whom);
+        }
+
+        void bot_OnPart(object sender, PartEventArgs e)
+        {
+            RemoveNick(e.Who);
+        }
+        
+        private void RemoveNick(string nick) {
+            nickCache.Remove(nick);
+        }
         
         public Dictionary<string, string> nickCache = new Dictionary<string, string>();
 
+        DateTime lastCheck;
         public override string Identified(string nick)
         {
             string id;
             if (nickCache.TryGetValue(nick, out id)) {
-                return id;
+                if ((id != null) || (lastCheck.AddSeconds(10) > DateTime.Now)) {
+                    return id;
+                }
             }
             
-            //TODO: recheck after a while?            
+            lastCheck = DateTime.Now;
             NickServIdentifyRequest nsir = new NickServIdentifyRequest(nick, bot);
             lock (nsir) Monitor.Wait (nsir);
             
