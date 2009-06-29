@@ -201,11 +201,11 @@ namespace Plugin
 
         
         
-        private MySqlConnection connection = new MySqlConnection(PersistentMemory.GetValue("MySQLConnection"));
+        private MySqlConnection connection = new MySqlConnection(PersistentMemory.Instance.GetValue("MySQLConnection"));
 
         public override void Init()
         {
-            if (PersistentMemory.GetValue("MySQLConnection") == null) {
+            if (PersistentMemory.Instance.GetValue("MySQLConnection") == null) {
                 return;
             }
                 

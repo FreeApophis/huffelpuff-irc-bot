@@ -77,12 +77,19 @@ namespace Plugin
         private void BotEvents_OnChannelMessage(object sender, IrcEventArgs e)
         {
             try {
+                string lang = (e.Data.Channel=="#piraten-schweiz")?"de":"en";
+                lang = (e.Data.Channel=="#pirates-suisse")?"fr":lang;
+                
                 if (e.Data.MessageArray.Length == 1) {
                     if (e.Data.Message.StartsWith("http://forum.piraten-partei.ch/viewtopic.php?f=")) {
                         string f = fMatch.Match(e.Data.Message).Value;
                         string t = tMatch.Match(e.Data.Message).Value;
-                        ForumItem item = getTopic("http://forum.piraten-partei.ch/rss.php?f=" + f + "&t=" + t + "&start=last", false);
-                        BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Piratenforum - " + item.Title + " (by " + item.Author + ")");
+                        ForumItem item = getTopic("http://forum.piraten-partei.ch/rss.php?f=" + f + "&t=" + t + "&start=last", lang, false);
+                        if (lang == "fr"){
+                            BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Forum des pirates - " + item.Title + " (by " + item.Author + ")");
+                        }    else {
+                            BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Piratenforum - " + item.Title + " (by " + item.Author + ")");
+                        }
                     } else if (e.Data.Message.StartsWith("http://")) {
                         WebClient client = new WebClient();
                         
@@ -120,17 +127,19 @@ namespace Plugin
             return sb.ToString();
         }
         
-        private ForumItem getTopic(string uri, bool hack)
+        private ForumItem getTopic(string uri, string lang, bool hack)
         {
 
             ForumItem item = null;
-            XmlReader feed = XmlReader.Create(uri);
+            WebClient client = new WebClient();
+            client.Headers.Add(HttpRequestHeader.AcceptLanguage, lang);
+            XmlReader feed = XmlReader.Create(client.OpenRead(uri));
             while(feed.Read()){
                 if ((feed.NodeType == XmlNodeType.Element) && (feed.Name == "item")) {
                     ForumItem temp = getItem(feed);
                     if (temp.Published == DateTime.MinValue) {
                         if (!hack) {
-                            item = getTopic(uri + "&start=" + getHack(item.Description), true);
+                            item = getTopic(uri + "&start=" + getHack(item.Description), lang, true);
                         }
                     } else {
                         item = temp;

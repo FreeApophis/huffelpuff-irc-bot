@@ -28,7 +28,7 @@ namespace Huffelpuff
         
         private AccessControlList acl;
         private Dictionary<string, Commandlet>  commands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
-        
+                
         private bool uPnPSupport;
         
         public bool UPnPSupport {
@@ -36,7 +36,7 @@ namespace Huffelpuff
         }
 
         public IrcBot()
-        {
+        {            
             this.Encoding = System.Text.Encoding.UTF8;
             this.SendDelay = 2000;
             this.PingInterval = 120;
@@ -97,7 +97,6 @@ namespace Huffelpuff
             this.AddCommand(new Commandlet("!plugins", "The command !plugins lists all the plugins", this.PluginsCommand, this, CommandScope.Both));
             this.AddCommand(new Commandlet("!activate", "The command !activate <plugin> activates the Plugin <plugin>", this.ActivateCommand, this, CommandScope.Both, "engine_activate"));
             this.AddCommand(new Commandlet("!deactivate", "The command !deactivate <plugin> deactivates the Plugin <plugin>", this.DeactivateCommand, this, CommandScope.Both, "engine_deactivate"));
-
         }
 
         
@@ -197,8 +196,8 @@ namespace Huffelpuff
                 return;
             foreach(AbstractPlugin p in plugManager.Plugins) {
                 if (e.Data.MessageArray[1]==p.FullName) {
-                    PersistentMemory.SetValue("plugin", p.FullName);
-                    PersistentMemory.Flush();
+                    PersistentMemory.Instance.SetValue("plugin", p.FullName);
+                    PersistentMemory.Instance.Flush();
                     p.Activate();
                     SendMessage(SendType.Notice, sendto, "Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
                 }
@@ -212,8 +211,8 @@ namespace Huffelpuff
                 return;
             foreach(AbstractPlugin p in plugManager.Plugins) {
                 if (e.Data.MessageArray[1]==p.FullName) {
-                    PersistentMemory.RemoveValue("plugin", p.FullName);
-                    PersistentMemory.Flush();
+                    PersistentMemory.Instance.RemoveValue("plugin", p.FullName);
+                    PersistentMemory.Instance.Flush();
                     p.Deactivate();
                     SendMessage(SendType.Notice, sendto, "Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
                 }
@@ -230,9 +229,9 @@ namespace Huffelpuff
             
             this.RfcJoin(e.Data.MessageArray[1]);
 
-            PersistentMemory.RemoveValue("channel", e.Data.MessageArray[1]);
-            PersistentMemory.SetValue("channel", e.Data.MessageArray[1]);
-            PersistentMemory.Flush();
+            PersistentMemory.Instance.RemoveValue("channel", e.Data.MessageArray[1]);
+            PersistentMemory.Instance.SetValue("channel", e.Data.MessageArray[1]);
+            PersistentMemory.Instance.Flush();
         }
         
         private void PartCommand(object sender, IrcEventArgs e)
@@ -245,8 +244,8 @@ namespace Huffelpuff
             
             this.RfcPart(e.Data.MessageArray[1]);
             
-            PersistentMemory.RemoveValue("channel", e.Data.MessageArray[1]);
-            PersistentMemory.Flush();
+            PersistentMemory.Instance.RemoveValue("channel", e.Data.MessageArray[1]);
+            PersistentMemory.Instance.Flush();
         }
         
         private void QuitCommand(object sender, IrcEventArgs e)
@@ -391,7 +390,7 @@ namespace Huffelpuff
 
         public void Exit()
         {
-            PersistentMemory.Flush();
+            PersistentMemory.Instance.Flush();
             
             plugManager.ShutDown();
             
@@ -410,17 +409,17 @@ namespace Huffelpuff
         {
             Thread.CurrentThread.Name = "Main";
             
-            if (PersistentMemory.GetValue("ProxyServer") != null) {
-                Console.WriteLine("Using Proxy Server: " + PersistentMemory.GetValue("ProxyServer"));
+            if (PersistentMemory.Instance.GetValue("ProxyServer") != null) {
+                Console.WriteLine("Using Proxy Server: " + PersistentMemory.Instance.GetValue("ProxyServer"));
                 this.ProxyType = Org.Mentalis.Network.ProxySocket.ProxyTypes.Socks5;
-                this.ProxyEndPoint = new IPEndPoint(IPAddress.Parse(PersistentMemory.GetValue("ProxyServer").Split(new char[] {':'})[0]), int.Parse(PersistentMemory.GetValue("ProxyServer").Split(new char[] {':'})[1]));
-                this.ProxyUser = PersistentMemory.GetValue("ProxyUser");
-                this.ProxyPass = PersistentMemory.GetValue("ProxyPass");
+                this.ProxyEndPoint = new IPEndPoint(IPAddress.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new char[] {':'})[0]), int.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new char[] {':'})[1]));
+                this.ProxyUser = PersistentMemory.Instance.GetValue("ProxyUser");
+                this.ProxyPass = PersistentMemory.Instance.GetValue("ProxyPass");
             }
 
             // the server we want to connect to
-            string[] serverlist = PersistentMemory.GetValues("ServerHost").ToArray();
-            int port = int.Parse(PersistentMemory.GetValue("ServerPort"));
+            string[] serverlist = PersistentMemory.Instance.GetValuesOrTodo("ServerHost").ToArray();
+            int port = int.Parse(PersistentMemory.Instance.GetValueOrTodo("ServerPort"));
             try {
                 // here we try to connect to the server and exceptions get handled
                 this.Connect(serverlist, port);
@@ -433,10 +432,10 @@ namespace Huffelpuff
             
             try {
                 // here we logon and register our nickname and so on
-                this.Login(PersistentMemory.GetValue("nick"), PersistentMemory.GetValue("realname"), 4, PersistentMemory.GetValue("username"), PersistentMemory.GetValue("serverpass"));
+                this.Login(PersistentMemory.Instance.GetValueOrTodo("nick"), PersistentMemory.Instance.GetValueOrTodo("realname"), 4, PersistentMemory.Instance.GetValueOrTodo("username"), PersistentMemory.Instance.GetValue("serverpass"));
                 
                 // join the channels
-                foreach(string channel in PersistentMemory.GetValues("channel"))
+                foreach(string channel in PersistentMemory.Instance.GetValues("channel"))
                 {
                     this.RfcJoin(channel);
                 }

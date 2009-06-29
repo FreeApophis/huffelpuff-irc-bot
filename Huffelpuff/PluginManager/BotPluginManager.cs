@@ -101,7 +101,7 @@ namespace Huffelpuff.Plugins
             }
 
             
-            foreach(string pluginname in PersistentMemory.GetValues("plugin")) {
+            foreach(string pluginname in PersistentMemory.Instance.GetValues("plugin")) {
                 foreach(AbstractPlugin p in plugins) {
                     if (pluginname==p.FullName) {
                         p.Activate();

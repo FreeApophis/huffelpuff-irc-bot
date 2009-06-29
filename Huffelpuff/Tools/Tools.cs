@@ -55,10 +55,10 @@ namespace Huffelpuff
         
         public static IPAddress TryGetExternalIP()
         {
-            if (PersistentMemory.GetValue("external_ip") != null) {
+            if (PersistentMemory.Instance.GetValue("external_ip") != null) {
                 
                 // external IP in settings overides any self detection
-                return System.Net.IPAddress.Parse(PersistentMemory.GetValue("external_ip"));
+                return System.Net.IPAddress.Parse(PersistentMemory.Instance.GetValue("external_ip"));
             } else {
                 IPAddress currentBest = null;
                 NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();

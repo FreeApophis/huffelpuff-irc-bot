@@ -38,6 +38,8 @@ namespace Huffelpuff.Plugins
 
             appDomain = AppDomain.CreateDomain(
                 "Plugins", null, setup);
+            // Used for a Cross AppDomain Singleton
+            appDomain.SetData("PersistentMemoryInstance", PersistentMemory.Instance);
             
             appDomain.UnhandledException += new UnhandledExceptionEventHandler(appDomain_UnhandledException);
             appDomain.InitializeLifetimeService();

@@ -36,10 +36,34 @@ namespace Huffelpuff
     /// Other Interfaces like SQL should be easy to implement.
     /// The usability is very restricted due the simplicity of the DB Scheme.
     /// This is intended! dont use it for huge Databases, use a Database instead!
+    /// 
+    /// * Added: Cross AppDomain Singleton (appDomain.SetData is used after creating
+    ///   the Plugins AppDomain!
     /// </summary>
-    public sealed class PersistentMemory
+    public sealed class PersistentMemory : MarshalByRefObject
     {
-        private static PersistentMemory instance = new PersistentMemory();
+        private static PersistentMemory instance = null;
+        
+        public static PersistentMemory Instance {
+            get
+            {
+                if(instance == null)
+                {
+                    // try to pull out of the AppDomain data
+                    instance = AppDomain.CurrentDomain.GetData("PersistentMemoryInstance") as PersistentMemory;
+
+                    // if it wasn't there, we're the first AppDomain
+                    // so create the instance
+                    if(instance == null)
+                        instance = new PersistentMemory();
+                }
+
+                return instance;
+            }
+        }
+        
+        private IrcBot bot;
+        
         private static System.Data.DataSet memory;
         private const string filename = "pmem.xml";
         private const string baseTable = "baseTBL";
@@ -48,14 +72,17 @@ namespace Huffelpuff
         private const string baseValue = "baseValue";
         private const string config = "config";
         
+        private const string todoValue = "TODO";
+        
         /// <summary>
         /// If you want to manipulate directly on the Dataset, you get the full functionality
         /// </summary>
-        public static DataSet RawData {
+        public DataSet RawData {
             get {
                 return memory;
             }
         }
+        public static bool Todo {get; private set;}
         
         public void CreateBase()
         {
@@ -77,7 +104,7 @@ namespace Huffelpuff
         /// <summary>
         /// Makes sure that the Database is written to disk (ie. XML)
         /// </summary>
-        public static void Flush()
+        public void Flush()
         {
             memory.WriteXml(filename);
         }
@@ -88,7 +115,7 @@ namespace Huffelpuff
         /// <param name="key">Key</param>
         /// <param name="value">Value</param>
         /// <returns>True if it exists</returns>
-        public static bool Exists(string key, string value) {
+        public bool Exists(string key, string value) {
             return Exists(config, key, value);
         }
 
@@ -99,8 +126,25 @@ namespace Huffelpuff
         /// <param name="key">Key</param>
         /// <param name="value">Value</param>
         /// <returns>True if it exists</returns>
-        public static bool Exists(string group, string key, string value) {
+        public bool Exists(string group, string key, string value) {
             return (0!=memory.Tables[baseTable].Select(baseGroup + " = '" + group + "' AND " + baseKey + " = '" + key + "' AND " + baseValue + " = '" + value + "'").Length);
+        }
+        
+        /// <summary>
+        /// If a value is not set, this GetValue will write a TODO field into the config file, and also will return TODO instead of null. null wont be a possible value for these keys!
+        /// This is meant to be used to create a config file, best to be used during the init of a plugin, because the start up of the bot will be blocked untill all TODO fields are filled!
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public string GetValueOrTodo(string key) {
+            string value = GetValue(key);
+            if ((value == null) || (value == todoValue)) {
+                Todo=true;
+                SetValue(key, todoValue);
+                return todoValue;
+            }
+            return value;
         }
         
         /// <summary>
@@ -108,7 +152,7 @@ namespace Huffelpuff
         /// </summary>
         /// <param name="key">Key</param>
         /// <returns>Single Value</returns>
-        public static string GetValue(string key) {
+        public string GetValue(string key) {
             return GetValue(config, key);
         }
         
@@ -118,7 +162,7 @@ namespace Huffelpuff
         /// <param name="group">Data Domain</param>
         /// <param name="key">Key</param>
         /// <returns>Single Value</returns>
-        public static string GetValue(string group, string key) {
+        public string GetValue(string group, string key) {
             List<string> t = GetValues(group, key);
             if (t.Count == 0) {
                 return null;
@@ -128,11 +172,30 @@ namespace Huffelpuff
         }
 
         /// <summary>
+        /// If not at least one value is set, this GetValues will write a TODO field into the config file, and also will return TODO instead of empty list. an empty list wont be a possible value for these keys!
+        /// This is meant to be used to create a config file, best to be used during the init of a plugin, because the start up of the bot will be blocked untill all TODO fields are filled!
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public List<string> GetValuesOrTodo(string key) {
+            List<string> values = GetValues(key);
+            if ((values.Count == 0) || (values[0] == todoValue)) {
+                Todo=true;
+                if (values.Count == 0) {
+                    SetValue(key, todoValue);
+                    values.Add(todoValue);
+                }
+            }
+            return values;
+        }
+        
+        /// <summary>
         /// Returns Values as a List for a key in default domain, or the empty list if it does not exist.
         /// </summary>
         /// <param name="key">Key</param>
         /// <returns>List of Values</returns>
-        public static List<string> GetValues(string key) {
+        public List<string> GetValues(string key) {
             return GetValues(config, key);
         }
         
@@ -142,7 +205,7 @@ namespace Huffelpuff
         /// <param name="group">Data Domain</param>
         /// <param name="key">Key</param>
         /// <returns>List of Values</returns>
-        public static List<string> GetValues(string group, string key) {
+        public List<string> GetValues(string group, string key) {
             List<string> vals = new List<string>();
             DataRow[] rows = memory.Tables[baseTable].Select(baseGroup + " = '" + group + "' AND " + baseKey + " = '" + key + "'");
             foreach(DataRow dr in rows) {
@@ -157,7 +220,7 @@ namespace Huffelpuff
         /// <param name="key">Key Value</param>
         /// <param name="value"></param>
         /// <returns>Returns true when successfull</returns>
-        public static bool SetValue(string key, string value)
+        public bool SetValue(string key, string value)
         {
             return SetValue(config, key, value);
         }
@@ -169,7 +232,7 @@ namespace Huffelpuff
         /// <param name="key">Key</param>
         /// <param name="value">Value</param>
         /// <returns>Returns true when successfull</returns>
-        public static bool SetValue(string group, string key, string value)
+        public bool SetValue(string group, string key, string value)
         {
             if (memory.Tables.Contains(baseTable))
             {
@@ -189,7 +252,7 @@ namespace Huffelpuff
         /// <param name="key">Key</param>
         /// <param name="value">Value</param>
         /// <returns>True if at least on element was removed</returns>
-        public static bool RemoveValue(string key, string value) {
+        public bool RemoveValue(string key, string value) {
             return RemoveValue(config, key, value);
         }
 
@@ -200,7 +263,7 @@ namespace Huffelpuff
         /// <param name="key">Key</param>
         /// <param name="value">Value</param>
         /// <returns>True if at least on element was removed</returns>
-        public static bool RemoveValue(string group, string key, string value) {
+        public bool RemoveValue(string group, string key, string value) {
             if (memory.Tables.Contains(baseTable))
             {
                 bool removed = false;
@@ -219,7 +282,7 @@ namespace Huffelpuff
         /// </summary>
         /// <param name="key">Key</param>
         /// <param name="beginOfValue">Value which begins with this String will be removed</param>
-        public static bool RemoveValueStartingWith(string key, string beginOfValue) {
+        public bool RemoveValueStartingWith(string key, string beginOfValue) {
             return RemoveValueStartingWith(config, key, beginOfValue);
         }
         
@@ -229,7 +292,7 @@ namespace Huffelpuff
         /// <param name="group">Data Domain</param>
         /// <param name="key">Key</param>
         /// <param name="beginOfValue">Value which begins with this String will be removed</param>
-        public static bool RemoveValueStartingWith(string group, string key, string beginOfValue) {
+        public bool RemoveValueStartingWith(string group, string key, string beginOfValue) {
             if (memory.Tables.Contains(baseTable))
             {
                 bool removed = false;
@@ -251,7 +314,7 @@ namespace Huffelpuff
         /// <param name="key">Key</param>
         /// <param name="value">Value</param>
         /// <returns>True if at least one Value was removed, false if the key is new</returns>
-        public static bool ReplaceValue(string key, string value) {
+        public bool ReplaceValue(string key, string value) {
             return ReplaceValue(config, key, value);
         }
         
@@ -262,7 +325,7 @@ namespace Huffelpuff
         /// <param name="key">Key</param>
         /// <param name="value">Value</param>
         /// <returns>True if at least one Value was removed, false if the key is new</returns>
-        public static bool ReplaceValue(string group, string key, string value) {
+        public bool ReplaceValue(string group, string key, string value) {
             bool removed = RemoveKey(group, key);
             SetValue(group, key, value);
             return removed;
@@ -273,7 +336,7 @@ namespace Huffelpuff
         /// </summary>
         /// <param name="key">Key</param>
         /// <returns>True if at least one element was removed</returns>
-        public static bool RemoveKey(string key)
+        public bool RemoveKey(string key)
         {
             return RemoveKey(config, key);
         }
@@ -284,7 +347,7 @@ namespace Huffelpuff
         /// <param name="group">Data Domain</param>
         /// <param name="key">Key</param>
         /// <returns>True if at least one element was removed</returns>
-        public static bool RemoveKey(string group, string key)
+        public bool RemoveKey(string group, string key)
         {
             if (memory.Tables.Contains(baseTable))
             {
@@ -304,7 +367,10 @@ namespace Huffelpuff
         /// Constructor
         /// </summary>
         private PersistentMemory()
-        {
+        {            
+            if (AppDomain.CurrentDomain.FriendlyName == "Plugins") {
+                throw new NotImplementedException("this should not happen");
+            }
             FileInfo fi = new FileInfo(PersistentMemory.filename);
             XmlDataDocument xdoc = new XmlDataDocument();
             if (fi.Exists) {
@@ -315,5 +381,10 @@ namespace Huffelpuff
             }
             CreateBase();
         }
+        
+        /// <summary>
+        /// static Constructor
+        /// </summary>
+        static PersistentMemory() {}
     }
 }

@@ -79,7 +79,7 @@ namespace Huffelpuff
             bot.AddCommand(new Commandlet("!-user", "!-user <group> <user> removes the user <user> from the group <group>.", groupHandler, this, CommandScope.Both, "group_remove_user"));
 
             // Get users and their accessstrings
-            foreach(string pair in PersistentMemory.GetValues("acl", "accesslist")) {
+            foreach(string pair in PersistentMemory.Instance.GetValues("acl", "accesslist")) {
                 string[] p = pair.Split(new char[] {';'});
                 if(!accessList.ContainsKey(p[0])) {
                     accessList.Add(p[0], new List<string>());
@@ -88,7 +88,7 @@ namespace Huffelpuff
             }
             
             // Get Groups and Users
-            foreach(string pair in PersistentMemory.GetValues("acl", "group")) {
+            foreach(string pair in PersistentMemory.Instance.GetValues("acl", "group")) {
                 string[] p = pair.Split(new char[] {';'});
                 if(!groups.ContainsKey(p[0])) {
                     groups.Add(p[0], new List<string>());
@@ -204,8 +204,8 @@ namespace Huffelpuff
         private bool RemoveGroup(string group) {
             if (groups.ContainsKey(group)) {
                 groups.Remove(group);
-                PersistentMemory.RemoveValueStartingWith("acl", "group", group + ";");
-                PersistentMemory.Flush();
+                PersistentMemory.Instance.RemoveValueStartingWith("acl", "group", group + ";");
+                PersistentMemory.Instance.Flush();
                 return true;
             }
             return false;
@@ -215,8 +215,8 @@ namespace Huffelpuff
             if (groups.ContainsKey(group)) {
                 if (!groups[group].Contains(id)) {
                     groups[group].Add(id);
-                    PersistentMemory.SetValue("acl", "group", group + ";" + id);
-                    PersistentMemory.Flush();
+                    PersistentMemory.Instance.SetValue("acl", "group", group + ";" + id);
+                    PersistentMemory.Instance.Flush();
                     return true;
                 }
             }
@@ -227,8 +227,8 @@ namespace Huffelpuff
             if (groups.ContainsKey(group)) {
                 if (groups[group].Contains(id)) {
                     groups[group].Remove(id);
-                    PersistentMemory.RemoveValue("acl", "group", group + ";" + id);
-                    PersistentMemory.Flush();
+                    PersistentMemory.Instance.RemoveValue("acl", "group", group + ";" + id);
+                    PersistentMemory.Instance.Flush();
                     return true;
                 }
             }
@@ -289,8 +289,8 @@ namespace Huffelpuff
                     accessList.Add(identity, new List<string>());
                 }
                 accessList[identity].Add(accessString);
-                PersistentMemory.SetValue("acl", "accesslist", identity + ";" + accessString);
-                PersistentMemory.Flush();
+                PersistentMemory.Instance.SetValue("acl", "accesslist", identity + ";" + accessString);
+                PersistentMemory.Instance.Flush();
                 return true;
             }
             return false;
@@ -300,8 +300,8 @@ namespace Huffelpuff
         {
             if (accessList.ContainsKey(identity)) {
                 accessList[identity].Remove(accessString);
-                PersistentMemory.RemoveValue("acl", "accesslist", identity + ";" + accessString);
-                PersistentMemory.Flush();
+                PersistentMemory.Instance.RemoveValue("acl", "accesslist", identity + ";" + accessString);
+                PersistentMemory.Instance.Flush();
                 return true;
             }
             return false;

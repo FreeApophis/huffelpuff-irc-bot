@@ -26,9 +26,14 @@ namespace Huffelpuff
     class Engine
     {
         public static void Main(string[] args)
-        {           
+        {
             Tools.RunOnMono();
             IrcBot bot = new IrcBot();
+            if(PersistentMemory.Todo) {
+                PersistentMemory.Instance.Flush();
+                Console.WriteLine("Edit your config file: there are some TODOs left.");
+                bot.Exit();
+            }            
             bot.Start();  /*blocking*/
         }
     }

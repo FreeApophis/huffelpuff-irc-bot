@@ -54,8 +54,8 @@ namespace Plugin
             interval = new System.Timers.Timer(30000);
             interval.Elapsed += new ElapsedEventHandler(interval_Elapsed);
             
-            filterGroups = PersistentMemory.GetValues("nntp", "GroupFilter");
-            filterWords = PersistentMemory.GetValues("nntp", "WordFilter");
+            filterGroups = PersistentMemory.Instance.GetValues("nntp", "GroupFilter");
+            filterWords = PersistentMemory.Instance.GetValues("nntp", "WordFilter");
             base.Init();
         }
         
@@ -68,7 +68,7 @@ namespace Plugin
                 return;
             lock_interval = true;
             try{
-                nntp.ConnectServer(PersistentMemory.GetValue("nntpServer"), int.Parse(PersistentMemory.GetValue("nntpPort")));
+                nntp.ConnectServer(PersistentMemory.Instance.GetValueOrTodo("nntpServer"), int.Parse(PersistentMemory.Instance.GetValueOrTodo("nntpPort")));
                 SortedDictionary<DateTime, KeyValuePair<Article, string>> newMessages = new SortedDictionary<DateTime, KeyValuePair<Article, string>>();
                 
                 foreach(Newsgroup ng in nntp.GetGroupList())
@@ -102,7 +102,7 @@ namespace Plugin
                     {
                         t = (DateTime.Now - kvp.Key);
                     }
-                    foreach(string channel in PersistentMemory.GetValues("nntpChannel")) {
+                    foreach(string channel in PersistentMemory.Instance.GetValues("nntpChannel")) {
                         BotMethods.SendMessage(SendType.Message, channel, "New FMS Posts will be reported: There are "+newMessages.Count+" Messages in the repository");
                         BotMethods.SendMessage(SendType.Message, channel, "Last Post on FMS was " + Math.Round(t.TotalMinutes) + " minutes ago.");
                     }
@@ -114,7 +114,7 @@ namespace Plugin
                 
                 foreach(KeyValuePair<DateTime, KeyValuePair<Article, string>>m in newMessages)
                 {
-                    foreach(string channel in PersistentMemory.GetValues("nntpChannel")) {
+                    foreach(string channel in PersistentMemory.Instance.GetValues("nntpChannel")) {
                         TimeSpan t = (DateTime.Now - m.Value.Key.Header.Date);
                         if (t < new TimeSpan(4,0,0)) {
                             if(WordFilter(m.Value.Key))

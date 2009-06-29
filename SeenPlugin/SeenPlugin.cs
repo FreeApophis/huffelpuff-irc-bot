@@ -92,7 +92,7 @@ namespace Plugin
                 dr["OnStatus"] = false;
             }
             
-            foreach(string channel in PersistentMemory.GetValues("channel"))
+            foreach(string channel in PersistentMemory.Instance.GetValues("channel"))
             {
                 BotMethods.RfcNames(channel);
             }

@@ -46,6 +46,7 @@ namespace Plugin
             checkInterval = new Timer();
             checkInterval.Elapsed += new ElapsedEventHandler(checkInterval_Elapsed);
             checkInterval.Interval = 1 * 60 * 1000; // 3 minutes
+            PersistentMemory.Instance.GetValueOrTodo("rssFeed"); // make sure we have one!
             base.Init();
         }
 
@@ -53,12 +54,12 @@ namespace Plugin
         {
             if (!BotMethods.IsConnected)
                 return;
-            List<RssItem> rss = getRss(PersistentMemory.GetValue("rssFeed"));
+            List<RssItem> rss = getRss(PersistentMemory.Instance.GetValue("rssFeed"));
             if (firstrun) {
                 firstrun = false;
                 foreach(string chan in this.BotMethods.GetChannels()) {
-                    BotMethods.SendMessage(SendType.Notice, chan, "RSS Plugin loaded with Feed: " + PersistentMemory.GetValue("rssFeed"));
-                    BotMethods.SendMessage(SendType.Notice, chan, "Last Post: " + IrcConstants.IrcBold + rss[0].Title + IrcConstants.IrcBold  + " was published on " + rss[0].Published.ToString() + " by " + IrcConstants.IrcBold + IrcConstants.IrcColor + ((int)IrcColors.Blue) + rss[0].Author + IrcConstants.IrcBold + IrcConstants.IrcColor + " in " + rss[0].Category + " -> " + rss[0].Link);
+                    //BotMethods.SendMessage(SendType.Notice, chan, "RSS Plugin loaded with Feed: " + PersistentMemory.GetValue("rssFeed"));
+                    //BotMethods.SendMessage(SendType.Notice, chan, "Last Post: " + IrcConstants.IrcBold + rss[0].Title + IrcConstants.IrcBold  + " was published on " + rss[0].Published.ToString() + " by " + IrcConstants.IrcBold + IrcConstants.IrcColor + ((int)IrcColors.Blue) + rss[0].Author + IrcConstants.IrcBold + IrcConstants.IrcColor + " in " + rss[0].Category + " -> " + rss[0].Link);
                 }
                 lastpost = rss[0].Published;
             } else if (lastpost < rss[0].Published) {
@@ -95,7 +96,7 @@ namespace Plugin
             int idx = 0;
             if (e.Data.MessageArray.Length > 1) {
                 int.TryParse(e.Data.MessageArray[1], out idx);
-                List<RssItem> items = getRss(PersistentMemory.GetValue("rssFeed"));
+                List<RssItem> items = getRss(PersistentMemory.Instance.GetValue("rssFeed"));
                 if ((idx <= items.Count) && (idx > 0)) {
                     idx--;
                 } else {
@@ -103,7 +104,7 @@ namespace Plugin
                 }
                 BotMethods.SendMessage(SendType.Notice, e.Data.Channel, items[idx].Title + " was published on " + items[idx].Published.ToString() + " by " + items[idx].Author + " in " + items[idx].Category + " -> " + items[idx].Link);
             } else {
-                foreach(RssItem item in getRss(PersistentMemory.GetValue("rssFeed"))) {
+                foreach(RssItem item in getRss(PersistentMemory.Instance.GetValue("rssFeed"))) {
                     BotMethods.SendMessage(SendType.Notice, sendto, item.Title + " was published on " + item.Published.ToString() + " by " + item.Author + " in " + item.Category + " -> " + item.Link);
                 }
             }

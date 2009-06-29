@@ -15,9 +15,9 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 using System;
 using System.Collections.Generic;
 
@@ -36,10 +36,10 @@ namespace Plugin
         public AIMLPlugin(IrcBot botInstance) : base(botInstance) {}
         
         public override string Name {
-            get { 
-                return "Artificial Intelligence Markup Language Plugin"; 
+            get {
+                return "Artificial Intelligence Markup Language Plugin";
             }
-        }           
+        }
 
         Bot myAimlBot;
         Dictionary<string, User> myUsers = new Dictionary<string, User>();
@@ -57,28 +57,33 @@ namespace Plugin
         
         public override void Activate()
         {
-            BotEvents.OnChannelMessage += new IrcEventHandler(messageHandler);
+            BotEvents.OnChannelMessage += new IrcEventHandler(BotEvents_OnChannelMessage);
+            //BotEvents.OnQueryMessage += new IrcEventHandler(BotEvents_OnQueryMessage);
+            
             base.Activate();
         }
         
         public override  void Deactivate()
         {
-            BotEvents.OnChannelMessage -= new IrcEventHandler(messageHandler);
+            BotEvents.OnChannelMessage -= new IrcEventHandler(BotEvents_OnChannelMessage);
+            //BotEvents.OnQueryMessage -= new IrcEventHandler(BotEvents_OnQueryMessage);
+            
             base.Deactivate();
         }
-                
+        
         public override  string AboutHelp()
         {
             return "Artificial Intelligence Markup Language Plugin";
         }
-                
-        private void messageHandler(object sender, IrcEventArgs e) {
+        
+        void BotEvents_OnChannelMessage(object sender, IrcEventArgs e)
+        {
             string msg;
             if(e.Data.Message.ToLower().Contains(BotMethods.Nickname.ToLower()))
             {
                 if (e.Data.Message.ToLower().Trim().StartsWith(BotMethods.Nickname.ToLower()))
                     msg = e.Data.Message.Trim().Substring(BotMethods.Nickname.Length+1);
-                else 
+                else
                     msg = e.Data.Message.Trim();
                 User myUser = null;
                 if (myUsers.ContainsKey(e.Data.Nick)) {
@@ -94,5 +99,12 @@ namespace Plugin
                 BotMethods.SendMessage(SendType.Message, e.Data.Channel, res.Output);
             }
         }
+        
+        void BotEvents_OnQueryMessage(object sender, IrcEventArgs e)
+        {
+            //throw new NotImplementedException();
+        }
+
+        
     }
 }
