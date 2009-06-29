@@ -38,9 +38,17 @@ namespace Plugin
     /// </summary>
     public class TwitterPlugin : AbstractPlugin
     {
-        
-        public TwitterPlugin(IrcBot botInstance) :
-            base(botInstance) {}
+        private string baseUrl;
+        private string feedUrl;
+        private string user;
+        private string pass;
+
+        public TwitterPlugin(IrcBot botInstance) : base(botInstance) {
+            baseUrl = PersistentMemory.Instance.GetValueOrTodo("twitter_api_base");
+            feedUrl = PersistentMemory.Instance.GetValueOrTodo("twitter_feed_base");
+            user = PersistentMemory.Instance.GetValueOrTodo("twitter_user");
+            pass = PersistentMemory.Instance.GetValueOrTodo("twitter_pass");
+        }
         
         public override string Name {
             get {
@@ -63,10 +71,7 @@ namespace Plugin
             return "The Twitter Plugin will post a twitter message to the channel feed, try !help twitter.";
         }
         
-        private string baseUrl = "http://identi.ca/api/";
-        private string feedUrl = "http://identi.ca/apophis/";
-        private string user = "apophis";
-        private string pass = "testpass";
+
         
         private void twitterHandler(object sender, IrcEventArgs e) {
             try {
@@ -80,7 +85,7 @@ namespace Plugin
                 
                 
                 if(text.Length > 140) {
-                    BotMethods.SendMessage(SendType.Notice, e.Data.Channel, "Your message was too long (" + text.Length + "), please rephrase!");
+                    BotMethods.SendMessage(SendType.Notice, e.Data.Nick, "Your message was too long (" + text.Length + "), please rephrase!");
                     return;
                 }
                 ASCIIEncoding encoding=new ASCIIEncoding();
@@ -95,10 +100,11 @@ namespace Plugin
                 newStream.Close();
                 WebResponse webResponse = request.GetResponse();
                 
-                BotMethods.SendMessage(SendType.Notice, e.Data.Channel, "twittered your message! Feed: " + feedUrl);
+                BotMethods.SendMessage(SendType.Notice, e.Data.Nick, "twittered your message!" );
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, "New message on twitter-feed: " + feedUrl);
             } catch (Exception ex) {
                 Console.WriteLine();
-                BotMethods.SendMessage(SendType.Notice, e.Data.Channel, "Twitter Error: " + ex.Message);
+                BotMethods.SendMessage(SendType.Notice, e.Data.Nick, "Twitter Error: " + ex.Message);
             }
         }
         
