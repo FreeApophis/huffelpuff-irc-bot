@@ -1,11 +1,11 @@
 ﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ProjectGuid>{F0801378-97EB-4609-9C68-C143519D62E8}</ProjectGuid>
+    <ProjectGuid>{5D3D2825-8C49-4D0E-8B55-D8B04BABB6C8}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
-    <RootNamespace>VotePlugin</RootNamespace>
-    <AssemblyName>VotePlugin</AssemblyName>
+    <RootNamespace>TimePlugin</RootNamespace>
+    <AssemblyName>TimePlugin</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <SourceAnalysisOverrideSettingsFile>C:\Users\apophis\AppData\Roaming\ICSharpCode/SharpDevelop3.0\Settings.SourceAnalysis</SourceAnalysisOverrideSettingsFile>
@@ -50,7 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="VotePlugin.cs" />
+    <Compile Include="TimePlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -60,6 +60,6 @@
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy .\VotePlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
+    <PostBuildEvent>xcopy .\TimePlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
   </PropertyGroup>
 </Project>

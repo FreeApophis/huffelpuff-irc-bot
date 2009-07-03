@@ -1,11 +1,11 @@
 ﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ProjectGuid>{F0801378-97EB-4609-9C68-C143519D62E8}</ProjectGuid>
+    <ProjectGuid>{BF492067-28D8-42AE-8BFB-53C30E681EF6}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
-    <RootNamespace>VotePlugin</RootNamespace>
-    <AssemblyName>VotePlugin</AssemblyName>
+    <RootNamespace>CommentedExamplePlugin</RootNamespace>
+    <AssemblyName>CommentedExamplePlugin</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <SourceAnalysisOverrideSettingsFile>C:\Users\apophis\AppData\Roaming\ICSharpCode/SharpDevelop3.0\Settings.SourceAnalysis</SourceAnalysisOverrideSettingsFile>
@@ -50,16 +50,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="VotePlugin.cs" />
+    <Compile Include="CommentedExamplePlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Huffelpuff\Huffelpuff.csproj">
-      <Project>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</Project>
-      <Name>Huffelpuff</Name>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy .\VotePlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
+    <PostBuildEvent>xcopy .\CommentedExamplePlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
   </PropertyGroup>
 </Project>

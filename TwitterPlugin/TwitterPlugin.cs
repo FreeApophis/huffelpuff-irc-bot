@@ -47,7 +47,9 @@ namespace Plugin
             baseUrl = PersistentMemory.Instance.GetValueOrTodo("twitter_api_base");
             feedUrl = PersistentMemory.Instance.GetValueOrTodo("twitter_feed_base");
             user = PersistentMemory.Instance.GetValueOrTodo("twitter_user");
+            //user2 = PersistentMemory.Instance.GetValueOrTodo("twitter2_user");
             pass = PersistentMemory.Instance.GetValueOrTodo("twitter_pass");
+            //pass2 = PersistentMemory.Instance.GetValueOrTodo("twitter2_pass");
         }
         
         public override string Name {
@@ -58,12 +60,20 @@ namespace Plugin
         
         public override void Activate() {
             BotMethods.AddCommand(new Commandlet("!twitter", "The command !twitter <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Public, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!mentions", "Will inform you when the pirates are mentioned on twitter or identi.ca. ", dummyHandler, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!endmentions", "Will inform you about ", dummyHandler, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!trends", "Will inform you about the newest emerging trends on twitter.", dummyHandler, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!endtrends", "Will inform stop informing you about new emerging trends. ", dummyHandler, this, CommandScope.Both));
             base.Activate();
         }
 
         
         public override void Deactivate() {
             BotMethods.RemoveCommand("!twitter");
+            BotMethods.RemoveCommand("!mentions");
+            BotMethods.RemoveCommand("!endmentions");
+            BotMethods.RemoveCommand("!trends");
+            BotMethods.RemoveCommand("!endtrends");
             base.Deactivate();
         }
         
@@ -71,7 +81,7 @@ namespace Plugin
             return "The Twitter Plugin will post a twitter message to the channel feed, try !help twitter.";
         }
         
-
+        private void dummyHandler(object sender, IrcEventArgs e) { }
         
         private void twitterHandler(object sender, IrcEventArgs e) {
             try {

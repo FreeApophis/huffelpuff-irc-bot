@@ -28,7 +28,7 @@ namespace Huffelpuff
         
         private AccessControlList acl;
         private Dictionary<string, Commandlet>  commands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
-                
+        
         private bool uPnPSupport;
         
         public bool UPnPSupport {
@@ -36,7 +36,7 @@ namespace Huffelpuff
         }
 
         public IrcBot()
-        {            
+        {
             this.Encoding = System.Text.Encoding.UTF8;
             this.SendDelay = 2000;
             this.PingInterval = 120;
@@ -88,15 +88,21 @@ namespace Huffelpuff
 
             // Plugin needs the Handlers from IRC we load the plugins after we set everything up
             plugManager = new BotPluginManager(this, "plugins");
-
             
+            //Basic Commands
             this.AddCommand(new Commandlet("!join", "The command !join <channel> lets the bot join Channel <channel>", this.JoinCommand, this, CommandScope.Both, "engine_join"));
             this.AddCommand(new Commandlet("!part", "The command !part <channel> lets the bot part Channel <channel>", this.PartCommand, this, CommandScope.Both,"engine_part") );
             this.AddCommand(new Commandlet("!quit", "The command !quit lets the bot quit himself", this.QuitCommand, this, CommandScope.Both, "engine_quit"));
-            this.AddCommand(new Commandlet("!help", "The command !help <topic> gives you help about <topic> (special topics: commands, more)", this.HelpCommand, this, CommandScope.Both));
+            
+            //Plugin Commands
             this.AddCommand(new Commandlet("!plugins", "The command !plugins lists all the plugins", this.PluginsCommand, this, CommandScope.Both));
             this.AddCommand(new Commandlet("!activate", "The command !activate <plugin> activates the Plugin <plugin>", this.ActivateCommand, this, CommandScope.Both, "engine_activate"));
             this.AddCommand(new Commandlet("!deactivate", "The command !deactivate <plugin> deactivates the Plugin <plugin>", this.DeactivateCommand, this, CommandScope.Both, "engine_deactivate"));
+            
+            //Helper Commands (!commands)
+            this.AddCommand(new Commandlet("!help", "The command !help <topic> gives you help about <topic> (special topics: commands, more)", this.HelpCommand, this, CommandScope.Both));
+            
+            new SettingCommands(this);
         }
 
         
@@ -196,9 +202,11 @@ namespace Huffelpuff
                 return;
             foreach(AbstractPlugin p in plugManager.Plugins) {
                 if (e.Data.MessageArray[1]==p.FullName) {
-                    PersistentMemory.Instance.SetValue("plugin", p.FullName);
-                    PersistentMemory.Instance.Flush();
-                    p.Activate();
+                    if (!p.Active) {
+                        PersistentMemory.Instance.SetValue("plugin", p.FullName);
+                        PersistentMemory.Instance.Flush();
+                        p.Activate();
+                    }
                     SendMessage(SendType.Notice, sendto, "Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
                 }
             }
@@ -211,9 +219,11 @@ namespace Huffelpuff
                 return;
             foreach(AbstractPlugin p in plugManager.Plugins) {
                 if (e.Data.MessageArray[1]==p.FullName) {
-                    PersistentMemory.Instance.RemoveValue("plugin", p.FullName);
-                    PersistentMemory.Instance.Flush();
-                    p.Deactivate();
+                    if (p.Active) {
+                        PersistentMemory.Instance.RemoveValue("plugin", p.FullName);
+                        PersistentMemory.Instance.Flush();
+                        p.Deactivate();
+                    }
                     SendMessage(SendType.Notice, sendto, "Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
                 }
             }

@@ -143,6 +143,7 @@
     <Compile Include="PluginManager\SharedClientSide.cs" />
     <Compile Include="PluginManager\SharedServerSide.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SettingCommands.cs" />
     <Compile Include="SocksProxy\AuthMethod.cs" />
     <Compile Include="SocksProxy\AuthNone.cs" />
     <Compile Include="SocksProxy\AuthUserPass.cs" />

@@ -106,56 +106,6 @@
     <baseValue>mp3</baseValue>
   </baseTBL>
   <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>plugin</baseKey>
-    <baseValue>Plugin.UT3GlobalStatsPlugin</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>plugin</baseKey>
-    <baseValue>Plugin.AIMLPlugin</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>plugin</baseKey>
-    <baseValue>Plugin.RadioPlugin</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>plugin</baseKey>
-    <baseValue>Plugin.EchoPlugin</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>plugin</baseKey>
-    <baseValue>Plugin.ExamplePlugin</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>plugin</baseKey>
-    <baseValue>Plugin.TranslatePlugin</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>plugin</baseKey>
-    <baseValue>Plugin.UrlToTitlePlugin</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>plugin</baseKey>
-    <baseValue>Plugin.UrlToTitlePlugin</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>plugin</baseKey>
-    <baseValue>Plugin.TwitterPlugin</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>plugin</baseKey>
-    <baseValue>Plugin.RssPlugin</baseValue>
-  </baseTBL>
-  <baseTBL>
     <baseGroup>acl</baseGroup>
     <baseKey>group</baseKey>
     <baseValue>#piraten;ns/Apophis</baseValue>
@@ -169,5 +119,50 @@
     <baseGroup>config</baseGroup>
     <baseKey>plugin</baseKey>
     <baseValue>Plugin.SeenPlugin</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>twitter_api_base</baseKey>
+    <baseValue>http://identi.ca/api/</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>twitter_feed_base</baseKey>
+    <baseValue>http://identi.ca/apophis/</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>twitter_user</baseKey>
+    <baseValue>apophis</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>twitter_pass</baseKey>
+    <baseValue>testpass</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>username</baseKey>
+    <baseValue>TODO</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>username</baseKey>
+    <baseValue>TODO</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.TimePlugin</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.TwitterPlugin</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>username</baseKey>
+    <baseValue>TODO</baseValue>
   </baseTBL>
 </NewDataSet>
