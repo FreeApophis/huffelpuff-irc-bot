@@ -22,11 +22,17 @@ namespace Huffelpuff
     /// <summary>
     /// Description of IrcBot.
     /// </summary>
+    [Serializable]
     public class IrcBot : IrcFeatures
     {
         private BotPluginManager plugManager;
         
         private AccessControlList acl;
+        
+        public AccessControlList Acl {
+            get { return acl; }
+        }
+        
         private Dictionary<string, Commandlet>  commands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
         
         private bool uPnPSupport;
@@ -38,7 +44,7 @@ namespace Huffelpuff
         public IrcBot()
         {
             this.Encoding = System.Text.Encoding.UTF8;
-            this.SendDelay = 2000;
+            this.SendDelay = 3000;
             this.PingInterval = 120;
             this.ActiveChannelSyncing = true;
             this.OnRawMessage += new IrcEventHandler(RawMessageHandler);

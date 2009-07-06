@@ -35,34 +35,75 @@ namespace Huffelpuff
             bot.OnKick += new KickEventHandler(bot_OnKick);
             bot.OnQuit += new QuitEventHandler(bot_OnQuit);
             bot.OnNickChange += new NickChangeEventHandler(bot_OnNickChange);
+            bot.OnNames += new NamesEventHandler(bot_OnNames);
         }
 
         void bot_OnNickChange(object sender, NickChangeEventArgs e)
         {
             RemoveNick(e.OldNickname);
+            Identified(e.NewNickname);
         }
 
         void bot_OnQuit(object sender, QuitEventArgs e)
         {
-            RemoveNick(e.Who);
+            if (e.Who == bot.Nickname) {
+                lock (nickCache) {
+                    nickCache.Clear();
+                }
+            } else {
+                RemoveNick(e.Who);
+            }
         }
 
         void bot_OnKick(object sender, KickEventArgs e)
         {
-            RemoveNick(e.Whom);
+            if (e.Whom == bot.Nickname) {
+                lock (nickCache) {
+                    nickCache.Clear();
+                }
+            } else {
+                RemoveNick(e.Whom);
+            }
         }
 
         void bot_OnPart(object sender, PartEventArgs e)
         {
-            RemoveNick(e.Who);
+            if (e.Who == bot.Nickname) {
+                lock (nickCache) {
+                    nickCache.Clear();
+                }
+            } else {
+                RemoveNick(e.Who);
+            }
         }
         
         private void RemoveNick(string nick) {
-            nickCache.Remove(nick);
+            lock (nickCache) {
+                nickCache.Remove(nick);
+            }
+        }
+        
+        void bot_OnNames(object sender, NamesEventArgs e)
+        {
+            foreach(string nick in e.UserList) {
+                Identified(nick);
+            }
         }
         
         public Dictionary<string, string> nickCache = new Dictionary<string, string>();
 
+        public string IdToNick(string id) {
+            lock (nickCache) {
+                foreach(KeyValuePair<string, string> kvp in nickCache) {
+                    if (kvp.Value == id) {
+                        return kvp.Key;
+                    }
+                    
+                }
+            }
+            return null;
+        }
+        
         DateTime lastCheck;
         public override string Identified(string nick)
         {
@@ -81,50 +122,11 @@ namespace Huffelpuff
             }
             
             lock (nsir) Monitor.Wait (nsir);
-            
-            nickCache.Add(nick, nsir.Identity);
+            lock (nickCache) {
+                if(!nickCache.ContainsKey(nick))
+                    nickCache.Add(nick, nsir.Identity);
+            }
             return nsir.Identity;
         }
     }
-    
-    internal class NickServIdentifyRequest {
-
-        private IrcBot bot;
-        private string nick;
-        
-        public NickServIdentifyRequest(string nick, IrcBot bot) {
-            this.bot = bot;
-            this.nick = nick;
-
-            bot.RfcWhois(nick);
-            bot.OnRawMessage += new IrcEventHandler(bot_OnRawMessage);
-        }
-        
-        void bot_OnRawMessage(object sender, IrcEventArgs e)
-        {
-            if ((e.Data.ReplyCode == ReplyCode.IdentifiedToServices) && (e.Data.RawMessageArray[3] == nick) && (e.Data.Message.StartsWith("is signed on as account")))
-            {
-                bot.OnRawMessage -= new IrcEventHandler(bot_OnRawMessage);
-                identity = e.Data.MessageArray[5];
-                lock (this) Monitor.Pulse (this);
-            }
-            if ((e.Data.ReplyCode == ReplyCode.EndOfWhoIs) && (e.Data.RawMessageArray[3] == nick)) {
-                bot.OnRawMessage -= new IrcEventHandler(bot_OnRawMessage);
-                lock (this) Monitor.Pulse (this);
-            }
-
-            if (e.Data.ReplyCode == ReplyCode.WhoIsRegistered) {
-                Console.WriteLine(e.Data.Message);
-            }
-        }
-        
-        private string identity = null;
-        
-        public string Identity {
-            get { return (identity!=null)?"ns/" + identity:null; }
-        }
-
-    }
-    
-    
 }

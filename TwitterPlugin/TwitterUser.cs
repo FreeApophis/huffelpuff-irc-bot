@@ -1,7 +1,8 @@
-﻿/*
- *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
+/*
+ *  <project description>
  * 
  *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
+ *  File created by apophis at 04.07.2009 17:30
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,27 +15,25 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
 using System;
-using Meebey.SmartIrc4net;
 
-namespace Huffelpuff
+namespace Plugin
 {
-    /// <summary>
-    /// Description of IdentifyUser.
-    /// </summary>
-    public abstract class IdentifyUser : MarshalByRefObject
-    {
-        protected IrcBot bot;
-        
-        public IdentifyUser(IrcBot bot) {
-            this.bot = bot;
-        }
-
-        public virtual string Identified(string nick) {
-                return null;
-        }
-    }
+	public class TwitterUser {
+	    internal TwitterUser() {}
+	    
+	    public long Id { get; set; }
+	    public string Nick { get; set; }
+	    public string Name { get; set; }
+	    public string Location { get; set; }
+	    public string Description { get; set; }
+	    public DateTime Created { get; set; }
+	    public int Followers { get; set; }
+	    public int Statuses { get; set; }
+	    public int Friends { get; set; }
+	}
 }
+
+

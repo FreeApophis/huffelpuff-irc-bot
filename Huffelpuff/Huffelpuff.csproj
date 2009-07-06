@@ -62,6 +62,7 @@
     <Compile Include="AccessControl\HostIdentify.cs" />
     <Compile Include="AccessControl\IdentifyUser.cs" />
     <Compile Include="AccessControl\NickServIdentify.cs" />
+    <Compile Include="AccessControl\NickServIdentifyRequest.cs" />
     <Compile Include="AccessControl\PasswordIdentify.cs" />
     <Compile Include="Commandlet.cs" />
     <Compile Include="IrcCore\Consts.cs" />

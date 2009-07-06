@@ -28,9 +28,13 @@ namespace Huffelpuff
     /// <summary>
     /// Description of AccessControlList.
     /// </summary>
-    public class AccessControlList
+    public class AccessControlList : MarshalByRefObject
     {
         private List<IdentifyUser> identifyPlugins = new List<IdentifyUser>();
+        
+        public List<IdentifyUser> IdentifyPlugins {
+            get { return identifyPlugins; }
+        }
         
         // string should be invalid for nicknames, that way we can handle them in paralell without problems of group overtaking!
         private const string groupPrefix = "#";
@@ -341,7 +345,7 @@ namespace Huffelpuff
             return false;
         }
         
-        private List<string> Identified(string nick) {
+        public List<string> Identified(string nick) {
             List<string> ids = new List<string>();
             foreach(IdentifyUser id in identifyPlugins) {
                 string idstring = id.Identified(nick);

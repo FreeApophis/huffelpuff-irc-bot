@@ -141,7 +141,7 @@ namespace Huffelpuff
             string value = GetValue(key);
             if ((value == null) || (value == todoValue)) {
                 Todo=true;
-                SetValue(key, todoValue);
+                ReplaceValue(key, todoValue);
                 return todoValue;
             }
             return value;
@@ -182,10 +182,8 @@ namespace Huffelpuff
             List<string> values = GetValues(key);
             if ((values.Count == 0) || (values[0] == todoValue)) {
                 Todo=true;
-                if (values.Count == 0) {
-                    SetValue(key, todoValue);
-                    values.Add(todoValue);
-                }
+                ReplaceValue(key, todoValue);
+                values.Add(todoValue);
             }
             return values;
         }
@@ -367,7 +365,7 @@ namespace Huffelpuff
         /// Constructor
         /// </summary>
         private PersistentMemory()
-        {            
+        {
             if (AppDomain.CurrentDomain.FriendlyName == "Plugins") {
                 throw new NotImplementedException("this should not happen");
             }

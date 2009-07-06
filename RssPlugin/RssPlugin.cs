@@ -45,7 +45,7 @@ namespace Plugin
         {
             checkInterval = new Timer();
             checkInterval.Elapsed += new ElapsedEventHandler(checkInterval_Elapsed);
-            checkInterval.Interval = 1 * 60 * 1000; // 3 minutes
+            checkInterval.Interval = 1 * 60 * 1000; // 1 minute
             PersistentMemory.Instance.GetValueOrTodo("rssFeed"); // make sure we have one!
             base.Init();
         }

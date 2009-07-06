@@ -167,6 +167,9 @@ namespace Plugin
         
         private void TranslateTrigger(object sender, IrcEventArgs e) {
             if(e.Data.MessageArray.Length > 1) {
+                if ((e.Data.MessageArray[1].ToLower() == "off") || (e.Data.MessageArray[1].ToLower() == "end")) {
+                    EndTranslate(e.Data.Nick, e.Data.Channel);
+                }
                 if(activeTranslations.Select("(Nick='" + e.Data.Nick + "') AND (Channel='" + e.Data.Channel + "')").Length > 0) {
                     EndTranslate(e.Data.Nick, e.Data.Channel);
                     BotMethods.SendMessage(SendType.Notice, e.Data.Nick, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Brown + "You requested more than one language translation in a channel: the old request was canceled.");
