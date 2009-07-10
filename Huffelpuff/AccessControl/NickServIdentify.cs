@@ -35,7 +35,6 @@ namespace Huffelpuff
             bot.OnKick += new KickEventHandler(bot_OnKick);
             bot.OnQuit += new QuitEventHandler(bot_OnQuit);
             bot.OnNickChange += new NickChangeEventHandler(bot_OnNickChange);
-            bot.OnNames += new NamesEventHandler(bot_OnNames);
         }
 
         void bot_OnNickChange(object sender, NickChangeEventArgs e)
@@ -82,14 +81,7 @@ namespace Huffelpuff
                 nickCache.Remove(nick);
             }
         }
-        
-        void bot_OnNames(object sender, NamesEventArgs e)
-        {
-            foreach(string nick in e.UserList) {
-                Identified(nick);
-            }
-        }
-        
+                
         public Dictionary<string, string> nickCache = new Dictionary<string, string>();
 
         public string IdToNick(string id) {

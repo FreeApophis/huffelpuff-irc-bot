@@ -114,6 +114,7 @@ namespace Huffelpuff
         
         internal void CleanPlugins()
         {
+            // try catch AppDomainUnloadedExceptions (somehow)
             List<string> del = new List<string>();
             foreach(KeyValuePair<string, Commandlet> p in commands) {
                 if (p.Value.Handler==null) {

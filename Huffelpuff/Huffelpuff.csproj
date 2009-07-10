@@ -96,14 +96,12 @@
     <Compile Include="IrcCore\IrcFeatures\IrcConstants.cs" />
     <Compile Include="IrcCore\IrcFeatures\IrcFeatures.cs" />
     <Compile Include="IrcCore\Logger.cs" />
-    <Compile Include="Mono.Nat\AbstractNatController.cs" />
     <Compile Include="Mono.Nat\AbstractNatDevice.cs" />
     <Compile Include="Mono.Nat\AsyncResults\AsyncResult.cs" />
     <Compile Include="Mono.Nat\Enums\MapState.cs" />
     <Compile Include="Mono.Nat\Enums\ProtocolType.cs" />
     <Compile Include="Mono.Nat\EventArgs\DeviceEventArgs.cs" />
     <Compile Include="Mono.Nat\Exceptions\MappingException.cs" />
-    <Compile Include="Mono.Nat\INatController.cs" />
     <Compile Include="Mono.Nat\INatDevice.cs" />
     <Compile Include="Mono.Nat\ISearcher.cs" />
     <Compile Include="Mono.Nat\Mapping.cs" />
@@ -111,9 +109,7 @@
     <Compile Include="Mono.Nat\PmpSearcher.cs" />
     <Compile Include="Mono.Nat\Pmp\AsyncResults\PortMapAsyncResult.cs" />
     <Compile Include="Mono.Nat\Pmp\PmpConstants.cs" />
-    <Compile Include="Mono.Nat\Pmp\PmpNatController.cs" />
     <Compile Include="Mono.Nat\Pmp\PmpNatDevice.cs" />
-    <Compile Include="Mono.Nat\TimerUtility.cs" />
     <Compile Include="Mono.Nat\UpnpSearcher.cs" />
     <Compile Include="Mono.Nat\Upnp\AsyncResults\GetAllMappingsAsyncResult.cs" />
     <Compile Include="Mono.Nat\Upnp\AsyncResults\PortMapAsyncResult.cs" />
@@ -130,7 +126,6 @@
     <Compile Include="Mono.Nat\Upnp\Messages\Responses\GetExternalIPAddressResponseMessage.cs" />
     <Compile Include="Mono.Nat\Upnp\Messages\Responses\GetGenericPortMappingEntryResponseMessage.cs" />
     <Compile Include="Mono.Nat\Upnp\Messages\UpnpMessage.cs" />
-    <Compile Include="Mono.Nat\Upnp\UpnpNatController.cs" />
     <Compile Include="Mono.Nat\Upnp\UpnpNatDevice.cs" />
     <Compile Include="PluginManager\BotPluginManager.cs" />
     <Compile Include="Engine.cs" />
