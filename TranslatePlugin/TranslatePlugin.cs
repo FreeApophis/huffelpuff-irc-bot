@@ -8,6 +8,7 @@
  */
 using System;
 using System.Net;
+using System.Web;
 using System.Data;
 using System.Collections;
 using System.Collections.Generic;
@@ -221,15 +222,19 @@ namespace Plugin
         
         private void DetectTrigger(object sender, IrcEventArgs e) {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
-            string lang = DetectLanguage(e.Data.Message.Substring(8));
-            if (languages.ContainsKey(lang)) {
-                string natlang;
-                try {
-                    natlang = TranslateText("This Text was in " + languages[lang] + ".", "en", lang);
-                } catch(Exception) {
-                    natlang = "";
+            if(e.Data.MessageArray.Length>1) {
+                string lang = DetectLanguage(e.Data.Message.Substring(8));
+                if (languages.ContainsKey(lang)) {
+                    string natlang;
+                    try {
+                        natlang = TranslateText("This Text was in " + languages[lang] + ".", "en", lang);
+                    } catch(Exception) {
+                        natlang = "";
+                    }
+                    BotMethods.SendMessage(SendType.Notice, sendto, "This Text was in " + languages[lang] + " - " + natlang );
                 }
-                BotMethods.SendMessage(SendType.Notice, sendto, "This Text was in " + languages[lang] + " - " + natlang );
+            } else {
+                BotMethods.SendMessage(SendType.Notice, sendto, "Userage to detect the language is !detect <some foreign text>" );
             }
         }
 
@@ -289,7 +294,6 @@ namespace Plugin
         private string TranslateText(string input, string sourceLanguage, string targetLanguage)
         {
             string url = String.Format("http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&q={0}&langpair={1}", input, sourceLanguage + "|" + targetLanguage);
-
             WebClient webClient = new WebClient();
             webClient.Encoding = System.Text.Encoding.UTF8;
             string result = webClient.DownloadString(url);
@@ -298,7 +302,7 @@ namespace Plugin
                 if (((Hashtable)jsonObj)["responseData"] == null) {
                     throw new Exception((string)((Hashtable)jsonObj)["responseDetails"]);
                 }
-                return ((string)((Hashtable)((Hashtable)jsonObj)["responseData"])["translatedText"]);
+                return HttpUtility.HtmlDecode(((string)((Hashtable)((Hashtable)jsonObj)["responseData"])["translatedText"]));
             } else {
                 return null;
             }

@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WikipediaPlugin", "Wikipedi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentedExamplePlugin", "CommentedExamplePlugin\CommentedExamplePlugin.csproj", "{BF492067-28D8-42AE-8BFB-53C30E681EF6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatorPlugin", "CalculatorPlugin\CalculatorPlugin.csproj", "{2782E763-3E1A-4C1B-9B65-5F611C1E487F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,5 +112,9 @@ Global
 		{BF492067-28D8-42AE-8BFB-53C30E681EF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BF492067-28D8-42AE-8BFB-53C30E681EF6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BF492067-28D8-42AE-8BFB-53C30E681EF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2782E763-3E1A-4C1B-9B65-5F611C1E487F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2782E763-3E1A-4C1B-9B65-5F611C1E487F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2782E763-3E1A-4C1B-9B65-5F611C1E487F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2782E763-3E1A-4C1B-9B65-5F611C1E487F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -20,12 +20,12 @@
 using System;
 using System.Collections.Generic;
 
-namespace WikipediaPlugin
+namespace Plugin
 {
     /// <summary>
-    /// Description of MyClass.
+    /// Description Wikipedia Plugin.
     /// </summary>
-    public class MyClass
+    public class WikipediaPlugin
     {
         
     }

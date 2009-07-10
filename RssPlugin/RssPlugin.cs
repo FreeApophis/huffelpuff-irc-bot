@@ -96,18 +96,22 @@ namespace Plugin
             int idx = 0;
             if (e.Data.MessageArray.Length > 1) {
                 int.TryParse(e.Data.MessageArray[1], out idx);
-                List<RssItem> items = getRss(PersistentMemory.Instance.GetValue("rssFeed"));
-                if ((idx <= items.Count) && (idx > 0)) {
-                    idx--;
-                } else {
-                    idx = 0;
-                }
-                BotMethods.SendMessage(SendType.Notice, e.Data.Channel, items[idx].Title + " was published on " + items[idx].Published.ToString() + " by " + items[idx].Author + " in " + items[idx].Category + " -> " + items[idx].Link);
+            }
+            
+            List<RssItem> items = getRss(PersistentMemory.Instance.GetValue("rssFeed"));
+            if ((idx <= items.Count) && (idx > 0)) {
+                idx--;
             } else {
+                idx = 0;
+            }
+            
+            BotMethods.SendMessage(SendType.Notice, e.Data.Channel, items[idx].Title + " was published on " + items[idx].Published.ToString() + " by " + items[idx].Author + " in " + items[idx].Category + " -> " + items[idx].Link);
+            
+            /*            } else {
                 foreach(RssItem item in getRss(PersistentMemory.Instance.GetValue("rssFeed"))) {
                     BotMethods.SendMessage(SendType.Notice, sendto, item.Title + " was published on " + item.Published.ToString() + " by " + item.Author + " in " + item.Category + " -> " + item.Link);
                 }
-            }
+            } */
         }
 
         
