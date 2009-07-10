@@ -9,13 +9,4 @@ namespace Plugin
     {
         public abstract CalculationResult Calculate(string equation);
     }
-
-    internal class DummyCalculator : WebCalculator
-    {
-        public override CalculationResult Calculate(string equation)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
 }

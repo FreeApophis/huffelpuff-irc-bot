@@ -15,21 +15,25 @@ namespace Plugin
 
         public override CalculationResult Calculate(string equation)
         {
-            WebClient client = new WebClient();
-            string eq = HttpUtility.UrlEncode(equation);
-            string query = client.DownloadString(urlBase + eq);
-            Match match = resultMatch.Match(query);
+            try {
+                WebClient client = new WebClient();
+                string eq = HttpUtility.UrlEncode(equation);
+                string query = client.DownloadString(urlBase + eq);
+                Match match = resultMatch.Match(query);
 
-            if (match.Success)
-            {
-                string result = match.Value;
-                result = parseSpecial(result);
-                string[] splitres = result.Split(new char[] { '=' });
-                return new CalculationResult(splitres[1], result, false);
-            }
-            else
-            {
-                return new CalculationResult();
+                if (match.Success)
+                {
+                    string result = match.Value;
+                    result = parseSpecial(result);
+                    string[] splitres = result.Split(new char[] { '=' });
+                    return new CalculationResult(splitres[1], result, false);
+                }
+                else
+                {
+                    return new CalculationResult();
+                }
+            } catch (Exception) {
+                return CalculationResult.NoResult();
             }
         }
 

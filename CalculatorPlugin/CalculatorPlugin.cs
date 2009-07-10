@@ -48,7 +48,7 @@ namespace Plugin
         public override void Activate()
         {
             BotMethods.AddCommand(new Commandlet("!calc",
-                                                 "!calc <function> does calculate pleny of things, different backends are used. Jere are some working Examples: 3*3*3, 20!, 1km^3 in teaspoons, x*(x+2)=15, 2*Pi, 1 USD in CHF, three times four, A = [1, 2, 3]; B=4; A*B, unidrnd(10), S = [2,1,4;3,2,2;-2,2,3]; D = diag(diag(S),0)",
+                                                 "!calc <function> calculates plenty of different equations, different backends are used. Here are some working Examples: 3*3*3, 20!, 1km^3 in teaspoons, x*(x+2)=15, 2*Pi, 1 USD in CHF, three times four, A = [1, 2, 3]; B=4; A*B, unidrnd(10), S = [2,1,4;3,2,2;-2,2,3]; D = diag(diag(S),0)",
                                                  CalculateHandler, this, CommandScope.Both));
             
             base.Activate();
@@ -56,15 +56,21 @@ namespace Plugin
         
         public override void Deactivate()
         {
+            BotMethods.RemoveCommand("!calc");
+            
             base.Deactivate();
         }
         
         private void CalculateHandler(object sender, IrcEventArgs e) {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
-
-            CalculationResult result = magicCalculator.Calculate(e.Data.Message.Substring(6));
-            
-            BotMethods.SendMessage(SendType.Message, sendto, "[" + result.ResultProvider.ToString()[0].ToString() + "] Result: " + result.Result);
+            try {
+                CalculationResult result = magicCalculator.Calculate(e.Data.Message.Substring(6));
+                if (result.HasResult) {
+                    BotMethods.SendMessage(SendType.Message, sendto, "[" + result.ResultProvider.ToString()[0].ToString() + "] Result: " + result.Result);
+                    return;
+                }
+            } catch (Exception) {}
+            BotMethods.SendMessage(SendType.Message, sendto, "no result!");
         }
         
     }

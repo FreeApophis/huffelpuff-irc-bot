@@ -16,61 +16,65 @@ namespace Plugin
         private Regex whiteSpaceMatch = new Regex(@"\s+");
         public override CalculationResult Calculate(string equation)
         {
-            string requestString = "submit=Submit%20to%20Octave&commands=" + HttpUtility.UrlEncode(equation);
+            try {
+                string requestString = "submit=Submit%20to%20Octave&commands=" + HttpUtility.UrlEncode(equation);
 
-            ASCIIEncoding encoding = new ASCIIEncoding();
-            byte[] data = encoding.GetBytes(requestString);
+                ASCIIEncoding encoding = new ASCIIEncoding();
+                byte[] data = encoding.GetBytes(requestString);
 
-            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(urlBase);
-            request.ServicePoint.Expect100Continue = false;
-            request.Method = "POST";
-            request.ContentType = "application/x-www-form-urlencoded";
-            request.ContentLength = data.Length;
-            Stream stream = request.GetRequestStream();
-            stream.Write(data, 0, data.Length);
-            stream.Flush();
+                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(urlBase);
+                request.ServicePoint.Expect100Continue = false;
+                request.Method = "POST";
+                request.ContentType = "application/x-www-form-urlencoded";
+                request.ContentLength = data.Length;
+                Stream stream = request.GetRequestStream();
+                stream.Write(data, 0, data.Length);
+                stream.Flush();
 
-            StreamReader reader = new StreamReader(request.GetResponse().GetResponseStream());
-            string query = reader.ReadToEnd();
+                StreamReader reader = new StreamReader(request.GetResponse().GetResponseStream());
+                string query = reader.ReadToEnd();
 
 
-            Match match = resultMatch.Match(query);
+                Match match = resultMatch.Match(query);
 
-            string[] lines = match.Value.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] lines = match.Value.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
-            if (lines.Length > 1)
-            {
-                if (lines.Length > 2)
+                if (lines.Length > 1)
                 {
-                    string result = ""; int i = 0;
-                    if (!lines[1].StartsWith("ans"))
+                    if (lines.Length > 2)
                     {
-                        result = lines[1]+" ";
+                        string result = ""; int i = 0;
+                        if (!lines[1].StartsWith("ans"))
+                        {
+                            result = lines[1]+" ";
+                        }
+                        foreach (string line in lines)
+                        {
+                            if (i > 2)
+                            {
+                                result += ",[" + whiteSpaceMatch.Replace(line.Trim(), ",") + "]";
+                            }
+                            else if (i > 1)
+                            {
+                                result += "[" + whiteSpaceMatch.Replace(line.Trim(), ",") + "]";
+                            }
+                            i++;
+                        }
+                        return new CalculationResult(result, lines[0] + " => " + result, true);
                     }
-                    foreach (string line in lines)
+                    else
                     {
-                        if (i > 2)
-                        {
-                            result += ",[" + whiteSpaceMatch.Replace(line.Trim(), ",") + "]";
-                        }
-                        else if (i > 1)
-                        {
-                            result += "[" + whiteSpaceMatch.Replace(line.Trim(), ",") + "]";
-                        }
-                        i++;
+                        string[] splitres = lines[1].Split(new char[] { '=' });
+                        return new CalculationResult(splitres[1], lines[0] + " => " + RemoveAns(lines[1]), false);
                     }
-                    return new CalculationResult(result, lines[0] + " => " + result, true);
+
                 }
                 else
                 {
-                    string[] splitres = lines[1].Split(new char[] { '=' });
-                    return new CalculationResult(splitres[1], lines[0] + " => " + RemoveAns(lines[1]), false);
+                    return CalculationResult.NoResult();
                 }
-
-            }
-            else
-            {
-                return new CalculationResult();
+            } catch (Exception) {
+                return CalculationResult.NoResult();
             }
         }
 
