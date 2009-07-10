@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -43,62 +44,114 @@ namespace Plugin
     {
         private Timer checkInterval;
         
-        private AccesTwitter twitter = new AccesTwitter("http://twitter.com/", "http://twitter.com/");
-        private AccesTwitter identica = new AccesTwitter("http://identi.ca/api/", "http://identi.ca/");
+        private AccesTwitter twitter_fr = new AccesTwitter("http://twitter.com/", "http://twitter.com/");
+        private AccesTwitter identica_fr = new AccesTwitter("http://identi.ca/api/", "http://identi.ca/");
+        private AccesTwitter twitter_de = new AccesTwitter("http://twitter.com/", "http://twitter.com/");
+        private AccesTwitter identica_de = new AccesTwitter("http://identi.ca/api/", "http://identi.ca/");
+        private AccesTwitter twitter_it = new AccesTwitter("http://twitter.com/", "http://twitter.com/");
+        private AccesTwitter identica_it = new AccesTwitter("http://identi.ca/api/", "http://identi.ca/");
+        private AccesTwitter twitter_all = new AccesTwitter("http://twitter.com/", "http://twitter.com/");
+        private AccesTwitter identica_all = new AccesTwitter("http://identi.ca/api/", "http://identi.ca/");
         
         private Dictionary<long, TwitterMention> allMention = new Dictionary<long, TwitterMention>();
 
-        public TwitterPlugin(IrcBot botInstance) : base(botInstance) {
-
-        }
-        
-        private NickServIdentify nickserv;
+        public TwitterPlugin(IrcBot botInstance) : base(botInstance) {}
         
         public override void Init()
         {
-            twitter.User = PersistentMemory.Instance.GetValueOrTodo("twitter_user");
-            identica.User = PersistentMemory.Instance.GetValueOrTodo("identica_user");
+            twitter_fr.User = PersistentMemory.Instance.GetValueOrTodo("twitter_user_fr");
+            identica_fr.User = PersistentMemory.Instance.GetValueOrTodo("identica_user_fr");
+            twitter_fr.Pass = PersistentMemory.Instance.GetValueOrTodo("twitter_pass_fr");
+            identica_fr.Pass = PersistentMemory.Instance.GetValueOrTodo("identica_pass_fr");
             
-            twitter.Pass = PersistentMemory.Instance.GetValueOrTodo("twitter_pass");
-            identica.Pass = PersistentMemory.Instance.GetValueOrTodo("identica_pass");
+            twitter_de.User = PersistentMemory.Instance.GetValueOrTodo("twitter_user_de");
+            identica_de.User = PersistentMemory.Instance.GetValueOrTodo("identica_user_de");
+            twitter_de.Pass = PersistentMemory.Instance.GetValueOrTodo("twitter_pass_de");
+            identica_de.Pass = PersistentMemory.Instance.GetValueOrTodo("identica_pass_de");
+
+            twitter_it.User = PersistentMemory.Instance.GetValueOrTodo("twitter_user_it");
+            identica_it.User = PersistentMemory.Instance.GetValueOrTodo("identica_user_it");
+            twitter_it.Pass = PersistentMemory.Instance.GetValueOrTodo("twitter_pass_it");
+            identica_it.Pass = PersistentMemory.Instance.GetValueOrTodo("identica_pass_it");
+
+            twitter_all.User = PersistentMemory.Instance.GetValueOrTodo("twitter_user_all");
+            identica_all.User = PersistentMemory.Instance.GetValueOrTodo("identica_user_all");
+            twitter_all.Pass = PersistentMemory.Instance.GetValueOrTodo("twitter_pass_all");
+            identica_all.Pass = PersistentMemory.Instance.GetValueOrTodo("identica_pass_all");
+
             
             checkInterval = new Timer();
             checkInterval.Interval = 1 * 60 * 1000; // 1 minute
             checkInterval.Elapsed += new ElapsedEventHandler(CheckInterval_Elapsed);
+            
+            BotMethods.SendMessage(SendType.Action, "#pps-twitter", " is in a new version: " + this.GetType().Assembly.FullName);
             base.Init();
-            
-            
-            foreach(IdentifyUser idu in BotMethods.Acl.IdentifyPlugins) {
-                if (idu is NickServIdentify) {
-                    nickserv = (NickServIdentify)idu;
-                }
-            }
-            
-            BotEvents.OnRawMessage += new IrcEventHandler(BotEvents_OnRawMessage);
         }
 
-        private void BotEvents_OnRawMessage(object sender, IrcEventArgs e)
-        {
-            if(e.Data.ReplyCode == ReplyCode.ErrorNoSuchNickname) {
-                PersistentMemory.Instance.RemoveValue("mention_subscriber", e.Data.RawMessageArray[3]);
-                PersistentMemory.Instance.Flush();
+        private AccesTwitter GetTwitterByLang(string lang) {
+            switch(lang) {
+                    case "fr": return twitter_fr;
+                    case "de": return twitter_de;
+                    case "it": return twitter_it;
+                    case "ll": return twitter_all;
+                    default: return null;
             }
         }
-
+        
+        private AccesTwitter GetIdenticaByLang(string lang) {
+            switch(lang) {
+                    case "fr": return identica_fr;
+                    case "de": return identica_de;
+                    case "it": return identica_it;
+                    case "ll": return identica_all;
+                    default: return null;
+            }
+        }
+        
         private void CheckInterval_Elapsed(object sender, ElapsedEventArgs e)
         {
             IEnumerable<TwitterMention> mentions;
             long newid;
-            //twitter
-            mentions = twitter.GetNewMentions();
-            newid = SendMentions(mentions, PersistentMemory.Instance.GetValue("twitter_maxid"));
-            PersistentMemory.Instance.ReplaceValue("twitter_maxid", newid.ToString());
+            //twitter fr
+            mentions = twitter_fr.GetNewMentions();
+            newid = SendMentions(mentions, PersistentMemory.Instance.GetValue("twitter_maxid_fr"));
+            PersistentMemory.Instance.ReplaceValue("twitter_maxid_fr", newid.ToString());
             
-            //identi.ca
-            mentions = identica.GetNewMentions();
-            newid = SendMentions(mentions, PersistentMemory.Instance.GetValue("identica_maxid"));
-            PersistentMemory.Instance.ReplaceValue("identica_maxid", newid.ToString());
+            //identi.ca fr
+            mentions = identica_fr.GetNewMentions();
+            newid = SendMentions(mentions, PersistentMemory.Instance.GetValue("identica_maxid_fr"));
+            PersistentMemory.Instance.ReplaceValue("identica_maxid_fr", newid.ToString());
             
+            //twitter de
+            mentions = twitter_de.GetNewMentions();
+            newid = SendMentions(mentions, PersistentMemory.Instance.GetValue("twitter_maxid_de"));
+            PersistentMemory.Instance.ReplaceValue("twitter_maxid_de", newid.ToString());
+            
+            //identi.ca de
+            mentions = identica_de.GetNewMentions();
+            newid = SendMentions(mentions, PersistentMemory.Instance.GetValue("identica_maxid_de"));
+            PersistentMemory.Instance.ReplaceValue("identica_maxid_de", newid.ToString());
+
+            //twitter it
+            mentions = twitter_it.GetNewMentions();
+            newid = SendMentions(mentions, PersistentMemory.Instance.GetValue("twitter_maxid_it"));
+            PersistentMemory.Instance.ReplaceValue("twitter_maxid_it", newid.ToString());
+            
+            //identi.ca it 
+            mentions = identica_it.GetNewMentions();
+            newid = SendMentions(mentions, PersistentMemory.Instance.GetValue("identica_maxid_it"));
+            PersistentMemory.Instance.ReplaceValue("identica_maxid_it", newid.ToString());
+
+            //twitter all
+            mentions = twitter_all.GetNewMentions();
+            newid = SendMentions(mentions, PersistentMemory.Instance.GetValue("twitter_maxid_all"));
+            PersistentMemory.Instance.ReplaceValue("twitter_maxid_all", newid.ToString());
+            
+            //identi.ca all
+            mentions = identica_all.GetNewMentions();
+            newid = SendMentions(mentions, PersistentMemory.Instance.GetValue("identica_maxid_all"));
+            PersistentMemory.Instance.ReplaceValue("identica_maxid_all", newid.ToString());
+
             PersistentMemory.Instance.Flush();
         }
 
@@ -117,23 +170,20 @@ namespace Plugin
                     allMention.Add(mention.Id, mention);
                 }
                 if (mention.Id > mid) {
-                    foreach (string sendto in PersistentMemory.Instance.GetValues("mention_subscriber")) {
-                        string nick;
-                        if (sendto.StartsWith("ns/")) {
-                            nick = nickserv.IdToNick(sendto);
-                            if (nick != null) {
-                                BotMethods.SendMessage(SendType.Message, nick, mention.Text + " (by " + mention.User.Nick + " [" + mention.User.Name + "|" + mention.User.Statuses + "|" + mention.User.Followers + "|" + mention.User.Friends + "] posted " + Ago(DateTime.Now - mention.Created) + " on " + mention.Feed + ") !reply " + mention.Id + ")");
-                            }
-                        }
-                        else {
-                            BotMethods.SendMessage(SendType.Message, sendto, mention.Text + " (by " + mention.User.Nick + " [" + mention.User.Name + "|" + mention.User.Statuses + "|" + mention.User.Followers + "|" + mention.User.Friends + "] posted " + Ago(DateTime.Now - mention.Created) + " on " + mention.Feed + ") !reply " + mention.Id + ")");
-                        }
-                    }
-                    nid = Math.Max(mention.Id, nid);
+
+                    BotMethods.SendMessage(SendType.Message, "#pps-twitter", "[" + IrcConstants.IrcBold+ IrcConstants.IrcColor + "" + (int)IrcColors.LightRed + "mention" + IrcConstants.IrcNormal + "] " + Colorize(HttpUtility.HtmlDecode(mention.Text)) + " (by " + mention.Feed + mention.User.Nick + " [" + IrcConstants.IrcColor + "" + (int)IrcColors.Brown+ mention.User.Name + IrcConstants.IrcColor + "|" + mention.User.Statuses + "|" + mention.User.Followers + "|" + mention.User.Friends + "] posted " +MessageTime(mention.Created) + ") !reply " + mention.Id + " @" + mention.User.Nick + ")");
+                    nid = Math.Max(nid, mention.Id);
                 }
                 
             }
             return nid;
+        }
+        
+        // TODO
+        private string Colorize(string text) {
+            text = text.Replace("@piratenparteich", "" + IrcConstants.IrcBold+ IrcConstants.IrcColor + "" + (int)IrcColors.Blue + "@piratenparteich" + IrcConstants.IrcNormal + IrcConstants.IrcColor);
+            text = text.Replace("@piratenparteischweiz", "" + IrcConstants.IrcBold+ IrcConstants.IrcColor + "" + (int)IrcColors.Blue + "@piratenparteich" + IrcConstants.IrcNormal + IrcConstants.IrcColor);
+            return text;
         }
         
         public override string Name {
@@ -143,13 +193,19 @@ namespace Plugin
         }
         
         public override void Activate() {
-            BotMethods.AddCommand(new Commandlet("!tweet", "The command !tweet <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Public, "twitter_access"));
-            BotMethods.AddCommand(new Commandlet("!rt", "The command !rt <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Public, "twitter_access"));
-            BotMethods.AddCommand(new Commandlet("!reply", "The command !reply <twitter_message_id> <your text>, will post a twitter message to the channel feed as a reply to a twitter message", twitterHandler, this, CommandScope.Public, "twitter_access"));
-            BotMethods.AddCommand(new Commandlet("!mentions", "The command !mentions will inform you when the pirates are mentioned on twitter or identi.ca. ", mentionAboHandler, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!endmentions", "Will inform you about ", mentionAboHandler, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!trends", "The command !trends Will inform you about the newest emerging trends on twitter.", trendAboHandler, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!endtrends", ". ", trendAboHandler, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!tweet-fr", "The command !tweet <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Public, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!tweet-de", "The command !tweet <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Public, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!tweet-it", "The command !tweet <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Public, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!tweet-all", "The command !tweet <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Public, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!rt-fr", "The command !rt <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Public, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!rt-de", "The command !rt <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Public, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!rt-it", "The command !rt <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Public, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!rt-all", "The command !rt <your text>, will post a twitter message to the channel feed", twitterHandler, this, CommandScope.Public, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!reply-fr", "The command !reply <twitter_message_id> <your text>, will post a twitter message to the channel feed as a reply to a twitter message", twitterHandler, this, CommandScope.Public, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!reply-de", "The command !reply <twitter_message_id> <your text>, will post a twitter message to the channel feed as a reply to a twitter message", twitterHandler, this, CommandScope.Public, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!reply-it", "The command !reply <twitter_message_id> <your text>, will post a twitter message to the channel feed as a reply to a twitter message", twitterHandler, this, CommandScope.Public, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!reply-all", "The command !reply <twitter_message_id> <your text>, will post a twitter message to the channel feed as a reply to a twitter message", twitterHandler, this, CommandScope.Public, "twitter_access"));
+            //BotMethods.AddCommand(new Commandlet("!mentions", "---help::mentions---", mentionsHandler, this, CommandScope.Public, "twitter_access"));
             
             checkInterval.Enabled = true;
             base.Activate();
@@ -157,11 +213,10 @@ namespace Plugin
 
         
         public override void Deactivate() {
-            BotMethods.RemoveCommand("!twitter");
+            BotMethods.RemoveCommand("!tweet");
+            BotMethods.RemoveCommand("!rt");
+            BotMethods.RemoveCommand("!reply");
             BotMethods.RemoveCommand("!mentions");
-            BotMethods.RemoveCommand("!endmentions");
-            BotMethods.RemoveCommand("!trends");
-            BotMethods.RemoveCommand("!endtrends");
 
             checkInterval.Enabled = false;
             base.Deactivate();
@@ -170,31 +225,11 @@ namespace Plugin
         public override string AboutHelp() {
             return "The Twitter Plugin will post a twitter message to the channel feed, try !help twitter.";
         }
-        
-        private void mentionAboHandler(object sender, IrcEventArgs e) {
-            string id;
-            
-            // Stop Abo
-            if (e.Data.MessageArray[0] == "!endmentions") {
-                PersistentMemory.Instance.RemoveValue("mention_subscriber", e.Data.Nick);
-                if ((id = nickserv.Identified(e.Data.Nick)) != null) {
-                    PersistentMemory.Instance.RemoveValue("mention_subscriber", id);
-                }
-                PersistentMemory.Instance.Flush();
-                return;
-            }
-            
-            // Start Abo
-            if ((id = nickserv.Identified(e.Data.Nick)) != null) {
-                PersistentMemory.Instance.SetValue("mention_subscriber", id);
-                BotMethods.SendMessage(SendType.Notice, e.Data.Nick, "You subscribed a mention abo permanently with your identified id: '" + id + "'. Join the channel identified to use your abo after a leave. (use !endmentions to stop)");
-            } else {
-                PersistentMemory.Instance.SetValue("mention_subscriber", e.Data.Nick);
-                BotMethods.SendMessage(SendType.Notice, e.Data.Nick, "You subscribed a mention abo temporarily with your nick: '" + e.Data.Nick + "' it will stop as soon as you leave, change your nick or use !endmentions.");
-            }
-            PersistentMemory.Instance.Flush();
-        }
 
+        private  string MessageTime(DateTime time) {
+            return time.ToString("HH:mm K", new CultureInfo("DE-ch", true));
+        }
+        
         private string Ago(TimeSpan ago) {
             if (ago.Days > 0) {
                 return ago.Days + ((ago.Days==1)?" day":" days") + " ago";
@@ -207,11 +242,12 @@ namespace Plugin
             }
         }
 
-        private void trendAboHandler(object sender, IrcEventArgs e) {
-            
-        }
-
         private void twitterHandler(object sender, IrcEventArgs e) {
+            
+            string lang = e.Data.MessageArray[0].Substring(e.Data.MessageArray[0].Length-2,2);
+            AccesTwitter identica = GetIdenticaByLang(lang);
+            AccesTwitter twitter = GetTwitterByLang(lang);
+            
             try {
                 if(e.Data.MessageArray[0].ToLower()=="!reply") {
                     long id = long.Parse(e.Data.MessageArray[1]);
@@ -225,7 +261,7 @@ namespace Plugin
                     identica.StatusUpdate("RT " + e.Data.Message.Substring(4));
                     //twitter.StatusUpdate("RT " + e.Data.Message.Substring(4));
                 } else {
-                    identica.StatusUpdate(e.Data.Message.Substring(9));
+                    identica.StatusUpdate(e.Data.Message.Substring(7));
                     //twitter.StatusUpdate(e.Data.Message.Substring(9));
                 }
                 
@@ -235,6 +271,11 @@ namespace Plugin
                 Console.WriteLine();
                 BotMethods.SendMessage(SendType.Notice, e.Data.Nick, "Twitter Error: " + ex.Message);
             }
+        }
+        
+        private void mentionsHandler(object sender, IrcEventArgs e) {
+            IEnumerable<TwitterMention> query = allMention.Values.OrderByDescending(t => t.Created).Take(10);
+            
         }
     }
 }

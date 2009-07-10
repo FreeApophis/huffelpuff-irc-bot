@@ -61,6 +61,17 @@ namespace Plugin
             
         }
         
+        public IEnumerable<string> GetNewDirectMessages() {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseUrlApi + "direct_messages.xml");
+            request.Credentials = new NetworkCredential(user, pass);
+            request.PreAuthenticate = true;
+            request.Method = "GET";
+
+            WebResponse webResponse = request.GetResponse();
+            XmlTextReader reader = new XmlTextReader(webResponse.GetResponseStream());
+            return null;
+        }
+        
         public IEnumerable<TwitterMention> GetNewMentions() {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseUrlApi + "statuses/mentions.xml");
             request.Credentials = new NetworkCredential(user, pass);
@@ -160,7 +171,7 @@ namespace Plugin
             request.Method = "POST";
             request.ServicePoint.Expect100Continue = false;
 
-            status = TinyUrl.GetTinyUrl(status);
+            status = UrlShortener.GetTinyUrl(status);
             
             if(status.Length > 140) {
                 throw new Exception("Your message was too long (" + status.Length + "), please rephrase!");

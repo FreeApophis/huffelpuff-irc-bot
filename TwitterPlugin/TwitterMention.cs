@@ -46,6 +46,8 @@ namespace Plugin
         public string Text { get; set; }
         public DateTime Created { get; set; }
         public string Source { get; set; }
+        public bool answered { get; set; }
+        
         
     }
     
