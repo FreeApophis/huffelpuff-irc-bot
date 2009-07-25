@@ -58,6 +58,7 @@
     <Compile Include="TwitterMention.cs" />
     <Compile Include="TwitterPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TwitterSearch.cs" />
     <Compile Include="TwitterUser.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -71,6 +71,47 @@ namespace Plugin
             XmlTextReader reader = new XmlTextReader(webResponse.GetResponseStream());
             return null;
         }
+
+        public IEnumerable<TwitterSearch> GetNewSearch(string searchterm) {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://search.twitter.com/search.atom?q=" + HttpUtility.UrlEncode(searchterm));
+            request.Method = "GET";
+
+            WebResponse webResponse = request.GetResponse();
+            XmlTextReader reader = new XmlTextReader(webResponse.GetResponseStream());
+
+            TwitterSearch search = null;
+            List<TwitterSearch> searches = new List<TwitterSearch>();
+            
+            
+            while (reader.Read()) {
+                if ((reader.Name == "entry") && (reader.NodeType == XmlNodeType.Element)) {
+                    search = new TwitterSearch(searchterm);
+                    searches.Add(search);
+                }
+                if ((search != null) && (reader.Name == "id") && (reader.NodeType == XmlNodeType.Element)) {
+                    reader.Read();
+                    search.Id = long.Parse(reader.Value.Split(new char[] {':'})[2]);
+                }
+                if ((reader.Name == "published") && (reader.NodeType == XmlNodeType.Element)) {
+                    reader.Read();
+                    search.Created = ParseSearchTwitterDate(reader.Value);
+                }
+                if ((search != null) && (reader.Name == "title") && (reader.NodeType == XmlNodeType.Element)) {
+                    reader.Read();
+                    search.Text = reader.Value;
+                }
+                if ((reader.Name == "name") && (reader.NodeType == XmlNodeType.Element)) {
+                    reader.Read();
+                    search.Author = reader.Value;
+                }
+                if ((reader.Name == "uri") && (reader.NodeType == XmlNodeType.Element)) {
+                    reader.Read();
+                    search.Feed = reader.Value;
+                }
+            }
+            return searches;
+        }
+        
         
         public IEnumerable<TwitterMention> GetNewMentions() {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseUrlApi + "statuses/mentions.xml");
@@ -109,7 +150,8 @@ namespace Plugin
                 }
                 if ((!isUser) && (reader.Name == "created_at") && (reader.NodeType == XmlNodeType.Element)) {
                     reader.Read();
-                    mention.Created = DateTime.ParseExact(reader.Value.Insert(23, ":"), "ddd MMM dd HH:mm:ss K yyyy", new CultureInfo("EN-us", true));
+                    mention.Created = ParseTwitterDate(reader.Value);
+                    //mention.Created = DateTime.ParseExact(reader.Value.Insert(23, ":"), "ddd MMM dd HH:mm:ss K yyyy", new CultureInfo("EN-us", true));
                 }
                 if ((!isUser) && (reader.Name == "source") && (reader.NodeType == XmlNodeType.Element)) {
                     reader.Read();
@@ -148,7 +190,8 @@ namespace Plugin
                 }
                 if ((isUser) && (reader.Name == "created_at") && (reader.NodeType == XmlNodeType.Element)) {
                     reader.Read();
-                    mention.User.Created = DateTime.ParseExact(reader.Value.Insert(23, ":"), "ddd MMM dd HH:mm:ss K yyyy", new CultureInfo("EN-us", true));
+                    mention.User.Created = ParseTwitterDate(reader.Value);
+                    //mention.Created = DateTime.ParseExact(reader.Value.Insert(23, ":"), "ddd MMM dd HH:mm:ss K yyyy", new CultureInfo("EN-us", true));
                 }
                 if ((isUser) && (reader.Name == "statuses_count") && (reader.NodeType == XmlNodeType.Element)) {
                     reader.Read();
@@ -156,6 +199,53 @@ namespace Plugin
                 }
             }
             return mentions;
+        }
+        
+        public DateTime ParseSearchTwitterDate(string datetime) {
+            //0    5  8  11 14 17
+            //2009-07-19T04:39:02Z
+            try {
+                int year = int.Parse(datetime.Substring(0,4));
+                int month = int.Parse(datetime.Substring(5,2));
+                int day = int.Parse(datetime.Substring(8,2));
+                int hour = int.Parse(datetime.Substring(11,2));
+                int minute = int.Parse(datetime.Substring(14,2));
+                int second = int.Parse(datetime.Substring(17,2));
+                return new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
+            } catch (Exception) {
+                return DateTime.MinValue;
+            }
+        }
+        
+        public DateTime ParseTwitterDate(string datetime) {
+            //     4   8  11 14 17       26
+            //"Sat Jul 18 07:06:53 +0000 2009"
+            try {
+                int year = int.Parse(datetime.Substring(26,4));
+                int month = 0;
+                switch(datetime.Substring(4,3)) {
+                        case "Jan": month = 1; break;
+                        case "Feb": month = 2; break;
+                        case "Mar": month = 3; break;
+                        case "Apr": month = 4; break;
+                        case "May": month = 5; break;
+                        case "Jun": month = 6; break;
+                        case "Jul": month = 7; break;
+                        case "Aug": month = 8; break;
+                        case "Sep": month = 9; break;
+                        case "Oct": month = 10; break;
+                        case "Nov": month = 11; break;
+                        case "Dec": month = 12; break;
+                        default: month = 0; break;
+                }
+                int day = int.Parse(datetime.Substring(8,2));
+                int hour = int.Parse(datetime.Substring(11,2));
+                int minute = int.Parse(datetime.Substring(14,2));
+                int second = int.Parse(datetime.Substring(17,2));
+                return new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
+            } catch (Exception) {
+                return DateTime.MinValue;
+            }
         }
         
         public void StatusUpdate(string status) {
