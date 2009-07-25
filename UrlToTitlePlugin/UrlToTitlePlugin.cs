@@ -74,7 +74,9 @@ namespace Plugin
         private Regex pMatch = new Regex("(?<=t=)[0-9]*");
         private Regex charsetMatch = new Regex("(?<=charset=)[^(;\" )]*", RegexOptions.IgnoreCase);
         
-        private void BotEvents_OnChannelMessage(object sender, IrcEventArgs e)
+         private Regex whiteSpaceMatch = new Regex(@"\s+");
+
+       private void BotEvents_OnChannelMessage(object sender, IrcEventArgs e)
         {
             try {
                 string lang = (e.Data.Channel=="#piraten-schweiz")?"de":"en";
@@ -95,7 +97,7 @@ namespace Plugin
                         
                         string page = client.DownloadString(e.Data.Message);
                         string charset = charsetMatch.Match(page).Value;
-                        string title = titleMatch.Match(page).Value;
+                        string title = whiteSpaceMatch.Replace(titleMatch.Match(page).Value, " ");
                         
                         if (charset.ToLower()!="") {
                             Encoding enc = System.Text.Encoding.GetEncoding(charset);
