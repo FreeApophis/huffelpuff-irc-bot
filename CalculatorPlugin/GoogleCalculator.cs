@@ -43,6 +43,7 @@ namespace Plugin
             resultBuilder.Replace("&#215;", "*");
             resultBuilder.Replace("<sup>", "^");
             resultBuilder.Replace("</sup>", "");
+            resultBuilder.Replace("<font size=-2> </font>", "");
             return resultBuilder.ToString();
         }
     }

@@ -50,6 +50,9 @@ namespace Plugin
             BotMethods.AddCommand(new Commandlet("!calc",
                                                  "!calc <function> calculates plenty of different equations, different backends are used. Here are some working Examples: 3*3*3, 20!, 1km^3 in teaspoons, x*(x+2)=15, 2*Pi, 1 USD in CHF, three times four, A = [1, 2, 3]; B=4; A*B, unidrnd(10), S = [2,1,4;3,2,2;-2,2,3]; D = diag(diag(S),0)",
                                                  CalculateHandler, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!eval",
+                                                 "!eval <function> calculates plenty of different equations, different backends are used. eval returns not only the result but the whole equation again. Here are some working Examples: 3*3*3, 20!, 1km^3 in teaspoons, x*(x+2)=15, 2*Pi, 1 USD in CHF, three times four, A = [1, 2, 3]; B=4; A*B, unidrnd(10), S = [2,1,4;3,2,2;-2,2,3]; D = diag(diag(S),0)",
+                                                 EvaluateHandler, this, CommandScope.Both));
             
             base.Activate();
         }
@@ -57,6 +60,7 @@ namespace Plugin
         public override void Deactivate()
         {
             BotMethods.RemoveCommand("!calc");
+            BotMethods.RemoveCommand("!eval");
             
             base.Deactivate();
         }
@@ -73,5 +77,17 @@ namespace Plugin
             BotMethods.SendMessage(SendType.Message, sendto, "no result!");
         }
         
+        private void EvaluateHandler(object sender, IrcEventArgs e) {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
+            try {
+                CalculationResult result = magicCalculator.Calculate(e.Data.Message.Substring(6));
+                if (result.HasResult) {
+                    BotMethods.SendMessage(SendType.Message, sendto, "[" + result.ResultProvider.ToString()[0].ToString() + "] Result: " + result.CompleteEquation);
+                    return;
+                }
+            } catch (Exception) {}
+            BotMethods.SendMessage(SendType.Message, sendto, "no result!");
+        }
+
     }
 }
