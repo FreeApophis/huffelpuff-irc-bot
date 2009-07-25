@@ -104,12 +104,40 @@ namespace Huffelpuff
 
         }
         
+        private List<string> GetAllGroups(string nick) {
+            List<string> allgroups = new List<string>();
+            foreach (string id in Identified(nick)) {
+                allgroups.AddRange(GetGroups(id));
+            }
+            return allgroups;
+        }
+        
         private List<string> GetGroups(string nick) {
             List<string> temp = new List<string>();
             
             foreach(string group in groups.Keys) {
                 if(groups[group].Contains(nick)) {
                     temp.Add(group);
+                }
+            }
+            
+            foreach(string channel in PersistentMemory.Instance.GetValues("channel"))
+            {
+                NonRfcChannelUser user = (NonRfcChannelUser)bot.GetChannelUser(channel, nick);
+                if (user==null) { continue; }
+                if (user.IsVoice) {
+                    temp.Add("#+" + channel);
+                }
+                if (bot.SupportNonRfc && user.IsHalfop) {
+                    temp.Add("#%" + channel);
+                    temp.Add("#+" + channel);
+                }
+                if (user.IsOp) {
+                    temp.Add("#@" + channel);
+                    if (bot.SupportNonRfc) {
+                        temp.Add("#%" + channel);
+                    }
+                    temp.Add("#+" + channel);
                 }
             }
             
@@ -130,31 +158,34 @@ namespace Huffelpuff
             foreach(string line in bot.ListToLines(this.Identified(nicktToID), 350, ", ", "IDs of the Nick '" + nicktToID + "': ", " END.")) {
                 bot.SendMessage(SendType.Notice, sendto, line);
             }
+            foreach(string line in bot.ListToLines(this.GetAllGroups(nicktToID), 350, ", ", "Nick is in Groups: ", " END.")) {
+                bot.SendMessage(SendType.Notice, sendto, line);
+            }
         }
 
         
         
         private void accessHandler(object sender, IrcEventArgs e) {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
-                if(e.Data.MessageArray.Length > 2) {
-                    if (e.Data.MessageArray[0] == "!+access") {
-                        if(AddAccessRight(e.Data.MessageArray[1], e.Data.MessageArray[2])) {
-                            bot.SendMessage(SendType.Notice, sendto, "Accessright '" + e.Data.MessageArray[2] + "' added to '" + e.Data.MessageArray[1] + "'!");
-                        } else {
-                            bot.SendMessage(SendType.Notice, sendto, "Failed to add Accessright '" + e.Data.MessageArray[2] + "' to '" + e.Data.MessageArray[1] + "'! (Try !access for a list of access strings)");
-                        }
-                        return;
-                    }
-                    if (e.Data.MessageArray[0] == "!-access") {
-                        if(RemoveAccessRight(e.Data.MessageArray[1], e.Data.MessageArray[2])) {
-                            bot.SendMessage(SendType.Notice, sendto, "Accessright '" + e.Data.MessageArray[2] + "' removed from '" + e.Data.MessageArray[1] + "'!");
-                        } else {
-                            bot.SendMessage(SendType.Notice, sendto, "Failed to remove Accessright '" + e.Data.MessageArray[2] + "' from '" + e.Data.MessageArray[1] + "'!");
-                        }
+            if(e.Data.MessageArray.Length > 2) {
+                if (e.Data.MessageArray[0] == "!+access") {
+                    if(AddAccessRight(e.Data.MessageArray[1], e.Data.MessageArray[2])) {
+                        bot.SendMessage(SendType.Notice, sendto, "Accessright '" + e.Data.MessageArray[2] + "' added to '" + e.Data.MessageArray[1] + "'!");
+                    } else {
+                        bot.SendMessage(SendType.Notice, sendto, "Failed to add Accessright '" + e.Data.MessageArray[2] + "' to '" + e.Data.MessageArray[1] + "'! (Try !access for a list of access strings)");
                     }
                     return;
                 }
-                bot.SendMessage(SendType.Notice, sendto, "Too few arguments! Try !help.");
+                if (e.Data.MessageArray[0] == "!-access") {
+                    if(RemoveAccessRight(e.Data.MessageArray[1], e.Data.MessageArray[2])) {
+                        bot.SendMessage(SendType.Notice, sendto, "Accessright '" + e.Data.MessageArray[2] + "' removed from '" + e.Data.MessageArray[1] + "'!");
+                    } else {
+                        bot.SendMessage(SendType.Notice, sendto, "Failed to remove Accessright '" + e.Data.MessageArray[2] + "' from '" + e.Data.MessageArray[1] + "'!");
+                    }
+                }
+                return;
+            }
+            bot.SendMessage(SendType.Notice, sendto, "Too few arguments! Try !help.");
         }
 
         private void groupHandler(object sender, IrcEventArgs e) {

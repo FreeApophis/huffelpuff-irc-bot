@@ -50,8 +50,8 @@ namespace Huffelpuff
             this.OnRawMessage += new IrcEventHandler(RawMessageHandler);
             this.AutoRejoin = true;
             this.AutoRetry = true;
-            this.AutoRetryDelay = 5;
-            
+            this.AutoRetryDelay = 5;            
+            this.SupportNonRfc = true;            
             this.OnChannelMessage += new IrcEventHandler(CommandDispatcher);
             this.OnQueryMessage +=  new IrcEventHandler(CommandDispatcher);
             
@@ -91,6 +91,7 @@ namespace Huffelpuff
             acl.AddIdentifyPlugin(new NickServIdentify(this));
             acl.AddIdentifyPlugin(new HostIdentify(this));
             acl.AddIdentifyPlugin(new PasswordIdentify(this));
+            acl.AddIdentifyPlugin(new NickIdentify(this));
 
             // Plugin needs the Handlers from IRC we load the plugins after we set everything up
             plugManager = new BotPluginManager(this, "plugins");
@@ -107,7 +108,6 @@ namespace Huffelpuff
             
             //Helper Commands (!commands)
             this.AddCommand(new Commandlet("!help", "The command !help <topic> gives you help about <topic> (special topics: commands, more)", this.HelpCommand, this, CommandScope.Both));
-            
             new SettingCommands(this);
         }
 
@@ -259,7 +259,7 @@ namespace Huffelpuff
                 return;
             }
             
-            this.RfcPart(e.Data.MessageArray[1]);
+            this.RfcPart(e.Data.Message.Substring(6));
             
             PersistentMemory.Instance.RemoveValue("channel", e.Data.MessageArray[1]);
             PersistentMemory.Instance.Flush();
@@ -268,7 +268,7 @@ namespace Huffelpuff
         private void QuitCommand(object sender, IrcEventArgs e)
         {
             if(e.Data.MessageArray.Length > 1)
-                this.RfcQuit(e.Data.MessageArray[1], Priority.Low);
+                this.RfcQuit(e.Data.Message.Substring(6), Priority.Low);
             else
                 this.RfcQuit(Priority.Low);
         }

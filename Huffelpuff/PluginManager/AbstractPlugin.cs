@@ -14,7 +14,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 using System;
@@ -41,7 +41,7 @@ namespace Huffelpuff.Plugins
         {
             BotMethods = botInstance;
             BotEvents = new SharedClientSide(botInstance);
-                        
+            
             AppDomain.CurrentDomain.DomainUnload += new EventHandler(AppDomain_CurrentDomain_DomainUnload);
         }
         
@@ -74,7 +74,16 @@ namespace Huffelpuff.Plugins
             this.GetType().GetMethod(HandlerName,  BindingFlags.Public |  BindingFlags.NonPublic | BindingFlags.Instance).Invoke(this, IrcEventParameters);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string FullName{
+            get {
+                return this.GetType().FullName;
+            }
+        }
+        
+        public string ShortName{
             get {
                 return this.GetType().FullName;
             }
@@ -88,7 +97,7 @@ namespace Huffelpuff.Plugins
         
         public virtual string Name{
             get {
-                return Assembly.GetExecutingAssembly().FullName;
+                return this.GetType().Assembly.FullName;
             }
         }
         
@@ -102,7 +111,7 @@ namespace Huffelpuff.Plugins
                 return active;
             }
         }
-            
+        
         public virtual void Init() {
             ready = true;
         }
@@ -118,7 +127,7 @@ namespace Huffelpuff.Plugins
         public virtual void DeInit() {
             ready = false;
         }
-            
+        
         public abstract string AboutHelp();
 
         

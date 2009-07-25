@@ -61,6 +61,7 @@
     <Compile Include="AccessControl\BotConfigure.cs" />
     <Compile Include="AccessControl\HostIdentify.cs" />
     <Compile Include="AccessControl\IdentifyUser.cs" />
+    <Compile Include="AccessControl\NickIdentify.cs" />
     <Compile Include="AccessControl\NickServIdentify.cs" />
     <Compile Include="AccessControl\NickServIdentifyRequest.cs" />
     <Compile Include="AccessControl\PasswordIdentify.cs" />
