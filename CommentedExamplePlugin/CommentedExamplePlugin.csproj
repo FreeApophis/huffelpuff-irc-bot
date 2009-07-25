@@ -56,4 +56,10 @@
   <PropertyGroup>
     <PostBuildEvent>xcopy .\CommentedExamplePlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Huffelpuff\Huffelpuff.csproj">
+      <Project>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</Project>
+      <Name>Huffelpuff</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
