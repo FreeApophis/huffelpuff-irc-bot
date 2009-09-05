@@ -74,6 +74,13 @@ namespace Huffelpuff.Plugins
             this.GetType().GetMethod(HandlerName,  BindingFlags.Public |  BindingFlags.NonPublic | BindingFlags.Instance).Invoke(this, IrcEventParameters);
         }
 
+        public string MainClass {
+            get {
+                string[] parts = FullName.Split(new [] { '.' });
+                return parts[parts.Length - 1];
+            }
+        }
+        
         /// <summary>
         /// 
         /// </summary>

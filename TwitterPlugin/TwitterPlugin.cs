@@ -17,26 +17,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dimebrain.TweetSharp;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Reflection;
-using System.Runtime.Remoting;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
 using System.Web;
-using System.Xml;
-using Dimebrain.TweetSharp.Extensions;
-using Dimebrain.TweetSharp.Fluent;
-using Dimebrain.TweetSharp.Model;
+
+using Dimebrain.TweetSharp;
+
 using Huffelpuff;
 using Huffelpuff.Plugins;
+using Huffelpuff.Tools;
+
 using Meebey.SmartIrc4net;
 
 namespace Plugin
@@ -152,7 +146,7 @@ namespace Plugin
                 
             }
             if (e.Data.MessageArray[0].ToLower() == "!tags") {
-                foreach(string line in BotMethods.ListToLines(PersistentMemory.Instance.GetValues("twitter_search_tag"), 350)) {
+                foreach(string line in PersistentMemory.Instance.GetValues("twitter_search_tag").ToLines(350)) {
                     BotMethods.SendMessage(SendType.Message, e.Data.Channel, line);
                 }
             }

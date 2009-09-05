@@ -23,12 +23,12 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Huffelpuff;
 
-namespace Huffelpuff
+namespace Huffelpuff.Tools
 {
     /// <summary>
     /// Description of Tools.
     /// </summary>
-    public class Tools
+    public class Tool
     {
         public static bool RunOnMono() {
             Type t = Type.GetType ("Mono.Runtime");

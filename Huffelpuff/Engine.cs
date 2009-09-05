@@ -21,13 +21,15 @@ using System;
 using System.Threading;
 using Meebey.SmartIrc4net;
 
+using Huffelpuff.Tools;
+
 namespace Huffelpuff
 {
     class Engine
     {
         public static void Main(string[] args)
         {
-            Tools.RunOnMono();
+            Tool.RunOnMono();
             IrcBot bot = new IrcBot();
             if(PersistentMemory.Todo) {
                 PersistentMemory.Instance.Flush();

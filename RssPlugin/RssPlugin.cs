@@ -19,12 +19,16 @@
 
 using System;
 using System.Xml;
+using System.Linq;
 using System.Timers;
 using System.Collections.Generic;
 
+using Meebey.SmartIrc4net;
+
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Meebey.SmartIrc4net;
+using Huffelpuff.Tools;
+
 
 namespace Plugin
 {
@@ -66,7 +70,7 @@ namespace Plugin
         public override void Activate()
         {
             BotMethods.AddCommand(new Commandlet("!rss", "With the command !rss you'll get a list of the bots configured RSS feed.", showRss, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!rss-admin", "With the command !rss you'll get a list of the bots configured RSS feed.", showRss, this, CommandScope.Both, "rss_admin"));
+            BotMethods.AddCommand(new Commandlet("!rss-admin", "With the command !rss you'll get a list of the bots configured RSS feed.", adminRss, this, CommandScope.Both, "rss_admin"));
             checkInterval.Enabled = true;
             
             base.Activate();
@@ -86,6 +90,13 @@ namespace Plugin
         }
         
         private void showRss(object sender, IrcEventArgs e) {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
+            foreach(string lines in rssFeeds.Select(item => item.Value.FriendlyName).ToLines(350)) {
+                BotMethods.SendMessage(SendType.Message, sendto, lines);
+            }
+        }
+
+        private void adminRss(object sender, IrcEventArgs e) {
             
         }
     }

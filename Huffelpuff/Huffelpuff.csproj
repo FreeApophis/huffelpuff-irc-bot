@@ -150,8 +150,9 @@
     <Compile Include="SocksProxy\Socks4Handler.cs" />
     <Compile Include="SocksProxy\Socks5Handler.cs" />
     <Compile Include="SocksProxy\SocksHandler.cs" />
+    <Compile Include="Tools\Extensions.cs" />
     <Compile Include="Tools\PersistentMemory.cs" />
-    <Compile Include="Tools\Tools.cs" />
+    <Compile Include="Tools\Tool.cs" />
     <Compile Include="Tools\UPnP.cs" />
   </ItemGroup>
   <ItemGroup>

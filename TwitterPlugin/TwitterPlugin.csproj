@@ -73,6 +73,7 @@
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy .\TwitterPlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
+    <PostBuildEvent>xcopy .\TwitterPlugin.* ..\..\Huffelpuff\bin\plugins /y
+xcopy .\*.dll ..\..\Huffelpuff\bin /y</PostBuildEvent>
   </PropertyGroup>
 </Project>

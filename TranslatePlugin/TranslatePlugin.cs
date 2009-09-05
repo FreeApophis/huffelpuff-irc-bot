@@ -14,10 +14,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
+using Meebey.SmartIrc4net;
+
 using Huffelpuff;
 using Huffelpuff.Plugins;
-
-using Meebey.SmartIrc4net;
+using Huffelpuff.Tools;
 
 namespace Plugin
 {
@@ -240,7 +241,7 @@ namespace Plugin
 
         private void LanguageTrigger(object sender, IrcEventArgs e) {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
-            foreach(string line in BotMethods.ListToLines(languages.Values, 400, ", ", "Languages: ", "")) {
+            foreach(string line in languages.Values.ToLines(400, ", ", "Languages: ", "")) {
                 BotMethods.SendMessage(SendType.Notice, sendto, line);
             }
         }

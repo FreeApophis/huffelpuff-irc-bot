@@ -11,9 +11,13 @@ using Mono.Nat;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
+
 using Huffelpuff.Plugins;
+using Huffelpuff.Tools;
+
 using Meebey.SmartIrc4net;
 
 namespace Huffelpuff
@@ -41,6 +45,8 @@ namespace Huffelpuff
             get { return uPnPSupport; }
         }
 
+        public const string channelconst = "channel";
+        
         public IrcBot()
         {
             this.Encoding = System.Text.Encoding.UTF8;
@@ -50,8 +56,8 @@ namespace Huffelpuff
             this.OnRawMessage += new IrcEventHandler(RawMessageHandler);
             this.AutoRejoin = true;
             this.AutoRetry = true;
-            this.AutoRetryDelay = 5;            
-            this.SupportNonRfc = true;            
+            this.AutoRetryDelay = 5;
+            this.SupportNonRfc = true;
             this.OnChannelMessage += new IrcEventHandler(CommandDispatcher);
             this.OnQueryMessage +=  new IrcEventHandler(CommandDispatcher);
             
@@ -99,6 +105,7 @@ namespace Huffelpuff
             //Basic Commands
             this.AddCommand(new Commandlet("!join", "The command !join <channel> lets the bot join Channel <channel>", this.JoinCommand, this, CommandScope.Both, "engine_join"));
             this.AddCommand(new Commandlet("!part", "The command !part <channel> lets the bot part Channel <channel>", this.PartCommand, this, CommandScope.Both,"engine_part") );
+            this.AddCommand(new Commandlet("!channels", "The command !channels lists all channels where the bot resides", this.ListChannelCommand, this, CommandScope.Both) );
             this.AddCommand(new Commandlet("!quit", "The command !quit lets the bot quit himself", this.QuitCommand, this, CommandScope.Both, "engine_quit"));
             
             //Plugin Commands
@@ -197,24 +204,26 @@ namespace Huffelpuff
             foreach(AbstractPlugin p in plugManager.Plugins) {
                 pluginsList.Add(IrcConstants.IrcBold + p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]"+ IrcConstants.IrcBold);
             }
-            foreach(string line in ListToLines(pluginsList, 300, ", ", "Plugins Loaded: " , " END.")) {
-                SendMessage(SendType.Notice, sendto, line);
+            foreach(string line in pluginsList.ToLines(300, ", ", "Plugins Loaded: " , " END.")) {
+                SendMessage(SendType.Message, sendto, line);
             }
         }
         
         private void ActivateCommand(object sender, IrcEventArgs e)
         {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
-            if (e.Data.MessageArray.Length < 2)
+            if (e.Data.MessageArray.Length < 2) {
+                SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
                 return;
-            foreach(AbstractPlugin p in plugManager.Plugins) {
-                if (e.Data.MessageArray[1]==p.FullName) {
-                    if (!p.Active) {
-                        PersistentMemory.Instance.SetValue("plugin", p.FullName);
+            }
+            foreach(string param in e.Data.MessageArray.Skip(1)) {
+                foreach(AbstractPlugin plugin in plugManager.Plugins.Where(p => p.FullName == param || p.MainClass == param)) {
+                    if (!plugin.Active) {
+                        PersistentMemory.Instance.SetValue("plugin", plugin.FullName);
                         PersistentMemory.Instance.Flush();
-                        p.Activate();
+                        plugin.Activate();
                     }
-                    SendMessage(SendType.Notice, sendto, "Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+                    SendMessage(SendType.Message, sendto, "Plugin: "+IrcConstants.IrcBold+plugin.FullName+" ["+((plugin.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
                 }
             }
         }
@@ -222,16 +231,18 @@ namespace Huffelpuff
         private void DeactivateCommand(object sender, IrcEventArgs e)
         {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
-            if (e.Data.MessageArray.Length < 2)
+            if (e.Data.MessageArray.Length < 2) {
+                SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
                 return;
-            foreach(AbstractPlugin p in plugManager.Plugins) {
-                if (e.Data.MessageArray[1]==p.FullName) {
-                    if (p.Active) {
-                        PersistentMemory.Instance.RemoveValue("plugin", p.FullName);
+            }
+            foreach(string param in e.Data.MessageArray.Skip(1)) {
+                foreach(AbstractPlugin plugin in plugManager.Plugins.Where(p => p.FullName == param || p.MainClass == param)) {
+                    if (plugin.Active) {
+                        PersistentMemory.Instance.SetValue("plugin", plugin.FullName);
                         PersistentMemory.Instance.Flush();
-                        p.Deactivate();
+                        plugin.Activate();
                     }
-                    SendMessage(SendType.Notice, sendto, "Plugin: "+IrcConstants.IrcBold+p.FullName+" ["+((p.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+                    SendMessage(SendType.Notice, sendto, "Plugin: "+IrcConstants.IrcBold+plugin.FullName+" ["+((plugin.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
                 }
             }
         }
@@ -240,7 +251,7 @@ namespace Huffelpuff
         {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             if (e.Data.MessageArray.Length < 2) {
-                SendMessage(SendType.Notice, sendto, "Too few arguments! Try !help.");
+                SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
                 return;
             }
             
@@ -251,11 +262,19 @@ namespace Huffelpuff
             PersistentMemory.Instance.Flush();
         }
         
+        private void ListChannelCommand(object sender, IrcEventArgs e)
+        {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+            foreach(string line in PersistentMemory.Instance.GetValues(channelconst).ToLines(350, ", ", "I am in the following channels: " , " END.")) {
+                SendMessage(SendType.Message, sendto, line);
+            }
+        }
+        
         private void PartCommand(object sender, IrcEventArgs e)
         {
-            string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length < 2) {
-                SendMessage(SendType.Notice, sendto, "Too few arguments! Try !help.");
+                SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
                 return;
             }
             
@@ -308,7 +327,7 @@ namespace Huffelpuff
                     }
                 }
                 
-                foreach(string com in ListToLines(commandlist, 350, ", ", "Active Commands (" + scopeColor[CommandScope.Public] + "public" + IrcConstants.IrcColor + IrcConstants.IrcBold + ", " + scopeColor[CommandScope.Private] + "private" + IrcConstants.IrcColor + IrcConstants.IrcBold + ") <restricted>: ", null))
+                foreach(string com in commandlist.ToLines(350, ", ", "Active Commands (" + scopeColor[CommandScope.Public] + "public" + IrcConstants.IrcColor + IrcConstants.IrcBold + ", " + scopeColor[CommandScope.Private] + "private" + IrcConstants.IrcColor + IrcConstants.IrcBold + ") <restricted>: ", null))
                 {
                     this.SendMessage(SendType.Notice, sendto, com);
                 }
@@ -355,54 +374,6 @@ namespace Huffelpuff
             
             if (!helped)
                 this.SendMessage(SendType.Notice, sendto, "Your Helptopic was not found");
-        }
-
-        public List<string> ListToLines(IEnumerable<string> list, int maxlinelength)
-        {
-            return ListToLines(list, maxlinelength, ", ");
-        }
-
-
-        public List<string> ListToLines(IEnumerable<string> list, int maxlinelength, string seperator)
-        {
-            return ListToLines(list, maxlinelength, ", ", null, null);
-        }
-
-
-        public List<string> ListToLines(IEnumerable<string> list, int maxlinelength, string seperator, string prefix, string postfix)
-        {
-            if (prefix==null) {
-                prefix="";
-            }
-            bool noSeparator = true;
-            
-            List<string> result = new List<string>();
-            result.Add(prefix);
-            
-            
-            foreach(string s in list)
-            {
-                if(result[result.Count-1].Length + s.Length + seperator.Length > maxlinelength) {
-                    if(!noSeparator) {
-                        result[result.Count-1]=result[result.Count-1]+seperator;
-                    }
-                    result.Add("");
-                    noSeparator = true;
-                }
-                if (noSeparator) {
-                    result[result.Count-1]=result[result.Count-1]+s;
-                    noSeparator = false;
-                } else {
-                    result[result.Count-1]=result[result.Count-1]+seperator+s;
-                }
-            }
-            if (!string.IsNullOrEmpty(postfix)) {
-                if(result[result.Count-1].Length + postfix.Length > maxlinelength) {
-                    result.Add("");
-                }
-                result[result.Count-1]=result[result.Count-1]+postfix;
-            }
-            return result;
         }
 
         public void Exit()
@@ -452,7 +423,7 @@ namespace Huffelpuff
                 this.Login(PersistentMemory.Instance.GetValueOrTodo("nick"), PersistentMemory.Instance.GetValueOrTodo("realname"), 4, PersistentMemory.Instance.GetValueOrTodo("username"), PersistentMemory.Instance.GetValue("serverpass"));
                 
                 // join the channels
-                foreach(string channel in PersistentMemory.Instance.GetValues("channel"))
+                foreach(string channel in PersistentMemory.Instance.GetValues(channelconst))
                 {
                     this.RfcJoin(channel);
                 }

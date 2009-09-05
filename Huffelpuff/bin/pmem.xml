@@ -142,16 +142,6 @@
   </baseTBL>
   <baseTBL>
     <baseGroup>config</baseGroup>
-    <baseKey>username</baseKey>
-    <baseValue>TODO</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>username</baseKey>
-    <baseValue>TODO</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
     <baseKey>plugin</baseKey>
     <baseValue>Plugin.TimePlugin</baseValue>
   </baseTBL>
@@ -159,11 +149,6 @@
     <baseGroup>config</baseGroup>
     <baseKey>plugin</baseKey>
     <baseValue>Plugin.TwitterPlugin</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
-    <baseKey>username</baseKey>
-    <baseValue>TODO</baseValue>
   </baseTBL>
   <baseTBL>
     <baseGroup>config</baseGroup>
@@ -244,5 +229,25 @@
     <baseGroup>config</baseGroup>
     <baseKey>identica_pass_all</baseKey>
     <baseValue>TODO</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.RssPlugin</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>username</baseKey>
+    <baseValue>TODO</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.CalculatorPlugin</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.AIMLPlugin</baseValue>
   </baseTBL>
 </NewDataSet>

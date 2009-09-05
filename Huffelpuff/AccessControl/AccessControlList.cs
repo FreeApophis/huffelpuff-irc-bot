@@ -23,6 +23,8 @@ using System.Collections.ObjectModel;
 
 using Meebey.SmartIrc4net;
 
+using Huffelpuff.Tools;
+
 namespace Huffelpuff
 {
     /// <summary>
@@ -155,10 +157,10 @@ namespace Huffelpuff
                 nicktToID = e.Data.MessageArray[1];
             }
             
-            foreach(string line in bot.ListToLines(this.Identified(nicktToID), 350, ", ", "IDs of the Nick '" + nicktToID + "': ", " END.")) {
+            foreach(string line in Identified(nicktToID).ToLines(350, ", ", "IDs of the Nick '" + nicktToID + "': ", " END.")) {
                 bot.SendMessage(SendType.Message, sendto, line);
             }
-            foreach(string line in bot.ListToLines(this.GetAllGroups(nicktToID), 350, ", ", "Nick is in Groups: ", " END.")) {
+            foreach(string line in GetAllGroups(nicktToID).ToLines(350, ", ", "Nick is in Groups: ", " END.")) {
                 bot.SendMessage(SendType.Message, sendto, line);
             }
         }
@@ -273,7 +275,7 @@ namespace Huffelpuff
         private void listRestricted(object sender, IrcEventArgs e) {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             // TODO <paramter> described in the help!
-            foreach(string line in bot.ListToLines(possibleAccessStrings, 350)) {
+            foreach(string line in possibleAccessStrings.ToLines(350)) {
                 bot.SendMessage(SendType.Notice, sendto, line);
             }
         }
@@ -282,7 +284,7 @@ namespace Huffelpuff
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             if (e.Data.MessageArray.Length > 1) {
                 if(groups.ContainsKey(EnsureGroupPrefix(e.Data.MessageArray[1]))) {
-                    foreach(string line in bot.ListToLines(groups[EnsureGroupPrefix(e.Data.MessageArray[1])], 350, ", ", "User in Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "': ", " END.")) {
+                    foreach(string line in groups[EnsureGroupPrefix(e.Data.MessageArray[1])].ToLines(350, ", ", "User in Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "': ", " END.")) {
                         bot.SendMessage(SendType.Notice, sendto, line);
                     }
                     
@@ -290,7 +292,7 @@ namespace Huffelpuff
                     bot.SendMessage(SendType.Notice, sendto, "No such group.");
                 }
             } else {
-                foreach(string line in bot.ListToLines(groups.Keys, 350, ", ", "Groups: ", " (Special Groups: #@, #%, #+, #*) END.")) {
+                foreach(string line in groups.Keys.ToLines(350, ", ", "Groups: ", " (Special Groups: #@, #%, #+, #*) END.")) {
                     bot.SendMessage(SendType.Notice, sendto, line);
                 }
             }

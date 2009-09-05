@@ -25,6 +25,7 @@ using System.Collections.Generic;
 
 using Huffelpuff;
 using Huffelpuff.Plugins;
+using Huffelpuff.Tools;
 
 using Nntp;
 using Meebey.SmartIrc4net;
@@ -246,7 +247,7 @@ namespace Plugin
 
         private void ListGroups(IrcEventArgs e)
         {
-            foreach (string s in BotMethods.ListToLines(nntpCache.Keys, 350)) {
+            foreach (string s in nntpCache.Keys.ToLines(350)) {
                 BotMethods.SendMessage(SendType.Message, e.Data.Channel, s);
             }
         }
