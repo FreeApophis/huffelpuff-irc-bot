@@ -80,13 +80,13 @@ namespace Plugin
         public override void Activate()
         {
             BotMethods.AddCommand(new Commandlet("!seen", "The command !seen <nick> tells you when a certain nick was last seen in this channel ", seenCommand, this));
-            BotEvents.OnChannelMessage += new IrcEventHandler(messageHandler);
-            BotEvents.OnNickChange += new NickChangeEventHandler(nickChangeHandler);
-            BotEvents.OnNames += new NamesEventHandler(namesHandler);
-            BotEvents.OnJoin += new JoinEventHandler(joinHandler);
-            BotEvents.OnPart += new PartEventHandler(partHandler);
-            BotEvents.OnQuit += new QuitEventHandler(quitHandler);
-            BotEvents.OnKick += new KickEventHandler(kickHandler);
+            BotEvents.OnChannelMessage += messageHandler;
+            BotEvents.OnNickChange += nickChangeHandler;
+            BotEvents.OnNames += namesHandler;
+            BotEvents.OnJoin += joinHandler;
+            BotEvents.OnPart += partHandler;
+            BotEvents.OnQuit += quitHandler;
+            BotEvents.OnKick += kickHandler;
             
             foreach(DataRow dr in db.Tables[seentable].Rows) {
                 dr["OnStatus"] = false;
@@ -102,13 +102,13 @@ namespace Plugin
         public override void Deactivate()
         {
             BotMethods.RemoveCommand("!seen");
-            BotEvents.OnChannelMessage -= new IrcEventHandler(messageHandler);
-            BotEvents.OnNickChange -= new NickChangeEventHandler(nickChangeHandler);
-            BotEvents.OnNames -= new NamesEventHandler(namesHandler);
-            BotEvents.OnJoin -= new JoinEventHandler(joinHandler);
-            BotEvents.OnPart -= new PartEventHandler(partHandler);
-            BotEvents.OnQuit -= new QuitEventHandler(quitHandler);
-            BotEvents.OnKick -= new KickEventHandler(kickHandler);
+            BotEvents.OnChannelMessage -= messageHandler;
+            BotEvents.OnNickChange -= nickChangeHandler;
+            BotEvents.OnNames -= namesHandler;
+            BotEvents.OnJoin -= joinHandler;
+            BotEvents.OnPart -= partHandler;
+            BotEvents.OnQuit -= quitHandler;
+            BotEvents.OnKick -= kickHandler;
             
             foreach(DataRow dr in db.Tables[seentable].Rows) {
                 dr["OnStatus"] = false;

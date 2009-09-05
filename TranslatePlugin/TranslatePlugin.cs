@@ -139,7 +139,7 @@ namespace Plugin
         {
             
             
-            BotEvents.OnChannelMessage += new IrcEventHandler(BotEvents_OnChannelMessage);
+            BotEvents.OnChannelMessage += BotEvents_OnChannelMessage;
             
             BotEvents.OnKick += delegate(object sender, KickEventArgs e) { EndTranslate(e.Who, e.Channel); };
             BotEvents.OnPart += delegate(object sender, PartEventArgs e) { EndTranslate(e.Who, e.Channel); };
@@ -156,7 +156,7 @@ namespace Plugin
         
         public override void Deactivate()
         {
-            BotEvents.OnChannelMessage -= new IrcEventHandler(BotEvents_OnChannelMessage);
+            BotEvents.OnChannelMessage -= BotEvents_OnChannelMessage;
             
             BotMethods.RemoveCommand("!translate");
             BotMethods.RemoveCommand("!languages");

@@ -40,6 +40,12 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
   <ItemGroup>
+    <Reference Include="Dimebrain.TweetSharp">
+      <HintPath>libs\Dimebrain.TweetSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>libs\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -50,16 +56,15 @@
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="TwitterooCore">
+      <HintPath>TwitterooCore.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccesTwitter.cs" />
-    <Compile Include="JSON.cs" />
     <Compile Include="TinyUrl.cs" />
-    <Compile Include="TwitterMention.cs" />
+    <Compile Include="TwitterWrapper.cs" />
     <Compile Include="TwitterPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TwitterSearch.cs" />
-    <Compile Include="TwitterUser.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Huffelpuff\Huffelpuff.csproj">

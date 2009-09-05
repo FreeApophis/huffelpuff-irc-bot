@@ -156,10 +156,10 @@ namespace Huffelpuff
             }
             
             foreach(string line in bot.ListToLines(this.Identified(nicktToID), 350, ", ", "IDs of the Nick '" + nicktToID + "': ", " END.")) {
-                bot.SendMessage(SendType.Notice, sendto, line);
+                bot.SendMessage(SendType.Message, sendto, line);
             }
             foreach(string line in bot.ListToLines(this.GetAllGroups(nicktToID), 350, ", ", "Nick is in Groups: ", " END.")) {
-                bot.SendMessage(SendType.Notice, sendto, line);
+                bot.SendMessage(SendType.Message, sendto, line);
             }
         }
 
@@ -170,17 +170,17 @@ namespace Huffelpuff
             if(e.Data.MessageArray.Length > 2) {
                 if (e.Data.MessageArray[0] == "!+access") {
                     if(AddAccessRight(e.Data.MessageArray[1], e.Data.MessageArray[2])) {
-                        bot.SendMessage(SendType.Notice, sendto, "Accessright '" + e.Data.MessageArray[2] + "' added to '" + e.Data.MessageArray[1] + "'!");
+                        bot.SendMessage(SendType.Message, sendto, "Accessright '" + e.Data.MessageArray[2] + "' added to '" + e.Data.MessageArray[1] + "'!");
                     } else {
-                        bot.SendMessage(SendType.Notice, sendto, "Failed to add Accessright '" + e.Data.MessageArray[2] + "' to '" + e.Data.MessageArray[1] + "'! (Try !access for a list of access strings)");
+                        bot.SendMessage(SendType.Message, sendto, "Failed to add Accessright '" + e.Data.MessageArray[2] + "' to '" + e.Data.MessageArray[1] + "'! (Try !access for a list of access strings)");
                     }
                     return;
                 }
                 if (e.Data.MessageArray[0] == "!-access") {
                     if(RemoveAccessRight(e.Data.MessageArray[1], e.Data.MessageArray[2])) {
-                        bot.SendMessage(SendType.Notice, sendto, "Accessright '" + e.Data.MessageArray[2] + "' removed from '" + e.Data.MessageArray[1] + "'!");
+                        bot.SendMessage(SendType.Message, sendto, "Accessright '" + e.Data.MessageArray[2] + "' removed from '" + e.Data.MessageArray[1] + "'!");
                     } else {
-                        bot.SendMessage(SendType.Notice, sendto, "Failed to remove Accessright '" + e.Data.MessageArray[2] + "' from '" + e.Data.MessageArray[1] + "'!");
+                        bot.SendMessage(SendType.Message, sendto, "Failed to remove Accessright '" + e.Data.MessageArray[2] + "' from '" + e.Data.MessageArray[1] + "'!");
                     }
                 }
                 return;
@@ -193,17 +193,17 @@ namespace Huffelpuff
             if(e.Data.MessageArray.Length > 1) {
                 if (e.Data.MessageArray[0] == "!+group") {
                     if(AddGroup(EnsureGroupPrefix(e.Data.MessageArray[1]))) {
-                        bot.SendMessage(SendType.Notice, sendto, "Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "' added!");
+                        bot.SendMessage(SendType.Message, sendto, "Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "' added!");
                     } else {
-                        bot.SendMessage(SendType.Notice, sendto, "Failed to add group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
+                        bot.SendMessage(SendType.Message, sendto, "Failed to add group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                     }
                     
                     return;
                 } else if (e.Data.MessageArray[0] == "!-group") {
                     if(RemoveGroup(EnsureGroupPrefix(e.Data.MessageArray[1]))) {
-                        bot.SendMessage(SendType.Notice, sendto, "Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "' removed!");
+                        bot.SendMessage(SendType.Message, sendto, "Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "' removed!");
                     } else {
-                        bot.SendMessage(SendType.Notice, sendto, "Failed to remove group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
+                        bot.SendMessage(SendType.Message, sendto, "Failed to remove group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                     }
                     return;
                 }
@@ -211,16 +211,16 @@ namespace Huffelpuff
             if(e.Data.MessageArray.Length > 2) {
                 if (e.Data.MessageArray[0] == "!+user") {
                     if(AddUser(EnsureGroupPrefix(e.Data.MessageArray[1]), e.Data.MessageArray[2])) {
-                        bot.SendMessage(SendType.Notice, sendto, "User '" + e.Data.MessageArray[2] + "' added to group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
+                        bot.SendMessage(SendType.Message, sendto, "User '" + e.Data.MessageArray[2] + "' added to group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                     } else {
-                        bot.SendMessage(SendType.Notice, sendto, "Failed to add user '" + e.Data.MessageArray[2] + "' from group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
+                        bot.SendMessage(SendType.Message, sendto, "Failed to add user '" + e.Data.MessageArray[2] + "' from group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                     }
                     return;
                 } else if (e.Data.MessageArray[0] == "!-user") {
                     if(RemoveUser(EnsureGroupPrefix(e.Data.MessageArray[1]), e.Data.MessageArray[2])) {
-                        bot.SendMessage(SendType.Notice, sendto, "User '" + e.Data.MessageArray[2] + "' removed from group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
+                        bot.SendMessage(SendType.Message, sendto, "User '" + e.Data.MessageArray[2] + "' removed from group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                     } else {
-                        bot.SendMessage(SendType.Notice, sendto, "Failed to remove user '" + e.Data.MessageArray[2] + "' from group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
+                        bot.SendMessage(SendType.Message, sendto, "Failed to remove user '" + e.Data.MessageArray[2] + "' from group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                     }
                     return;
                 }

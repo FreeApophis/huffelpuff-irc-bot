@@ -57,16 +57,16 @@ namespace Plugin
         
         public override void Activate()
         {
-            BotEvents.OnChannelMessage += new IrcEventHandler(BotEvents_OnChannelMessage);
-            //BotEvents.OnQueryMessage += new IrcEventHandler(BotEvents_OnQueryMessage);
+            BotEvents.OnChannelMessage += BotEvents_OnChannelMessage;
+            //BotEvents.OnQueryMessage += BotEvents_OnQueryMessage;
             
             base.Activate();
         }
         
         public override  void Deactivate()
         {
-            BotEvents.OnChannelMessage -= new IrcEventHandler(BotEvents_OnChannelMessage);
-            //BotEvents.OnQueryMessage -= new IrcEventHandler(BotEvents_OnQueryMessage);
+            BotEvents.OnChannelMessage -= BotEvents_OnChannelMessage;
+            //BotEvents.OnQueryMessage -= BotEvents_OnQueryMessage;
             
             base.Deactivate();
         }

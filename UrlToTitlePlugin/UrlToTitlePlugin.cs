@@ -55,7 +55,7 @@ namespace Plugin
         public override void Activate()
         {
             if (!this.active) {
-                BotEvents.OnChannelMessage += new IrcEventHandler(BotEvents_OnChannelMessage);
+                BotEvents.OnChannelMessage += BotEvents_OnChannelMessage;
             }
 
             base.Activate();
@@ -63,7 +63,7 @@ namespace Plugin
         
         public override void Deactivate()
         {
-            BotEvents.OnChannelMessage -= new IrcEventHandler(BotEvents_OnChannelMessage);
+            BotEvents.OnChannelMessage -= BotEvents_OnChannelMessage;
 
             base.Deactivate();
         }

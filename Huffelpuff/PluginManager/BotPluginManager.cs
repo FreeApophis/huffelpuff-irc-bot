@@ -17,10 +17,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Meebey.SmartIrc4net;
 using System;
-using System.Reflection;
 using System.Collections.Generic;
-
+using System.Reflection;
 
 namespace Huffelpuff.Plugins
 {
@@ -41,6 +41,7 @@ namespace Huffelpuff.Plugins
         public BotPluginManager(IrcBot bot, string relPluginPath)
         {
             this.bot = bot;
+            this.bot.AddCommand(new Commandlet("!reload", "!reload unloads and reloads all the plugins", reloadPlugins, this, CommandScope.Both, "pluginmanager_reload"));
             
             pluginManager = new PluginManager(relPluginPath);
             pluginManager.PluginsReloaded += new EventHandler(Plugins_PluginsReloaded);
@@ -52,13 +53,15 @@ namespace Huffelpuff.Plugins
             pluginManager.Start();
         }
 
-            
+        private void reloadPlugins(object sender, IrcEventArgs e) {
+            pluginManager.ReloadPlugins();
+        }
+
         
 
         private List<string> oldPlugs = new List<string>();
         private void Plugins_PluginsReloaded(object sender, EventArgs e)
         {
-            
             plugins.Clear();
             bot.CleanPlugins();
             

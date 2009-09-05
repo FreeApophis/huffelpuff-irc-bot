@@ -44,7 +44,7 @@ namespace Plugin
         public override void Init()
         {
             checkInterval = new Timer();
-            checkInterval.Elapsed += new ElapsedEventHandler(checkInterval_Elapsed);
+            checkInterval.Elapsed += checkInterval_Elapsed;
             checkInterval.Interval = 1 * 60 * 1000; // 1 minute
             PersistentMemory.Instance.GetValueOrTodo("rssFeed"); // make sure we have one!
             base.Init();
@@ -54,7 +54,8 @@ namespace Plugin
         {
             if (!BotMethods.IsConnected)
                 return;
-            List<RssItem> rss = getRss(PersistentMemory.Instance.GetValue("rssFeed"));
+            //var feeds = PersistentMemory.Instance.GetValues("rssFeed")
+            List<RssItem> rss = null;
             if (firstrun) {
                 firstrun = false;
                 foreach(string chan in this.BotMethods.GetChannels()) {

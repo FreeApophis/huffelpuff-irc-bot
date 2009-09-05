@@ -1,0 +1,106 @@
+/*
+ *  <project description>
+ * 
+ *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
+ *  File created by apophis at 05.09.2009 10:45
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+using Dimebrain.TweetSharp;
+using System;
+using System.Linq;
+using Dimebrain.TweetSharp.Extensions;
+using Dimebrain.TweetSharp.Fluent;
+using Dimebrain.TweetSharp.Model;
+using Huffelpuff;
+
+namespace Plugin
+{
+    /// <summary>
+    /// Description of TwitterInfos.
+    /// </summary>
+    public class TwitterWrapper
+    {
+        public string Name { get; private set; }
+        
+        private const string friendlynameconst = "friendlyname";
+        private string friendlyName;
+        public string FriendlyName {
+            get  {
+                return friendlyName;
+            }
+            set {
+                PersistentMemory.Instance.SetValue("twitteraccount_" + Name, friendlynameconst, value);
+                friendlyName = value;
+            }
+        }
+        
+        private const string  userconst = "user";
+        private string user;
+        public string User {
+            get  {
+                return user;
+            }
+            set {
+                PersistentMemory.Instance.SetValue("twitteraccount_" + Name, userconst, value);
+                user = value;
+            }
+        }
+
+        private const string passconst = "pass";
+        private string pass;
+        public string Pass {
+            get  {
+                return pass;
+            }
+            set {
+                PersistentMemory.Instance.SetValue("twitteraccount_" + Name, passconst, value);
+                pass = value;
+            }
+        }
+        
+
+        
+        public TwitterWrapper(string name)
+        {
+            Name = name;
+            friendlyName = PersistentMemory.Instance.GetValueOrTodo("twitteraccount_" + Name, friendlynameconst);
+            user = PersistentMemory.Instance.GetValueOrTodo("twitteraccount_" + Name, userconst);
+            pass = PersistentMemory.Instance.GetValueOrTodo("twitteraccount_" + Name, passconst);
+        }
+        
+        public void GetMentions() {
+            var request = FluentTwitter.CreateRequest(TwitterPlugin.ClientInfo).Statuses().OnPublicTimeline().AsJson();
+            var response = request.Request();
+            foreach(var status in response.AsStatuses()) {
+                
+            }
+        }
+        
+        /// <summary>
+        /// Send a message to the twitter account 
+        /// </summary>
+        /// <param name="message">string with maximum 140 characters</param>
+        /// <returns>returns the response as a string</returns>
+        public string SendStatus(string message) {
+            var twitter = FluentTwitter.CreateRequest()
+                .AuthenticateAs(user, pass)
+                .Statuses().Update(message)
+                .AsJson();
+
+            var response = twitter.Request();
+
+        }
+    }
+}

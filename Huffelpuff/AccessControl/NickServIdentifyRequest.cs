@@ -40,10 +40,17 @@ namespace Huffelpuff
 	    
 	    void bot_OnRawMessage(object sender, IrcEventArgs e)
 	    {
+	        
 	        if ((e.Data.ReplyCode == ReplyCode.IdentifiedToServices) && (e.Data.RawMessageArray[3] == nick) && (e.Data.Message.StartsWith("is signed on as account")))
 	        {
 	            bot.OnRawMessage -= new IrcEventHandler(bot_OnRawMessage);
 	            identity = e.Data.MessageArray[5];
+	            lock (this) Monitor.Pulse (this);
+	        }
+	        if ((e.Data.ReplyCode == ReplyCode.WhoIsRegistered) && (e.Data.RawMessageArray[3] == nick) && (e.Data.Message.StartsWith("is a registered nick")))
+	        {
+	            bot.OnRawMessage -= new IrcEventHandler(bot_OnRawMessage);
+	            identity = e.Data.RawMessageArray[3];
 	            lock (this) Monitor.Pulse (this);
 	        }
 	        if ((e.Data.ReplyCode == ReplyCode.EndOfWhoIs) && (e.Data.RawMessageArray[3] == nick)) {

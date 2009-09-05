@@ -72,7 +72,7 @@ namespace Huffelpuff
         private const string baseValue = "baseValue";
         private const string config = "config";
         
-        private const string todoValue = "TODO";
+        public const string todoValue = "TODO";
         
         /// <summary>
         /// If you want to manipulate directly on the Dataset, you get the full functionality
@@ -154,6 +154,23 @@ namespace Huffelpuff
         /// <returns>Single Value</returns>
         public string GetValue(string key) {
             return GetValue(config, key);
+        }
+        
+        /// <summary>
+        /// If a value is not set, this GetValue will write a TODO field into the config file, and also will return TODO instead of null. null wont be a possible value for these keys!
+        /// This is meant to be used to create a config file, best to be used during the init of a plugin, because the start up of the bot will be blocked untill all TODO fields are filled!
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public string GetValueOrTodo(string group, string key) {
+            string value = GetValue(group, key);
+            if ((value == null) || (value == todoValue)) {
+                Todo=true;
+                ReplaceValue(group, key, todoValue);
+                return todoValue;
+            }
+            return value;
         }
         
         /// <summary>
