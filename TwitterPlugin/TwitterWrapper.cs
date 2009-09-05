@@ -33,6 +33,12 @@ namespace Plugin
     public class TwitterWrapper
     {
         public string Name { get; private set; }
+        public string NameSpace {
+            get{
+                return "twitteraccount_" + Name;
+            }
+        }
+        
         
         private const string friendlynameconst = "friendlyname";
         private string friendlyName;
@@ -41,7 +47,7 @@ namespace Plugin
                 return friendlyName;
             }
             set {
-                PersistentMemory.Instance.SetValue("twitteraccount_" + Name, friendlynameconst, value);
+                PersistentMemory.Instance.SetValue(NameSpace, friendlynameconst, value);
                 friendlyName = value;
             }
         }
@@ -53,7 +59,7 @@ namespace Plugin
                 return user;
             }
             set {
-                PersistentMemory.Instance.SetValue("twitteraccount_" + Name, userconst, value);
+                PersistentMemory.Instance.SetValue(NameSpace, userconst, value);
                 user = value;
             }
         }
@@ -75,13 +81,19 @@ namespace Plugin
         public TwitterWrapper(string name)
         {
             Name = name;
-            friendlyName = PersistentMemory.Instance.GetValueOrTodo("twitteraccount_" + Name, friendlynameconst);
-            user = PersistentMemory.Instance.GetValueOrTodo("twitteraccount_" + Name, userconst);
-            pass = PersistentMemory.Instance.GetValueOrTodo("twitteraccount_" + Name, passconst);
+            friendlyName = PersistentMemory.Instance.GetValueOrTodo(NameSpace, friendlynameconst);
+            user = PersistentMemory.Instance.GetValueOrTodo(NameSpace, userconst);
+            pass = PersistentMemory.Instance.GetValueOrTodo(NameSpace, passconst);
         }
         
         public void GetMentions() {
-            var request = FluentTwitter.CreateRequest(TwitterPlugin.ClientInfo).Statuses().OnPublicTimeline().AsJson();
+            var request = FluentTwitter
+                .CreateRequest(TwitterPlugin.ClientInfo)
+                .AuthenticateAs(user, pass)
+                .Statuses()
+                .OnPublicTimeline()
+                .AsJson();
+            
             var response = request.Request();
             foreach(var status in response.AsStatuses()) {
                 
@@ -89,18 +101,17 @@ namespace Plugin
         }
         
         /// <summary>
-        /// Send a message to the twitter account 
+        /// Send a message to the twitter account
         /// </summary>
         /// <param name="message">string with maximum 140 characters</param>
         /// <returns>returns the response as a string</returns>
         public string SendStatus(string message) {
-            var twitter = FluentTwitter.CreateRequest()
+            return FluentTwitter
+                .CreateRequest(TwitterPlugin.ClientInfo)
                 .AuthenticateAs(user, pass)
                 .Statuses().Update(message)
-                .AsJson();
-
-            var response = twitter.Request();
-
+                .AsJson()
+                .Request();
         }
     }
 }
