@@ -62,8 +62,6 @@ namespace Huffelpuff
             }
         }
         
-        private IrcBot bot;
-        
         private static System.Data.DataSet memory;
         private const string filename = "pmem.xml";
         private const string baseTable = "baseTBL";
@@ -221,12 +219,12 @@ namespace Huffelpuff
         /// <param name="key">Key</param>
         /// <returns>List of Values</returns>
         public List<string> GetValues(string group, string key) {
-            List<string> vals = new List<string>();
+            List<string> values = new List<string>();
             DataRow[] rows = memory.Tables[baseTable].Select(baseGroup + " = '" + group + "' AND " + baseKey + " = '" + key + "'");
             foreach(DataRow dr in rows) {
-                vals.Add((string)dr[baseValue]);
+                values.Add((string)dr[baseValue]);
             }
-            return vals;
+            return values;
         }
         
         /// <summary>
@@ -323,28 +321,6 @@ namespace Huffelpuff
             return false;
         }
         
-        /// <summary>
-        /// Replaces key with a new value in the default Domain, if multiple old values exist only one new value will exist after this operation
-        /// </summary>
-        /// <param name="key">Key</param>
-        /// <param name="value">Value</param>
-        /// <returns>True if at least one Value was removed, false if the key is new</returns>
-        public bool ReplaceValue(string key, string value) {
-            return ReplaceValue(config, key, value);
-        }
-        
-        /// <summary>
-        /// Replaces key with a new value in the Domain group, if multiple old values exist only one new value will exist after this operation
-        /// </summary>
-        /// <param name="group">Data Domain</param>
-        /// <param name="key">Key</param>
-        /// <param name="value">Value</param>
-        /// <returns>True if at least one Value was removed, false if the key is new</returns>
-        public bool ReplaceValue(string group, string key, string value) {
-            bool removed = RemoveKey(group, key);
-            SetValue(group, key, value);
-            return removed;
-        }
         
         /// <summary>
         /// Removes all values with the specified key in default Domain
@@ -374,8 +350,52 @@ namespace Huffelpuff
                 }
                 return removed;
             }
-            else
-                return false;
+            return false;
+        }
+
+        /// <summary>
+        /// Removes all values within the specified domain group.
+        /// (Be carefull. Deleting 'config' would render the bot without a valid configuration)
+        /// </summary>
+        /// <param name="group">the domain which should be removed</param>
+        /// <returns>True if at least one element was removed</returns>
+        public bool RemoveGroup(string group) {
+            if (memory.Tables.Contains(baseTable))
+            {
+                bool removed = false;
+                DataRow[] rows = memory.Tables[baseTable].Select(baseGroup + " = '" + group + "'");
+                foreach (DataRow dr in rows) {
+                    memory.Tables[baseTable].Rows.Remove(dr);
+                    removed = true;
+                }
+                return removed;
+            }
+            return false;
+        }
+
+        
+        
+        /// <summary>
+        /// Replaces key with a new value in the default Domain, if multiple old values exist only one new value will exist after this operation
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <param name="value">Value</param>
+        /// <returns>True if at least one Value was removed, false if the key is new</returns>
+        public bool ReplaceValue(string key, string value) {
+            return ReplaceValue(config, key, value);
+        }
+        
+        /// <summary>
+        /// Replaces key with a new value in the Domain group, if multiple old values exist only one new value will exist after this operation
+        /// </summary>
+        /// <param name="group">Data Domain</param>
+        /// <param name="key">Key</param>
+        /// <param name="value">Value</param>
+        /// <returns>True if at least one Value was removed, false if the key is new</returns>
+        public bool ReplaceValue(string group, string key, string value) {
+            bool removed = RemoveKey(group, key);
+            SetValue(group, key, value);
+            return removed;
         }
 
         /// <summary>

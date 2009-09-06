@@ -30,6 +30,10 @@ namespace Huffelpuff.Tools
         public static bool IsNullOrEmpty(this string str) {
             return string.IsNullOrEmpty(str);
         }
+
+        public static string Fill(this string str, params object[] args) {
+            return string.Format(str, args);
+        }
         
         public static List<string> ToLines(this IEnumerable<string> list, int maxlinelength)
         {

@@ -130,16 +130,16 @@ namespace Plugin
                     DataRow[] datarows = db.Tables[seentable].Select("Nick='" + e.Data.MessageArray[1] + "'");
                     if(datarows.Length > 0) {
                         if((bool)datarows[0]["OnStatus"]) {
-                            BotMethods.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' is on right now (Last Action: " + datarows[0]["LastAction"] + " (" + datarows[0]["LastSeenTime"] + ") Lastmessage: " + datarows[0]["LastMessage"] + " !seen#: " + datarows[0]["TimesSeen"] + ")");
+                            BotMethods.SendMessage(SendType.Message, destination, "The nick '" + e.Data.MessageArray[1] + "' is on right now (Last Action: " + datarows[0]["LastAction"] + " (" + datarows[0]["LastSeenTime"] + ") Lastmessage: " + datarows[0]["LastMessage"] + " !seen#: " + datarows[0]["TimesSeen"] + ")");
                         } else {
-                            BotMethods.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' was last seen at " + datarows[0]["LastSeenTime"] + " (Last Action: " + datarows[0]["LastAction"] + " Lastmessage: " + datarows[0]["LastMessage"] + " !seen#: " + datarows[0]["TimesSeen"] + ")");
+                            BotMethods.SendMessage(SendType.Message, destination, "The nick '" + e.Data.MessageArray[1] + "' was last seen at " + datarows[0]["LastSeenTime"] + " (Last Action: " + datarows[0]["LastAction"] + " Lastmessage: " + datarows[0]["LastMessage"] + " !seen#: " + datarows[0]["TimesSeen"] + ")");
                         }
                         datarows[0]["TimesSeen"] = ((int)datarows[0]["TimesSeen"] + 1);
                     } else {
-                        BotMethods.SendMessage(SendType.Notice, destination, "The nick '" + e.Data.MessageArray[1] + "' was never seen");
+                        BotMethods.SendMessage(SendType.Message, destination, "The nick '" + e.Data.MessageArray[1] + "' was never seen");
                     }
                 } else {
-                    BotMethods.SendMessage(SendType.Notice, destination, "Seen " + db.Tables[seentable].Rows.Count + " unique nicknames. Use !seen <nick> for query.");
+                    BotMethods.SendMessage(SendType.Message, destination, "Seen " + db.Tables[seentable].Rows.Count + " unique nicknames. Use !seen <nick> for query.");
                 }
                 
                 SaveDB();

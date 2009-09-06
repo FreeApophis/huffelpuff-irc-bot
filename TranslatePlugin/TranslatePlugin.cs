@@ -232,17 +232,17 @@ namespace Plugin
                     } catch(Exception) {
                         natlang = "";
                     }
-                    BotMethods.SendMessage(SendType.Notice, sendto, "This Text was in " + languages[lang] + " - " + natlang );
+                    BotMethods.SendMessage(SendType.Message, sendto, "This Text was in " + languages[lang] + " - " + natlang );
                 }
             } else {
-                BotMethods.SendMessage(SendType.Notice, sendto, "Userage to detect the language is !detect <some foreign text>" );
+                BotMethods.SendMessage(SendType.Message, sendto, "Usage to detect the language is !detect <some foreign text>" );
             }
         }
 
         private void LanguageTrigger(object sender, IrcEventArgs e) {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             foreach(string line in languages.Values.ToLines(400, ", ", "Languages: ", "")) {
-                BotMethods.SendMessage(SendType.Notice, sendto, line);
+                BotMethods.SendMessage(SendType.Message, sendto, line);
             }
         }
         

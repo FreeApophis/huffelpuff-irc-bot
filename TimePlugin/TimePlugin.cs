@@ -55,7 +55,7 @@ namespace Plugin
         }
 
         private void nowHandler(object sender, IrcEventArgs e) {
-            BotMethods.SendMessage(SendType.Notice, e.Data.Nick, "Es ist jetzt " + DateTime.Now.ToString("HH:mm:ss") + "Uhr" + DateTime.Now.ToString("K") + ".");
+            BotMethods.SendMessage(SendType.Message, e.Data.Nick, "Es ist jetzt " + DateTime.Now.ToString("HH:mm:ss") + "Uhr" + DateTime.Now.ToString("K") + ".");
         }
 
         private void countdownHandler(object sender, IrcEventArgs e) {

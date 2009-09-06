@@ -74,6 +74,7 @@
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy .\TwitterPlugin.* ..\..\Huffelpuff\bin\plugins /y
-xcopy .\*.dll ..\..\Huffelpuff\bin /y</PostBuildEvent>
+xcopy .\Dimebrain.TweetSharp.dll ..\..\Huffelpuff\bin /y
+xcopy .\Newtonsoft.Json.dll ..\..\Huffelpuff\bin /y</PostBuildEvent>
   </PropertyGroup>
 </Project>

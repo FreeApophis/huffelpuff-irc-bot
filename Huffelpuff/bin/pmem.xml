@@ -237,11 +237,6 @@
   </baseTBL>
   <baseTBL>
     <baseGroup>config</baseGroup>
-    <baseKey>username</baseKey>
-    <baseValue>TODO</baseValue>
-  </baseTBL>
-  <baseTBL>
-    <baseGroup>config</baseGroup>
     <baseKey>plugin</baseKey>
     <baseValue>Plugin.CalculatorPlugin</baseValue>
   </baseTBL>
@@ -249,5 +244,35 @@
     <baseGroup>config</baseGroup>
     <baseKey>plugin</baseKey>
     <baseValue>Plugin.AIMLPlugin</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>rss_feed</baseKey>
+    <baseValue>piraten</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>rssfeed_piraten</baseGroup>
+    <baseKey>friendlyname</baseKey>
+    <baseValue>piraten</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>rssfeed_piraten</baseGroup>
+    <baseKey>url</baseKey>
+    <baseValue>http://www.piraten-partei.ch/rss.xml</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>rssfeed_piraten</baseGroup>
+    <baseKey>lastdate</baseKey>
+    <baseValue>01.01.0001 00:00:00</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>username</baseKey>
+    <baseValue>TODO</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>plugin</baseKey>
+    <baseValue>Plugin.UrlToTitlePlugin</baseValue>
   </baseTBL>
 </NewDataSet>

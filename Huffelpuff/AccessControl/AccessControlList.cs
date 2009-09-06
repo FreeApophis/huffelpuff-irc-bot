@@ -187,7 +187,7 @@ namespace Huffelpuff
                 }
                 return;
             }
-            bot.SendMessage(SendType.Notice, sendto, "Too few arguments! Try !help.");
+            bot.SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
         }
 
         private void groupHandler(object sender, IrcEventArgs e) {
@@ -227,7 +227,7 @@ namespace Huffelpuff
                     return;
                 }
             }
-            bot.SendMessage(SendType.Notice, sendto, "Too few arguments! Try !help.");
+            bot.SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
         }
 
         private bool AddGroup(string group) {
@@ -276,7 +276,7 @@ namespace Huffelpuff
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
             // TODO <paramter> described in the help!
             foreach(string line in possibleAccessStrings.ToLines(350)) {
-                bot.SendMessage(SendType.Notice, sendto, line);
+                bot.SendMessage(SendType.Message, sendto, line);
             }
         }
         
@@ -285,15 +285,15 @@ namespace Huffelpuff
             if (e.Data.MessageArray.Length > 1) {
                 if(groups.ContainsKey(EnsureGroupPrefix(e.Data.MessageArray[1]))) {
                     foreach(string line in groups[EnsureGroupPrefix(e.Data.MessageArray[1])].ToLines(350, ", ", "User in Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "': ", " END.")) {
-                        bot.SendMessage(SendType.Notice, sendto, line);
+                        bot.SendMessage(SendType.Message, sendto, line);
                     }
                     
                 } else {
-                    bot.SendMessage(SendType.Notice, sendto, "No such group.");
+                    bot.SendMessage(SendType.Message, sendto, "No such group.");
                 }
             } else {
                 foreach(string line in groups.Keys.ToLines(350, ", ", "Groups: ", " (Special Groups: #@, #%, #+, #*) END.")) {
-                    bot.SendMessage(SendType.Notice, sendto, line);
+                    bot.SendMessage(SendType.Message, sendto, line);
                 }
             }
         }
@@ -352,7 +352,7 @@ namespace Huffelpuff
                 }
             }
             if (warn) {
-                bot.SendMessage(SendType.Notice, nick, "you tried to access function: '" + command + "' but you don't have the required privileges");
+                bot.SendMessage(SendType.Message, nick, "you tried to access function: '" + command + "' but you don't have the required privileges");
             }
             return false;
         }

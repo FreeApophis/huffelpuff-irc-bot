@@ -31,8 +31,6 @@ namespace Plugin
             return CalculationResult.NoResult();
         }
 
-        private int threadsRunning;
-
         public List<CalculationResult> CalculateAll(string equation)
         {
             results.Clear();
