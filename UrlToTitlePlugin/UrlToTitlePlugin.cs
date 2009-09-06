@@ -18,6 +18,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Huffelpuff.Tools;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -25,7 +26,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
-
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
@@ -192,8 +192,8 @@ namespace Plugin
                             break;
                             case "guid":feed.Read();
                             //guid
-                            break;
-                            default: Console.WriteLine("unparsed Element: " + feed.Name);
+                            break;                            
+                            default: Log.Instance.Log("unparsed Element: " + feed.Name);
                             break;
                     }
                 }

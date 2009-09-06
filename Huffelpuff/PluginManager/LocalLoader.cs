@@ -1,15 +1,16 @@
+using Huffelpuff.Tools;
 using System;
 using System.Collections;
+using System.Data;
 using System.IO;
-using System.Text;
-using System.Threading;
 using System.Reflection;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
-using System.Data;
 using System.Security;
 using System.Security.Permissions;
 using System.Security.Policy;
+using System.Text;
+using System.Threading;
 
 namespace Huffelpuff.Plugins
 {
@@ -51,12 +52,10 @@ namespace Huffelpuff.Plugins
 
         void appDomain_UnhandledException(object sender, UnhandledExceptionEventArgs ex)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
             Exception e = (Exception) ex.ExceptionObject;
-            Console.WriteLine(e.Message);
-            Console.WriteLine(e.Source);
-            Console.WriteLine(e.StackTrace);
-            Console.ForegroundColor = ConsoleColor.Gray;
+            Log.Instance.Log(e.Message, Level.Error, ConsoleColor.Red);
+            Log.Instance.Log(e.Source, Level.Error, ConsoleColor.Red);
+            Log.Instance.Log(e.StackTrace, Level.Error, ConsoleColor.Red);
         }
 
         /// <summary>
@@ -192,7 +191,7 @@ namespace Huffelpuff.Plugins
         /// <param name="constructorParams">The parameters to pass to the constructor</param>
         /// <returns>The constructed object</returns>
         public MarshalByRefObject CreateInstance(string typeName, BindingFlags bindingFlags,
-            object[] constructorParams)
+                                                 object[] constructorParams)
         {
             return remoteLoader.CreateInstance(typeName, bindingFlags, constructorParams);
         }

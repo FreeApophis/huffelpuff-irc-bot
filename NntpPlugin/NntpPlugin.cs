@@ -130,8 +130,8 @@ namespace Plugin
                     }
                 }
             } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
+                Log.Instance.Log(ex.Message, Level.Error);
+                Log.Instance.Log(ex.StackTrace, Level.Error);
             } finally {
                 lock_interval = false;
                 nntp.Disconnect();

@@ -27,17 +27,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+using Huffelpuff.Tools;
 using System;
-using System.IO;
-using System.Text;
 using System.Collections;
-using System.Threading;
-using System.Reflection;
-using System.Net.Sockets;
+using System.IO;
 using System.Net;
-using Org.Mentalis.Network.ProxySocket;
-#if NET_2_0
 using System.Net.Security;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Text;
+using System.Threading;
+using Org.Mentalis.Network.ProxySocket;
+
+#if NET_2_0
+
 #endif
 
 namespace Meebey.SmartIrc4net
@@ -539,12 +542,12 @@ namespace Meebey.SmartIrc4net
                 if (_ProxyType != ProxyTypes.None) {
                     //TODO: use multiple ports too!
 
-                    Console.WriteLine("Connecting [" + _ConnectTries + "] (" + Address + ":" + Port + ") (" + ProxyEndPoint.ToString() +") ");
+                    Log.Instance.Log("Connecting [" + _ConnectTries + "] (" + Address + ":" + Port + ") (" + ProxyEndPoint.ToString() +") ");
 
                     socksProxy.Connect(Address, port);
                 } else {
                     // FIXME: this is not needed but should help merging the IPv6 changes! (just use always the if case!)
-                    Console.WriteLine("Connecting [" + _ConnectTries + "] (" + Address + ":" + Port + ")");
+                    Log.Instance.Log("Connecting [" + _ConnectTries + "] (" + Address + ":" + Port + ")");
 
                     System.Net.IPAddress ip = System.Net.Dns.Resolve(Address).AddressList[0];
                     _TcpClient.Connect(ip, port);

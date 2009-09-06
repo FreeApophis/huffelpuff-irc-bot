@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Huffelpuff.Tools;
 using System;
 using System.Reflection;
 using Meebey.SmartIrc4net;
@@ -70,7 +71,7 @@ namespace Huffelpuff.Plugins
         
         public void InvokeHandler(string HandlerName, IrcEventArgs e) {
             object[] IrcEventParameters = new object[] {this, e};
-            Console.WriteLine("InovkeHandler in " + this.GetType() + " calls " + HandlerName);
+            Log.Instance.Log("InovkeHandler in " + this.GetType() + " calls " + HandlerName);
             this.GetType().GetMethod(HandlerName,  BindingFlags.Public |  BindingFlags.NonPublic | BindingFlags.Instance).Invoke(this, IrcEventParameters);
         }
 

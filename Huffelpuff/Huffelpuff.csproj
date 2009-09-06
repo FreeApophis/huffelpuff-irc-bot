@@ -150,10 +150,16 @@
     <Compile Include="SocksProxy\Socks4Handler.cs" />
     <Compile Include="SocksProxy\Socks5Handler.cs" />
     <Compile Include="SocksProxy\SocksHandler.cs" />
+    <Compile Include="Tools\ConsoleLogger.cs" />
     <Compile Include="Tools\Extensions.cs" />
+    <Compile Include="Tools\Level.cs" />
+    <Compile Include="Tools\LinuxDeamonLogger.cs" />
+    <Compile Include="Tools\Logger.cs" />
+    <Compile Include="Tools\NullLogger.cs" />
     <Compile Include="Tools\PersistentMemory.cs" />
     <Compile Include="Tools\Tool.cs" />
     <Compile Include="Tools\UPnP.cs" />
+    <Compile Include="Tools\WindowsServiceLogger.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AccessControl" />

@@ -18,6 +18,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
 
+using Huffelpuff.Tools;
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
@@ -49,14 +50,14 @@ namespace Plugin
             }
             catch (SocketException)
             {
-                System.Console.WriteLine("No connection: check internet connection and open port tcp 29900");
+                Log.Instance.Log("No connection: check internet connection and open port tcp 29900");
                 return null;
             }
             ns = client.GetStream();
             int len = ns.Read(buffer, 0, BufferSize);
             string receive1 = Encoding.ASCII.GetString(buffer, 0, len);
             string serverChallenge = getParameterValue(receive1, "challenge");
-            if (string.IsNullOrEmpty(serverChallenge)) { System.Console.WriteLine("no challenge"); }
+            if (string.IsNullOrEmpty(serverChallenge)) { Log.Instance.Log("no challenge"); }
             string clientChallenge = createRandomString(32);
             string response = getResponseValue(nick, pass, clientChallenge, serverChallenge);
             string login = "\\login\\" +
@@ -77,7 +78,7 @@ namespace Plugin
             len = ns.Read(buffer, 0, BufferSize);
             string receive2 = Encoding.ASCII.GetString(buffer, 0, len);
             if (!string.IsNullOrEmpty(getParameterValue(receive2, "errmsg")))
-                System.Console.WriteLine(getParameterValue(receive2, "errmsg"));
+                Log.Instance.Log(getParameterValue(receive2, "errmsg"));
             sessionkey = getParameterValue(receive2, "sesskey");
             return getParameterValue(receive2, "lt");
         }

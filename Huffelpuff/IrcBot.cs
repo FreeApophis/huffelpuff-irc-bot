@@ -68,15 +68,15 @@ namespace Huffelpuff
             // DCC Setup
             NatUtility.DeviceFound += delegate(object sender, DeviceEventArgs e) {
                 INatDevice device = e.Device;
-                Console.WriteLine("NAT Device found: " + e.Device.ToString());
-                Console.WriteLine("External IP: " + e.Device.GetExternalIP());
-                Console.WriteLine("LastSeen: " + e.Device.LastSeen);
+                Log.Instance.Log("NAT Device found: " + e.Device.ToString());
+                Log.Instance.Log("External IP: " + e.Device.GetExternalIP());
+                Log.Instance.Log("LastSeen: " + e.Device.LastSeen);
             };
             
             NatUtility.DeviceLost += delegate(object sender, DeviceEventArgs e) {
                 INatDevice device = e.Device;
-                Console.WriteLine ("Device Lost");
-                Console.WriteLine ("Type: {0}", device.GetType().Name);
+                Log.Instance.Log("Device Lost");
+                Log.Instance.Log(string.Format("Type: {0}", device.GetType().Name));
             };
 
             
@@ -135,7 +135,7 @@ namespace Huffelpuff
         
         private void RawMessageHandler(object sender, IrcEventArgs e)
         {
-            Console.WriteLine(e.Data.RawMessage);
+            Log.Instance.Log(e.Data.RawMessage, Level.Trace);
         }
         
         
@@ -383,7 +383,7 @@ namespace Huffelpuff
             plugManager.ShutDown();
             
             // we are done, lets exit...
-            System.Console.WriteLine("Exiting...");
+            Log.Instance.Log("Exiting...");
             #if DEBUG
             System.Threading.Thread.Sleep(60000);
             #endif
@@ -398,7 +398,7 @@ namespace Huffelpuff
             Thread.CurrentThread.Name = "Main";
             
             if (PersistentMemory.Instance.GetValue("ProxyServer") != null) {
-                Console.WriteLine("Using Proxy Server: " + PersistentMemory.Instance.GetValue("ProxyServer"));
+                Log.Instance.Log("Using Proxy Server: " + PersistentMemory.Instance.GetValue("ProxyServer"));
                 this.ProxyType = Org.Mentalis.Network.ProxySocket.ProxyTypes.Socks5;
                 this.ProxyEndPoint = new IPEndPoint(IPAddress.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new char[] {':'})[0]), int.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new char[] {':'})[1]));
                 this.ProxyUser = PersistentMemory.Instance.GetValue("ProxyUser");
@@ -411,10 +411,10 @@ namespace Huffelpuff
             try {
                 // here we try to connect to the server and exceptions get handled
                 this.Connect(serverlist, port);
-                Console.WriteLine("successfull connected");
+                Log.Instance.Log("successfull connected");
             } catch (ConnectionException e) {
                 // something went wrong, the reason will be shown
-                System.Console.WriteLine("couldn't connect! Reason: "+e.Message);
+                Log.Instance.Log("couldn't connect! Reason: "+e.Message);
                 Exit();
             }
             
@@ -434,8 +434,8 @@ namespace Huffelpuff
                 Exit();
             } catch (Exception e) {
                 // this should not happen by just in case we handle it nicely
-                System.Console.WriteLine("Error occurred! Message: "+e.Message);
-                System.Console.WriteLine("Exception: "+e.StackTrace);
+                Log.Instance.Log("Error occurred! Message: "+e.Message, Level.Error);
+                Log.Instance.Log("Exception: "+e.StackTrace, Level.Error);
                 Exit();
             }
         }

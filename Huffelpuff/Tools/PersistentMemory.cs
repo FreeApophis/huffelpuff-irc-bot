@@ -18,11 +18,12 @@
  */
 
 
+using Huffelpuff.Tools;
 using System;
+using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Xml;
-using System.Data;
-using System.Collections.Generic;
 
 namespace Huffelpuff
 {
@@ -92,8 +93,8 @@ namespace Huffelpuff
                     memory.Tables[baseTable].Columns.Add(new DataColumn(baseKey));
                     memory.Tables[baseTable].Columns.Add(new DataColumn(baseValue));
                 } catch (Exception e) {
-                    Console.WriteLine(e.Message);
-                    Console.WriteLine(e.StackTrace);
+                    Log.Instance.Log(e.Message, Level.Error);
+                    Log.Instance.Log(e.StackTrace, Level.Error);
                 }
             }
             Flush();

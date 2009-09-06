@@ -17,10 +17,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Huffelpuff.Tools;
 using System;
 using System.Collections.Generic;
-using Meebey.SmartIrc4net;
 using System.Threading;
+using Meebey.SmartIrc4net;
 
 namespace Huffelpuff
 {
@@ -59,7 +60,7 @@ namespace Huffelpuff
 	        }
 	
 	        if (e.Data.ReplyCode == ReplyCode.WhoIsRegistered) {
-	            Console.WriteLine(e.Data.Message);
+	            Log.Instance.Log(e.Data.Message, Level.Info);
 	        }
 	    }
 	    

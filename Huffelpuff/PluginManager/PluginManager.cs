@@ -1,15 +1,16 @@
+using Huffelpuff.Tools;
 using System;
 using System.Collections;
+using System.Data;
 using System.IO;
-using System.Text;
-using System.Threading;
 using System.Reflection;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
-using System.Data;
 using System.Security;
 using System.Security.Permissions;
 using System.Security.Policy;
+using System.Text;
+using System.Threading;
 
 namespace Huffelpuff.Plugins
 {
@@ -183,9 +184,7 @@ namespace Huffelpuff.Plugins
 				try {
 				    LoadUserAssemblies();
 				} catch (Exception e) {
-				    Console.ForegroundColor = ConsoleColor.Red;
-				    Console.WriteLine(e.Message);
-				    Console.ForegroundColor = ConsoleColor.Gray;
+				    Log.Instance.Log(e.Message, Level.Error, ConsoleColor.Red);
 				}
 
 				changeTime = new DateTime(0);

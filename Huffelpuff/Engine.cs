@@ -41,7 +41,7 @@ namespace Huffelpuff
             
             if(PersistentMemory.Todo) {
                 PersistentMemory.Instance.Flush();
-                Console.WriteLine("Edit your config file: there are some TODOs left.");
+                Log.Instance.Log("Edit your config file: there are some TODOs left.", Level.Fatal);
                 bot.Exit();
             }
             bot.Start();  /*blocking*/

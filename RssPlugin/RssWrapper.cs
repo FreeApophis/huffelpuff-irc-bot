@@ -17,11 +17,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+using Huffelpuff.Tools;
 using System;
 using System.Collections.Generic;
-using Huffelpuff;
-using System.Xml;
 using System.Linq;
+using System.Xml;
+using Huffelpuff;
 
 namespace Plugin
 {
@@ -161,44 +162,45 @@ namespace Plugin
                 if (feed.NodeType == XmlNodeType.Element) {
                     switch(feed.Name) {
                             // Main Items every RSS feed has
-                            case "title": 
+                        case "title":
                             title = feed.ReadElementContentAsString();
                             break;
-                            case "link":
+                        case "link":
                             link = feed.ReadElementContentAsString();
                             break;
-                            case "description":
+                        case "description":
                             desc = feed.ReadElementContentAsString();
                             break;
                             // The pubDate is important for notifying
-                            case "pubDate":
+                        case "pubDate":
                             string str = feed.ReadElementContentAsString();
                             DateTime.TryParse(str, out published);
                             break;
                             // Some more RSS 2.0 Standard fields.
-                            case "category":
+                        case "category":
                             category = feed.ReadElementContentAsString();
                             break;
-                            case "author":
+                        case "author":
                             author = feed.ReadElementContentAsString();
                             break;
-                            case "guid":
+                        case "guid":
                             //link = feed.ReadElementContentAsString();
                             break;
                             // Special ones (for vBulletin)
-                            case "content:encoded":
+                        case "content:encoded":
                             content = feed.ReadElementContentAsString();
                             break;
-                            case "dc:creator":
+                        case "dc:creator":
                             author = feed.ReadElementContentAsString();
                             break;
-                            case "comments":
+                        case "comments":
                             //Comment
                             break;
-                            case "wfw:commentRss":
+                        case "wfw:commentRss":
                             //Comment LInk
                             break;
-                            default: Console.WriteLine("unparsed Element: " + feed.Name);
+                        default:
+                            Log.Instance.Log("unparsed Element: " + feed.Name);
                             break;
                     }
                 }

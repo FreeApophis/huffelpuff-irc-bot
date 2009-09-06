@@ -17,10 +17,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Meebey.SmartIrc4net;
+using Huffelpuff.Tools;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Meebey.SmartIrc4net;
 
 namespace Huffelpuff.Plugins
 {
@@ -73,30 +74,24 @@ namespace Huffelpuff.Plugins
                 if (p.Ready) {
                     plugins.Add(p);
                 } else {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(" [FAILED] " + pluginName + " (Init failed)");
+                    Log.Instance.Log(" [FAILED] " + pluginName + " (Init failed)", Level.Info, ConsoleColor.Red);
                 }
             }
 
             foreach(AbstractPlugin ap in plugins)
             {
                 if (oldPlugs.Contains(ap.AssemblyName)) {
-                    Console.ForegroundColor = ConsoleColor.DarkGreen;
-                    Console.WriteLine(" [RELOAD] " + ap.FullName);
+                    Log.Instance.Log(" [RELOAD] " + ap.FullName, Level.Info, ConsoleColor.DarkGreen);
                     oldPlugs.Remove(ap.AssemblyName);
                 } else {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("  [LOAD]  " + ap.FullName);
+                    Log.Instance.Log("  [LOAD]  " + ap.FullName, Level.Info, ConsoleColor.Green);
                 }
             }
             
             foreach (string s in oldPlugs) {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(" [REMOVE] " + s);
+                Log.Instance.Log(" [REMOVE] " + s, Level.Info, ConsoleColor.Red);
             }
 
-            Console.ForegroundColor = ConsoleColor.Gray;
-            
             oldPlugs.Clear();
             foreach(AbstractPlugin ap in plugins)
             {

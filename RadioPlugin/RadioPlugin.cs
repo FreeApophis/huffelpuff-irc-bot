@@ -17,20 +17,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
  
+using Huffelpuff.Tools;
 using System;
+using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Net;
-using System.Data;
-using System.Timers;
-using System.Reflection;
 using System.Net.Sockets;
-using System.Collections.Generic;
-
+using System.Reflection;
+using System.Timers;
 using Huffelpuff;
 using Huffelpuff.Plugins;
-
 using Meebey.SmartIrc4net;
-
 using MySql.Data;
 using MySql.Data.MySqlClient;
 
@@ -304,9 +302,9 @@ namespace Plugin
                 new Tag(Tracks[(int)dr["trackID"]], (string)dr["tagIdstr"], (double)dr["weight"]);
             }
             
-            Console.WriteLine("Artists : " + Artists.Count);
-            Console.WriteLine("Albums  : " + Albums.Count);
-            Console.WriteLine("Tracks  : " + Tracks.Count);
+            Log.Instance.Log("Artists : " + Artists.Count);
+            Log.Instance.Log("Albums  : " + Albums.Count);
+            Log.Instance.Log("Tracks  : " + Tracks.Count);
 
             scheduler.Elapsed += new ElapsedEventHandler(mainScheduler);
 

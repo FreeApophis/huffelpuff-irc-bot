@@ -17,12 +17,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Huffelpuff.Tools;
 using System;
 using System.Collections.Generic;
-
 using Huffelpuff;
 using Huffelpuff.Plugins;
-
 using Meebey.SmartIrc4net;
 
 namespace Plugin
@@ -114,13 +113,13 @@ namespace Plugin
             {
                 Result s = gsStorage.SearchForRecords(ut3gameID, ticket, statsTable, queryFields.ToArray(), filter, orderBy, offset, limit, targetFilter, surrounding, ownerIds.ToArray(), cacheFlag, out values);
                 if (s != Result.Success) {
-                    System.Console.WriteLine("Webservice returned '" + s.ToString() + "' instead of success.");
+                    Log.Instance.Log("Webservice returned '" + s.ToString() + "' instead of success.");
                     return;
                 }
             }
             catch (Exception ex)
             {
-                System.Console.WriteLine(ex.Message);
+                Log.Instance.Log(ex.Message);
                 return;
             }
             foreach (RecordValue[] perPlayerValues in values)
@@ -165,13 +164,13 @@ namespace Plugin
             {
                 Result s = gsStorage.SearchForRecords(ut3gameID, ticket, statsTable, queryFields.ToArray(), filter, orderBy, offset, limit, targetFilter, surrounding, ownerIds.ToArray(), cacheFlag, out values);
                 if (s != Result.Success) {
-                    System.Console.WriteLine("Webservice returned '" + s.ToString() + "' instead of success.");
+                    Log.Instance.Log("Webservice returned '" + s.ToString() + "' instead of success.");
                     return;
                 }
             }
             catch (Exception ex)
             {
-                System.Console.WriteLine(ex.Message);
+                Log.Instance.Log(ex.Message, Level.Error);
                 return;
             }
             foreach (RecordValue[] perPlayerValues in values)
