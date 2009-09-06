@@ -14,9 +14,9 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 using Meebey.SmartIrc4net;
 using System;
 
@@ -30,9 +30,12 @@ namespace Huffelpuff
         public HostIdentify(IrcBot bot) : base(bot) { }
         
         public override string Identified(string nick)
-        {            
+        {
             IrcUser user = bot.GetIrcUser(nick);
-            return "host/" + user.Host;
+            if (user != null)  {
+                return "host/" + user.Host;
+            }
+            return "host/";
         }
     }
 }

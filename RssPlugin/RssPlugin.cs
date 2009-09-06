@@ -68,7 +68,7 @@ namespace Plugin
                 var newItems = rssFeed.NewItems();
                 foreach(var newItem in newItems) {
                     foreach(string channel in PersistentMemory.Instance.GetValues(IrcBot.channelconst)) {
-                        BotMethods.SendMessage(SendType.Message, channel, "New Message on RSS Feed '{0}': {1} (by {2} on {3})".Fill(rssFeed.FriendlyName, newItem.Title, newItem.Author, newItem.Published.ToString()));
+                        BotMethods.SendMessage(SendType.Message, channel, ("" + IrcConstants.IrcBold + "New Message" + IrcConstants.IrcBold + " on RSS Feed " + IrcConstants.IrcBold + "'" + IrcConstants.IrcColor + (int)IrcColors.Blue + "{0}" + IrcConstants.IrcColor + "'" + IrcConstants.IrcBold + ": " + IrcConstants.IrcColor + (int)IrcColors.Brown + "{1}" + IrcConstants.IrcColor + " (by " + IrcConstants.IrcBold + "{2}" + IrcConstants.IrcBold + " on " + IrcConstants.IrcColor + (int)IrcColors.Blue + "{3}" + IrcConstants.IrcColor + " go: {4})").Fill(rssFeed.FriendlyName, newItem.Title, newItem.Author, newItem.Published.ToString(), newItem.Link));
                     }
                 }
             }
@@ -143,7 +143,7 @@ namespace Plugin
                     if (rssFeeds.ContainsKey(e.Data.MessageArray[2].ToLower())) {
                         rssFeeds[e.Data.MessageArray[2].ToLower()].RemoveFeed();
                         rssFeeds.Remove(e.Data.MessageArray[2].ToLower());
-                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully added.".Fill(e.Data.MessageArray[2].ToLower()));
+                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully removed.".Fill(e.Data.MessageArray[2].ToLower()));
                     } else {
                         BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[2].ToLower()));
                     }

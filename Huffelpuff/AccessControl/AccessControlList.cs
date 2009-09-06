@@ -69,7 +69,7 @@ namespace Huffelpuff
             this.bot = bot;
         }
         
-        private string superUser = "ns/Apophis";
+        private string superUser = PersistentMemory.Instance.GetValueOrTodo("botmaster");
         
         public void Init() {
             bot.AddCommand(new Commandlet("!+access", "!+access <id or" + groupPrefix + "group> <access_string> adds the privilge to use <access_string> to user <nick>.", accessHandler, this, CommandScope.Both, "acl_add"));
@@ -141,12 +141,9 @@ namespace Huffelpuff
                     }
                     temp.Add("#+" + channel);
                 }
-            }
-            
-            // TODO: Dynamic Groups here
-            // example: if <nick> is voice, add group #+ #@ #%
-            // everyone = #*
-            
+                temp.Add("#*" + channel);
+                temp.Add("#*");
+            }                        
             return temp;
         }
 

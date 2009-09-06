@@ -31,11 +31,19 @@ namespace Huffelpuff
         {
             Tool.RunOnMono();
             IrcBot bot = new IrcBot();
+            
+            // check for basic settings
+            PersistentMemory.Instance.GetValuesOrTodo("ServerHost");
+            PersistentMemory.Instance.GetValuesOrTodo("ServerPort");
+            PersistentMemory.Instance.GetValueOrTodo("nick");
+            PersistentMemory.Instance.GetValueOrTodo("realname");
+            PersistentMemory.Instance.GetValueOrTodo("username");
+            
             if(PersistentMemory.Todo) {
                 PersistentMemory.Instance.Flush();
                 Console.WriteLine("Edit your config file: there are some TODOs left.");
                 bot.Exit();
-            }            
+            }
             bot.Start();  /*blocking*/
         }
     }
