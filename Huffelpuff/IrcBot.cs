@@ -66,28 +66,8 @@ namespace Huffelpuff
             this.CtcpSource = "https://svn.origo.ethz.ch/huffelpuff-irc-bot/";
 
             // DCC Setup
-            NatUtility.DeviceFound += delegate(object sender, DeviceEventArgs e) {
-                INatDevice device = e.Device;
-                Log.Instance.Log("NAT Device found: " + e.Device.ToString());
-                Log.Instance.Log("External IP: " + e.Device.GetExternalIP());
-                Log.Instance.Log("LastSeen: " + e.Device.LastSeen);
-            };
             
-            NatUtility.DeviceLost += delegate(object sender, DeviceEventArgs e) {
-                INatDevice device = e.Device;
-                Log.Instance.Log("Device Lost");
-                Log.Instance.Log(string.Format("Type: {0}", device.GetType().Name));
-            };
-
-            
-            /*
-            this.uPnPSupport = UPnP.NAT.Discover();
-            this.ExternalIpAdress = Tools.TryGetExternalIP();
-            if(Tools.LocalIP != null) {
-                Console.WriteLine("Int IP : " + Tools.LocalIP);
-            }
-            Console.WriteLine("Ext IP : " + this.ExternalIpAdress);
-             */
+            /* todo: find NAT / or our IP */
             
             //Setting up Access Control
             acl = new AccessControlList(this);
@@ -190,6 +170,7 @@ namespace Huffelpuff
                         if (plug.FullName == (string)commands[e.Data.MessageArray[0]].Owner)
                         {
                             plug.InvokeHandler(commands[e.Data.MessageArray[0]].HandlerName, e);
+                            return;
                         }
                     }
                 }
@@ -216,6 +197,7 @@ namespace Huffelpuff
                 SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
                 return;
             }
+            List<AbstractPlugin> calledPlugins = new List<AbstractPlugin>();
             foreach(string param in e.Data.MessageArray.Skip(1)) {
                 foreach(AbstractPlugin plugin in plugManager.Plugins.Where(p => p.FullName == param || p.MainClass == param)) {
                     if (!plugin.Active) {
@@ -223,8 +205,11 @@ namespace Huffelpuff
                         PersistentMemory.Instance.Flush();
                         plugin.Activate();
                     }
-                    SendMessage(SendType.Message, sendto, "Plugin: "+IrcConstants.IrcBold+plugin.FullName+" ["+((plugin.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+                    calledPlugins.Add(plugin);
                 }
+            }
+            foreach(var line in calledPlugins.Select(plugin => "" + plugin.FullName + " ["+((plugin.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]").ToLines(350, ", ", "Plugins: ", " END.")) {
+                SendMessage(SendType.Message, sendto, line);
             }
         }
 
@@ -235,15 +220,19 @@ namespace Huffelpuff
                 SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
                 return;
             }
+            List<AbstractPlugin> calledPlugins = new List<AbstractPlugin>();
             foreach(string param in e.Data.MessageArray.Skip(1)) {
                 foreach(AbstractPlugin plugin in plugManager.Plugins.Where(p => p.FullName == param || p.MainClass == param)) {
                     if (plugin.Active) {
-                        PersistentMemory.Instance.SetValue("plugin", plugin.FullName);
+                        PersistentMemory.Instance.RemoveValue("plugin", plugin.FullName);
                         PersistentMemory.Instance.Flush();
-                        plugin.Activate();
+                        plugin.Deactivate();
                     }
-                    SendMessage(SendType.Message, sendto, "Plugin: "+IrcConstants.IrcBold+plugin.FullName+" ["+((plugin.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]");
+                    calledPlugins.Add(plugin);
                 }
+            }
+            foreach(var line in calledPlugins.Select(plugin => "" + plugin.FullName + " ["+((plugin.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]").ToLines(350, ", ", "Plugins: ", " END.")) {
+                SendMessage(SendType.Message, sendto, line);
             }
         }
         
@@ -254,11 +243,13 @@ namespace Huffelpuff
                 SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
                 return;
             }
-            
-            this.RfcJoin(e.Data.MessageArray[1]);
-
-            PersistentMemory.Instance.RemoveValue("channel", e.Data.MessageArray[1]);
-            PersistentMemory.Instance.SetValue("channel", e.Data.MessageArray[1]);
+            foreach(var channel in e.Data.MessageArray.Skip(1)) {
+                if (!channel.IsNullOrEmpty()) {
+                    this.RfcJoin(channel);
+                    PersistentMemory.Instance.RemoveValue("channel", channel);
+                    PersistentMemory.Instance.SetValue("channel", channel);
+                }
+            }
             PersistentMemory.Instance.Flush();
         }
         
@@ -437,6 +428,7 @@ namespace Huffelpuff
                 Log.Instance.Log("Error occurred! Message: "+e.Message, Level.Error);
                 Log.Instance.Log("Exception: "+e.StackTrace, Level.Error);
                 Exit();
+                List<string> blubb;
             }
         }
     }

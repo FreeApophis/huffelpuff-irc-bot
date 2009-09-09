@@ -17,20 +17,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dimebrain.TweetSharp;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Timers;
 using System.Web;
-
-using Dimebrain.TweetSharp;
-
+using Dimebrain.TweetSharp.Extensions;
+using Dimebrain.TweetSharp.Fluent;
+using Dimebrain.TweetSharp.Model;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Huffelpuff.Tools;
-
 using Meebey.SmartIrc4net;
 
 namespace Plugin
@@ -46,6 +47,7 @@ namespace Plugin
         
         private Dictionary<string, TwitterWrapper> twitterAccounts = new Dictionary<string, TwitterWrapper>();
         
+        public const string twitteraccountconst = "twitter_account";
         public static TwitterClientInfo ClientInfo = new TwitterClientInfo() {
             ClientName = "Huffelpuff IRC Bot - Twitter Plugin",
             ClientUrl = "http://huffelpuff-irc-bot.origo.ethz.ch/",
@@ -56,7 +58,7 @@ namespace Plugin
         public override void Init()
         {
 
-            foreach(string account in PersistentMemory.Instance.GetValues("twitter_account"))
+            foreach(string account in PersistentMemory.Instance.GetValues(twitteraccountconst))
             {
                 TwitterWrapper twitterInfo = new TwitterWrapper(account);
                 if (twitterInfo.FriendlyName != PersistentMemory.todoValue) {
@@ -102,7 +104,10 @@ namespace Plugin
         
         public override void Activate() {
             BotMethods.AddCommand(new Commandlet("!tweet", "The !tweet <account> <text> command tweets a message to the account. If there is only 1 account, the account name can be omitted.", tweetHandler, this, CommandScope.Public, "twitter_access"));
-            BotMethods.AddCommand(new Commandlet("!tweet-admin", "The !tweet-add [remove|add]", tweetHandler, this, CommandScope.Private, "twitter_admin"));
+            BotMethods.AddCommand(new Commandlet("!+tweet", "With the command !+tweet <friendlyname> [<username> <password>] you can add a tweets.", adminTweet, this, CommandScope.Private, "twitter_admin"));
+            BotMethods.AddCommand(new Commandlet("!-tweet", "With the command !-tweet <friendlyname> you can remove a tweets.", adminTweet, this, CommandScope.Private, "twitter_admin"));
+            BotMethods.AddCommand(new Commandlet("!+tag", "With the command !+tag you can add a search tag.", tagHandler, this, CommandScope.Both, "twitter_admin"));
+            BotMethods.AddCommand(new Commandlet("!-tag", "With the command !-tag you can remove a search tag.", tagHandler, this, CommandScope.Both, "twitter_admin"));
 
             base.Activate();
         }
@@ -110,13 +115,16 @@ namespace Plugin
         
         public override void Deactivate() {
             BotMethods.RemoveCommand("!tweet");
-            BotMethods.RemoveCommand("!tweet-admin");
+            BotMethods.RemoveCommand("!+tweet");
+            BotMethods.RemoveCommand("!-tweet");
+            BotMethods.RemoveCommand("!+tag");
+            BotMethods.RemoveCommand("!-tag");
             
             base.Deactivate();
         }
         
         public override string AboutHelp() {
-            return "The Twitter Plugin will post a twitter message to the channel feed, try !help twitter.";
+            return "The Twitter Plugin will post a twitter message to the channel feed, try !help tweet.";
         }
 
         private  string MessageTime(DateTime time) {
@@ -157,7 +165,64 @@ namespace Plugin
         }
         
         private void tweetHandler(object sender, IrcEventArgs e) {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
+            if (e.Data.MessageArray.Length < 2) {
+                foreach(string lines in twitterAccounts.Select(item => item.Value.FriendlyName).ToLines(350, ", ", "Tweet accounts loaded: ", ".")) {
+                    BotMethods.SendMessage(SendType.Message, sendto, lines);
+                }
+                return;
+            }
+            if (e.Data.MessageArray.Length < 3) {
+                BotMethods.SendMessage(SendType.Message, sendto, "Nothing to say? I don't tweet empty messages! try !help !tweet.");
+                return;
+            }
+            if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower())) {
+                string status = e.Data.Message.Substring(e.Data.MessageArray[0].Length + e.Data.MessageArray[1].Length + 2);
+                
+                try {
+                    string returnFromTwitter = twitterAccounts[e.Data.MessageArray[1].ToLower()].SendStatus(status);
+                } catch (Exception) {}
+            } else {
+                BotMethods.SendMessage(SendType.Message, sendto, "I dont know a tweet with the name: {0}.".Fill(e.Data.MessageArray[1].ToLower()));
+                return;
+            }
         }
+        
+        
+        private void adminTweet(object sender, IrcEventArgs e) {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
+            switch(e.Data.MessageArray[0].ToLower()) {
+                case "!+tweet":
+                    if (e.Data.MessageArray.Length < 4) {
+                        BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments for 'add'! Try '!help rss-admin'.");
+                        return;
+                    }
+                    if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower())) {
+                        BotMethods.SendMessage(SendType.Message, sendto, "Tweet '{0}' already exists.".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName));
+                        break;
+                    }
+                    PersistentMemory.Instance.SetValue(twitteraccountconst, e.Data.MessageArray[1].ToLower());
+                    twitterAccounts.Add(e.Data.MessageArray[1].ToLower(), new TwitterWrapper(e.Data.MessageArray[1].ToLower(), e.Data.MessageArray[1], e.Data.MessageArray[2], e.Data.MessageArray[3]));
+                    BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully added.".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName));
+                    break;
+                case "!-tweet":
+                    if (e.Data.MessageArray.Length < 2) {
+                        BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments! Try '!help rss-admin'.");
+                        return;
+                    }
+                    if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower())) {
+                        twitterAccounts[e.Data.MessageArray[1].ToLower()].RemoveAccount();
+                        twitterAccounts.Remove(e.Data.MessageArray[1].ToLower());
+                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully removed.".Fill(e.Data.MessageArray[1].ToLower()));
+                    } else {
+                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        
         
         private void mentionsHandler(object sender, IrcEventArgs e) {
         }

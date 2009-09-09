@@ -76,6 +76,18 @@ namespace Plugin
             }
         }
         
+        private const string lastconst = "lastdate";
+        private DateTime last;
+        public DateTime Last {
+            get  {
+                return last;
+            }
+            set {
+                PersistentMemory.Instance.SetValue(NameSpace, lastconst, value.ToString());
+                last = value;
+            }
+        }
+        
 
         
         public TwitterWrapper(string name)
@@ -85,6 +97,26 @@ namespace Plugin
             user = PersistentMemory.Instance.GetValueOrTodo(NameSpace, userconst);
             pass = PersistentMemory.Instance.GetValueOrTodo(NameSpace, passconst);
         }
+        
+        public TwitterWrapper(string name, string friendlyName, string user, string pass)
+        {
+            Name = name;
+            this.friendlyName = friendlyName;
+            this.user = user;
+            this.pass = pass;
+            this.last = DateTime.MinValue;
+
+            PersistentMemory.Instance.ReplaceValue(NameSpace, friendlynameconst, friendlyName);
+            PersistentMemory.Instance.ReplaceValue(NameSpace, userconst, user);
+            PersistentMemory.Instance.ReplaceValue(NameSpace, passconst, pass);
+            PersistentMemory.Instance.ReplaceValue(NameSpace, lastconst, last.ToString());
+        }
+        
+        public void RemoveAccount() {
+            PersistentMemory.Instance.RemoveValue(TwitterPlugin.twitteraccountconst, Name);
+            PersistentMemory.Instance.RemoveGroup(NameSpace);
+        }
+
         
         public void GetMentions() {
             var request = FluentTwitter
