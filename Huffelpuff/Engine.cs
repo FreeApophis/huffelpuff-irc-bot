@@ -20,13 +20,19 @@
 using System;
 using System.Threading;
 using Meebey.SmartIrc4net;
-
 using Huffelpuff.Tools;
+
+#if SERVICE
+using System.Diagnostics;
+using System.ServiceProcess;
+#endif
 
 namespace Huffelpuff
 {
+    #if !SERVICE
     class Engine
     {
+
         public static void Main(string[] args)
         {
             Tool.RunOnMono();
@@ -47,4 +53,46 @@ namespace Huffelpuff
             bot.Start();  /*blocking*/
         }
     }
+    #else
+    public class ServiceEngine : ServiceBase
+    {
+        public static string HuffelpuffServiceName = "Huffelpuff IRC Bot";
+        public ServiceEngine()
+        {
+            this.ServiceName = HuffelpuffServiceName;
+            this.EventLog.Log = "Application";
+
+            this.CanHandlePowerEvent = false;
+            this.CanPauseAndContinue = false;
+            this.CanShutdown = true;
+            this.CanStop = true;
+        }
+
+        static void Main()
+        {
+            ServiceBase.Run(new ServiceEngine());
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+        }
+
+        protected override void OnStart(string[] args)
+        {
+            base.OnStart(args);
+        }
+
+
+        protected override void OnStop()
+        {
+            base.OnStop();
+        }
+
+        protected override void OnShutdown()
+        {
+            base.OnShutdown();
+        }
+    }
+    #endif
 }
