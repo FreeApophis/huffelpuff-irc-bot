@@ -40,7 +40,7 @@ namespace Huffelpuff
             serviceProcessInstaller.Password = null;
 
             //# Service Information
-            serviceInstaller.DisplayName = "Huffelpuff Installer";
+            serviceInstaller.DisplayName = "Huffelpuff IRC Bot Service";
             serviceInstaller.StartType = ServiceStartMode.Automatic;
             serviceInstaller.ServiceName = ServiceEngine.HuffelpuffServiceName;
 

@@ -54,9 +54,13 @@ namespace Huffelpuff
         }
     }
     #else
+    
     public class ServiceEngine : ServiceBase
     {
         public static string HuffelpuffServiceName = "Huffelpuff IRC Bot";
+        private Thread botThread;
+        private IrcBot bot;
+        
         public ServiceEngine()
         {
             this.ServiceName = HuffelpuffServiceName;
@@ -80,17 +84,44 @@ namespace Huffelpuff
 
         protected override void OnStart(string[] args)
         {
+            Tool.RunOnMono();
+            bot = new IrcBot();
+            
+            // check for basic settings
+            PersistentMemory.Instance.GetValuesOrTodo("ServerHost");
+            PersistentMemory.Instance.GetValuesOrTodo("ServerPort");
+            PersistentMemory.Instance.GetValueOrTodo("nick");
+            PersistentMemory.Instance.GetValueOrTodo("realname");
+            PersistentMemory.Instance.GetValueOrTodo("username");
+            
+            if(PersistentMemory.Todo) {
+                PersistentMemory.Instance.Flush();
+                Log.Instance.Log("Edit your config file: there are some TODOs left.", Level.Fatal);
+                bot.Exit();
+            }
+            
+            botThread = new Thread(bot.Start);
+            botThread.Start();
+            
             base.OnStart(args);
         }
 
 
         protected override void OnStop()
         {
+            bot.RfcQuit("Service shut down", Priority.Low);
+            while(bot.IsConnected) {
+                Thread.Sleep(100);
+            }
             base.OnStop();
         }
 
         protected override void OnShutdown()
         {
+            bot.RfcQuit("Service shut down", Priority.Low);
+            while(bot.IsConnected) {
+                Thread.Sleep(100);
+            }
             base.OnShutdown();
         }
     }

@@ -29,13 +29,17 @@ namespace Huffelpuff.Tools
             get {
                 if (instance != null) {
                     return instance;
-                } else {                    
+                } else {
+                    #if SERVICE
+                    return instance = new WindowsServiceLogger();
+                    #else
                     switch (PersistentMemory.Instance.GetValue("logger")) {
                         case "console":
                             return instance = new ConsoleLogger();
                         default:
                             return instance = new NullLogger();
-                    }                    
+                    }
+                    #endif
                 }
             }
         }
