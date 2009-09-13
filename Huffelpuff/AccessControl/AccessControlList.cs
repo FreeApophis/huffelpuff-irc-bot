@@ -40,9 +40,10 @@ namespace Huffelpuff
         
         // string should be invalid for nicknames, that way we can handle them in paralell without problems of group overtaking!
         private const string groupPrefix = "#";
+        private const string aclNameSpace = "acl";
         
         /// <summary>
-        /// For each Group it gold the list of users
+        /// For each Group it holds the list of users
         /// </summary>
         private Dictionary<string, List<string>> groups = new Dictionary<string, List<string>>();
         
@@ -74,7 +75,7 @@ namespace Huffelpuff
         public void Init() {
             bot.AddCommand(new Commandlet("!+access", "!+access <id or" + groupPrefix + "group> <access_string> adds the privilge to use <access_string> to user <nick>.", accessHandler, this, CommandScope.Both, "acl_add"));
             bot.AddCommand(new Commandlet("!-access", "!-access <id or" + groupPrefix + "group> <access_string> removes the privilge to use <access_string> from user <nick>.", accessHandler, this, CommandScope.Both, "acl_remove"));
-            bot.AddCommand(new Commandlet("!access", "!access lists all access_strings, which can be used to access restricted functions, they are not the same as commands. !access <id> lists all access strings he owns by himself or inherited through a group", listRestricted, this, CommandScope.Both));
+            bot.AddCommand(new Commandlet("!access", "!access lists all access_strings, which can be used to access restricted functions, they are not the same as commands. !access <id|nick|group> lists all access strings he owns by himself or inherited through a group", listRestricted, this, CommandScope.Both));
             
             bot.AddCommand(new Commandlet("!groups", "!groups lists all currently active groups. !groups <" + groupPrefix + "group> lists all user in the group.", listGroups, this, CommandScope.Both));
             bot.AddCommand(new Commandlet("!id", "!id shows all my current identifactions. !id <nick> shows their ids.", idDelegate, this, CommandScope.Both));
@@ -85,7 +86,7 @@ namespace Huffelpuff
             bot.AddCommand(new Commandlet("!-user", "!-user <group> <user> removes the user <user> from the group <group>.", groupHandler, this, CommandScope.Both, "group_remove_user"));
 
             // Get users and their accessstrings
-            foreach(string pair in PersistentMemory.Instance.GetValues("acl", "accesslist")) {
+            foreach(string pair in PersistentMemory.Instance.GetValues(aclNameSpace, "accesslist")) {
                 string[] p = pair.Split(new char[] {';'});
                 if(!accessList.ContainsKey(p[0])) {
                     accessList.Add(p[0], new List<string>());
@@ -94,7 +95,7 @@ namespace Huffelpuff
             }
             
             // Get Groups and Users
-            foreach(string pair in PersistentMemory.Instance.GetValues("acl", "group")) {
+            foreach(string pair in PersistentMemory.Instance.GetValues(aclNameSpace, "group")) {
                 string[] p = pair.Split(new char[] {';'});
                 if(!groups.ContainsKey(p[0])) {
                     groups.Add(p[0], new List<string>());
@@ -143,7 +144,7 @@ namespace Huffelpuff
                 }
                 temp.Add("#*" + channel);
                 temp.Add("#*");
-            }                        
+            }
             return temp;
         }
 
@@ -238,7 +239,7 @@ namespace Huffelpuff
         private bool RemoveGroup(string group) {
             if (groups.ContainsKey(group)) {
                 groups.Remove(group);
-                PersistentMemory.Instance.RemoveValueStartingWith("acl", "group", group + ";");
+                PersistentMemory.Instance.RemoveValueStartingWith(aclNameSpace, "group", group + ";");
                 PersistentMemory.Instance.Flush();
                 return true;
             }
@@ -249,7 +250,7 @@ namespace Huffelpuff
             if (groups.ContainsKey(group)) {
                 if (!groups[group].Contains(id)) {
                     groups[group].Add(id);
-                    PersistentMemory.Instance.SetValue("acl", "group", group + ";" + id);
+                    PersistentMemory.Instance.SetValue(aclNameSpace, "group", group + ";" + id);
                     PersistentMemory.Instance.Flush();
                     return true;
                 }
@@ -261,7 +262,7 @@ namespace Huffelpuff
             if (groups.ContainsKey(group)) {
                 if (groups[group].Contains(id)) {
                     groups[group].Remove(id);
-                    PersistentMemory.Instance.RemoveValue("acl", "group", group + ";" + id);
+                    PersistentMemory.Instance.RemoveValue(aclNameSpace, "group", group + ";" + id);
                     PersistentMemory.Instance.Flush();
                     return true;
                 }
@@ -271,8 +272,47 @@ namespace Huffelpuff
         
         private void listRestricted(object sender, IrcEventArgs e) {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel))?e.Data.Nick:e.Data.Channel;
-            // TODO <paramter> described in the help!
-            foreach(string line in possibleAccessStrings.ToLines(350)) {
+            
+            if (e.Data.MessageArray.Length > 1) {
+                string id = e.Data.MessageArray[1];
+                listAccessrights(sendto, id);
+            } else {
+                foreach(string line in possibleAccessStrings.ToLines(350)) {
+                    bot.SendMessage(SendType.Message, sendto, line);
+                }
+            }
+        }
+
+
+        void listAccessrights(string sendto, string name)
+        {
+            List<string> message = new List<string>();
+            if (name.StartsWith(groupPrefix) && accessList.ContainsKey(name)) {
+                message.AddRange(accessList[name].ToLines(350, ", ", "Group Rights: ", ""));
+            } else {
+                foreach(string id in Identified(name))
+                {
+                    if (id == superUser) {
+                        message.Add("User Rights from '{0}': This user is botmaster".Fill(id));
+                    } else if (accessList.ContainsKey(id)) {
+                        message.AddRange(accessList[id].ToLines(350, ", ", "User Rights from '{0}': ".Fill(id), ""));
+                    }
+                    foreach (string @group in GetGroups(id)) {
+                        if (accessList.ContainsKey(@group)) {
+                            message.AddRange(accessList[@group].ToLines(350, ", ", "inherited rights from group '{0}': ".Fill(@group), ""));
+                        }
+                    }
+                }
+
+                if (message.Count == 0) {
+                    if (name.StartsWith(groupPrefix)) {
+                        message.Add("Group '{0}' does not exist or has no rights set".Fill(name));
+                    } else {
+                        message.Add("User '{0}' does not exist or has no rights set".Fill(name));
+                    }
+                }
+            }
+            foreach (string line in message.ToLines(350, " / ")) {
                 bot.SendMessage(SendType.Message, sendto, line);
             }
         }
@@ -284,7 +324,6 @@ namespace Huffelpuff
                     foreach(string line in groups[EnsureGroupPrefix(e.Data.MessageArray[1])].ToLines(350, ", ", "User in Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "': ", " END.")) {
                         bot.SendMessage(SendType.Message, sendto, line);
                     }
-                    
                 } else {
                     bot.SendMessage(SendType.Message, sendto, "No such group.");
                 }
@@ -323,7 +362,7 @@ namespace Huffelpuff
                     accessList.Add(identity, new List<string>());
                 }
                 accessList[identity].Add(accessString);
-                PersistentMemory.Instance.SetValue("acl", "accesslist", identity + ";" + accessString);
+                PersistentMemory.Instance.SetValue(aclNameSpace, "accesslist", identity + ";" + accessString);
                 PersistentMemory.Instance.Flush();
                 return true;
             }
@@ -334,7 +373,7 @@ namespace Huffelpuff
         {
             if (accessList.ContainsKey(identity)) {
                 accessList[identity].Remove(accessString);
-                PersistentMemory.Instance.RemoveValue("acl", "accesslist", identity + ";" + accessString);
+                PersistentMemory.Instance.RemoveValue(aclNameSpace, "accesslist", identity + ";" + accessString);
                 PersistentMemory.Instance.Flush();
                 return true;
             }
@@ -377,6 +416,11 @@ namespace Huffelpuff
         
         public List<string> Identified(string nick) {
             List<string> ids = new List<string>();
+            if (nick.Contains("/")) {
+                ids.Add(nick);
+                return ids;
+            }
+            
             foreach(IdentifyUser id in identifyPlugins) {
                 string idstring = id.Identified(nick);
                 if (idstring!=null) {

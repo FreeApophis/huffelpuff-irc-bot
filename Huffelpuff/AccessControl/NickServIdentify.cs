@@ -29,6 +29,7 @@ namespace Huffelpuff
     /// </summary>
     public class NickServIdentify : IdentifyUser
     {
+        private int maxWaitTime = 15000;
         
         public NickServIdentify(IrcBot bot) : base(bot) {
             bot.OnPart += new PartEventHandler(bot_OnPart);
@@ -81,7 +82,7 @@ namespace Huffelpuff
                 nickCache.Remove(nick);
             }
         }
-                
+        
         public Dictionary<string, string> nickCache = new Dictionary<string, string>();
 
         public string IdToNick(string id) {
@@ -113,10 +114,15 @@ namespace Huffelpuff
                 nickCache.Remove(nick);
             }
             
-            lock (nsir) Monitor.Wait (nsir);
-            lock (nickCache) {
-                if(!nickCache.ContainsKey(nick))
-                    nickCache.Add(nick, nsir.Identity);
+            lock (nsir)  {
+                if (Monitor.Wait (nsir, maxWaitTime)) {
+                    lock (nickCache) {
+                        if(!nickCache.ContainsKey(nick))
+                            nickCache.Add(nick, nsir.Identity);
+                    }
+                } else {
+                    return null;
+                }
             }
             return nsir.Identity;
         }
