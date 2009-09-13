@@ -65,8 +65,7 @@ namespace Plugin
             if (!BotMethods.IsConnected)
                 return;
             foreach(var rssFeed in rssFeeds.Values) {
-                var newItems = rssFeed.NewItems();
-                foreach(var newItem in newItems) {
+                foreach(var newItem in rssFeed.NewItems()) {
                     foreach(string channel in PersistentMemory.Instance.GetValues(IrcBot.channelconst)) {
                         BotMethods.SendMessage(SendType.Message, channel, ("" + IrcConstants.IrcBold + "New Message" + IrcConstants.IrcBold + " on RSS Feed " + IrcConstants.IrcBold + "'" + IrcConstants.IrcColor + (int)IrcColors.Blue + "{0}" + IrcConstants.IrcColor + "'" + IrcConstants.IrcBold + ": " + IrcConstants.IrcColor + (int)IrcColors.Brown + "{1}" + IrcConstants.IrcColor + " (by " + IrcConstants.IrcBold + "{2}" + IrcConstants.IrcBold + " on " + IrcConstants.IrcColor + (int)IrcColors.Blue + "{3}" + IrcConstants.IrcColor + " go: {4})").Fill(rssFeed.FriendlyName, newItem.Title, newItem.Author, newItem.Published.ToString(), newItem.Link));
                     }

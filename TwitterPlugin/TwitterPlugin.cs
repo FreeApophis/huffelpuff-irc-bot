@@ -76,9 +76,24 @@ namespace Plugin
 
         void checkInterval_Elapsed(object sender, ElapsedEventArgs e)
         {
+            if (!BotMethods.IsConnected)
+                return;
             foreach(var twitteraccount in twitterAccounts) {
-                twitteraccount.Value.GetMentions();
+                foreach(var mention in twitteraccount.Value.GetNewMentions()) {
+                    foreach(string channel in PersistentMemory.Instance.GetValues(IrcBot.channelconst)) {
+                        BotMethods.SendMessage(SendType.Message, channel, "Mention: {0} (by {1})".Fill(mention.Text, mention.User.ScreenName));
+                    }
+                }
             }
+            
+            foreach(string tag in PersistentMemory.Instance.GetValues("twitter_search_tag")) {
+                foreach(var tagStatus in twitterAccounts.First().Value.SearchNewTag(tag)) {
+                    foreach(string channel in PersistentMemory.Instance.GetValues(IrcBot.channelconst)) {
+                        BotMethods.SendMessage(SendType.Message, channel, "Tag: {0} (by {1})".Fill(tagStatus.Text, tagStatus.FromUserScreenName));
+                    }
+                }
+            }
+            
         }
 
         private Regex whiteSpaceMatch = new Regex(@"\s+");
@@ -104,22 +119,28 @@ namespace Plugin
         
         public override void Activate() {
             BotMethods.AddCommand(new Commandlet("!tweet", "The !tweet <account> <text> command tweets a message to the account. If there is only 1 account, the account name can be omitted.", tweetHandler, this, CommandScope.Public, "twitter_access"));
+            BotMethods.AddCommand(new Commandlet("!tweet-stats", "The !tweet-stats.", tweetStatsHandler, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!tweet-trends", "The !tweet-stats.", tweetTrendsHandler, this, CommandScope.Both));
             BotMethods.AddCommand(new Commandlet("!+tweet", "With the command !+tweet <friendlyname> [<username> <password>] you can add a tweets.", adminTweet, this, CommandScope.Private, "twitter_admin"));
             BotMethods.AddCommand(new Commandlet("!-tweet", "With the command !-tweet <friendlyname> you can remove a tweets.", adminTweet, this, CommandScope.Private, "twitter_admin"));
             BotMethods.AddCommand(new Commandlet("!+tag", "With the command !+tag you can add a search tag.", tagHandler, this, CommandScope.Both, "twitter_admin"));
             BotMethods.AddCommand(new Commandlet("!-tag", "With the command !-tag you can remove a search tag.", tagHandler, this, CommandScope.Both, "twitter_admin"));
 
+            checkInterval.Enabled = true;
             base.Activate();
         }
 
         
         public override void Deactivate() {
             BotMethods.RemoveCommand("!tweet");
+            BotMethods.RemoveCommand("!tweet-stats");
+            BotMethods.RemoveCommand("!tweet-trends");
             BotMethods.RemoveCommand("!+tweet");
             BotMethods.RemoveCommand("!-tweet");
             BotMethods.RemoveCommand("!+tag");
             BotMethods.RemoveCommand("!-tag");
             
+            checkInterval.Enabled = false;
             base.Deactivate();
         }
         
@@ -145,9 +166,10 @@ namespace Plugin
 
         
         private void tagHandler(object sender, IrcEventArgs e) {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
             if (e.Data.MessageArray[0].ToLower() == "!+tag") {
                 PersistentMemory.Instance.SetValue("twitter_search_tag", e.Data.MessageArray[1]);
-                BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Automatic Search activated: " + "http://search.twitter.com/search?q=" + HttpUtility.UrlEncode(e.Data.MessageArray[1]) + " or " + "http://search.twitter.com/search?q=" + HttpUtility.UrlEncode(e.Data.MessageArray[1]));
+                BotMethods.SendMessage(SendType.Message, sendto, "Automatic Search activated: " + "http://search.twitter.com/search?q=" + HttpUtility.UrlEncode(e.Data.MessageArray[1]));
             }
             if (e.Data.MessageArray[0].ToLower() == "!-tag") {
                 PersistentMemory.Instance.RemoveValue("twitter_search_tag", e.Data.MessageArray[1]);
@@ -155,20 +177,44 @@ namespace Plugin
             }
             if (e.Data.MessageArray[0].ToLower() == "!tags") {
                 foreach(string line in PersistentMemory.Instance.GetValues("twitter_search_tag").ToLines(350)) {
-                    BotMethods.SendMessage(SendType.Message, e.Data.Channel, line);
+                    BotMethods.SendMessage(SendType.Message, sendto, line);
                 }
             }
         }
         
         private void tweetStatsHandler(object sender, IrcEventArgs e) {
-            BotMethods.SendMessage(SendType.Message, e.Data.Channel, "http://twitter.com/users/show/ppsde.xml http://twitter.com/users/show/ppsfr.xml");
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
+            if (e.Data.MessageArray.Length < 2) {
+                BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments for 'add'! Try '!help !tweet-stats'.");
+                return;
+            }
+            
+            if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower())) {
+                TwitterUser user = twitterAccounts[e.Data.MessageArray[1].ToLower()].GetStats();
+                BotMethods.SendMessage(SendType.Message, sendto, "Followers: {0}, Friends: {1}, Statuses: {2}, -> {3}".Fill(user.FollowersCount, user.FriendsCount, user.StatusesCount, user.Url));
+            } else {
+                BotMethods.SendMessage(SendType.Message, sendto, "I dont know a tweet with the name: {0}.".Fill(e.Data.MessageArray[1].ToLower()));
+            }
+        }
+        
+        private void tweetTrendsHandler(object sender, IrcEventArgs e) {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
+            var bla = twitterAccounts.First().Value.GetTrends();
+            var trends = twitterAccounts.First().Value.GetTrends();
+            if (trends == null) {
+                BotMethods.SendMessage(SendType.Message, sendto, "Trends failed");
+            } else {
+                foreach(var line in trends.Trends.Select(trend => trend.Name).ToLines(350, ", ", "Current trends: ", "")) {
+                    BotMethods.SendMessage(SendType.Message, sendto, line);
+                }
+            }
         }
         
         private void tweetHandler(object sender, IrcEventArgs e) {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
             if (e.Data.MessageArray.Length < 2) {
-                foreach(string lines in twitterAccounts.Select(item => item.Value.FriendlyName).ToLines(350, ", ", "Tweet accounts loaded: ", ".")) {
-                    BotMethods.SendMessage(SendType.Message, sendto, lines);
+                foreach(string line in twitterAccounts.Select(item => item.Value.FriendlyName).ToLines(350, ", ", "Tweet accounts loaded: ", ".")) {
+                    BotMethods.SendMessage(SendType.Message, sendto, line);
                 }
                 return;
             }
@@ -194,7 +240,7 @@ namespace Plugin
             switch(e.Data.MessageArray[0].ToLower()) {
                 case "!+tweet":
                     if (e.Data.MessageArray.Length < 4) {
-                        BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments for 'add'! Try '!help rss-admin'.");
+                        BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments for 'add'! Try '!help !+tweet'.");
                         return;
                     }
                     if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower())) {
@@ -207,7 +253,7 @@ namespace Plugin
                     break;
                 case "!-tweet":
                     if (e.Data.MessageArray.Length < 2) {
-                        BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments! Try '!help rss-admin'.");
+                        BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments! Try '!help !-tweet'.");
                         return;
                     }
                     if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower())) {
@@ -215,7 +261,7 @@ namespace Plugin
                         twitterAccounts.Remove(e.Data.MessageArray[1].ToLower());
                         BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully removed.".Fill(e.Data.MessageArray[1].ToLower()));
                     } else {
-                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
+                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!tweet'.".Fill(e.Data.MessageArray[1].ToLower()));
                     }
                     break;
                 default:

@@ -17,9 +17,11 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-using Dimebrain.TweetSharp;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+
+using Dimebrain.TweetSharp;
 using Dimebrain.TweetSharp.Extensions;
 using Dimebrain.TweetSharp.Fluent;
 using Dimebrain.TweetSharp.Model;
@@ -88,7 +90,7 @@ namespace Plugin
             }
         }
         
-
+        private Dictionary<string, DateTime> lastTag = new Dictionary<string, DateTime>();
         
         public TwitterWrapper(string name)
         {
@@ -118,18 +120,70 @@ namespace Plugin
         }
 
         
-        public void GetMentions() {
-            var request = FluentTwitter
+        private IEnumerable<TwitterStatus> GetMentions()
+        {
+            var mentions = FluentTwitter
                 .CreateRequest(TwitterPlugin.ClientInfo)
                 .AuthenticateAs(user, pass)
                 .Statuses()
-                .OnPublicTimeline()
-                .AsJson();
+                .Mentions()
+                .AsJson()
+                .Request();
             
-            var response = request.Request();
-            foreach(var status in response.AsStatuses()) {
-                
+            return mentions.AsStatuses();
+        }
+        
+        public IEnumerable<TwitterStatus> GetNewMentions ()
+        {
+            IEnumerable<TwitterStatus> mentions = GetMentions();
+            var newMentions = mentions.Where(item => item.CreatedDate > last).OrderBy(item => item.CreatedDate).ToList();
+            if (newMentions.Count() > 0) {
+                last = newMentions.OrderByDescending(item => item.CreatedDate).Take(1).Single().CreatedDate;
+                PersistentMemory.Instance.ReplaceValue(NameSpace, lastconst, last.ToString());
             }
+            return newMentions;
+        }
+        
+        public IEnumerable<TwitterSearchStatus> SearchNewTag(string tag) {
+            var allTags = SearchTag(tag);
+            DateTime last = lastTag.ContainsKey(tag) ? lastTag[tag] : DateTime.Now.AddHours(-3);
+            var newTags = allTags.Where(tss => tss.CreatedDate > last).OrderBy(tss => tss.CreatedDate).ToList();
+            if (newTags.Count() > 0) {
+                lastTag[tag] = newTags.OrderByDescending(tss => tss.CreatedDate).Take(1).Single().CreatedDate;
+            }
+            return newTags;
+        }
+        
+        private IEnumerable<TwitterSearchStatus> SearchTag(string tag)
+        {
+            return FluentTwitter
+                .CreateRequest(TwitterPlugin.ClientInfo)
+                .AuthenticateAs(user, pass)
+                .Search()
+                .Query()
+                .ContainingHashTag(tag)
+                .AsJson()
+                .Request()
+                .AsSearchResult()
+                .Statuses;
+        }
+        
+        public Dimebrain.TweetSharp.Model.Twitter.TwitterSearchTrends GetTrends()
+        {
+            try {
+                var temp = FluentTwitter
+                    .CreateRequest(TwitterPlugin.ClientInfo)
+                    .AuthenticateAs(user, pass)
+                    .Search()
+                    .Trends()
+                    .AsJson()
+                    .Request()
+                    .AsTrends();
+                return temp;
+            }catch (Exception ex) {
+                return null;
+            }
+            
         }
         
         /// <summary>
@@ -137,13 +191,34 @@ namespace Plugin
         /// </summary>
         /// <param name="message">string with maximum 140 characters</param>
         /// <returns>returns the response as a string</returns>
-        public string SendStatus(string message) {
+        public string SendStatus(string message)
+        {
             return FluentTwitter
                 .CreateRequest(TwitterPlugin.ClientInfo)
                 .AuthenticateAs(user, pass)
-                .Statuses().Update(message)
+                .Statuses()
+                .Update(message)
                 .AsJson()
                 .Request();
+        }
+
+        /// <summary>
+        /// Returns the current user (fails if there is no status yet)
+        /// Missing method in TweetSharp
+        /// </summary>
+        /// <returns>the current Twitter User</returns>
+        public TwitterUser GetStats()
+        {
+            return FluentTwitter
+                .CreateRequest(TwitterPlugin.ClientInfo)
+                .AuthenticateAs(user, pass)
+                .Statuses()
+                .OnUserTimeline()
+                .AsJson()
+                .Request()
+                .AsStatuses()
+                .First()
+                .User;
         }
     }
 }
