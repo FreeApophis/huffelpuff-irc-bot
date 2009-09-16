@@ -998,7 +998,7 @@ namespace Meebey.SmartIrc4net
                             Logger.Socket.Debug("received: \""+data+"\"");
 #endif
                         }
-                    } catch (IOException e) {
+                    } catch (IOException) {
 #if LOG4NET
                         Logger.Socket.Warn("IOException: "+e.Message);
 #endif

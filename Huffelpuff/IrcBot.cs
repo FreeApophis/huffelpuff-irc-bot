@@ -439,7 +439,6 @@ namespace Huffelpuff
                 Log.Instance.Log("Error occurred! Message: "+e.Message, Level.Error);
                 Log.Instance.Log("Exception: "+e.StackTrace, Level.Error);
                 Exit();
-                List<string> blubb;
             }
         }
     }

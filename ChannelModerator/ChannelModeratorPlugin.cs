@@ -1,7 +1,7 @@
-﻿/*
+/*
  *  <project description>
  * 
- *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch> 
+ *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
  *  File created by apophis at 14.09.2009 19:02
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -15,9 +15,10 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
+using Meebey.SmartIrc4net;
 using System;
 using Huffelpuff;
 using Huffelpuff.Plugins;
@@ -37,19 +38,28 @@ namespace ChannelModerator
             base.Init();
         }
         
-        public override void Activate()
+        public override void Activate ()
         {
+            BotMethods.AddCommand(new Commandlet("!kick", "kicks an annyoing user", kickUser, this));
+            
             base.Activate();
         }
         
-        public override void Deactivate()
+        public override void Deactivate ()
         {
+            BotMethods.RemoveCommand("!kick");
+            
             base.Deactivate();
         }
         
         public override string AboutHelp()
         {
             return "The channel moderator plugins, manages your channel...";
+        }
+        
+        private void kickUser(object sender, IrcEventArgs e) 
+        {
+            
         }
     }
 }
