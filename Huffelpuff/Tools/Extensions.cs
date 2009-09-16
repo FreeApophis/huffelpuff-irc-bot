@@ -19,6 +19,8 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Text;
 
 namespace Huffelpuff.Tools
 {
@@ -27,6 +29,11 @@ namespace Huffelpuff.Tools
     /// </summary>
     public static class Extensions
     {
+        public static string ToStringAll(this object obj)
+        {
+            return null;
+        }
+        
         public static bool IsNullOrEmpty(this string str) {
             return string.IsNullOrEmpty(str);
         }
@@ -90,6 +97,24 @@ namespace Huffelpuff.Tools
                 result[result.Count-1]=result[result.Count-1]+postfix;
             }
             return result;
+        }
+        
+        /// <summary>
+        /// Returns safely the Value at key, or the default value of this type. Alternative to TryGetValue without the out parameter.
+        /// </summary>
+        /// <typeparam name="TKey">Type of Key in dictionary</typeparam>
+        /// <typeparam name="TValue">Type of Value in dictionary</typeparam>
+        /// <param name="dictionary">this</param>
+        /// <param name="key">The key</param>
+        /// <returns>returns the Value or the default for this Type</returns>
+        public static TValue GetSafe<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key)
+        {
+            TValue result;
+            if (dictionary.TryGetValue(key, out result))
+            {
+                return result;
+            }
+            return default(TValue);
         }
     }
 }

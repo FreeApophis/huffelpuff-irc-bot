@@ -40,6 +40,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatorPlugin", "Calcula
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedirectPlugin", "RedirectPlugin\RedirectPlugin.csproj", "{3E062165-48AC-4823-A4D3-FF343D6FF996}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChannelModeratorPlugin", "ChannelModerator\ChannelModeratorPlugin.csproj", "{85EF9CDB-F9B0-4097-A264-8803B76CF348}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -161,5 +163,11 @@ Global
 		{DD1D95FD-3E44-4651-877F-DA5DC41A334B}.Service|Any CPU.ActiveCfg = Release|Any CPU
 		{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}.Service|Any CPU.Build.0 = Service|Any CPU
 		{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}.Service|Any CPU.ActiveCfg = Service|Any CPU
+		{85EF9CDB-F9B0-4097-A264-8803B76CF348}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85EF9CDB-F9B0-4097-A264-8803B76CF348}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85EF9CDB-F9B0-4097-A264-8803B76CF348}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85EF9CDB-F9B0-4097-A264-8803B76CF348}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85EF9CDB-F9B0-4097-A264-8803B76CF348}.Service|Any CPU.Build.0 = Service|Any CPU
+		{85EF9CDB-F9B0-4097-A264-8803B76CF348}.Service|Any CPU.ActiveCfg = Service|Any CPU
 	EndGlobalSection
 EndGlobal

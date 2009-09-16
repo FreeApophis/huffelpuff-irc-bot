@@ -98,6 +98,9 @@ namespace Plugin
             friendlyName = PersistentMemory.Instance.GetValueOrTodo(NameSpace, friendlynameconst);
             user = PersistentMemory.Instance.GetValueOrTodo(NameSpace, userconst);
             pass = PersistentMemory.Instance.GetValueOrTodo(NameSpace, passconst);
+
+            string lastDateTimeString = PersistentMemory.Instance.GetValue(NameSpace, lastconst);
+            last = (lastDateTimeString == null) ? DateTime.MinValue : DateTime.Parse(lastDateTimeString);
         }
         
         public TwitterWrapper(string name, string friendlyName, string user, string pass)

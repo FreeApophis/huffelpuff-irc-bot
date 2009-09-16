@@ -53,13 +53,14 @@ namespace Huffelpuff
             this.SendDelay = 3000;
             this.PingInterval = 120;
             this.ActiveChannelSyncing = true;
-            this.OnRawMessage += new IrcEventHandler(RawMessageHandler);
+            this.OnRawMessage += RawMessageHandler;
             this.AutoRejoin = true;
             this.AutoRetry = true;
             this.AutoRetryDelay = 5;
             this.SupportNonRfc = true;
-            this.OnChannelMessage += new IrcEventHandler(CommandDispatcher);
-            this.OnQueryMessage +=  new IrcEventHandler(CommandDispatcher);
+            this.OnChannelMessage += CommandDispatcher;
+            this.OnQueryMessage +=  CommandDispatcher;
+            this.OnConnected += OnBotConnected;
             
             this.CtcpVersion = this.VersionString + " (SmartIrc4Net " + Assembly.GetAssembly(typeof(IrcFeatures)).GetName(false).Version + ")";
             this.CtcpUrl = "http://huffelpuff-irc-bot.origo.ethz.ch/";
@@ -95,7 +96,17 @@ namespace Huffelpuff
             
             //Helper Commands (!commands)
             this.AddCommand(new Commandlet("!help", "The command !help <topic> gives you help about <topic> (special topics: commands, more)", this.HelpCommand, this, CommandScope.Both));
+            
+            //Settings Commands
             new SettingCommands(this);
+            
+        }
+
+        void OnBotConnected(object sender, EventArgs e)
+        {
+            if(PersistentMemory.Instance.GetValue("nickserv") != null) {
+                this.SendMessage(SendType.Message, "nickserv", "identify {0}".Fill(PersistentMemory.Instance.GetValue("nickserv")), Priority.Critical);
+            }
         }
 
         
