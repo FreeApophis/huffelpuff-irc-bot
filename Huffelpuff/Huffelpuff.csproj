@@ -1,4 +1,5 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <ProjectGuid>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -15,6 +16,8 @@
     <SignAssembly>False</SignAssembly>
     <DelaySign>False</DelaySign>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <OutputPath>bin\</OutputPath>
@@ -47,7 +50,23 @@
     <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
     <DefineConstants>SERVICE;TRACE</DefineConstants>
   </PropertyGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <WarningLevel>4</WarningLevel>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Service|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Reference Include="Microsoft.JScript" />
     <Reference Include="System" />
@@ -173,27 +192,20 @@
     <Compile Include="Tools\WindowsServiceLogger.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="AccessControl" />
-    <Folder Include="IrcCore" />
-    <Folder Include="IrcCore\IrcClient" />
-    <Folder Include="IrcCore\IrcCommands" />
-    <Folder Include="IrcCore\IrcConnection" />
-    <Folder Include="IrcCore\IrcFeatures" />
-    <Folder Include="Mono.Nat" />
-    <Folder Include="Mono.Nat\AsyncResults" />
-    <Folder Include="Mono.Nat\Enums" />
-    <Folder Include="Mono.Nat\EventArgs" />
-    <Folder Include="Mono.Nat\Exceptions" />
-    <Folder Include="Mono.Nat\Pmp" />
-    <Folder Include="Mono.Nat\Pmp\AsyncResults" />
-    <Folder Include="Mono.Nat\Upnp" />
-    <Folder Include="Mono.Nat\Upnp\AsyncResults" />
-    <Folder Include="Mono.Nat\Upnp\Messages" />
-    <Folder Include="Mono.Nat\Upnp\Messages\Requests" />
-    <Folder Include="Mono.Nat\Upnp\Messages\Responses" />
-    <Folder Include="SocksProxy" />
-    <Folder Include="Tools" />
-    <Folder Include="Properties" />
-    <Folder Include="PluginManager" />
+    <Folder Include="IrcCore\" />
+    <Folder Include="IrcCore\" />
+    <Folder Include="IrcCore\" />
+    <Folder Include="IrcCore\" />
+    <Folder Include="Mono.Nat\" />
+    <Folder Include="Mono.Nat\" />
+    <Folder Include="Mono.Nat\" />
+    <Folder Include="Mono.Nat\" />
+    <Folder Include="Mono.Nat\" />
+    <Folder Include="Mono.Nat\Pmp\" />
+    <Folder Include="Mono.Nat\" />
+    <Folder Include="Mono.Nat\Upnp\" />
+    <Folder Include="Mono.Nat\Upnp\" />
+    <Folder Include="Mono.Nat\Upnp\Messages\" />
+    <Folder Include="Mono.Nat\Upnp\Messages\" />
   </ItemGroup>
 </Project>

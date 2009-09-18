@@ -54,8 +54,8 @@ namespace Huffelpuff.Plugins
 				case ".cs":
 					codeProvider = new Microsoft.CSharp.CSharpCodeProvider();
 					break;
-				case ".vb":
-					codeProvider = new Microsoft.CSharp.CSharpCodeProvider();
+	            case ".vb":
+					codeProvider = new Microsoft.VisualBasic.VBCodeProvider();
 					break;
 				case ".js":
 					codeProvider = new Microsoft.JScript.JScriptCodeProvider();

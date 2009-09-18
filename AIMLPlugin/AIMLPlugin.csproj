@@ -1,4 +1,5 @@
-﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{F662345E-3D7E-4AA9-BDE9-51026A2858FE}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -14,6 +15,8 @@
     <NoStdLib>False</NoStdLib>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <OutputPath>bin\</OutputPath>
@@ -38,7 +41,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <FileAlignment>4096</FileAlignment>
   </PropertyGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -113,14 +116,24 @@
       <Project>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</Project>
       <Name>Huffelpuff</Name>
     </ProjectReference>
-    <Folder Include="AIMLbot" />
-    <Folder Include="AIMLbot\AIMLTagHandlers" />
-    <Folder Include="AIMLbot\ConfigurationFiles" />
-    <Folder Include="AIMLbot\Normalize" />
-    <Folder Include="AIMLbot\Utils" />
+    <Folder Include="AIMLbot\" />
+    <Folder Include="AIMLbot\" />
+    <Folder Include="AIMLbot\" />
+    <Folder Include="AIMLbot\" />
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy .\AIMLPlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
     <PreBuildEvent>xcopy ..\AIMLexample\* ..\..\Huffelpuff\bin /y /s</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <WarningLevel>4</WarningLevel>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
 </Project>

@@ -107,6 +107,7 @@ namespace Huffelpuff
             if(PersistentMemory.Instance.GetValue("nickserv") != null) {
                 this.SendMessage(SendType.Message, "nickserv", "identify {0}".Fill(PersistentMemory.Instance.GetValue("nickserv")), Priority.Critical);
             }
+            Console.WriteLine("/msg nickserv identify {0}".Fill(PersistentMemory.Instance.GetValue("nickserv")));
         }
 
         
