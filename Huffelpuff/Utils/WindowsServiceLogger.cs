@@ -20,7 +20,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Huffelpuff.Tools
+namespace Huffelpuff.Utils
 {
     public class WindowsServiceLogger : Logger
     {

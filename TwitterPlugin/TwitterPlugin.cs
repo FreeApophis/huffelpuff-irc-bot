@@ -31,7 +31,7 @@ using Dimebrain.TweetSharp.Fluent;
 using Dimebrain.TweetSharp.Model;
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Huffelpuff.Tools;
+using Huffelpuff.Utils;
 using Meebey.SmartIrc4net;
 
 namespace Plugin
@@ -223,10 +223,10 @@ namespace Plugin
                 return;
             }
             if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower())) {
-                string status = e.Data.Message.Substring(e.Data.MessageArray[0].Length + e.Data.MessageArray[1].Length + 2);
-                
+                string status = e.Data.Message.Substring(e.Data.MessageArray[0].Length + e.Data.MessageArray[1].Length + 2);                
                 try {
                     string returnFromTwitter = twitterAccounts[e.Data.MessageArray[1].ToLower()].SendStatus(status);
+                    BotMethods.SendMessage(SendType.Message, sendto, "successfully tweeted on feed: {0}".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName));
                 } catch (Exception) {}
             } else {
                 BotMethods.SendMessage(SendType.Message, sendto, "I dont know a tweet with the name: {0}.".Fill(e.Data.MessageArray[1].ToLower()));

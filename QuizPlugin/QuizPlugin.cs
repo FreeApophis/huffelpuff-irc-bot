@@ -32,17 +32,15 @@ namespace Plugin
         
         public override void Activate()
         {
-            throw new NotImplementedException();
         }
         
         public override void Deactivate()
         {
-            throw new NotImplementedException();
         }
         
         public override string AboutHelp()
         {
-            throw new NotImplementedException();
+            return "";
         }
     }
 }

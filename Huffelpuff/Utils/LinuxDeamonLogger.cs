@@ -19,7 +19,7 @@
  */
 using System;
 
-namespace Huffelpuff.Tools
+namespace Huffelpuff.Utils
 {
 	public class LinuxDeamonLogger : Logger 
 	{

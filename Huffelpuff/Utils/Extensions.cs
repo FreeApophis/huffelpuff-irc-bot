@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-namespace Huffelpuff.Tools
+namespace Huffelpuff.Utils
 {
     /// <summary>
     /// Description of Extensions.

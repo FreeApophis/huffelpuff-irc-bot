@@ -20,7 +20,7 @@
 using System;
 using System.Threading;
 using Meebey.SmartIrc4net;
-using Huffelpuff.Tools;
+using Huffelpuff.Utils;
 
 #if SERVICE
 using System.Diagnostics;

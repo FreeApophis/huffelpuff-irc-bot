@@ -20,7 +20,7 @@
 using Meebey.SmartIrc4net;
 using System;
 using System.Linq;
-using Huffelpuff.Tools;
+using Huffelpuff.Utils;
 
 namespace Huffelpuff
 {

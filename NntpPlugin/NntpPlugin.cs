@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Huffelpuff.Tools;
+using Huffelpuff.Utils;
 
 using Nntp;
 using Meebey.SmartIrc4net;

@@ -44,16 +44,18 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="WikipediaClient.cs" />
+    <Compile Include="DotNetWikiBot.cs" />
     <Compile Include="WikipediaPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -71,4 +73,10 @@
     <Optimize>true</Optimize>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Huffelpuff\Huffelpuff.csproj">
+      <Project>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</Project>
+      <Name>Huffelpuff</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

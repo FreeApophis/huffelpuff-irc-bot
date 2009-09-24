@@ -6,7 +6,7 @@ using System.Net;
 using System.Xml;
 using System.IO;
 
-namespace Huffelpuff.UPnP
+namespace Huffelpuff.Utils
 {
 	public class NAT
 	{

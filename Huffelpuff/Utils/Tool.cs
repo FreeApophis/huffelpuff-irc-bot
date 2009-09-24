@@ -23,7 +23,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Huffelpuff;
 
-namespace Huffelpuff.Tools
+namespace Huffelpuff.Utils
 {
     /// <summary>
     /// Description of Tools.
@@ -89,8 +89,8 @@ namespace Huffelpuff.Tools
                 if(IsLocalIP(currentBest)) {
                     // we will use this for redirect ports;
                     localIP = currentBest;
-                    if (UPnP.NAT.Discover()) {
-                        currentBest = UPnP.NAT.GetExternalIP();
+                    if (NAT.Discover()) {
+                        currentBest = NAT.GetExternalIP();
                     } else {
                         // TODO: no upnp support on a local adress :: ugly
                         // further ideas :: userip / whatismyip.com /manual port forward

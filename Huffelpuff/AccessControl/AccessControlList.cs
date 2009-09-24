@@ -23,7 +23,7 @@ using System.Collections.ObjectModel;
 
 using Meebey.SmartIrc4net;
 
-using Huffelpuff.Tools;
+using Huffelpuff.Utils;
 
 namespace Huffelpuff
 {

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <ProjectGuid>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</ProjectGuid>
@@ -180,16 +180,17 @@
     <Compile Include="SocksProxy\Socks4Handler.cs" />
     <Compile Include="SocksProxy\Socks5Handler.cs" />
     <Compile Include="SocksProxy\SocksHandler.cs" />
-    <Compile Include="Tools\ConsoleLogger.cs" />
-    <Compile Include="Tools\Extensions.cs" />
-    <Compile Include="Tools\Level.cs" />
-    <Compile Include="Tools\LinuxDeamonLogger.cs" />
-    <Compile Include="Tools\Logger.cs" />
-    <Compile Include="Tools\NullLogger.cs" />
-    <Compile Include="Tools\PersistentMemory.cs" />
-    <Compile Include="Tools\Tool.cs" />
-    <Compile Include="Tools\UPnP.cs" />
-    <Compile Include="Tools\WindowsServiceLogger.cs" />
+    <Compile Include="Utils\ConsoleLogger.cs" />
+    <Compile Include="Utils\Extensions.cs" />
+    <Compile Include="Utils\Level.cs" />
+    <Compile Include="Utils\LinuxDeamonLogger.cs" />
+    <Compile Include="Utils\Logger.cs" />
+    <Compile Include="Utils\NullLogger.cs" />
+    <Compile Include="Utils\PersistentMemory.cs" />
+    <Compile Include="Utils\Tool.cs" />
+    <Compile Include="Utils\UPnP.cs" />
+    <Compile Include="Utils\WildCard.cs" />
+    <Compile Include="Utils\WindowsServiceLogger.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="IrcCore\" />

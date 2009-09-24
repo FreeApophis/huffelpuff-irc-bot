@@ -16,7 +16,7 @@ using System.Reflection;
 using System.Threading;
 
 using Huffelpuff.Plugins;
-using Huffelpuff.Tools;
+using Huffelpuff.Utils;
 
 using Meebey.SmartIrc4net;
 
@@ -211,13 +211,15 @@ namespace Huffelpuff
             }
             List<AbstractPlugin> calledPlugins = new List<AbstractPlugin>();
             foreach(string param in e.Data.MessageArray.Skip(1)) {
-                foreach(AbstractPlugin plugin in plugManager.Plugins.Where(p => p.FullName == param || p.MainClass == param)) {
+                Wildcard wildcard = new Wildcard(param);
+                foreach(AbstractPlugin plugin in plugManager.Plugins.Where(p => wildcard.IsMatch(p.FullName) || wildcard.IsMatch(p.MainClass))) {
                     if (!plugin.Active) {
                         PersistentMemory.Instance.SetValue("plugin", plugin.FullName);
                         PersistentMemory.Instance.Flush();
                         plugin.Activate();
                     }
                     calledPlugins.Add(plugin);
+                    
                 }
             }
             foreach(var line in calledPlugins.Select(plugin => "" + plugin.FullName + " ["+((plugin.Active?IrcConstants.IrcColor+""+(int)IrcColors.LightGreen+"ON":IrcConstants.IrcColor+""+(int)IrcColors.LightRed+"OFF"))+IrcConstants.IrcColor+"]").ToLines(350, ", ", "Plugins: ", " END.")) {
@@ -234,7 +236,8 @@ namespace Huffelpuff
             }
             List<AbstractPlugin> calledPlugins = new List<AbstractPlugin>();
             foreach(string param in e.Data.MessageArray.Skip(1)) {
-                foreach(AbstractPlugin plugin in plugManager.Plugins.Where(p => p.FullName == param || p.MainClass == param)) {
+                Wildcard wildcard = new Wildcard(param);
+                foreach(AbstractPlugin plugin in plugManager.Plugins.Where(p => wildcard.IsMatch(p.FullName) || wildcard.IsMatch(p.MainClass))) {
                     if (plugin.Active) {
                         PersistentMemory.Instance.RemoveValue("plugin", plugin.FullName);
                         PersistentMemory.Instance.Flush();

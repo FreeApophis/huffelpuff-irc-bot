@@ -18,7 +18,7 @@ using Meebey.SmartIrc4net;
 
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Huffelpuff.Tools;
+using Huffelpuff.Utils;
 
 namespace Plugin
 {
