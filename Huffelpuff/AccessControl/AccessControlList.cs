@@ -213,7 +213,7 @@ namespace Huffelpuff
                     if(AddUser(EnsureGroupPrefix(e.Data.MessageArray[1]), e.Data.MessageArray[2])) {
                         bot.SendMessage(SendType.Message, sendto, "User '" + e.Data.MessageArray[2] + "' added to group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                     } else {
-                        bot.SendMessage(SendType.Message, sendto, "Failed to add user '" + e.Data.MessageArray[2] + "' from group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
+                        bot.SendMessage(SendType.Message, sendto, "Failed to add user '" + e.Data.MessageArray[2] + "' to group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                     }
                     return;
                 } else if (e.Data.MessageArray[0] == "!-user") {

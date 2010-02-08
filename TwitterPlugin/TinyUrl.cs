@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Web;
 
 namespace Plugin
 {
@@ -38,7 +39,7 @@ namespace Plugin
             foreach(string word in url.Split(new char[] {' '})) {
                 if ((word.Length > 23) && (word.StartsWith("http://"))) {
                     WebClient tinyurl = new WebClient();
-                    tinyurl.QueryString.Add("url", word);
+                    tinyurl.QueryString.Add("url", HttpUtility.UrlEncode(word));
                     string tiny = tinyurl.DownloadString("http://tinyurl.com/api-create.php");
                     if (!replace.ContainsKey(word)) {
                         replace.Add(word, tiny);
@@ -63,7 +64,7 @@ namespace Plugin
             foreach(string word in url.Split(new char[] {' '})) {
                 if ((word.Length > 16) && (word.StartsWith("http://"))) {
                     WebClient unu = new WebClient();
-                    unu.QueryString.Add("url", word);
+                    unu.QueryString.Add("url", HttpUtility.UrlEncode(word));
                     string tiny = unu.DownloadString("http://u.nu/unu-api-simple");
                     if (!replace.ContainsKey(word)) {
                         replace.Add(word, tiny);

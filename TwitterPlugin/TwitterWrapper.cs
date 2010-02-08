@@ -139,6 +139,8 @@ namespace Plugin
         public IEnumerable<TwitterStatus> GetNewMentions ()
         {
             IEnumerable<TwitterStatus> mentions = GetMentions();
+            if (mentions == null)
+            	return new List<TwitterStatus>();
             var newMentions = mentions.Where(item => item.CreatedDate > last).OrderBy(item => item.CreatedDate).ToList();
             if (newMentions.Count() > 0) {
                 last = newMentions.OrderByDescending(item => item.CreatedDate).Take(1).Single().CreatedDate;
@@ -173,20 +175,14 @@ namespace Plugin
         
         public Dimebrain.TweetSharp.Model.Twitter.TwitterSearchTrends GetTrends()
         {
-            try {
-                var temp = FluentTwitter
+                return FluentTwitter
                     .CreateRequest(TwitterPlugin.ClientInfo)
                     .AuthenticateAs(user, pass)
                     .Search()
                     .Trends()
-                    .AsJson()
+                    .Current()
                     .Request()
-                    .AsTrends();
-                return temp;
-            }catch (Exception ex) {
-                return null;
-            }
-            
+                	.AsSearchTrends();
         }
         
         /// <summary>
@@ -194,7 +190,7 @@ namespace Plugin
         /// </summary>
         /// <param name="message">string with maximum 140 characters</param>
         /// <returns>returns the response as a string</returns>
-        public string SendStatus(string message)
+        public TwitterResult SendStatus(string message)
         {
             return FluentTwitter
                 .CreateRequest(TwitterPlugin.ClientInfo)
