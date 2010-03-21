@@ -17,9 +17,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Huffelpuff.Utils;
 using System;
 using System.Reflection;
+using Huffelpuff.Database;
+using Huffelpuff.Utils;
 using Meebey.SmartIrc4net;
 
 namespace Huffelpuff.Plugins
@@ -62,14 +63,16 @@ namespace Huffelpuff.Plugins
 
 			BotEvents.Unload();
 			
-			if (this.active) {
+			if (this.active)
+			{
 				this.Deactivate();
 			}
 			this.DeInit();
 			
 		}
 		
-		public void InvokeHandler(string HandlerName, IrcEventArgs e) {
+		public void InvokeHandler(string HandlerName, IrcEventArgs e) 
+		{
 			object[] IrcEventParameters = new object[] {this, e};
 			Log.Instance.Log("InovkeHandler in " + this.GetType() + " calls " + HandlerName);
 			try
@@ -82,6 +85,15 @@ namespace Huffelpuff.Plugins
 			}
 		}
 
+		
+		public Main Db 
+		{
+			get 
+			{
+				return DatabaseCommon.Db;
+			}
+		}
+		
 		public string MainClass {
 			get {
 				string[] parts = FullName.Split(new [] { '.' });
@@ -92,54 +104,67 @@ namespace Huffelpuff.Plugins
 		/// <summary>
 		/// 
 		/// </summary>
-		public string FullName{
-			get {
+		public string FullName
+		{
+			get 
+			{
 				return this.GetType().FullName;
 			}
 		}
 		
-		public string ShortName{
-			get {
+		public string ShortName
+		{
+			get 
+			{
 				return this.GetType().FullName;
 			}
 		}
 		
-		public string AssemblyName {
-			get {
+		public string AssemblyName 
+		{
+			get
+			{
 				return this.GetType().Assembly.FullName;
 			}
 		}
 		
 		public virtual string Name{
-			get {
+			get 
+			{
 				return this.GetType().Assembly.FullName;
 			}
 		}
 		
 		public virtual bool Ready{
-			get {
+			get 
+			{
 				return ready;
 			}
 		}
 		public virtual bool Active{
-			get {
+			get 
+			{
 				return active;
 			}
 		}
 		
-		public virtual void Init() {
+		public virtual void Init()
+		{
 			ready = true;
 		}
 		
-		public virtual void Activate() {
+		public virtual void Activate() 
+		{
 			active = true;
 		}
 		
-		public virtual void Deactivate() {
+		public virtual void Deactivate()
+		{
 			active = false;
 		}
 		
-		public virtual void DeInit() {
+		public virtual void DeInit()
+		{
 			ready = false;
 		}
 		

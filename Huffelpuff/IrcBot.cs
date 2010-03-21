@@ -7,18 +7,18 @@
  * Sie können diese Vorlage unter Extras > Optionen > Codeerstellung > Standardheader ändern.
  */
 
-using Mono.Nat;
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 
+using Huffelpuff.Database;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
-
 using Meebey.SmartIrc4net;
+using Mono.Nat;
 
 namespace Huffelpuff
 {
@@ -261,8 +261,7 @@ namespace Huffelpuff
             foreach(var channel in e.Data.MessageArray.Skip(1)) {
                 if (!channel.IsNullOrEmpty()) {
                     this.RfcJoin(channel);
-                    PersistentMemory.Instance.RemoveValue("channel", channel);
-                    PersistentMemory.Instance.SetValue("channel", channel);
+                    PersistentMemory.Instance.ReplaceValue("channel", channel);
                 }
             }
             PersistentMemory.Instance.Flush();
