@@ -135,7 +135,7 @@ namespace Plugin
 						break;
 					}
 					PersistentMemory.Instance.SetValue(rssfeedconst, e.Data.MessageArray[1].ToLower());
-					rssFeeds.Add(e.Data.MessageArray[1].ToLower(), new RssWrapper(e.Data.MessageArray[1].ToLower(), e.Data.MessageArray[1], e.Data.MessageArray[2]));
+					rssFeeds.Add(e.Data.MessageArray[1].ToLower(), new RssWrapper(e.Data.MessageArray[1].ToLower(), e.Data.MessageArray[1], e.Data.MessageArray[2], DateTime.Now));
 					BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully added.".Fill(rssFeeds[e.Data.MessageArray[1].ToLower()].FriendlyName));
 					break;
 				case "!-rss":

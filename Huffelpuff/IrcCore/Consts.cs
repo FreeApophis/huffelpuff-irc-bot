@@ -154,6 +154,7 @@ namespace Meebey.SmartIrc4net
         ListEnd =                        323,
         ChannelModeIs =                  324,
         UniqueOpIs =                     325,
+        IdentifiedFreenode   =           330,
         NoTopic =                        331,
         Topic =                          332,
         Inviting =                       341,

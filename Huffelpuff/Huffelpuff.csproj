@@ -68,7 +68,16 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Reference Include="DbLinq">
+      <HintPath>lib\DbLinq.dll</HintPath>
+    </Reference>
+    <Reference Include="DbLinq.Sqlite">
+      <HintPath>lib\DbLinq.Sqlite.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.JScript" />
+    <Reference Include="Mono.Data.Sqlite">
+      <HintPath>lib\Mono.Data.Sqlite.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core">
@@ -77,6 +86,12 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.SQLite">
+      <HintPath>lib\System.Data.SQLite.DLL</HintPath>
     </Reference>
     <Reference Include="System.Security" />
     <Reference Include="System.ServiceProcess" />
@@ -95,6 +110,8 @@
     <Compile Include="AccessControl\NickServIdentifyRequest.cs" />
     <Compile Include="AccessControl\PasswordIdentify.cs" />
     <Compile Include="Commandlet.cs" />
+    <Compile Include="Database\Database.cs" />
+    <Compile Include="Database\DatabaseCommon.cs" />
     <Compile Include="HuffelpuffServiceInstaller.cs" />
     <Compile Include="IrcCore\Consts.cs" />
     <Compile Include="IrcCore\EventArgs.cs" />
@@ -193,6 +210,7 @@
     <Compile Include="Utils\WindowsServiceLogger.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Database" />
     <Folder Include="IrcCore\" />
     <Folder Include="IrcCore\" />
     <Folder Include="IrcCore\" />
@@ -209,4 +227,7 @@
     <Folder Include="Mono.Nat\Upnp\Messages\" />
     <Folder Include="Mono.Nat\Upnp\Messages\" />
   </ItemGroup>
+  <PropertyGroup>
+    <PreBuildEvent>xcopy ..\huffelpuff.db . /y</PreBuildEvent>
+  </PropertyGroup>
 </Project>

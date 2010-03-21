@@ -86,12 +86,12 @@ namespace Plugin
             last = (lastDateTimeString == null) ? DateTime.MinValue : DateTime.Parse(lastDateTimeString);
         }
         
-        public RssWrapper(string name, string friendlyName, string url)
+        public RssWrapper(string name, string friendlyName, string url, DateTime last)
         {
             Name = name;
             this.friendlyName = friendlyName;
             this.url = url;
-            this.last = DateTime.MinValue;
+            this.last = last;
             
             PersistentMemory.Instance.ReplaceValue(NameSpace, friendlynameconst, friendlyName);
             PersistentMemory.Instance.ReplaceValue(NameSpace, urlconst, url);

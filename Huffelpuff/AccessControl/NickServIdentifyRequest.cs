@@ -48,6 +48,12 @@ namespace Huffelpuff
 	            identity = e.Data.MessageArray[5];
 	            lock (this) Monitor.Pulse (this);
 	        }
+	        if ((e.Data.ReplyCode == ReplyCode.IdentifiedFreenode) && (e.Data.RawMessageArray[3] == nick) && (e.Data.Message.StartsWith("is logged in as")))
+	        {
+	            bot.OnRawMessage -= new IrcEventHandler(bot_OnRawMessage);
+	            identity = e.Data.RawMessageArray[4];
+	            lock (this) Monitor.Pulse (this);
+	        }
 	        if ((e.Data.ReplyCode == ReplyCode.WhoIsRegistered) && (e.Data.RawMessageArray[3] == nick) && (e.Data.Message.StartsWith("is a registered nick")))
 	        {
 	            bot.OnRawMessage -= new IrcEventHandler(bot_OnRawMessage);

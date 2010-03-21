@@ -18,112 +18,119 @@
  */
 
 using System;
+using System.Data.SQLite;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.ServiceProcess;
 using System.Threading;
-using Meebey.SmartIrc4net;
+
+using Huffelpuff.Database;
 using Huffelpuff.Utils;
+using Meebey.SmartIrc4net;
 
 #if SERVICE
-using System.Diagnostics;
-using System.ServiceProcess;
+
+
 #endif
 
 namespace Huffelpuff
 {
-    #if !SERVICE
-    class Engine
-    {
+	#if !SERVICE
+	class Engine
+	{
 
-        public static void Main(string[] args)
-        {
-            Tool.RunOnMono();
-            IrcBot bot = new IrcBot();
-            
-            // check for basic settings
-            PersistentMemory.Instance.GetValuesOrTodo("ServerHost");
-            PersistentMemory.Instance.GetValuesOrTodo("ServerPort");
-            PersistentMemory.Instance.GetValueOrTodo("nick");
-            PersistentMemory.Instance.GetValueOrTodo("realname");
-            PersistentMemory.Instance.GetValueOrTodo("username");
-            
-            if(PersistentMemory.Todo) {
-                PersistentMemory.Instance.Flush();
-                Log.Instance.Log("Edit your config file: there are some TODOs left.", Level.Fatal);
-                bot.Exit();
-            }
-            bot.Start();  /*blocking*/
-        }
-    }
-    #else
-    
-    public class ServiceEngine : ServiceBase
-    {
-        public static string HuffelpuffServiceName = "Huffelpuff IRC Bot";
-        private Thread botThread;
-        private IrcBot bot;
-        
-        public ServiceEngine()
-        {
-            this.ServiceName = HuffelpuffServiceName;
-            this.EventLog.Log = "Application";
+		public static void Main(string[] args)
+		{
+			Tool.RunOnMono();
+			IrcBot bot = new IrcBot();
+			
+			// check for basic settings
+			PersistentMemory.Instance.GetValuesOrTodo("ServerHost");
+			PersistentMemory.Instance.GetValuesOrTodo("ServerPort");
+			PersistentMemory.Instance.GetValueOrTodo("nick");
+			PersistentMemory.Instance.GetValueOrTodo("realname");
+			PersistentMemory.Instance.GetValueOrTodo("username");
+			
+			if(PersistentMemory.Todo) {
+				PersistentMemory.Instance.Flush();
+				Log.Instance.Log("Edit your config file: there are some TODOs left.", Level.Fatal);
+				bot.Exit();
+			}
+			bot.Start();  /*blocking*/
+		}
+	}
+	#else
+	
+	public class ServiceEngine : ServiceBase
+	{
+		public static string HuffelpuffServiceName = "Huffelpuff IRC Bot";
+		private Thread botThread;
+		private IrcBot bot;
+		
+		public ServiceEngine()
+		{
+			this.ServiceName = HuffelpuffServiceName;
+			this.EventLog.Log = "Application";
 
-            this.CanHandlePowerEvent = false;
-            this.CanPauseAndContinue = false;
-            this.CanShutdown = true;
-            this.CanStop = true;
-        }
+			this.CanHandlePowerEvent = false;
+			this.CanPauseAndContinue = false;
+			this.CanShutdown = true;
+			this.CanStop = true;
+		}
 
-        static void Main()
-        {
-            ServiceBase.Run(new ServiceEngine());
-        }
+		static void Main()
+		{
+			ServiceBase.Run(new ServiceEngine());
+		}
 
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-        }
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+		}
 
-        protected override void OnStart(string[] args)
-        {
-            Tool.RunOnMono();
-            bot = new IrcBot();
-            
-            // check for basic settings
-            PersistentMemory.Instance.GetValuesOrTodo("ServerHost");
-            PersistentMemory.Instance.GetValuesOrTodo("ServerPort");
-            PersistentMemory.Instance.GetValueOrTodo("nick");
-            PersistentMemory.Instance.GetValueOrTodo("realname");
-            PersistentMemory.Instance.GetValueOrTodo("username");
-            
-            if(PersistentMemory.Todo) {
-                PersistentMemory.Instance.Flush();
-                Log.Instance.Log("Edit your config file: there are some TODOs left.", Level.Fatal);
-                bot.Exit();
-            }
-            
-            botThread = new Thread(bot.Start);
-            botThread.Start();
-            
-            base.OnStart(args);
-        }
+		protected override void OnStart(string[] args)
+		{
+			Tool.RunOnMono();
+			bot = new IrcBot();
+			
+			// check for basic settings
+			PersistentMemory.Instance.GetValuesOrTodo("ServerHost");
+			PersistentMemory.Instance.GetValuesOrTodo("ServerPort");
+			PersistentMemory.Instance.GetValueOrTodo("nick");
+			PersistentMemory.Instance.GetValueOrTodo("realname");
+			PersistentMemory.Instance.GetValueOrTodo("username");
+			
+			if(PersistentMemory.Todo) {
+				PersistentMemory.Instance.Flush();
+				Log.Instance.Log("Edit your config file: there are some TODOs left.", Level.Fatal);
+				bot.Exit();
+			}
+			
+			botThread = new Thread(bot.Start);
+			botThread.Start();
+			
+			base.OnStart(args);
+		}
 
 
-        protected override void OnStop()
-        {
-            bot.RfcQuit("Service shut down", Priority.Low);
-            while(bot.IsConnected) {
-                Thread.Sleep(100);
-            }
-            base.OnStop();
-        }
+		protected override void OnStop()
+		{
+			bot.RfcQuit("Service shut down", Priority.Low);
+			while(bot.IsConnected) {
+				Thread.Sleep(100);
+			}
+			base.OnStop();
+		}
 
-        protected override void OnShutdown()
-        {
-            bot.RfcQuit("Service shut down", Priority.Low);
-            while(bot.IsConnected) {
-                Thread.Sleep(100);
-            }
-            base.OnShutdown();
-        }
-    }
-    #endif
+		protected override void OnShutdown()
+		{
+			bot.RfcQuit("Service shut down", Priority.Low);
+			while(bot.IsConnected) {
+				Thread.Sleep(100);
+			}
+			base.OnShutdown();
+		}
+	}
+	#endif
 }

@@ -54,6 +54,8 @@ namespace Plugin
 			ClientName = "Huffelpuff IRC Bot - Twitter Plugin",
 			ClientUrl = "http://huffelpuff-irc-bot.origo.ethz.ch/",
 			ClientVersion = "1.0",
+			ConsumerKey = "yRaZB2ljtZ1ldg84Uvu4Iw",
+			ConsumerSecret = "26SPIqzqcfQZPsgchKipqWLX3bCGu7vw0JaAUghuKs"
 		};
 		
 		
@@ -85,8 +87,9 @@ namespace Plugin
 				foreach(var twitteraccount in twitterAccounts) {
 					foreach(var mention in twitteraccount.Value.GetNewMentions()) {
 						foreach(string channel in PersistentMemory.Instance.GetValues(IrcBot.channelconst)) {
-							BotMethods.SendMessage(SendType.Message, channel, "" + IrcConstants.IrcBold + "New Mention" + IrcConstants.IrcBold + ": {0} (by {1} ({2}/{3}/{4}) - {5})".Fill(
-								Colorize(mention.Text), mention.User.ScreenName, mention.User.StatusesCount, mention.User.FriendsCount, mention.User.FollowersCount, mention.CreatedDate.ToRelativeTime()));
+							BotMethods.SendMessage(SendType.Message, channel, "{8}New Mention{9} ({7}): {0} (by {6}{1}{6} ({2}/{3}/{4}) - {5})".Fill(
+								Colorize(mention.Text), mention.User.ScreenName, mention.User.StatusesCount, mention.User.FriendsCount, mention.User.FollowersCount, mention.CreatedDate.ToRelativeTime(), 
+								IrcConstants.IrcBold, mention.Id, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + "" + (int)IrcColors.Orange, "" + IrcConstants.IrcColor + IrcConstants.IrcBold));
 						}
 					}
 				}
@@ -98,7 +101,7 @@ namespace Plugin
 						}
 					}
 				}
-			} catch {}			
+			} catch {}
 		}
 
 		private Regex whiteSpaceMatch = new Regex(@"\s+");
@@ -124,17 +127,7 @@ namespace Plugin
 		
 		private string Shorten(string text)
 		{
-			StringBuilder sb = new StringBuilder();
-			foreach(var word in whiteSpaceMatch.Split(text)) {
-				if(word.StartsWith("http://") && word.Length > 18) {
-					sb.Append(UrlShortener.GetUnuUrl(word));
-				} else {
-					sb.Append(word);
-				}
-				sb.Append(' ');
-			}
-			
-			return sb.ToString().TrimEnd(new [] {' '});
+			return UrlShortener.GetUnuUrl(text);
 		}
 		
 		public override string Name {
@@ -145,6 +138,7 @@ namespace Plugin
 		
 		public override void Activate() {
 			BotMethods.AddCommand(new Commandlet("!tweet", "The !tweet <account> <text> command tweets a message to the account. If there is only 1 account, the account name can be omitted.", tweetHandler, this, CommandScope.Public, "twitter_access"));
+			BotMethods.AddCommand(new Commandlet("!retweet", "The !retweet <account> <id> command retweets a message, just enter the ID of the tweet. If there is only 1 account, the account name can be omitted.", tweetHandler, this, CommandScope.Public, "twitter_access"));
 			BotMethods.AddCommand(new Commandlet("!tweet-stats", "The !tweet-stats.", tweetStatsHandler, this, CommandScope.Both));
 			BotMethods.AddCommand(new Commandlet("!tweet-trends", "The !tweet-stats.", tweetTrendsHandler, this, CommandScope.Both));
 			BotMethods.AddCommand(new Commandlet("!+tweet", "With the command !+tweet <friendlyname> [<username> <password>] you can add a tweets.", adminTweet, this, CommandScope.Private, "twitter_admin"));
@@ -178,6 +172,8 @@ namespace Plugin
 		
 		
 		private void utf8Handler(object sender, IrcEventArgs e) {
+			Shorten("Twitmobber, http://bit.ly/azOhNq die #Piraten zur Gemeinderatswahl Winterthur per Maus unterstützen mögen");
+			
 			string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
 			if (e.Data.MessageArray.Length > 1) {
 				if (e.Data.MessageArray[1] == "äöü") {
@@ -231,7 +227,8 @@ namespace Plugin
 			
 			if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower())) {
 				TwitterUser user = twitterAccounts[e.Data.MessageArray[1].ToLower()].GetStats();
-				BotMethods.SendMessage(SendType.Message, sendto, "Followers: {0}, Friends: {1}, Statuses: {2}, -> {3}".Fill(user.FollowersCount, user.FriendsCount, user.StatusesCount, user.Url));
+				BotMethods.SendMessage(SendType.Message, sendto, "Followers: {0}, Friends: {1}, Statuses: {2}, -> {3}"
+				                       .Fill(user.FollowersCount, user.FriendsCount, user.StatusesCount, user.Url));
 			} else {
 				BotMethods.SendMessage(SendType.Message, sendto, "I dont know a tweet with the name: {0}.".Fill(e.Data.MessageArray[1].ToLower()));
 			}
@@ -251,13 +248,15 @@ namespace Plugin
 		
 		private void tweetHandler(object sender, IrcEventArgs e) {
 			string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
+			bool retweet = (e.Data.MessageArray[0] == "!retweet");
+			
 			if (e.Data.MessageArray.Length < 2) {
 				foreach(string line in twitterAccounts.Select(item => item.Value.FriendlyName).ToLines(350, ", ", "Tweet accounts loaded: ", ".")) {
 					BotMethods.SendMessage(SendType.Message, sendto, line);
 				}
 				return;
 			}
-			if (e.Data.MessageArray.Length < 3) {
+			if (e.Data.MessageArray.Length < 3 && twitterAccounts.Count > 1) {
 				BotMethods.SendMessage(SendType.Message, sendto, "Nothing to say? I don't tweet empty messages! try !help !tweet.");
 				return;
 			}
@@ -269,11 +268,13 @@ namespace Plugin
 						BotMethods.SendMessage(SendType.Message, sendto, "Error on feed '{0}': Message longer than 140 characters, try rewriting and tweet again, nothing was tweeted.".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName));
 						return;
 					}
-					var returnFromTwitter = twitterAccounts[e.Data.MessageArray[1].ToLower()].SendStatus(status);
+					var returnFromTwitter = twitterAccounts[e.Data.MessageArray[1].ToLower()].SendStatus(status, retweet);
 					var error = returnFromTwitter.AsError();
 					if (error==null)
 					{
-						BotMethods.SendMessage(SendType.Message, sendto, "successfully tweeted on feed '{0}'".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName));
+						var twitterStatus = returnFromTwitter.AsStatus();
+						string StatusUrl = "http://twitter.com/{0}/status/{1}".Fill(twitterStatus.User.ScreenName, twitterStatus.Id);						
+						BotMethods.SendMessage(SendType.Message, sendto, "successfully tweeted on feed '{0}', Link to Status: {1}".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName, StatusUrl));
 						return;
 					}
 					else
@@ -282,6 +283,8 @@ namespace Plugin
 						return;
 					}
 				} catch (Exception) {}
+			} else if (twitterAccounts.Count == 1) {
+				
 			} else {
 				BotMethods.SendMessage(SendType.Message, sendto, "I dont know a tweet with the name: {0}.".Fill(e.Data.MessageArray[1].ToLower()));
 				return;
@@ -321,10 +324,6 @@ namespace Plugin
 				default:
 					break;
 			}
-		}
-		
-		
-		private void mentionsHandler(object sender, IrcEventArgs e) {
 		}
 	}
 }

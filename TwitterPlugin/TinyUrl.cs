@@ -24,59 +24,66 @@ using System.Web;
 
 namespace Plugin
 {
-    /// <summary>
-    /// Urlshortener make a short redirect url to an arbitrary long external url.
-    /// </summary>
-    public class UrlShortener
-    {
-        /// <summary>
-        /// TinyUrl, the big grandfater of the urlshortneres, not the shortest ones.
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public static string GetTinyUrl(string url) {
-            Dictionary<string, string> replace = new Dictionary<string, string>();
-            foreach(string word in url.Split(new char[] {' '})) {
-                if ((word.Length > 23) && (word.StartsWith("http://"))) {
-                    WebClient tinyurl = new WebClient();
-                    tinyurl.QueryString.Add("url", HttpUtility.UrlEncode(word));
-                    string tiny = tinyurl.DownloadString("http://tinyurl.com/api-create.php");
-                    if (!replace.ContainsKey(word)) {
-                        replace.Add(word, tiny);
-                    }
-                }
-            }
-            
-            foreach(KeyValuePair<string, string> kvp in replace) {
-                url = url.Replace(kvp.Key, kvp.Value);
-            }
-            
-            return url;
-        }
+	/// <summary>
+	/// Urlshortener make a short redirect url to an arbitrary long external url.
+	/// </summary>
+	public class UrlShortener
+	{
+		/// <summary>
+		/// TinyUrl, the big grandfater of the urlshortneres, not the shortest ones.
+		/// </summary>
+		/// <param name="url"></param>
+		/// <returns></returns>
+		public static string GetTinyUrl(string url) {
+			Dictionary<string, string> replace = new Dictionary<string, string>();
+			foreach(string word in url.Split(new char[] {' '})) 
+			{
+				if ((word.Length > 23) && ((word.StartsWith("http://")) || (word.StartsWith("https://"))))
+				{
+					WebClient tinyurl = new WebClient();
+					tinyurl.QueryString.Add("url", HttpUtility.UrlEncode(word));
+					string tiny = tinyurl.DownloadString("http://tinyurl.com/api-create.php");
+					if (!replace.ContainsKey(word)) 
+					{
+						replace.Add(word, tiny);
+					}
+				}
+			}
+			
+			foreach(KeyValuePair<string, string> kvp in replace) 
+			{
+				url = url.Replace(kvp.Key, kvp.Value);
+			}
+			
+			return url;
+		}
 
-        /// <summary>
-        /// U.nu the shortest URLs possible!
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public static string GetUnuUrl(string url) {
-            Dictionary<string, string> replace = new Dictionary<string, string>();
-            foreach(string word in url.Split(new char[] {' '})) {
-                if ((word.Length > 16) && (word.StartsWith("http://"))) {
-                    WebClient unu = new WebClient();
-                    unu.QueryString.Add("url", HttpUtility.UrlEncode(word));
-                    string tiny = unu.DownloadString("http://u.nu/unu-api-simple");
-                    if (!replace.ContainsKey(word)) {
-                        replace.Add(word, tiny);
-                    }
-                }
-            }
-            
-            foreach(KeyValuePair<string, string> kvp in replace) {
-                url = url.Replace(kvp.Key, kvp.Value);
-            }
-            
-            return url;
-        }
-    }
+		/// <summary>
+		/// U.nu the shortest URLs possible!
+		/// </summary>
+		/// <param name="url"></param>
+		/// <returns></returns>
+		public static string GetUnuUrl(string url) {
+			Dictionary<string, string> replace = new Dictionary<string, string>();
+			foreach(string word in url.Split(new char[] {' '})) {
+				if ((word.Length > 16) && ((word.StartsWith("http://")) || (word.StartsWith("https://"))))
+				{
+					WebClient unu = new WebClient();
+					unu.QueryString.Add("url", HttpUtility.UrlEncode(word));
+					string tiny = unu.DownloadString("http://u.nu/unu-api-simple");
+					if (!tiny.StartsWith("NO_RECURSION") && !replace.ContainsKey(word)) 
+					{
+						replace.Add(word, tiny);
+					}
+				}
+			}
+			
+			foreach(KeyValuePair<string, string> kvp in replace) 
+			{
+				url = url.Replace(kvp.Key, kvp.Value);
+			}
+			
+			return url;
+		}
+	}
 }
