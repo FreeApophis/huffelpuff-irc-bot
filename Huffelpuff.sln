@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-# SharpDevelop 3.1.0.4545
+# SharpDevelop 3.2.0.5505
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Huffelpuff", "Huffelpuff\Huffelpuff.csproj", "{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoPlugin", "EchoPlugin\EchoPlugin.csproj", "{DD1D95FD-3E44-4651-877F-DA5DC41A334B}"
@@ -41,6 +41,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedirectPlugin", "RedirectPlugin\RedirectPlugin.csproj", "{3E062165-48AC-4823-A4D3-FF343D6FF996}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChannelModeratorPlugin", "ChannelModerator\ChannelModeratorPlugin.csproj", "{85EF9CDB-F9B0-4097-A264-8803B76CF348}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FactoidPlugin", "FactoidPlugin\FactoidPlugin.csproj", "{1FF20B3C-6B28-4CE6-82ED-88CFD03A1CE9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -169,6 +171,12 @@ Global
 		{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}.Service|Any CPU.Build.0 = Service|Any CPU
+		{1FF20B3C-6B28-4CE6-82ED-88CFD03A1CE9}.Debug|Any CPU.Build.0 = Debug|x86
+		{1FF20B3C-6B28-4CE6-82ED-88CFD03A1CE9}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{1FF20B3C-6B28-4CE6-82ED-88CFD03A1CE9}.Release|Any CPU.Build.0 = Release|x86
+		{1FF20B3C-6B28-4CE6-82ED-88CFD03A1CE9}.Release|Any CPU.ActiveCfg = Release|x86
+		{1FF20B3C-6B28-4CE6-82ED-88CFD03A1CE9}.Service|Any CPU.Build.0 = Debug|x86
+		{1FF20B3C-6B28-4CE6-82ED-88CFD03A1CE9}.Service|Any CPU.ActiveCfg = Debug|x86
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Huffelpuff\Huffelpuff.csproj
