@@ -88,7 +88,7 @@ namespace Plugin
 					foreach(var mention in twitteraccount.Value.GetNewMentions()) {
 						foreach(string channel in PersistentMemory.Instance.GetValues(IrcBot.channelconst)) {
 							BotMethods.SendMessage(SendType.Message, channel, "{8}New Mention{9} ({7}): {0} (by {6}{1}{6} ({2}/{3}/{4}) - {5})".Fill(
-								Colorize(mention.Text), mention.User.ScreenName, mention.User.StatusesCount, mention.User.FriendsCount, mention.User.FollowersCount, mention.CreatedDate.ToRelativeTime(), 
+								Colorize(mention.Text), mention.User.ScreenName, mention.User.StatusesCount, mention.User.FriendsCount, mention.User.FollowersCount, mention.CreatedDate.ToRelativeTime(),
 								IrcConstants.IrcBold, mention.Id, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + "" + (int)IrcColors.Orange, "" + IrcConstants.IrcColor + IrcConstants.IrcBold));
 						}
 					}
@@ -265,7 +265,7 @@ namespace Plugin
 				try {
 					status = Shorten(status);
 					if (status.Length > 140) {
-						BotMethods.SendMessage(SendType.Message, sendto, "Error on feed '{0}': Message longer than 140 characters, try rewriting and tweet again, nothing was tweeted.".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName));
+						BotMethods.SendMessage(SendType.Message, sendto, "Error on feed '{0}': Message longer than 140 characters(140+{1}), try rewriting and tweet again, nothing was tweeted.".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName, status.Length-140));
 						return;
 					}
 					var returnFromTwitter = twitterAccounts[e.Data.MessageArray[1].ToLower()].SendStatus(status, retweet);
@@ -273,7 +273,7 @@ namespace Plugin
 					if (error==null)
 					{
 						var twitterStatus = returnFromTwitter.AsStatus();
-						string StatusUrl = "http://twitter.com/{0}/status/{1}".Fill(twitterStatus.User.ScreenName, twitterStatus.Id);						
+						string StatusUrl = "http://twitter.com/{0}/status/{1}".Fill(twitterStatus.User.ScreenName, twitterStatus.Id);
 						BotMethods.SendMessage(SendType.Message, sendto, "successfully tweeted on feed '{0}', Link to Status: {1}".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName, StatusUrl));
 						return;
 					}

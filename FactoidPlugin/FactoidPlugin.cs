@@ -24,6 +24,7 @@ using System.Linq;
 using Huffelpuff;
 using Huffelpuff.Database;
 using Huffelpuff.Plugins;
+using Huffelpuff.Utils;
 using Meebey.SmartIrc4net;
 
 namespace FactoidPlugin
@@ -43,8 +44,8 @@ namespace FactoidPlugin
 
 		public override void Activate()
 		{
-			BotMethods.AddCommand(new Commandlet("!facts", "Lists all the facts.", listFacts, this, CommandScope.Private));
-			BotMethods.AddCommand(new Commandlet("!+fact", "With the command !+fact <fact> <descriptive text> you can add a fact with its description, or you can link a new fact to the same description with !+fact <newfact> <oldfact>.", addFact, this, CommandScope.Both, "fact_admin"));
+			BotMethods.AddCommand(new Commandlet("!facts", "Lists all the facts.", listFacts, this, CommandScope.Both));
+			BotMethods.AddCommand(new Commandlet("!+fact", "With the command !+fact <fact> <descriptive text> you can add a fact with its description, or you can link a new fact to the same description with !+fact <newfact> <oldfact>. You can add dynamic paramters with %n (where n = 1,2...).", addFact, this, CommandScope.Both, "fact_admin"));
 			BotMethods.AddCommand(new Commandlet("!-fact", "With the command !-fact <fact> you can remove a fact.", removeFact, this, CommandScope.Both, "fact_admin"));
 			BotEvents.OnQueryMessage += BotEvents_OnQueryMessage;
 			BotEvents.OnChannelMessage += BotEvents_OnQueryMessage;
@@ -70,39 +71,102 @@ namespace FactoidPlugin
 		
 		void BotEvents_OnQueryMessage(object sender, IrcEventArgs e)
 		{
-			if (e.Data.MessageArray.Length > 0)
+			string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
+			
+			if (e.Data.MessageArray.Length > 0 && e.Data.MessageArray[0].StartsWith("!"))
 			{
-				if (e.Data.MessageArray[0].StartsWith("!"))
+				var factKey = Db.FactKeys.Where(facts => facts.Key == e.Data.MessageArray[0].Substring(1)).SingleOrDefault();
+				if (factKey != null)
 				{
-					
+					factKey.HitCount ++;
+					var factValue = Db.FactValues.Where(facts => facts.FactKeyID == factKey.ID).SingleOrDefault();
+					if (factValue != null)
+					{
+						string answer = factValue.Value;
+						int count = 0;
+						foreach(var parameter in e.Data.MessageArray.Skip(1))
+						{
+							count++;
+							answer = answer.Replace("%"+count.ToString(), parameter);
+						}
+						BotMethods.SendMessage(SendType.Message, sendto, answer);
+						
+					}
 				}
-				Db.FactKeys.Where(facts => facts.Key ==  e.Data.MessageArray[0].Substring(1)).Select( fact => fact.ID);
-			}
-			
-			
-			if(e.Data.MessageArray[0].StartsWith("!"))
-			{
-				
+				Db.SubmitChanges();
 			}
 		}
 		
 		private void listFacts(object sender, IrcEventArgs e)
 		{
-			foreach(var fact in Db.FactKeys)
+			string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
+			
+			if ( Db.FactKeys.Count() == 0) {
+				BotMethods.SendMessage(SendType.Message, sendto, "There are no facts yet, add them with !+fact");
+				return;
+			}
+			foreach(var line in Db.FactKeys.Select(fact => fact.Key).ToLines(350, ", ", "All Facts: ", ""))
 			{
-				
+				BotMethods.SendMessage(SendType.Message, sendto, line);
 			}
 		}
 		
 		private void addFact(object sender, IrcEventArgs e)
 		{
-			var fact = new FactKey();
-			Db.FactKeys.InsertOnSubmit(fact);			
-			Db.SubmitChanges();
+			string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
+			
+			if (e.Data.MessageArray.Length < 3) {
+				BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments for 'add'! Try '!help !+fact'.");
+				return;
+			}
+
+			if ( Db.FactKeys.Where(facts => facts.Key == e.Data.MessageArray[1]).SingleOrDefault() == null)
+			{
+				var factKey = new FactKey();
+				factKey.Key = e.Data.MessageArray[1];
+				Db.FactKeys.InsertOnSubmit(factKey);
+				Db.SubmitChanges();
+				
+				var factValue = new FactValue();
+				factValue.FactKeyID = factKey.ID;
+				factValue.IrcUserID = 0;
+				factValue.Value = e.Data.Message.Substring(e.Data.MessageArray[0].Length + e.Data.MessageArray[1].Length + 2);
+				Db.FactValues.InsertOnSubmit(factValue);
+				Db.SubmitChanges();
+
+				BotMethods.SendMessage(SendType.Message, sendto, "New Fact '" + factKey.Key + "' learned. Activate it with !" +  factKey.Key +".");
+			}
+			else
+			{
+				BotMethods.SendMessage(SendType.Message, sendto, "Sorry, I know that fact already.");
+			}
+
 		}
+		
 		private void removeFact(object sender, IrcEventArgs e)
 		{
-			
-		}		
+			string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
+
+			if (e.Data.MessageArray.Length < 2) {
+				BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments for 'remove'! Try '!help !-fact'.");
+				return;
+			}
+			var factKey = Db.FactKeys.Where(facts => facts.Key == e.Data.MessageArray[1]).SingleOrDefault();
+			if (factKey != null)
+			{
+				var factValue = Db.FactValues.Where(facts => facts.FactKeyID == factKey.ID).SingleOrDefault();
+				if (factValue != null)
+				{
+					Db.FactValues.DeleteOnSubmit(factValue);
+				}
+				Db.FactKeys.DeleteOnSubmit(factKey);
+				
+				BotMethods.SendMessage(SendType.Message, sendto, "I forgot Fact '" + factKey.Key + "'.");
+				
+				Db.SubmitChanges();
+			} else {
+				BotMethods.SendMessage(SendType.Message, sendto, "I don't know fact '" + factKey.Key + "'.");
+			}
+		}
 	}
 }
