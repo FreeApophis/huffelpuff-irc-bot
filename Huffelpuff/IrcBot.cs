@@ -31,6 +31,14 @@ namespace Huffelpuff
     {
         private BotPluginManager plugManager;
         
+		public Main Db 
+		{
+			get 
+			{
+				return DatabaseCommon.Db;
+			}
+		}
+        
         private AccessControlList acl;
         
         public AccessControlList Acl {
@@ -261,6 +269,7 @@ namespace Huffelpuff
             foreach(var channel in e.Data.MessageArray.Skip(1)) {
                 if (!channel.IsNullOrEmpty()) {
                     this.RfcJoin(channel);
+                    
                     PersistentMemory.Instance.ReplaceValue("channel", channel);
                 }
             }

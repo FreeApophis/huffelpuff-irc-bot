@@ -16,8 +16,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Huffelpuff.Database
 {
@@ -26,6 +28,45 @@ namespace Huffelpuff.Database
 	/// </summary>
 	public static class DatabaseExtensions
 	{
+		public static string GetKey(this IEnumerable<Setting> settings, string key)
+		{
+			var setting = settings.Where(s => s.Key == key).SingleOrDefault();
+			return setting == null ? null : setting.Value;
+		}
+
+		public static bool SetKey(this IEnumerable<Setting> settings, string key, string value)
+		{
+			var setting = settings.Where(s => s.Key == key).SingleOrDefault();
+			var result = setting != null;
+			
+			if (result)
+			{
+				setting.Key = key;
+				setting.Value = value;
+			} 
+			else
+			{
+				setting = new Setting();
+				setting.Key = key;
+				setting.Value = value;
+				DatabaseCommon.Db.Settings.InsertOnSubmit(setting);
+			}
+			
+			DatabaseCommon.Db.SubmitChanges();
+			return result;
+		}
+		
+		public static bool RemoveKey(this IEnumerable<Setting> settings, string key)
+		{
+			var setting = settings.Where(s => s.Key == key).SingleOrDefault();
+			var result = setting != null;
+			if (result)
+			{
+				DatabaseCommon.Db.Settings.DeleteOnSubmit(setting);
+				DatabaseCommon.Db.SubmitChanges();
+			}
+			return result;
+		}
 		
 	}
 }

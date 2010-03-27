@@ -1,4 +1,4 @@
-#region Auto-generated classes for main database on 2010-03-21 13:34:58Z
+#region Auto-generated classes for main database on 2010-03-26 21:41:26Z
 
 //
 //  ____  _     __  __      _        _
@@ -7,7 +7,7 @@
 // | |_| | |_) | |  | |  __/ || (_| | |
 // |____/|_.__/|_|  |_|\___|\__\__,_|_|
 //
-// Auto-generated from main on 2010-03-21 13:34:58Z
+// Auto-generated from main on 2010-03-26 21:41:26Z
 // Please visit http://linq.to/db for more information
 
 #endregion
@@ -325,7 +325,7 @@ namespace Huffelpuff.Database
 
 		private string _key;
 		[DebuggerNonUserCode]
-		[Column(Storage = "_key", Name = "\"Key\"", DbType = "VARCHAR(50)", AutoSync = AutoSync.Never, CanBeNull = false)]
+		[Column(Storage = "_key", Name = "Key", DbType = "VARCHAR(50)", AutoSync = AutoSync.Never, CanBeNull = false)]
 		public string Key
 		{
 			get
@@ -649,7 +649,7 @@ namespace Huffelpuff.Database
 
 		private DateTime _time;
 		[DebuggerNonUserCode]
-		[Column(Storage = "_time", Name = "\"Time\"", DbType = "TIMESTAMP", AutoSync = AutoSync.Never, CanBeNull = false)]
+		[Column(Storage = "_time", Name = "Time", DbType = "TIMESTAMP", AutoSync = AutoSync.Never, CanBeNull = false)]
 		public DateTime Time
 		{
 			get
@@ -836,7 +836,7 @@ namespace Huffelpuff.Database
 
 		private string _user;
 		[DebuggerNonUserCode]
-		[Column(Storage = "_user", Name = "\"User\"", DbType = "VARCHAR(50)", AutoSync = AutoSync.Never)]
+		[Column(Storage = "_user", Name = "User", DbType = "VARCHAR(50)", AutoSync = AutoSync.Never)]
 		public string User
 		{
 			get
@@ -1076,7 +1076,7 @@ namespace Huffelpuff.Database
 
 		private string _key;
 		[DebuggerNonUserCode]
-		[Column(Storage = "_key", Name = "\"Key\"", DbType = "VARCHAR(50)", AutoSync = AutoSync.Never, CanBeNull = false)]
+		[Column(Storage = "_key", Name = "Key", DbType = "VARCHAR(50)", AutoSync = AutoSync.Never, CanBeNull = false)]
 		public string Key
 		{
 			get
@@ -1135,7 +1135,7 @@ namespace Huffelpuff.Database
 
 	}
 
-	[Table(Name = "main.\"User\"")]
+	[Table(Name = "main.User")]
 	public partial class User : INotifyPropertyChanging, INotifyPropertyChanged
 	{
 		#region INotifyPropertyChanging handling

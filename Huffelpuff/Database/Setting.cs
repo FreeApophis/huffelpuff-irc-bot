@@ -14,10 +14,7 @@ namespace Huffelpuff.Database
 	/// Convinience Functions for the Settings
 	/// </summary>
 	public partial class Setting
-	{
-		public string Test () 
-		{
-			return "Test";
-		}
+	{		
+		
 	}
 }

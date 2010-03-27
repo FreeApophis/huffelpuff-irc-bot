@@ -84,16 +84,7 @@ namespace Huffelpuff.Plugins
 				Log.Instance.Log("Handler " + HandlerName + "in" + this.GetType() + " has thrown an Exception: \n" + ex.Message + "\n" + ex.InnerException.Message, Level.Error, ConsoleColor.Red);
 			}
 		}
-
-		
-		public Main Db 
-		{
-			get 
-			{
-				return DatabaseCommon.Db;
-			}
-		}
-		
+	
 		public string MainClass {
 			get {
 				string[] parts = FullName.Split(new [] { '.' });
