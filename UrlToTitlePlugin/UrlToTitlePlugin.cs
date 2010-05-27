@@ -83,10 +83,10 @@ namespace Plugin
                 lang = (e.Data.Channel=="#pirates-suisse")?"fr":lang;
                 
                 if (e.Data.MessageArray.Length == 1) {
-                    if (e.Data.Message.StartsWith("http://forum.piraten-partei.ch/viewtopic.php?f=")) {
+                    if (e.Data.Message.StartsWith("http://forum.piratenpartei.ch/viewtopic.php?f=")) {
                         string f = fMatch.Match(e.Data.Message).Value;
                         string t = tMatch.Match(e.Data.Message).Value;
-                        ForumItem item = getTopic("http://forum.piraten-partei.ch/rss.php?f=" + f + "&t=" + t + "&start=last", lang, false);
+                        ForumItem item = getTopic("http://forum.piratenpartei.ch/rss.php?f=" + f + "&t=" + t + "&start=last", lang, false);
                         if (lang == "fr"){
                             BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Forum des pirates - " + item.Title + " (by " + item.Author + ")");
                         }    else {

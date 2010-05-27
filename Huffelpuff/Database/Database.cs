@@ -1,1480 +1,1440 @@
-#region Auto-generated classes for main database on 2010-03-26 21:41:26Z
-
-//
-//  ____  _     __  __      _        _
+// 
+//  ____  _     __  __      _        _ 
 // |  _ \| |__ |  \/  | ___| |_ __ _| |
 // | | | | '_ \| |\/| |/ _ \ __/ _` | |
 // | |_| | |_) | |  | |  __/ || (_| | |
 // |____/|_.__/|_|  |_|\___|\__\__,_|_|
 //
-// Auto-generated from main on 2010-03-26 21:41:26Z
-// Please visit http://linq.to/db for more information
-
-#endregion
-
-using System;
-using System.Data;
-using System.Data.Linq.Mapping;
-using System.Diagnostics;
-using System.Reflection;
-#if MONO_STRICT
-using System.Data.Linq;
-#else   // MONO_STRICT
-using DbLinq.Data.Linq;
-using DbLinq.Vendor;
-#endif  // MONO_STRICT
-using System.ComponentModel;
-
+// Auto-generated from main on 2010-05-28 01:16:25Z.
+// Please visit http://code.google.com/p/dblinq2007/ for more information.
+//
 namespace Huffelpuff.Database
 {
+	using System;
+	using System.ComponentModel;
+	using System.Data;
+#if MONO_STRICT
+	using System.Data.Linq;
+#else   // MONO_STRICT
+	using DbLinq.Data.Linq;
+	using DbLinq.Vendor;
+#endif  // MONO_STRICT
+	using System.Data.Linq.Mapping;
+	using System.Diagnostics;
+	
+	
 	public partial class Main : DataContext
 	{
-		#region Extensibility Method Definitions
-
+		
+		#region Extensibility Method Declarations
 		partial void OnCreated();
-
 		#endregion
-
-		public Main(string connectionString)
-			: base(connectionString)
+		
+		
+		public Main(string connectionString) : 
+				base(connectionString)
 		{
-			OnCreated();
+			this.OnCreated();
 		}
-
-		public Main(IDbConnection connection)
-//		#if MONO_STRICT
-//			: base(connection)
-//		#else   // MONO_STRICT
-			: base(connection, new DbLinq.Sqlite.SqliteVendor())
-//		#endif  // MONO_STRICT
+		
+		public Main(string connection, MappingSource mappingSource) : 
+				base(connection, mappingSource)
 		{
-			OnCreated();
+			this.OnCreated();
 		}
-
-		public Main(string connection, MappingSource mappingSource)
-			: base(connection, mappingSource)
+		
+		public Main(IDbConnection connection, MappingSource mappingSource) : 
+				base(connection, mappingSource)
 		{
-			OnCreated();
+			this.OnCreated();
 		}
-
-		public Main(IDbConnection connection, MappingSource mappingSource)
-			: base(connection, mappingSource)
+		
+		public Table<EventLog> EventLogs
 		{
-			OnCreated();
+			get
+			{
+				return this.GetTable<EventLog>();
+			}
 		}
-
-		#if !MONO_STRICT
-		public Main(IDbConnection connection, IVendor vendor)
-			: base(connection, vendor)
+		
+		public Table<FactKey> FactKeys
 		{
-			OnCreated();
+			get
+			{
+				return this.GetTable<FactKey>();
+			}
 		}
-		#endif  // !MONO_STRICT
-
-		#if !MONO_STRICT
-		public Main(IDbConnection connection, MappingSource mappingSource, IVendor vendor)
-			: base(connection, mappingSource, vendor)
+		
+		public Table<FactValue> FactValues
 		{
-			OnCreated();
+			get
+			{
+				return this.GetTable<FactValue>();
+			}
 		}
-		#endif  // !MONO_STRICT
-
-		public Table<EventLog> EventLogs { get { return GetTable<EventLog>(); } }
-		public Table<FactKey> FactKeys { get { return GetTable<FactKey>(); } }
-		public Table<FactValue> FactValues { get { return GetTable<FactValue>(); } }
-		public Table<IrcLog> IrcLogs { get { return GetTable<IrcLog>(); } }
-		public Table<IrcUser> IrcUsers { get { return GetTable<IrcUser>(); } }
-		public Table<IrcUserAlias> IrcUserAlias { get { return GetTable<IrcUserAlias>(); } }
-		public Table<Setting> Settings { get { return GetTable<Setting>(); } }
-		public Table<User> Users { get { return GetTable<User>(); } }
-		public Table<UserGroup> UserGroups { get { return GetTable<UserGroup>(); } }
-		public Table<UserGroupUser> UserGroupUsers { get { return GetTable<UserGroupUser>(); } }
-
+		
+		public Table<IrcLog> IrcLogs
+		{
+			get
+			{
+				return this.GetTable<IrcLog>();
+			}
+		}
+		
+		public Table<IrcUser> IrcUsers
+		{
+			get
+			{
+				return this.GetTable<IrcUser>();
+			}
+		}
+		
+		public Table<IrcUserAlias> IrcUserAlias
+		{
+			get
+			{
+				return this.GetTable<IrcUserAlias>();
+			}
+		}
+		
+		public Table<Setting> Settings
+		{
+			get
+			{
+				return this.GetTable<Setting>();
+			}
+		}
+		
+		public Table<User> Users
+		{
+			get
+			{
+				return this.GetTable<User>();
+			}
+		}
+		
+		public Table<UserGroup> UserGroups
+		{
+			get
+			{
+				return this.GetTable<UserGroup>();
+			}
+		}
+		
+		public Table<UserGroupUser> UserGroupUsers
+		{
+			get
+			{
+				return this.GetTable<UserGroupUser>();
+			}
+		}
 	}
+	
+	#region Start MONO_STRICT
+#if MONO_STRICT
 
-	[Table(Name = "main.EventLog")]
-	public partial class EventLog : INotifyPropertyChanging, INotifyPropertyChanged
+	public partial class Main
 	{
-		#region INotifyPropertyChanging handling
-
-		public event PropertyChangingEventHandler PropertyChanging;
-
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
-		protected virtual void SendPropertyChanging()
+		
+		public Main(IDbConnection connection) : 
+				base(connection)
 		{
-			if (PropertyChanging != null)
-			{
-				PropertyChanging(this, emptyChangingEventArgs);
-			}
+			this.OnCreated();
 		}
-
-		#endregion
-
-		#region INotifyPropertyChanged handling
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		protected virtual void SendPropertyChanged(string propertyName)
+	}
+	#region End MONO_STRICT
+	#endregion
+#else     // MONO_STRICT
+	
+	public partial class Main
+	{
+		
+		public Main(IDbConnection connection) : 
+				base(connection, new DbLinq.Sqlite.SqliteVendor())
 		{
-			if (PropertyChanged != null)
-			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
+			this.OnCreated();
 		}
-
-		#endregion
-
-		#region Extensibility Method Definitions
-
-		partial void OnCreated();
-		partial void OnIDChanged();
-		partial void OnIDChanging(int value);
-		partial void OnLevelChanged();
-		partial void OnLevelChanging(int value);
-		partial void OnMessageChanged();
-		partial void OnMessageChanging(string value);
-
-		#endregion
-
-		#region int ID
-
+		
+		public Main(IDbConnection connection, IVendor sqlDialect) : 
+				base(connection, sqlDialect)
+		{
+			this.OnCreated();
+		}
+		
+		public Main(IDbConnection connection, MappingSource mappingSource, IVendor sqlDialect) : 
+				base(connection, mappingSource, sqlDialect)
+		{
+			this.OnCreated();
+		}
+	}
+	#region End Not MONO_STRICT
+	#endregion
+#endif     // MONO_STRICT
+	#endregion
+	
+	[Table(Name="main.EventLog")]
+	public partial class EventLog : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	{
+		
+		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		
 		private int _id;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_id", Name = "ID", DbType = "INTEGER", IsPrimaryKey = true, IsDbGenerated = true, AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		private int _level;
+		
+		private string _message;
+		
+		#region Extensibility Method Declarations
+		partial void OnCreated();
+		
+		partial void OnIDChanged();
+		
+		partial void OnIDChanging(int value);
+		
+		partial void OnLevelChanged();
+		
+		partial void OnLevelChanging(int value);
+		
+		partial void OnMessageChanged();
+		
+		partial void OnMessageChanging(string value);
+		#endregion
+		
+		
+		public EventLog()
+		{
+			this.OnCreated();
+		}
+		
+		[Column(Storage="_id", Name="ID", DbType="INTEGER", IsPrimaryKey=true, IsDbGenerated=true, AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int ID
 		{
 			get
 			{
-				return _id;
+				return this._id;
 			}
 			set
 			{
-				if (value != _id)
+				if ((_id != value))
 				{
-					OnIDChanging(value);
-					SendPropertyChanging();
-					_id = value;
-					SendPropertyChanged("ID");
-					OnIDChanged();
+					this.OnIDChanging(value);
+					this.SendPropertyChanging();
+					this._id = value;
+					this.SendPropertyChanged("ID");
+					this.OnIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region int Level
-
-		private int _level;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_level", Name = "Level", DbType = "INTEGER", AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		[Column(Storage="_level", Name="Level", DbType="INTEGER", AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int Level
 		{
 			get
 			{
-				return _level;
+				return this._level;
 			}
 			set
 			{
-				if (value != _level)
+				if ((_level != value))
 				{
-					OnLevelChanging(value);
-					SendPropertyChanging();
-					_level = value;
-					SendPropertyChanged("Level");
-					OnLevelChanged();
+					this.OnLevelChanging(value);
+					this.SendPropertyChanging();
+					this._level = value;
+					this.SendPropertyChanged("Level");
+					this.OnLevelChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region string Message
-
-		private string _message;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_message", Name = "Message", DbType = "TEXT", AutoSync = AutoSync.Never)]
+		
+		[Column(Storage="_message", Name="Message", DbType="TEXT", AutoSync=AutoSync.Never)]
+		[DebuggerNonUserCode()]
 		public string Message
 		{
 			get
 			{
-				return _message;
+				return this._message;
 			}
 			set
 			{
-				if (value != _message)
+				if (((_message == value) 
+							== false))
 				{
-					OnMessageChanging(value);
-					SendPropertyChanging();
-					_message = value;
-					SendPropertyChanged("Message");
-					OnMessageChanged();
+					this.OnMessageChanging(value);
+					this.SendPropertyChanging();
+					this._message = value;
+					this.SendPropertyChanged("Message");
+					this.OnMessageChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region ctor
-
-		public EventLog()
-		{
-			OnCreated();
-		}
-
-		#endregion
-
-	}
-
-	[Table(Name = "main.FactKey")]
-	public partial class FactKey : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		#region INotifyPropertyChanging handling
-
-		public event PropertyChangingEventHandler PropertyChanging;
-
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
+		
+		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		
+		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		
 		protected virtual void SendPropertyChanging()
 		{
-			if (PropertyChanging != null)
+			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			if ((h != null))
 			{
-				PropertyChanging(this, emptyChangingEventArgs);
+				h(this, emptyChangingEventArgs);
 			}
 		}
-
-		#endregion
-
-		#region INotifyPropertyChanged handling
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
+		
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			if (PropertyChanged != null)
+			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			if ((h != null))
 			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
 			}
 		}
-
-		#endregion
-
-		#region Extensibility Method Definitions
-
-		partial void OnCreated();
-		partial void OnHitCountChanged();
-		partial void OnHitCountChanging(int value);
-		partial void OnIDChanged();
-		partial void OnIDChanging(int value);
-		partial void OnKeyChanged();
-		partial void OnKeyChanging(string value);
-
-		#endregion
-
-		#region int HitCount
-
+	}
+	
+	[Table(Name="main.FactKey")]
+	public partial class FactKey : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	{
+		
+		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		
 		private int _hitCount;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_hitCount", Name = "HitCount", DbType = "INTEGER", AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		private int _id;
+		
+		private string _key;
+		
+		#region Extensibility Method Declarations
+		partial void OnCreated();
+		
+		partial void OnHitCountChanged();
+		
+		partial void OnHitCountChanging(int value);
+		
+		partial void OnIDChanged();
+		
+		partial void OnIDChanging(int value);
+		
+		partial void OnKeyChanged();
+		
+		partial void OnKeyChanging(string value);
+		#endregion
+		
+		
+		public FactKey()
+		{
+			this.OnCreated();
+		}
+		
+		[Column(Storage="_hitCount", Name="HitCount", DbType="INTEGER", AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int HitCount
 		{
 			get
 			{
-				return _hitCount;
+				return this._hitCount;
 			}
 			set
 			{
-				if (value != _hitCount)
+				if ((_hitCount != value))
 				{
-					OnHitCountChanging(value);
-					SendPropertyChanging();
-					_hitCount = value;
-					SendPropertyChanged("HitCount");
-					OnHitCountChanged();
+					this.OnHitCountChanging(value);
+					this.SendPropertyChanging();
+					this._hitCount = value;
+					this.SendPropertyChanged("HitCount");
+					this.OnHitCountChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region int ID
-
-		private int _id;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_id", Name = "ID", DbType = "INTEGER", IsPrimaryKey = true, IsDbGenerated = true, AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		[Column(Storage="_id", Name="ID", DbType="INTEGER", IsPrimaryKey=true, IsDbGenerated=true, AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int ID
 		{
 			get
 			{
-				return _id;
+				return this._id;
 			}
 			set
 			{
-				if (value != _id)
+				if ((_id != value))
 				{
-					OnIDChanging(value);
-					SendPropertyChanging();
-					_id = value;
-					SendPropertyChanged("ID");
-					OnIDChanged();
+					this.OnIDChanging(value);
+					this.SendPropertyChanging();
+					this._id = value;
+					this.SendPropertyChanged("ID");
+					this.OnIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region string Key
-
-		private string _key;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_key", Name = "Key", DbType = "VARCHAR(50)", AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		[Column(Storage="_key", Name="Key", DbType="VARCHAR(50)", AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public string Key
 		{
 			get
 			{
-				return _key;
+				return this._key;
 			}
 			set
 			{
-				if (value != _key)
+				if (((_key == value) 
+							== false))
 				{
-					OnKeyChanging(value);
-					SendPropertyChanging();
-					_key = value;
-					SendPropertyChanged("Key");
-					OnKeyChanged();
+					this.OnKeyChanging(value);
+					this.SendPropertyChanging();
+					this._key = value;
+					this.SendPropertyChanged("Key");
+					this.OnKeyChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region ctor
-
-		public FactKey()
-		{
-			OnCreated();
-		}
-
-		#endregion
-
-	}
-
-	[Table(Name = "main.FactValue")]
-	public partial class FactValue : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		#region INotifyPropertyChanging handling
-
-		public event PropertyChangingEventHandler PropertyChanging;
-
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
+		
+		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		
+		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		
 		protected virtual void SendPropertyChanging()
 		{
-			if (PropertyChanging != null)
+			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			if ((h != null))
 			{
-				PropertyChanging(this, emptyChangingEventArgs);
+				h(this, emptyChangingEventArgs);
 			}
 		}
-
-		#endregion
-
-		#region INotifyPropertyChanged handling
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
+		
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			if (PropertyChanged != null)
+			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			if ((h != null))
 			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
 			}
 		}
-
-		#endregion
-
-		#region Extensibility Method Definitions
-
-		partial void OnCreated();
-		partial void OnFactKeyIDChanged();
-		partial void OnFactKeyIDChanging(int value);
-		partial void OnIDChanged();
-		partial void OnIDChanging(int value);
-		partial void OnIrcUserIDChanged();
-		partial void OnIrcUserIDChanging(int value);
-		partial void OnValueChanged();
-		partial void OnValueChanging(string value);
-
-		#endregion
-
-		#region int FactKeyID
-
+	}
+	
+	[Table(Name="main.FactValue")]
+	public partial class FactValue : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	{
+		
+		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		
 		private int _factKeyID;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_factKeyID", Name = "FactKeyID", DbType = "INTEGER", AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		private int _id;
+		
+		private int _ircUserID;
+		
+		private string _value;
+		
+		#region Extensibility Method Declarations
+		partial void OnCreated();
+		
+		partial void OnFactKeyIDChanged();
+		
+		partial void OnFactKeyIDChanging(int value);
+		
+		partial void OnIDChanged();
+		
+		partial void OnIDChanging(int value);
+		
+		partial void OnIrcUserIDChanged();
+		
+		partial void OnIrcUserIDChanging(int value);
+		
+		partial void OnValueChanged();
+		
+		partial void OnValueChanging(string value);
+		#endregion
+		
+		
+		public FactValue()
+		{
+			this.OnCreated();
+		}
+		
+		[Column(Storage="_factKeyID", Name="FactKeyID", DbType="INTEGER", AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int FactKeyID
 		{
 			get
 			{
-				return _factKeyID;
+				return this._factKeyID;
 			}
 			set
 			{
-				if (value != _factKeyID)
+				if ((_factKeyID != value))
 				{
-					OnFactKeyIDChanging(value);
-					SendPropertyChanging();
-					_factKeyID = value;
-					SendPropertyChanged("FactKeyID");
-					OnFactKeyIDChanged();
+					this.OnFactKeyIDChanging(value);
+					this.SendPropertyChanging();
+					this._factKeyID = value;
+					this.SendPropertyChanged("FactKeyID");
+					this.OnFactKeyIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region int ID
-
-		private int _id;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_id", Name = "ID", DbType = "INTEGER", IsPrimaryKey = true, IsDbGenerated = true, AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		[Column(Storage="_id", Name="ID", DbType="INTEGER", IsPrimaryKey=true, IsDbGenerated=true, AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int ID
 		{
 			get
 			{
-				return _id;
+				return this._id;
 			}
 			set
 			{
-				if (value != _id)
+				if ((_id != value))
 				{
-					OnIDChanging(value);
-					SendPropertyChanging();
-					_id = value;
-					SendPropertyChanged("ID");
-					OnIDChanged();
+					this.OnIDChanging(value);
+					this.SendPropertyChanging();
+					this._id = value;
+					this.SendPropertyChanged("ID");
+					this.OnIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region int IrcUserID
-
-		private int _ircUserID;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_ircUserID", Name = "IrcUserID", DbType = "INTEGER", AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		[Column(Storage="_ircUserID", Name="IrcUserID", DbType="INTEGER", AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int IrcUserID
 		{
 			get
 			{
-				return _ircUserID;
+				return this._ircUserID;
 			}
 			set
 			{
-				if (value != _ircUserID)
+				if ((_ircUserID != value))
 				{
-					OnIrcUserIDChanging(value);
-					SendPropertyChanging();
-					_ircUserID = value;
-					SendPropertyChanged("IrcUserID");
-					OnIrcUserIDChanged();
+					this.OnIrcUserIDChanging(value);
+					this.SendPropertyChanging();
+					this._ircUserID = value;
+					this.SendPropertyChanged("IrcUserID");
+					this.OnIrcUserIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region string Value
-
-		private string _value;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_value", Name = "Value", DbType = "TEXT", AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		[Column(Storage="_value", Name="Value", DbType="TEXT", AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public string Value
 		{
 			get
 			{
-				return _value;
+				return this._value;
 			}
 			set
 			{
-				if (value != _value)
+				if (((_value == value) 
+							== false))
 				{
-					OnValueChanging(value);
-					SendPropertyChanging();
-					_value = value;
-					SendPropertyChanged("Value");
-					OnValueChanged();
+					this.OnValueChanging(value);
+					this.SendPropertyChanging();
+					this._value = value;
+					this.SendPropertyChanged("Value");
+					this.OnValueChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region ctor
-
-		public FactValue()
-		{
-			OnCreated();
-		}
-
-		#endregion
-
-	}
-
-	[Table(Name = "main.IrcLog")]
-	public partial class IrcLog : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		#region INotifyPropertyChanging handling
-
-		public event PropertyChangingEventHandler PropertyChanging;
-
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
+		
+		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		
+		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		
 		protected virtual void SendPropertyChanging()
 		{
-			if (PropertyChanging != null)
+			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			if ((h != null))
 			{
-				PropertyChanging(this, emptyChangingEventArgs);
+				h(this, emptyChangingEventArgs);
 			}
 		}
-
-		#endregion
-
-		#region INotifyPropertyChanged handling
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
+		
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			if (PropertyChanged != null)
+			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			if ((h != null))
 			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
 			}
 		}
-
-		#endregion
-
-		#region Extensibility Method Definitions
-
-		partial void OnCreated();
-		partial void OnEventTypeChanged();
-		partial void OnEventTypeChanging(string value);
-		partial void OnIDChanged();
-		partial void OnIDChanging(int value);
-		partial void OnMessageChanged();
-		partial void OnMessageChanging(string value);
-		partial void OnTimeChanged();
-		partial void OnTimeChanging(DateTime value);
-		partial void OnUserIDChanged();
-		partial void OnUserIDChanging(int? value);
-
-		#endregion
-
-		#region string EventType
-
+	}
+	
+	[Table(Name="main.IrcLog")]
+	public partial class IrcLog : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	{
+		
+		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		
 		private string _eventType;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_eventType", Name = "EventType", DbType = "VARCHAR(50)", AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		private int _id;
+		
+		private string _message;
+		
+		private System.DateTime _time;
+		
+		private System.Nullable<int> _userID;
+		
+		#region Extensibility Method Declarations
+		partial void OnCreated();
+		
+		partial void OnEventTypeChanged();
+		
+		partial void OnEventTypeChanging(string value);
+		
+		partial void OnIDChanged();
+		
+		partial void OnIDChanging(int value);
+		
+		partial void OnMessageChanged();
+		
+		partial void OnMessageChanging(string value);
+		
+		partial void OnTimeChanged();
+		
+		partial void OnTimeChanging(System.DateTime value);
+		
+		partial void OnUserIDChanged();
+		
+		partial void OnUserIDChanging(System.Nullable<int> value);
+		#endregion
+		
+		
+		public IrcLog()
+		{
+			this.OnCreated();
+		}
+		
+		[Column(Storage="_eventType", Name="EventType", DbType="VARCHAR(50)", AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public string EventType
 		{
 			get
 			{
-				return _eventType;
+				return this._eventType;
 			}
 			set
 			{
-				if (value != _eventType)
+				if (((_eventType == value) 
+							== false))
 				{
-					OnEventTypeChanging(value);
-					SendPropertyChanging();
-					_eventType = value;
-					SendPropertyChanged("EventType");
-					OnEventTypeChanged();
+					this.OnEventTypeChanging(value);
+					this.SendPropertyChanging();
+					this._eventType = value;
+					this.SendPropertyChanged("EventType");
+					this.OnEventTypeChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region int ID
-
-		private int _id;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_id", Name = "ID", DbType = "INTEGER", IsPrimaryKey = true, IsDbGenerated = true, AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		[Column(Storage="_id", Name="ID", DbType="INTEGER", IsPrimaryKey=true, IsDbGenerated=true, AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int ID
 		{
 			get
 			{
-				return _id;
+				return this._id;
 			}
 			set
 			{
-				if (value != _id)
+				if ((_id != value))
 				{
-					OnIDChanging(value);
-					SendPropertyChanging();
-					_id = value;
-					SendPropertyChanged("ID");
-					OnIDChanged();
+					this.OnIDChanging(value);
+					this.SendPropertyChanging();
+					this._id = value;
+					this.SendPropertyChanged("ID");
+					this.OnIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region string Message
-
-		private string _message;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_message", Name = "Message", DbType = "TEXT", AutoSync = AutoSync.Never)]
+		
+		[Column(Storage="_message", Name="Message", DbType="TEXT", AutoSync=AutoSync.Never)]
+		[DebuggerNonUserCode()]
 		public string Message
 		{
 			get
 			{
-				return _message;
+				return this._message;
 			}
 			set
 			{
-				if (value != _message)
+				if (((_message == value) 
+							== false))
 				{
-					OnMessageChanging(value);
-					SendPropertyChanging();
-					_message = value;
-					SendPropertyChanged("Message");
-					OnMessageChanged();
+					this.OnMessageChanging(value);
+					this.SendPropertyChanging();
+					this._message = value;
+					this.SendPropertyChanged("Message");
+					this.OnMessageChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region DateTime Time
-
-		private DateTime _time;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_time", Name = "Time", DbType = "TIMESTAMP", AutoSync = AutoSync.Never, CanBeNull = false)]
-		public DateTime Time
+		
+		[Column(Storage="_time", Name="Time", DbType="TIMESTAMP", AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
+		public System.DateTime Time
 		{
 			get
 			{
-				return _time;
+				return this._time;
 			}
 			set
 			{
-				if (value != _time)
+				if ((_time != value))
 				{
-					OnTimeChanging(value);
-					SendPropertyChanging();
-					_time = value;
-					SendPropertyChanged("Time");
-					OnTimeChanged();
+					this.OnTimeChanging(value);
+					this.SendPropertyChanging();
+					this._time = value;
+					this.SendPropertyChanged("Time");
+					this.OnTimeChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region int? UserID
-
-		private int? _userID;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_userID", Name = "UserID", DbType = "INTEGER", AutoSync = AutoSync.Never)]
-		public int? UserID
+		
+		[Column(Storage="_userID", Name="UserID", DbType="INTEGER", AutoSync=AutoSync.Never)]
+		[DebuggerNonUserCode()]
+		public System.Nullable<int> UserID
 		{
 			get
 			{
-				return _userID;
+				return this._userID;
 			}
 			set
 			{
-				if (value != _userID)
+				if ((_userID != value))
 				{
-					OnUserIDChanging(value);
-					SendPropertyChanging();
-					_userID = value;
-					SendPropertyChanged("UserID");
-					OnUserIDChanged();
+					this.OnUserIDChanging(value);
+					this.SendPropertyChanging();
+					this._userID = value;
+					this.SendPropertyChanged("UserID");
+					this.OnUserIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region ctor
-
-		public IrcLog()
-		{
-			OnCreated();
-		}
-
-		#endregion
-
-	}
-
-	[Table(Name = "main.IrcUser")]
-	public partial class IrcUser : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		#region INotifyPropertyChanging handling
-
-		public event PropertyChangingEventHandler PropertyChanging;
-
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
+		
+		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		
+		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		
 		protected virtual void SendPropertyChanging()
 		{
-			if (PropertyChanging != null)
+			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			if ((h != null))
 			{
-				PropertyChanging(this, emptyChangingEventArgs);
+				h(this, emptyChangingEventArgs);
 			}
 		}
-
-		#endregion
-
-		#region INotifyPropertyChanged handling
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
+		
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			if (PropertyChanged != null)
+			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			if ((h != null))
 			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
 			}
 		}
-
-		#endregion
-
-		#region Extensibility Method Definitions
-
-		partial void OnCreated();
-		partial void OnHostChanged();
-		partial void OnHostChanging(string value);
-		partial void OnIDChanged();
-		partial void OnIDChanging(int value);
-		partial void OnNicknameChanged();
-		partial void OnNicknameChanging(string value);
-		partial void OnUserChanged();
-		partial void OnUserChanging(string value);
-
-		#endregion
-
-		#region string Host
-
+	}
+	
+	[Table(Name="main.IrcUser")]
+	public partial class IrcUser : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	{
+		
+		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		
 		private string _host;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_host", Name = "Host", DbType = "VARCHAR(100)", AutoSync = AutoSync.Never)]
+		
+		private int _id;
+		
+		private string _nickname;
+		
+		private string _user;
+		
+		#region Extensibility Method Declarations
+		partial void OnCreated();
+		
+		partial void OnHostChanged();
+		
+		partial void OnHostChanging(string value);
+		
+		partial void OnIDChanged();
+		
+		partial void OnIDChanging(int value);
+		
+		partial void OnNicknameChanged();
+		
+		partial void OnNicknameChanging(string value);
+		
+		partial void OnUserChanged();
+		
+		partial void OnUserChanging(string value);
+		#endregion
+		
+		
+		public IrcUser()
+		{
+			this.OnCreated();
+		}
+		
+		[Column(Storage="_host", Name="Host", DbType="VARCHAR(100)", AutoSync=AutoSync.Never)]
+		[DebuggerNonUserCode()]
 		public string Host
 		{
 			get
 			{
-				return _host;
+				return this._host;
 			}
 			set
 			{
-				if (value != _host)
+				if (((_host == value) 
+							== false))
 				{
-					OnHostChanging(value);
-					SendPropertyChanging();
-					_host = value;
-					SendPropertyChanged("Host");
-					OnHostChanged();
+					this.OnHostChanging(value);
+					this.SendPropertyChanging();
+					this._host = value;
+					this.SendPropertyChanged("Host");
+					this.OnHostChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region int ID
-
-		private int _id;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_id", Name = "ID", DbType = "INTEGER", IsPrimaryKey = true, IsDbGenerated = true, AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		[Column(Storage="_id", Name="ID", DbType="INTEGER", IsPrimaryKey=true, IsDbGenerated=true, AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int ID
 		{
 			get
 			{
-				return _id;
+				return this._id;
 			}
 			set
 			{
-				if (value != _id)
+				if ((_id != value))
 				{
-					OnIDChanging(value);
-					SendPropertyChanging();
-					_id = value;
-					SendPropertyChanged("ID");
-					OnIDChanged();
+					this.OnIDChanging(value);
+					this.SendPropertyChanging();
+					this._id = value;
+					this.SendPropertyChanged("ID");
+					this.OnIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region string Nickname
-
-		private string _nickname;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_nickname", Name = "Nickname", DbType = "VARCHAR(50)", AutoSync = AutoSync.Never)]
+		
+		[Column(Storage="_nickname", Name="Nickname", DbType="VARCHAR(50)", AutoSync=AutoSync.Never)]
+		[DebuggerNonUserCode()]
 		public string Nickname
 		{
 			get
 			{
-				return _nickname;
+				return this._nickname;
 			}
 			set
 			{
-				if (value != _nickname)
+				if (((_nickname == value) 
+							== false))
 				{
-					OnNicknameChanging(value);
-					SendPropertyChanging();
-					_nickname = value;
-					SendPropertyChanged("Nickname");
-					OnNicknameChanged();
+					this.OnNicknameChanging(value);
+					this.SendPropertyChanging();
+					this._nickname = value;
+					this.SendPropertyChanged("Nickname");
+					this.OnNicknameChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region string User
-
-		private string _user;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_user", Name = "User", DbType = "VARCHAR(50)", AutoSync = AutoSync.Never)]
+		
+		[Column(Storage="_user", Name="User", DbType="VARCHAR(50)", AutoSync=AutoSync.Never)]
+		[DebuggerNonUserCode()]
 		public string User
 		{
 			get
 			{
-				return _user;
+				return this._user;
 			}
 			set
 			{
-				if (value != _user)
+				if (((_user == value) 
+							== false))
 				{
-					OnUserChanging(value);
-					SendPropertyChanging();
-					_user = value;
-					SendPropertyChanged("User");
-					OnUserChanged();
+					this.OnUserChanging(value);
+					this.SendPropertyChanging();
+					this._user = value;
+					this.SendPropertyChanged("User");
+					this.OnUserChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region ctor
-
-		public IrcUser()
-		{
-			OnCreated();
-		}
-
-		#endregion
-
-	}
-
-	[Table(Name = "main.IrcUserAlias")]
-	public partial class IrcUserAlias : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		#region INotifyPropertyChanging handling
-
-		public event PropertyChangingEventHandler PropertyChanging;
-
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
+		
+		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		
+		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		
 		protected virtual void SendPropertyChanging()
 		{
-			if (PropertyChanging != null)
+			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			if ((h != null))
 			{
-				PropertyChanging(this, emptyChangingEventArgs);
+				h(this, emptyChangingEventArgs);
 			}
 		}
-
-		#endregion
-
-		#region INotifyPropertyChanged handling
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
+		
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			if (PropertyChanged != null)
+			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			if ((h != null))
 			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
 			}
 		}
-
-		#endregion
-
-		#region Extensibility Method Definitions
-
-		partial void OnCreated();
-		partial void OnIDChanged();
-		partial void OnIDChanging(int value);
-		partial void OnSourceIDChanged();
-		partial void OnSourceIDChanging(int value);
-		partial void OnTargetIDChanged();
-		partial void OnTargetIDChanging(int value);
-
-		#endregion
-
-		#region int ID
-
+	}
+	
+	[Table(Name="main.IrcUserAlias")]
+	public partial class IrcUserAlias : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	{
+		
+		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		
 		private int _id;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_id", Name = "ID", DbType = "INTEGER", IsPrimaryKey = true, IsDbGenerated = true, AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		private int _sourceID;
+		
+		private int _targetID;
+		
+		#region Extensibility Method Declarations
+		partial void OnCreated();
+		
+		partial void OnIDChanged();
+		
+		partial void OnIDChanging(int value);
+		
+		partial void OnSourceIDChanged();
+		
+		partial void OnSourceIDChanging(int value);
+		
+		partial void OnTargetIDChanged();
+		
+		partial void OnTargetIDChanging(int value);
+		#endregion
+		
+		
+		public IrcUserAlias()
+		{
+			this.OnCreated();
+		}
+		
+		[Column(Storage="_id", Name="ID", DbType="INTEGER", IsPrimaryKey=true, IsDbGenerated=true, AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int ID
 		{
 			get
 			{
-				return _id;
+				return this._id;
 			}
 			set
 			{
-				if (value != _id)
+				if ((_id != value))
 				{
-					OnIDChanging(value);
-					SendPropertyChanging();
-					_id = value;
-					SendPropertyChanged("ID");
-					OnIDChanged();
+					this.OnIDChanging(value);
+					this.SendPropertyChanging();
+					this._id = value;
+					this.SendPropertyChanged("ID");
+					this.OnIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region int SourceID
-
-		private int _sourceID;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_sourceID", Name = "SourceID", DbType = "INTEGER", AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		[Column(Storage="_sourceID", Name="SourceID", DbType="INTEGER", AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int SourceID
 		{
 			get
 			{
-				return _sourceID;
+				return this._sourceID;
 			}
 			set
 			{
-				if (value != _sourceID)
+				if ((_sourceID != value))
 				{
-					OnSourceIDChanging(value);
-					SendPropertyChanging();
-					_sourceID = value;
-					SendPropertyChanged("SourceID");
-					OnSourceIDChanged();
+					this.OnSourceIDChanging(value);
+					this.SendPropertyChanging();
+					this._sourceID = value;
+					this.SendPropertyChanged("SourceID");
+					this.OnSourceIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region int TargetID
-
-		private int _targetID;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_targetID", Name = "TargetID", DbType = "INTEGER", AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		[Column(Storage="_targetID", Name="TargetID", DbType="INTEGER", AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int TargetID
 		{
 			get
 			{
-				return _targetID;
+				return this._targetID;
 			}
 			set
 			{
-				if (value != _targetID)
+				if ((_targetID != value))
 				{
-					OnTargetIDChanging(value);
-					SendPropertyChanging();
-					_targetID = value;
-					SendPropertyChanged("TargetID");
-					OnTargetIDChanged();
+					this.OnTargetIDChanging(value);
+					this.SendPropertyChanging();
+					this._targetID = value;
+					this.SendPropertyChanged("TargetID");
+					this.OnTargetIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region ctor
-
-		public IrcUserAlias()
-		{
-			OnCreated();
-		}
-
-		#endregion
-
-	}
-
-	[Table(Name = "main.Settings")]
-	public partial class Setting : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		#region INotifyPropertyChanging handling
-
-		public event PropertyChangingEventHandler PropertyChanging;
-
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
+		
+		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		
+		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		
 		protected virtual void SendPropertyChanging()
 		{
-			if (PropertyChanging != null)
+			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			if ((h != null))
 			{
-				PropertyChanging(this, emptyChangingEventArgs);
+				h(this, emptyChangingEventArgs);
 			}
 		}
-
-		#endregion
-
-		#region INotifyPropertyChanged handling
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
+		
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			if (PropertyChanged != null)
+			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			if ((h != null))
 			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
 			}
 		}
-
-		#endregion
-
-		#region Extensibility Method Definitions
-
-		partial void OnCreated();
-		partial void OnIDChanged();
-		partial void OnIDChanging(int value);
-		partial void OnKeyChanged();
-		partial void OnKeyChanging(string value);
-		partial void OnValueChanged();
-		partial void OnValueChanging(string value);
-
-		#endregion
-
-		#region int ID
-
+	}
+	
+	[Table(Name="main.Settings")]
+	public partial class Setting : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	{
+		
+		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		
 		private int _id;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_id", Name = "ID", DbType = "INTEGER", IsPrimaryKey = true, IsDbGenerated = true, AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		private string _key;
+		
+		private string _value;
+		
+		#region Extensibility Method Declarations
+		partial void OnCreated();
+		
+		partial void OnIDChanged();
+		
+		partial void OnIDChanging(int value);
+		
+		partial void OnKeyChanged();
+		
+		partial void OnKeyChanging(string value);
+		
+		partial void OnValueChanged();
+		
+		partial void OnValueChanging(string value);
+		#endregion
+		
+		
+		public Setting()
+		{
+			this.OnCreated();
+		}
+		
+		[Column(Storage="_id", Name="ID", DbType="INTEGER", IsPrimaryKey=true, IsDbGenerated=true, AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int ID
 		{
 			get
 			{
-				return _id;
+				return this._id;
 			}
 			set
 			{
-				if (value != _id)
+				if ((_id != value))
 				{
-					OnIDChanging(value);
-					SendPropertyChanging();
-					_id = value;
-					SendPropertyChanged("ID");
-					OnIDChanged();
+					this.OnIDChanging(value);
+					this.SendPropertyChanging();
+					this._id = value;
+					this.SendPropertyChanged("ID");
+					this.OnIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region string Key
-
-		private string _key;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_key", Name = "Key", DbType = "VARCHAR(50)", AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		[Column(Storage="_key", Name="Key", DbType="VARCHAR(50)", AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public string Key
 		{
 			get
 			{
-				return _key;
+				return this._key;
 			}
 			set
 			{
-				if (value != _key)
+				if (((_key == value) 
+							== false))
 				{
-					OnKeyChanging(value);
-					SendPropertyChanging();
-					_key = value;
-					SendPropertyChanged("Key");
-					OnKeyChanged();
+					this.OnKeyChanging(value);
+					this.SendPropertyChanging();
+					this._key = value;
+					this.SendPropertyChanged("Key");
+					this.OnKeyChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region string Value
-
-		private string _value;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_value", Name = "Value", DbType = "TEXT", AutoSync = AutoSync.Never)]
+		
+		[Column(Storage="_value", Name="Value", DbType="TEXT", AutoSync=AutoSync.Never)]
+		[DebuggerNonUserCode()]
 		public string Value
 		{
 			get
 			{
-				return _value;
+				return this._value;
 			}
 			set
 			{
-				if (value != _value)
+				if (((_value == value) 
+							== false))
 				{
-					OnValueChanging(value);
-					SendPropertyChanging();
-					_value = value;
-					SendPropertyChanged("Value");
-					OnValueChanged();
+					this.OnValueChanging(value);
+					this.SendPropertyChanging();
+					this._value = value;
+					this.SendPropertyChanged("Value");
+					this.OnValueChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region ctor
-
-		public Setting()
-		{
-			OnCreated();
-		}
-
-		#endregion
-
-	}
-
-	[Table(Name = "main.User")]
-	public partial class User : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		#region INotifyPropertyChanging handling
-
-		public event PropertyChangingEventHandler PropertyChanging;
-
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
+		
+		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		
+		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		
 		protected virtual void SendPropertyChanging()
 		{
-			if (PropertyChanging != null)
+			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			if ((h != null))
 			{
-				PropertyChanging(this, emptyChangingEventArgs);
+				h(this, emptyChangingEventArgs);
 			}
 		}
-
-		#endregion
-
-		#region INotifyPropertyChanged handling
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
+		
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			if (PropertyChanged != null)
+			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			if ((h != null))
 			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
 			}
 		}
-
-		#endregion
-
-		#region Extensibility Method Definitions
-
-		partial void OnCreated();
-		partial void OnIDChanged();
-		partial void OnIDChanging(int value);
-		partial void OnUsernameChanged();
-		partial void OnUsernameChanging(string value);
-
-		#endregion
-
-		#region int ID
-
+	}
+	
+	[Table(Name="main.User")]
+	public partial class User : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	{
+		
+		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		
 		private int _id;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_id", Name = "ID", DbType = "INTEGER", IsPrimaryKey = true, IsDbGenerated = true, AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		private string _username;
+		
+		#region Extensibility Method Declarations
+		partial void OnCreated();
+		
+		partial void OnIDChanged();
+		
+		partial void OnIDChanging(int value);
+		
+		partial void OnUsernameChanged();
+		
+		partial void OnUsernameChanging(string value);
+		#endregion
+		
+		
+		public User()
+		{
+			this.OnCreated();
+		}
+		
+		[Column(Storage="_id", Name="ID", DbType="INTEGER", IsPrimaryKey=true, IsDbGenerated=true, AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int ID
 		{
 			get
 			{
-				return _id;
+				return this._id;
 			}
 			set
 			{
-				if (value != _id)
+				if ((_id != value))
 				{
-					OnIDChanging(value);
-					SendPropertyChanging();
-					_id = value;
-					SendPropertyChanged("ID");
-					OnIDChanged();
+					this.OnIDChanging(value);
+					this.SendPropertyChanging();
+					this._id = value;
+					this.SendPropertyChanged("ID");
+					this.OnIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region string Username
-
-		private string _username;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_username", Name = "Username", DbType = "VARCHAR(100)", AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		[Column(Storage="_username", Name="Username", DbType="VARCHAR(100)", AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public string Username
 		{
 			get
 			{
-				return _username;
+				return this._username;
 			}
 			set
 			{
-				if (value != _username)
+				if (((_username == value) 
+							== false))
 				{
-					OnUsernameChanging(value);
-					SendPropertyChanging();
-					_username = value;
-					SendPropertyChanged("Username");
-					OnUsernameChanged();
+					this.OnUsernameChanging(value);
+					this.SendPropertyChanging();
+					this._username = value;
+					this.SendPropertyChanged("Username");
+					this.OnUsernameChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region ctor
-
-		public User()
-		{
-			OnCreated();
-		}
-
-		#endregion
-
-	}
-
-	[Table(Name = "main.UserGroup")]
-	public partial class UserGroup : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		#region INotifyPropertyChanging handling
-
-		public event PropertyChangingEventHandler PropertyChanging;
-
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
+		
+		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		
+		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		
 		protected virtual void SendPropertyChanging()
 		{
-			if (PropertyChanging != null)
+			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			if ((h != null))
 			{
-				PropertyChanging(this, emptyChangingEventArgs);
+				h(this, emptyChangingEventArgs);
 			}
 		}
-
-		#endregion
-
-		#region INotifyPropertyChanged handling
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
+		
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			if (PropertyChanged != null)
+			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			if ((h != null))
 			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
 			}
 		}
-
-		#endregion
-
-		#region Extensibility Method Definitions
-
-		partial void OnCreated();
-		partial void OnIDChanged();
-		partial void OnIDChanging(int value);
-		partial void OnNameChanged();
-		partial void OnNameChanging(string value);
-
-		#endregion
-
-		#region int ID
-
+	}
+	
+	[Table(Name="main.UserGroup")]
+	public partial class UserGroup : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	{
+		
+		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		
 		private int _id;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_id", Name = "ID", DbType = "INTEGER", IsPrimaryKey = true, IsDbGenerated = true, AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		private string _name;
+		
+		#region Extensibility Method Declarations
+		partial void OnCreated();
+		
+		partial void OnIDChanged();
+		
+		partial void OnIDChanging(int value);
+		
+		partial void OnNameChanged();
+		
+		partial void OnNameChanging(string value);
+		#endregion
+		
+		
+		public UserGroup()
+		{
+			this.OnCreated();
+		}
+		
+		[Column(Storage="_id", Name="ID", DbType="INTEGER", IsPrimaryKey=true, IsDbGenerated=true, AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int ID
 		{
 			get
 			{
-				return _id;
+				return this._id;
 			}
 			set
 			{
-				if (value != _id)
+				if ((_id != value))
 				{
-					OnIDChanging(value);
-					SendPropertyChanging();
-					_id = value;
-					SendPropertyChanged("ID");
-					OnIDChanged();
+					this.OnIDChanging(value);
+					this.SendPropertyChanging();
+					this._id = value;
+					this.SendPropertyChanged("ID");
+					this.OnIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region string Name
-
-		private string _name;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_name", Name = "Name", DbType = "VARCHAR(50)", AutoSync = AutoSync.Never)]
+		
+		[Column(Storage="_name", Name="Name", DbType="VARCHAR(50)", AutoSync=AutoSync.Never)]
+		[DebuggerNonUserCode()]
 		public string Name
 		{
 			get
 			{
-				return _name;
+				return this._name;
 			}
 			set
 			{
-				if (value != _name)
+				if (((_name == value) 
+							== false))
 				{
-					OnNameChanging(value);
-					SendPropertyChanging();
-					_name = value;
-					SendPropertyChanged("Name");
-					OnNameChanged();
+					this.OnNameChanging(value);
+					this.SendPropertyChanging();
+					this._name = value;
+					this.SendPropertyChanged("Name");
+					this.OnNameChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region ctor
-
-		public UserGroup()
-		{
-			OnCreated();
-		}
-
-		#endregion
-
-	}
-
-	[Table(Name = "main.UserGroupUser")]
-	public partial class UserGroupUser : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		#region INotifyPropertyChanging handling
-
-		public event PropertyChangingEventHandler PropertyChanging;
-
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs("");
+		
+		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		
+		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		
 		protected virtual void SendPropertyChanging()
 		{
-			if (PropertyChanging != null)
+			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			if ((h != null))
 			{
-				PropertyChanging(this, emptyChangingEventArgs);
+				h(this, emptyChangingEventArgs);
 			}
 		}
-
-		#endregion
-
-		#region INotifyPropertyChanged handling
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
+		
 		protected virtual void SendPropertyChanged(string propertyName)
 		{
-			if (PropertyChanged != null)
+			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			if ((h != null))
 			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
 			}
 		}
-
-		#endregion
-
-		#region Extensibility Method Definitions
-
+	}
+	
+	[Table(Name="main.UserGroupUser")]
+	public partial class UserGroupUser : System.ComponentModel.INotifyPropertyChanging, System.ComponentModel.INotifyPropertyChanged
+	{
+		
+		private static System.ComponentModel.PropertyChangingEventArgs emptyChangingEventArgs = new System.ComponentModel.PropertyChangingEventArgs("");
+		
+		private System.Nullable<int> _groupID;
+		
+		private int _id;
+		
+		private System.Nullable<int> _userID;
+		
+		#region Extensibility Method Declarations
 		partial void OnCreated();
+		
 		partial void OnGroupIDChanged();
-		partial void OnGroupIDChanging(int? value);
+		
+		partial void OnGroupIDChanging(System.Nullable<int> value);
+		
 		partial void OnIDChanged();
+		
 		partial void OnIDChanging(int value);
+		
 		partial void OnUserIDChanged();
-		partial void OnUserIDChanging(int? value);
-
+		
+		partial void OnUserIDChanging(System.Nullable<int> value);
 		#endregion
-
-		#region int? GroupID
-
-		private int? _groupID;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_groupID", Name = "GroupID", DbType = "INTEGER", AutoSync = AutoSync.Never)]
-		public int? GroupID
+		
+		
+		public UserGroupUser()
+		{
+			this.OnCreated();
+		}
+		
+		[Column(Storage="_groupID", Name="GroupID", DbType="INTEGER", AutoSync=AutoSync.Never)]
+		[DebuggerNonUserCode()]
+		public System.Nullable<int> GroupID
 		{
 			get
 			{
-				return _groupID;
+				return this._groupID;
 			}
 			set
 			{
-				if (value != _groupID)
+				if ((_groupID != value))
 				{
-					OnGroupIDChanging(value);
-					SendPropertyChanging();
-					_groupID = value;
-					SendPropertyChanged("GroupID");
-					OnGroupIDChanged();
+					this.OnGroupIDChanging(value);
+					this.SendPropertyChanging();
+					this._groupID = value;
+					this.SendPropertyChanged("GroupID");
+					this.OnGroupIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region int ID
-
-		private int _id;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_id", Name = "ID", DbType = "INTEGER", IsPrimaryKey = true, IsDbGenerated = true, AutoSync = AutoSync.Never, CanBeNull = false)]
+		
+		[Column(Storage="_id", Name="ID", DbType="INTEGER", IsPrimaryKey=true, IsDbGenerated=true, AutoSync=AutoSync.Never, CanBeNull=false)]
+		[DebuggerNonUserCode()]
 		public int ID
 		{
 			get
 			{
-				return _id;
+				return this._id;
 			}
 			set
 			{
-				if (value != _id)
+				if ((_id != value))
 				{
-					OnIDChanging(value);
-					SendPropertyChanging();
-					_id = value;
-					SendPropertyChanged("ID");
-					OnIDChanged();
+					this.OnIDChanging(value);
+					this.SendPropertyChanging();
+					this._id = value;
+					this.SendPropertyChanged("ID");
+					this.OnIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region int? UserID
-
-		private int? _userID;
-		[DebuggerNonUserCode]
-		[Column(Storage = "_userID", Name = "UserID", DbType = "INTEGER", AutoSync = AutoSync.Never)]
-		public int? UserID
+		
+		[Column(Storage="_userID", Name="UserID", DbType="INTEGER", AutoSync=AutoSync.Never)]
+		[DebuggerNonUserCode()]
+		public System.Nullable<int> UserID
 		{
 			get
 			{
-				return _userID;
+				return this._userID;
 			}
 			set
 			{
-				if (value != _userID)
+				if ((_userID != value))
 				{
-					OnUserIDChanging(value);
-					SendPropertyChanging();
-					_userID = value;
-					SendPropertyChanged("UserID");
-					OnUserIDChanged();
+					this.OnUserIDChanging(value);
+					this.SendPropertyChanging();
+					this._userID = value;
+					this.SendPropertyChanged("UserID");
+					this.OnUserIDChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region ctor
-
-		public UserGroupUser()
+		
+		public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+		
+		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
 		{
-			OnCreated();
+			System.ComponentModel.PropertyChangingEventHandler h = this.PropertyChanging;
+			if ((h != null))
+			{
+				h(this, emptyChangingEventArgs);
+			}
 		}
-
-		#endregion
-
+		
+		protected virtual void SendPropertyChanged(string propertyName)
+		{
+			System.ComponentModel.PropertyChangedEventHandler h = this.PropertyChanged;
+			if ((h != null))
+			{
+				h(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+			}
+		}
 	}
 }
