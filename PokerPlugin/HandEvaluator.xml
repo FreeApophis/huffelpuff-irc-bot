@@ -1,0 +1,1915 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HandEvaluator</name>
+    </assembly>
+    <members>
+        <member name="T:HoldemHand.Hand">
+            <example>
+            <code>
+            using System;
+            using System.Collections.Generic;
+            using System.Text;
+            using HoldemHand;
+            
+            // Simple example of using the Holdem.Hand class
+            class Program
+            {
+                static void Main(string[] args)
+                {
+                    // initialize board
+                    string board = "2d kh qh 3h qc";
+                    // Create a hand with AKs plus board
+                    Hand h1 = new Hand("ad kd", board);
+                    // Create a hand with 23 unsuited plus board
+                    Hand h2 = new Hand("2h 3d", board);
+            
+                    // Find stronger hand and print results
+                    if (h1 > h2)
+                    {
+                        Console.WriteLine("{0} greater than \n\t{1}", h1.Description, h2.Description);
+                    }
+                    else
+                    {
+                        Console.WriteLine("{0} less than or equal \n\t{1}", h1.Description, h2.Description);
+                    }
+                }
+            }
+            </code>
+            </example>
+            
+            <summary>
+            Represents a Texas Holdem Hand
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.TwoCardTable">
+            <summary>
+            1326 ulong cards masks for all hold cards.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.Pocket169Table">
+            <summary>
+            The 1326 possible pocket cards ordered by the 169 unique holdem combinations. The
+            index is equivalent to the number value of Hand.PocketPairType.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.pocketdict">
+            <exclude/>
+        </member>
+        <member name="M:HoldemHand.Hand.PocketHand169Type(System.UInt64)">
+            <summary>
+            Given a pocket pair mask, the PocketPairType cooresponding to this mask
+            will be returned. 
+            </summary>
+            <param name="mask"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HoldemHand.Hand.Hands(System.Int32)">
+             <summary>
+             Enables a foreach command to enumerate all possible ncard hands.
+             </summary>
+             <param name="numberOfCards">the number of cards in the hand (must be between 1 and 7)</param>
+             <returns></returns>
+             <example>
+             <code>
+             // This method iterates through all possible 5 card hands and returns a count.
+             public static long CountFiveCardHands()
+             {
+                 long count = 0;
+             
+                 // Iterate through all possible 5 card hands
+                 foreach (ulong mask in Hands(5))
+                 {
+                     count++;
+                 }
+            
+                 // Validate results.
+                 System.Diagnostics.Debug.Assert(count == 2598960);
+                 return count;
+             }
+             </code>
+             </example>
+        </member>
+        <member name="M:HoldemHand.Hand.Hands(System.UInt64,System.UInt64,System.Int32)">
+            <summary>
+            Enables a foreach command to enumerate all possible ncard hands.
+            </summary>
+            <param name="shared">A bitfield containing the cards that must be in the enumerated hands</param>
+            <param name="dead">A bitfield containing the cards that must not be in the enumerated hands</param>
+            <param name="numberOfCards">the number of cards in the hand (must be between 1 and 7)</param>
+            <returns></returns>
+            <example>
+            <code>
+            // Counts all remaining hands in a 7 card holdem hand.
+            static long CountHands(string partialHand)
+            {
+                long count = 0;
+            
+                // Parse hand and create a mask
+                ulong partialHandmask = Hand.ParseHand(partialHand);
+            
+                // iterate through all 7 card hands that share the cards in our partial hand.
+               foreach (ulong handmask in Hand.Hands(partialHandmask, 0UL, 7))
+               {
+                   count++;
+               }
+            
+               return count;
+             }
+            </code>
+            </example>
+        </member>
+        <member name="M:HoldemHand.Hand.GetRandomHand(System.UInt64,System.Int32,System.Random)">
+            <summary>
+            Returns a rand hand with the specified number of cards and constrained
+            to not contain any of the passed dead cards.
+            </summary>
+            <param name="dead">Mask for the cards that must not be returned.</param>
+            <param name="ncards">The number of cards to return in this hand.</param>
+            <param name="rand">An instance of the Random class.</param>
+            <returns>A randomly chosen hand containing the number of cards requested.</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.RandomHands(System.UInt64,System.UInt64,System.Int32,System.Int32)">
+            <summary>
+            This function iterates through random hands returning the number of random hands specified
+            in trials. Please note that a mask can be repeated.
+            </summary>
+            <param name="shared">Cards that must be in the hand.</param>
+            <param name="dead">Cards that must not be in the hand.</param>
+            <param name="ncards">The total number of cards in the hand.</param>
+            <param name="trials">The total number of random hands to return.</param>
+            <returns>Returns a random hand mask meeting the input specifications.</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.RandomHands(System.Int32,System.Int32)">
+            <summary>
+            Iterates through random hands with ncards number of cards. This iterator
+            will return the number of masks specifed in trials. Masks can be repeated.
+            </summary>
+            <param name="ncards">Number of cards required to be in the hand.</param>
+            <param name="trials">Number of total mask to return.</param>
+            <returns>A random hand as a hand mask.</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.QueryPerformanceCounter(System.Int64@)">
+            <summary>
+            C# Interop call to Win32 QueryPerformanceCount. This function should be removed
+            if you need an interop free class definition.
+            </summary>
+            <param name="lpPerformanceCount">returns performance counter</param>
+            <returns>True if successful, false otherwise</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.QueryPerformanceFrequency(System.Int64@)">
+            <summary>
+            C# Interop call to Win32 QueryPerformanceFrequency. This function should be removed
+            if you need an interop free class definition.
+            </summary>
+            <param name="lpFrequency">returns performance frequence</param>
+            <returns>True if successful, false otherwise</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.RandomHands(System.UInt64,System.UInt64,System.Int32,System.Double)">
+            <summary>
+            Iterates through random hands that meets the specified requirements until the specified
+            time duration has elapse. 
+            
+            Please note that this iterator requires interop. If you need
+            and interop free hand evaluator you should remove this function along with the other interop
+            functions in this file.
+            </summary>
+            <param name="shared">These cards must be included in the returned hand</param>
+            <param name="dead">These cards must not be included in the returned hand</param>
+            <param name="ncards">The number of cards in the returned random hand.</param>
+            <param name="duration">The amount of time to allow the generation of hands to occur. When elapsed, the iterator will terminate.</param>
+            <returns>A hand mask</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.RandomHands(System.Int32,System.Double)">
+            <summary>
+            Iterates through random hands that meets the specified requirements until the specified
+            time duration has elapse. 
+            
+            Please note that this iterator requires interop. If you need
+            and interop free hand evaluator you should remove this function along with the other interop
+            functions in this file.
+            </summary>
+            <param name="ncards">The number of cards in the returned hand.</param>
+            <param name="duration">The amount of time to allow the generation of hands to occur. When elapsed, the iterator will terminate.</param>
+            <returns>A hand mask.</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.HandOdds(System.String[],System.String,System.String,System.Int64[],System.Int64[],System.Int64[],System.Int64@)">
+            <summary>
+            Used to calculate the wining information about each players hand. This function enumerates all 
+            possible remaining hands and tallies win, tie and losses for each player. This function typically takes
+            well less than a second regardless of the number of players.
+            </summary>
+            <param name="pockets">Array of pocket hand string, one for each player</param>
+            <param name="board">the board cards</param>
+            <param name="dead">the dead cards</param>
+            <param name="wins">An array of win tallies, one for each player</param>
+            <param name="ties">An array of tie tallies, one for each player</param>
+            <param name="losses">An array of losses tallies, one for each player</param>
+            <param name="totalHands">The total number of hands enumarated.</param>
+        </member>
+        <member name="M:HoldemHand.Hand.Outs(System.UInt64,System.UInt64,System.UInt64[])">
+            <summary>
+            Returns the number of outs possible with the next card.
+            </summary>
+            <param name="player">Players pocket cards</param>
+            <param name="board">THe board (must contain either 3 or 4 cards)</param>
+            <param name="opponents">A list of zero or more opponent cards.</param>
+            <returns>The count of the number of single cards that improve the current hand.</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.OutsMask(System.UInt64,System.UInt64,System.UInt64[])">
+            <summary>
+            Creates a Hand mask with the cards that will improve the specified players hand
+            against a list of opponents or if no opponents are list just the cards that improve the 
+            players current had.
+            
+            Please note that this only looks at single cards that improve the hand and will not specifically
+            look at runner-runner possiblities.
+            </summary>
+            <param name="player">Players pocket cards</param>
+            <param name="board">The board (must contain either 3 or 4 cards)</param>
+            <param name="opponents">A list of zero or more opponent pocket cards</param>
+            <returns>A mask of all of the cards taht improve the hand.</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.IsSuited(System.UInt64)">
+            <summary>
+            This function returns true if the cards in the hand are all one suit
+            </summary>
+            <param name="mask">hand to check for "suited-ness"</param>
+            <returns>true if all hands are of the same suit, false otherwise.</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.IsConnected(System.UInt64)">
+            <summary>
+            Returns true if the cards in the two card hand are connected.
+            </summary>
+            <param name="mask">the hand to check</param>
+            <returns>true of all of the cards are next to each other.</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.GapCount(System.UInt64)">
+            <summary>
+            Counts the number of empty space between adjacent cards. 0 means connected, 1 means a gap
+            of one, 2 means a gap of two and 3 means a gap of three.
+            </summary>
+            <param name="mask">two card hand mask</param>
+            <returns>number of spaces between two cards</returns>
+        </member>
+        <member name="F:HoldemHand.Hand.PreCalcPlayerOdds">
+            <summary>
+            This table is used by HandPlayerOpponentOdds and contains the odds of each type of 
+            hand occuring against a random player when the board is currently empty. This calculation
+            normally takes about 5 minutes, so the values are precalculated to save time.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PreCalcOppOdds">
+            This table is used by HandPlayerOpponentOdds and contains the odds of each type of 
+            hand occuring for a random player when the board is currently empty. This calculation
+            normally takes about 5 minutes, so the values are precalculated to save time.
+        </member>
+        <member name="M:HoldemHand.Hand.HandPlayerOpponentOdds(System.UInt64,System.UInt64,System.Double[]@,System.Double[]@)">
+            <summary>
+            Given a set of pocket cards and a set of board cards this function returns the odds of winning or tying for a player and a random opponent.
+            </summary>
+            <param name="ourcards">Pocket mask for the hand.</param>
+            <param name="board">Board mask for hand</param>
+            <param name="player">Player odds as doubles</param>
+            <param name="opponent">Opponent odds as doubles</param>
+        </member>
+        <member name="M:HoldemHand.Hand.HandPlayerOpponentOdds(System.String,System.String,System.Double[]@,System.Double[]@)">
+            <summary>
+            Given a set of pocket cards and a set of board cards this function returns the odds of winning or tying for a player and a random opponent.
+            </summary>
+            <param name="pocketcards">Pocket cards in ASCII</param>
+            <param name="boardcards">Board cards in ASCII</param>
+            <param name="player">Player odds as doubles</param>
+            <param name="opponent">Opponent odds as doubles</param>
+        </member>
+        <member name="M:HoldemHand.Hand.HandPotentialOpp(System.UInt64,System.UInt64,System.UInt64,System.Int32,System.Int32[0:,0:]@)">
+            <summary>
+            Internal function used by HandPotential.
+            </summary>
+            <param name="ourcards"></param>
+            <param name="board"></param>
+            <param name="oppcards"></param>
+            <param name="index"></param>
+            <param name="HP"></param>
+        </member>
+        <member name="M:HoldemHand.Hand.HandPotential(System.UInt64,System.UInt64,System.Double@,System.Double@)">
+            <summary>
+            Returns the positive and negative potential of the current hand. This funciton
+            is described in Aaron Davidson's masters thesis (davidson.msc.pdf).
+            </summary>
+            <param name="pocket">Hold Cards</param>
+            <param name="board">Community cards</param>
+            <param name="ppot">Positive Potential</param>
+            <param name="npot">Negative Potential</param>
+        </member>
+        <member name="F:HoldemHand.Hand.Hearts">
+            <summary>
+            Represents the suit - Hearts
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.Diamonds">
+            <summary>
+            Represents the suit - Diamonds
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.Clubs">
+            <summary>
+            Represents the suit - Clubs
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.Spades">
+            <summary>
+            Represents the suit - Spades
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.Rank2">
+            <summary>
+            Rank of a card with a value of two.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.Rank3">
+            <summary>
+            Rank of a card with a value of three.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.Rank4">
+            <summary>
+            Rank of a card with a value of four.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.Rank5">
+            <summary>
+            Rank of a card with a value of five.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.Rank6">
+            <summary>
+            Rank of a card with a value of six.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.Rank7">
+            <summary>
+            Rank of a card with a value of seven.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.Rank8">
+            <summary>
+            Rank of a card with a value of eight.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.Rank9">
+            <summary>
+            Rank of a card with a value of nine.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.RankTen">
+            <summary>
+            Rank of a card with a value of ten.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.RankJack">
+            <summary>
+            Rank of a card showing a Jack.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.RankQueen">
+            <summary>
+            Rank of a card showing a Queen.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.RankKing">
+            <summary>
+            Rank of a card showing a King.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.RankAce">
+            <summary>
+            Rank of a card showing an Ace.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.CardJoker">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.NumberOfCards">
+            <summary>
+            The total number of cards in a deck
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.NCardsWJoker">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.HANDTYPE_SHIFT">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.TOP_CARD_SHIFT">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.TOP_CARD_MASK">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.SECOND_CARD_SHIFT">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.SECOND_CARD_MASK">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.THIRD_CARD_SHIFT">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.FOURTH_CARD_SHIFT">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.FIFTH_CARD_SHIFT">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.FIFTH_CARD_MASK">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.CARD_WIDTH">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.CARD_MASK">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.handmask">
+            <summary>
+            Hand mask for the current card set
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.pocket">
+            <summary>
+            Contains string representing the pocket cards
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.board">
+            <summary>
+            Contains a string representing the board (common cards)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.handval">
+            <summary>
+            The value of the current had. This value allows hands to be 
+            compared using a normal arithmitic compare function.
+            </summary>
+        </member>
+        <member name="M:HoldemHand.Hand.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:HoldemHand.Hand.#ctor(System.String,System.String)">
+            <example>
+            <code>
+            using System;
+            using System.Collections.Generic;
+            using System.Text;
+            using HoldemHand;
+            
+            // Simple example of using the Holdem.Hand class
+            class Program
+            {
+                static void Main(string[] args)
+                {
+                    // initialize board
+                    string board = "2d kh qh 3h qc";
+                    // Create a hand with AKs plus board
+                    Hand h1 = new Hand("ad kd", board);
+                    // Create a hand with 23 unsuited plus board
+                    Hand h2 = new Hand("2h 3d", board);
+            
+                    // Find stronger hand and print results
+                    if (h1 > h2)
+                    {
+                        Console.WriteLine("{0} greater than \n\t{1}", h1.Description, h2.Description);
+                    }
+                    else
+                    {
+                        Console.WriteLine("{0} less than or equal \n\t{1}", h1.Description, h2.Description);
+                    }
+                }
+            }
+            </code>
+            </example>
+            <summary>
+            Constructor
+            </summary>
+            <param name="pocket">Pocket Cards</param>
+            <param name="board">Board</param>
+        </member>
+        <member name="M:HoldemHand.Hand.ValidateHand(System.String)">
+            <summary>
+            This function takes a string representing a full or partial holdem hand 
+            and validates that the text represents valid cards and that no card is
+            duplicated.
+            </summary>
+            <param name="hand">hand to validate</param>
+            <returns>true of a valid hand, false otherwise</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.ValidateHand(System.String,System.String)">
+            <summary>
+            This function takes a string representing pocket cards and a board and then 
+            validates that the text represents a valid hand.
+            </summary>
+            <param name="pocket">Pocket cards as a string</param>
+            <param name="board">Board cards as a string</param>
+            <returns></returns>
+        </member>
+        <member name="M:HoldemHand.Hand.ParseHand(System.String)">
+            <example>
+            <code>
+             // Takes an ascii seven card hand and prints out a 
+             // value description. For example: "ad kd 2d kh qh 3h qc" would
+             // output "Two pair, King's and Queen's with a Ace for a kicker"
+             static void PrintDescription(string hand)
+             {
+                 // Parse hand into a hand mask
+                 ulong handmask = Hand.ParseHand(hand);
+             
+                 // Convert hand mask into a compariable hand value.
+                 uint handval = Hand.Evaluate(handmask, 7);
+             
+                 // Print a description of the hand.
+                 Console.WriteLine("Hand: {0}", Hand.DescriptionFromHandValue(handval));
+             }
+            </code>
+            </example>
+            <summary>
+            Parses an string description of a hand and returns a hand mask.
+            </summary>
+            <param name="hand">string descripton of a hand</param>
+            <returns>a hand mask representing the hand</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.ParseHand(System.String,System.Int32@)">
+            <summary>
+            
+            </summary>
+            <param name="hand"></param>
+            <param name="cards"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HoldemHand.Hand.ParseHand(System.String,System.String,System.Int32@)">
+            <summary>
+            This static method parses the passed pocket cards and board and produces
+            a card mask.
+            </summary>
+            <param name="pocket">ASCII string representing pocket cards</param>
+            <param name="board">ASCII string representing board</param>
+            <param name="cards">Number of cards represented in mask</param>
+            <returns></returns>
+        </member>
+        <member name="M:HoldemHand.Hand.ParseCard(System.String)">
+            <summary>
+            Reads an string definition of a card and returns the Card value.
+            </summary>
+            <param name="card">card string</param>
+            <returns></returns>
+        </member>
+        <member name="M:HoldemHand.Hand.NextCard(System.String,System.Int32@)">
+            <summary>
+            Parses Card strings (internal)
+            </summary>
+            <param name="cards">string containing hand definition</param>
+            <param name="index">iterator into card string</param>
+            <returns></returns>
+        </member>
+        <member name="M:HoldemHand.Hand.CardRank(System.Int32)">
+            <summary>
+            Given a card value, returns it's rank
+            </summary>
+            <param name="card">card value</param>
+            <returns>returns rank</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.CardSuit(System.Int32)">
+            <summary>
+            Given a card value, returns it's suit
+            </summary>
+            <param name="card">Card value</param>
+            <returns>suit</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.DescriptionFromHandValue(System.UInt32)">
+            <summary>
+            Takes a hand value and returns a description string
+            </summary>
+            <param name="handValue">A hand value from Evaluate or Evaluate</param>
+            <returns>A description string of the value of the hand</returns>
+            <example>
+            <code>
+             // Takes an ascii seven card hand and prints out a 
+             // value description. For example: "ad kd 2d kh qh 3h qc" would
+             // output "Two pair, King's and Queen's with a Ace for a kicker"
+             static void PrintDescription(string hand)
+             {
+                 // Parse hand into a hand mask
+                 ulong handmask = Hand.ParseHand(hand);
+             
+                 // Convert hand mask into a compariable hand value.
+                 uint handval = Hand.Evaluate(handmask, 7);
+             
+                 // Print a description of the hand.
+                 Console.WriteLine("Hand: {0}", Hand.DescriptionFromHandValue(handval));
+             }
+            </code>
+            </example>
+        </member>
+        <member name="M:HoldemHand.Hand.MaskToDescription(System.UInt64)">
+            <summary>
+            Take a card mask like the ones that come out or the Hand.Parse 
+            functions.
+            </summary>
+            <param name="mask">hand mask</param>
+            <returns>returns a description of the hand value</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.DescriptionFromHand(System.String)">
+            <summary>
+            Takes an string describing a hand and returns the description.
+            </summary>
+            <param name="hand">the string describing the hand</param>
+            <returns>Returns a description string</returns>
+            <example>
+            <code>
+            // Print a description of the hand.
+            Console.WriteLine("Hand: {0}", Hand.DescriptionFromHand("ad kd 2d kh qh 3h qc"));
+            </code>
+            </example>
+        </member>
+        <member name="M:HoldemHand.Hand.UpdateHandMask">
+            <summary>
+            Updates handmask and handval, called when card strings change
+            </summary>
+        </member>
+        <member name="M:HoldemHand.Hand.ToString">
+            <summary>
+            Returns the string representing the hand.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HoldemHand.Hand.Mask(System.Int32)">
+            <summary>
+            This is a fast way to look up the index mask. 
+            </summary>
+            <param name="index">index of mask</param>
+            <returns>mask</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.HandType(System.UInt32)">
+            <exclude/>
+        </member>
+        <member name="M:HoldemHand.Hand.TopCard(System.UInt32)">
+            <exclude/>
+        </member>
+        <member name="M:HoldemHand.Hand.SECOND_CARD(System.UInt32)">
+            <exclude/>
+        </member>
+        <member name="M:HoldemHand.Hand.THIRD_CARD(System.UInt32)">
+            <exclude/>
+        </member>
+        <member name="M:HoldemHand.Hand.FOURTH_CARD(System.UInt32)">
+            <exclude/>
+        </member>
+        <member name="M:HoldemHand.Hand.FIFTH_CARD(System.UInt32)">
+            <exclude/>
+        </member>
+        <member name="M:HoldemHand.Hand.HANDTYPE_VALUE(HoldemHand.Hand.HandTypes)">
+            <exclude/>
+        </member>
+        <member name="M:HoldemHand.Hand.TOP_CARD_VALUE(System.UInt32)">
+            <exclude/>
+        </member>
+        <member name="M:HoldemHand.Hand.SECOND_CARD_VALUE(System.UInt32)">
+            <exclude/>
+        </member>
+        <member name="M:HoldemHand.Hand.THIRD_CARD_VALUE(System.UInt32)">
+            <exclude/>
+        </member>
+        <member name="M:HoldemHand.Hand.CardMask(System.UInt64,System.Int32)">
+            <exclude/>
+        </member>
+        <member name="M:HoldemHand.Hand.MaskToString(System.UInt64)">
+            <summary>
+            Turns a card mask into the equivalent human readable string.
+            </summary>
+            <param name="mask">mask to convert</param>
+            <returns>human readable string that is equivalent to the hand represented by the mask</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.EvaluateType(System.UInt64)">
+            <summary>
+            Evaluates the card mask and returns the type of hand it is. This function is
+            faster (but provides less information) than Evaluate or Evaluate.
+            </summary>
+            <param name="mask">card mask</param>
+            <returns>A HandTypes value</returns>
+            <example>
+            <code>
+            public static long ValidateEnumerate5()
+            {
+                int[] handtypes = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                int count = 0;
+            
+                // Iterate through all possible 5 card hands
+                foreach (ulong mask in Hands(5))
+                {
+                    handtypes[(int)Hand.EvaluateType(mask)]++;
+                    count++;
+                }
+            
+                // Validate results.
+                System.Diagnostics.Debug.Assert(handtypes[(int)HandTypes.HighCard] == 1302540);
+                System.Diagnostics.Debug.Assert(handtypes[(int)HandTypes.Pair] == 1098240);
+                System.Diagnostics.Debug.Assert(handtypes[(int)HandTypes.TwoPair] == 123552);
+                System.Diagnostics.Debug.Assert(handtypes[(int)HandTypes.Trips] == 54912);
+                System.Diagnostics.Debug.Assert(handtypes[(int)HandTypes.Straight] == 10200);
+                System.Diagnostics.Debug.Assert(handtypes[(int)HandTypes.Flush] == 5108);
+                System.Diagnostics.Debug.Assert(handtypes[(int)HandTypes.FullHouse] == 3744);
+                System.Diagnostics.Debug.Assert(handtypes[(int)HandTypes.FourOfAKind] == 624);
+                System.Diagnostics.Debug.Assert(handtypes[(int)HandTypes.StraightFlush] == 40);
+                System.Diagnostics.Debug.Assert(count == 2598960);
+                return count;
+            }
+            </code>
+            </example>
+        </member>
+        <member name="M:HoldemHand.Hand.EvaluateType(System.UInt64,System.Int32)">
+            <summary>
+             This function is faster (but provides less information) than Evaluate or Evaluate.
+            </summary>
+            <param name="mask">card mask</param>
+            <param name="cards">number of cards in mask</param>
+            <returns>HandType enum that describes the rank of the hand</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.Evaluate(System.UInt64)">
+            <summary>
+            Evaluates a hand (passed as a hand mask) and returns a hand value.
+            A hand value can be compared against another hand value to
+            determine which has the higher value.
+            </summary>
+            <param name="cards">hand mask</param>
+            <returns>Hand Value bit field</returns>
+        </member>
+        <member name="F:HoldemHand.Hand.HANDTYPE_VALUE_STRAIGHTFLUSH">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.HANDTYPE_VALUE_STRAIGHT">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.HANDTYPE_VALUE_FLUSH">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.HANDTYPE_VALUE_FULLHOUSE">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.HANDTYPE_VALUE_FOUR_OF_A_KIND">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.HANDTYPE_VALUE_TRIPS">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.HANDTYPE_VALUE_TWOPAIR">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.HANDTYPE_VALUE_PAIR">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.HANDTYPE_VALUE_HIGHCARD">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.SPADE_OFFSET">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.CLUB_OFFSET">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.DIAMOND_OFFSET">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.HEART_OFFSET">
+            <exclude/>
+        </member>
+        <member name="M:HoldemHand.Hand.Evaluate(System.UInt64,System.Int32)">
+            <summary>
+            Evaluates a hand (passed as a hand mask) and returns a hand value.
+            A hand value can be compared against another hand value to
+            determine which has the higher value.
+            </summary>
+            <param name="cards">hand mask</param>
+            <param name="numberOfCards">number of cards in the hand</param>
+            <returns>hand value</returns>
+            <example>
+            <code>
+            // Takes an ascii seven card hand and prints out a 
+            // value description. For example: "ad kd 2d kh qh 3h qc" would
+            // output "Two pair, King's and Queen's with a Ace for a kicker"
+            static void PrintDescription(string hand)
+            {
+                // Parse hand into a hand mask
+                ulong handmask = Hand.ParseHand(hand);
+            
+                // Convert hand mask into a compariable hand value.
+                uint handval = Hand.Evaluate(handmask, 7);
+            
+                // Print a description of the hand.
+                Console.WriteLine("Hand: {0}", Hand.DescriptionFromHandValue(handval));
+            }
+            </code>
+            </example>
+        </member>
+        <member name="M:HoldemHand.Hand.CompareTo(System.Object)">
+            <summary>
+            Used to compare one hand to another. This method allows
+            normal compare functions to work as expected with a hand.
+            </summary>
+            <param name="obj">object to compare against</param>
+            <returns></returns>
+        </member>
+        <member name="M:HoldemHand.Hand.Equals(System.Object)">
+            <summary>
+            Test for equality
+            </summary>
+            <param name="obj"></param>
+            <returns>returns true if equal, false otherwise</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.GetHashCode">
+            <summary>
+            Returns hash code
+            </summary>
+            <returns>Hash code</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.op_Equality(HoldemHand.Hand,HoldemHand.Hand)">
+            <summary>
+            Test for equality
+            </summary>
+            <param name="op1">left side object</param>
+            <param name="op2">right side object</param>
+            <returns>returns true if equal, false otherwise</returns>
+            <example>
+            <code>
+            // These two hands are equal because the five best cards
+            // in both hands are the same.
+            Hand h1 = new Hand("ac as", "4d 5d 6c 7c 8d");
+            Hand h2 = new Hand("td js", "4d 5d 6c 7c 8d");
+            
+            if (h1 == h2)
+            {
+                Console.WriteLine("Hands are equal");
+            }
+            </code>
+            </example>
+        </member>
+        <member name="M:HoldemHand.Hand.op_Inequality(HoldemHand.Hand,HoldemHand.Hand)">
+            <summary>
+            Test for inequality.
+            </summary>
+            <param name="op1">left side object</param>
+            <param name="op2">right side object</param>
+            <returns>returns true if not equal, false otherwise</returns>
+            <example>
+            <code>
+            Hand h1 = new Hand("ac as", "4d 5d 6c 7c 8d");
+            Hand h2 = new Hand("td 9s", "4d 5d 6c 7c 8d");
+            
+            if (h1 != h2)
+            {
+                Console.WriteLine("Hand h2 is a higher straight");
+            }
+            </code>
+            </example>
+        </member>
+        <member name="M:HoldemHand.Hand.op_GreaterThan(HoldemHand.Hand,HoldemHand.Hand)">
+            <summary>
+            Test that the left side is greater than the right side.
+            </summary>
+            <param name="op1">left side</param>
+            <param name="op2">right side</param>
+            <returns>returns true of the left item is greater than the right item</returns>
+            <example>
+            <code>
+            Hand h1 = new Hand("ac as", "4d 5d 6c 7c 8d");
+            Hand h2 = new Hand("td 9s", "4d 5d 6c 7c 8d");
+            
+            if (h2 > h1)
+            {
+                Console.WriteLine("Hand h2 is a higher straight");
+            }
+            </code>
+            </example>
+        </member>
+        <member name="M:HoldemHand.Hand.op_GreaterThanOrEqual(HoldemHand.Hand,HoldemHand.Hand)">
+            <summary>
+            Test that the left side is greater or equal than the right side.
+            </summary>
+            <param name="op1">left side</param>
+            <param name="op2">right side</param>
+            <returns>returns true of the left item is greater or equal than the right item</returns>
+            <example>
+            <code>
+            Hand h1 = new Hand("ac as", "4d 5d 6c 7c 8d");
+            Hand h2 = new Hand("td 9s", "4d 5d 6c 7c 8d");
+            
+            if (h2 >= h1)
+            {
+                Console.WriteLine("Hand h2 is a higher straight");
+            }
+            </code>
+            </example>
+        </member>
+        <member name="M:HoldemHand.Hand.op_LessThan(HoldemHand.Hand,HoldemHand.Hand)">
+            <summary>
+            Test that the left side is less than the right side.
+            </summary>
+            <param name="op1">left side</param>
+            <param name="op2">right side</param>
+            <returns>returns true if the left item is less than the right item.</returns>
+        </member>
+        <member name="M:HoldemHand.Hand.op_LessThanOrEqual(HoldemHand.Hand,HoldemHand.Hand)">
+            <summary>
+            Test that the left side is less than or equal to the right side.
+            </summary>
+            <param name="op1">left side</param>
+            <param name="op2">right side</param>
+            <returns>returns true if the left item is less than or equal to the right item.</returns>
+        </member>
+        <member name="F:HoldemHand.Hand.bits">
+            <summary>
+            Bit count table from snippets.org
+            </summary>
+        </member>
+        <member name="M:HoldemHand.Hand.BitCount(System.UInt64)">
+            <summary>
+            Fast Bitcounting method (adapted from snippets.org)
+            </summary>
+            <param name="bitField">ulong to count</param>
+            <returns>number of set bits in ulong</returns>
+        </member>
+        <member name="F:HoldemHand.Hand.nBitsAndStrTable">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.nBitsTable">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.straightTable">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.topFiveCardsTable">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.topCardTable">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.CardMasksTable">
+            <summary>
+            This table is equivalent to 1UL left shifted by the index.
+            The lookup is faster than the left shift operator.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.CardTable">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.ranktbl">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.suittbl">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.rankchar">
+            <exclude/>
+        </member>
+        <member name="F:HoldemHand.Hand.suitchar">
+            <exclude/>
+        </member>
+        <member name="P:HoldemHand.Hand.MaskValue">
+            <summary>
+            Returns hand mask value
+            </summary>
+        </member>
+        <member name="P:HoldemHand.Hand.PocketCards">
+            <summary>
+            Returns/Sets pocket card string
+            </summary>
+        </member>
+        <member name="P:HoldemHand.Hand.Board">
+            <summary>
+            Returns/Sets board card string
+            </summary>
+        </member>
+        <member name="P:HoldemHand.Hand.HandValue">
+            <summary>
+            Returns/Sets the hand value. This value may be used
+            to compare one hand to another using standard numeric 
+            compares.
+            </summary>
+        </member>
+        <member name="P:HoldemHand.Hand.Description">
+            <summary>
+            Returns a textual description of the current hand
+            </summary>
+        </member>
+        <member name="P:HoldemHand.Hand.HandTypeValue">
+            <summary>
+            Returns the current hand type.
+            </summary>
+        </member>
+        <member name="T:HoldemHand.Hand.PocketHand169Enum">
+            <summary>
+            An enumeration value for each of the 169 possible types of pocket cards.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.None">
+            <summary>
+            Not a PocketPairType
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketAA">
+            <summary>
+            Represents a pair of Aces (Pocket Rockets)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketKK">
+            <summary>
+            Represents a pair of Kings (Cowboys)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQQ">
+            <summary>
+            Represents a pair of Queens (Ladies)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJJ">
+            <summary>
+            Represents a pair of Jacks (Fish hooks)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketTT">
+            <summary>
+            Represents a pair of Tens (Rin Tin Tin)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket99">
+            <summary>
+            Represents a pair of Nines (Gretzky)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket88">
+            <summary>
+            Represents a pair of Eights (Snowmen)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket77">
+            <summary>
+            Represents a pair of Sevens (Hockey Sticks)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket66">
+            <summary>
+            Represents a pair of Sixes (Route 66)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket55">
+            <summary>
+            Represents a pair of Fives (Speed Limit)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket44">
+            <summary>
+            Represents a pair of Fours (Sailboats)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket33">
+            <summary>
+            Represents a pair of Threes (Crabs)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket22">
+            <summary>
+            Represents a pair of Twos (Ducks)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketAKs">
+            <summary>
+            Represents Ace/King Suited (Big Slick)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketAKo">
+            <summary>
+            Represents Ace/King offsuit (Big Slick)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketAQs">
+            <summary>
+            Represents Ace/Queen Suited (Little Slick)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketAQo">
+            <summary>
+            Represents Ace/Queen offsuit (Little Slick)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketAJs">
+            <summary>
+            Represents Ace/Jack suited (Blackjack)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketAJo">
+            <summary>
+            Represents Ace/Jack offsuit (Blackjack)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketATs">
+            <summary>
+            Represents Ace/Ten suited (Johnny Moss)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketATo">
+            <summary>
+            Represents Ace/Ten offsuit (Johnny Moss)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA9s">
+            <summary>
+            Represents Ace/Nine suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA9o">
+            <summary>
+            Represents Ace/Nine offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA8s">
+            <summary>
+            Represents Ace/Eight suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA8o">
+            <summary>
+            Represents Ace/Eight offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA7s">
+            <summary>
+            Represents Ace/seven suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA7o">
+            <summary>
+            Represents Ace/seven offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA6s">
+            <summary>
+            Represents Ace/Six suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA6o">
+            <summary>
+            Represents Ace/Six offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA5s">
+            <summary>
+            Represents Ace/Five suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA5o">
+            <summary>
+            Represents Ace/Five offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA4s">
+            <summary>
+            Represents Ace/Four suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA4o">
+            <summary>
+            Represents Ace/Four offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA3s">
+            <summary>
+            Represents Ace/Three suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA3o">
+            <summary>
+            Represents Ace/Three offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA2s">
+            <summary>
+            Represents Ace/Two suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketA2o">
+            <summary>
+            Represents Ace/Two offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketKQs">
+            <summary>
+            Represents King/Queen suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketKQo">
+            <summary>
+            Represents King/Queen offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketKJs">
+            <summary>
+            Represents King/Jack suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketKJo">
+            <summary>
+            Represents King/Jack offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketKTs">
+            <summary>
+            Represents King/Ten suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketKTo">
+            <summary>
+            Represents King/Ten offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK9s">
+            <summary>
+            Represents King/Nine suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK9o">
+            <summary>
+            Represents King/Nine offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK8s">
+            <summary>
+            Represents King/Eight suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK8o">
+            <summary>
+            Represents King/Eight offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK7s">
+            <summary>
+            Represents King/Seven suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK7o">
+            <summary>
+            Represents King/Seven offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK6s">
+            <summary>
+            Represents King/Six suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK6o">
+            <summary>
+            Represents King/Six offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK5s">
+            <summary>
+            Represents King/Five suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK5o">
+            <summary>
+            Represents King/Five offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK4s">
+            <summary>
+            Represents King/Four suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK4o">
+            <summary>
+            Represents King/Four offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK3s">
+            <summary>
+            Represents King/Three suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK3o">
+            <summary>
+            Represents King/Three offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK2s">
+            <summary>
+            Represents King/Two suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketK2o">
+            <summary>
+            Represents King/Two offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQJs">
+            <summary>
+            Represents Queen/Jack suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQJo">
+            <summary>
+            Represents Queen/Jack offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQTs">
+            <summary>
+            Represents Queen/Ten suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQTo">
+            <summary>
+            Represents Queen/Ten offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ9s">
+            <summary>
+            Represents Queen/Nine suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ9o">
+            <summary>
+            Represents Queen/Nine offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ8s">
+            <summary>
+            Represents Queen/Eight suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ8o">
+            <summary>
+            Represents Queen/Eight offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ7s">
+            <summary>
+            Represents Queen/Seven suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ7o">
+            <summary>
+            Represents Queen/Seven offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ6s">
+            <summary>
+            Represents Queen/Six suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ6o">
+            <summary>
+            Represents Queen/Six offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ5s">
+            <summary>
+            Represents Queen/Five suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ5o">
+            <summary>
+            Represents Queen/Five offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ4s">
+            <summary>
+            Represents Queen/Four suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ4o">
+            <summary>
+            Represents Queen/Four offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ3s">
+            <summary>
+            Represents Queen/Three suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ3o">
+            <summary>
+            Represents Queen/Three offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ2s">
+            <summary>
+            Represents Queen/Two suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketQ2o">
+            <summary>
+            Represents Queen/Two offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJTs">
+            <summary>
+            Represents Jack/Ten suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJTo">
+            <summary>
+            Represents Jack/Ten offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ9s">
+            <summary>
+            Represents Jack/Nine suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ9o">
+            <summary>
+            Represents Jack/Nine offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ8s">
+            <summary>
+            Represents Jack/Eight suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ8o">
+            <summary>
+            Represents Jack/Eight offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ7s">
+            <summary>
+            Represents Jack/Seven suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ7o">
+            <summary>
+            Represents Jack/Seven offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ6s">
+            <summary>
+            Represents Jack/Six suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ6o">
+            <summary>
+            Represents Jack/Six offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ5s">
+            <summary>
+            Represents Jack/Five suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ5o">
+            <summary>
+            Represents Jack/Five offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ4s">
+            <summary>
+            Represents Jack/Four suited.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ4o">
+            <summary>
+            Represents Jack/Four offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ3s">
+            <summary>
+            Represents Jack/Three suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ3o">
+            <summary>
+            Represents Jack/Three offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ2s">
+            <summary>
+            Represents Jack/Two suited.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketJ2o">
+            <summary>
+            Represents Jack/Two offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT9s">
+            <summary>
+            Represents Ten/Nine suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT9o">
+            <summary>
+            Represents Ten/Nine offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT8s">
+            <summary>
+            Represents Ten/Eigth suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT8o">
+            <summary>
+            Represents Ten/Eight offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT7s">
+            <summary>
+            Represents Ten/Seven suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT7o">
+            <summary>
+            Represents Ten/Seven offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT6s">
+            <summary>
+            Represents Ten/Six suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT6o">
+            <summary>
+            Represents Ten/Six offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT5s">
+            <summary>
+            Represents Ten/Five suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT5o">
+            <summary>
+            Represents Ten/Five offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT4s">
+            <summary>
+            Represents Ten/Four suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT4o">
+            <summary>
+            Represents Ten/Four offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT3s">
+            <summary>
+            Represents Ten/Three suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT3o">
+            <summary>
+            Represents Ten/Three offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT2s">
+            <summary>
+            Represents Ten/Two suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.PocketT2o">
+            <summary>
+            Represents Ten/Two offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket98s">
+            <summary>
+            Represents Nine/Eight suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket98o">
+            <summary>
+            Represents Nine/Eight offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket97s">
+            <summary>
+            Represents Nine/Seven suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket97o">
+            <summary>
+            Represents Nine/Seven offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket96s">
+            <summary>
+            Represents Nine/Six suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket96o">
+            <summary>
+            Represents Nine/Six offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket95s">
+            <summary>
+            Represents Nine/Five suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket95o">
+            <summary>
+            Represents Nine/Five offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket94s">
+            <summary>
+            Represents Nine/Four suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket94o">
+            <summary>
+            Represents Nine/Four offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket93s">
+            <summary>
+            Represents Nine/Three suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket93o">
+            <summary>
+            Represents Nine/Three offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket92s">
+            <summary>
+            Represents Nine/Two suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket92o">
+            <summary>
+            Represents Nine/Two offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket87s">
+            <summary>
+            Represents Eight/Seven Suited.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket87o">
+            <summary>
+            Represents Eight/Seven offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket86s">
+            <summary>
+            Represents Eight/Six suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket86o">
+            <summary>
+            Represents Eight/Six offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket85s">
+            <summary>
+            Represents Eight/Five suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket85o">
+            <summary>
+            Represents Eight/Five offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket84s">
+            <summary>
+            Represents Eight/Four suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket84o">
+            <summary>
+            Represents Eight/Four offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket83s">
+            <summary>
+            Represents Eight/Three suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket83o">
+            <summary>
+            Represents Eight/Three offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket82s">
+            <summary>
+            Represents Eight/Two suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket82o">
+            <summary>
+            Represents Eight/Two offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket76s">
+            <summary>
+            Represents Seven/Six suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket76o">
+            <summary>
+            Represents Seven/Six offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket75s">
+            <summary>
+            Represents Seven/Five suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket75o">
+            <summary>
+            Represents Seven/Five offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket74s">
+            <summary>
+            Represents Seven/Four suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket74o">
+            <summary>
+            Represents Seven/Four offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket73s">
+            <summary>
+            Represents Seven/Three suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket73o">
+            <summary>
+            Represents Seven/Three offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket72s">
+            <summary>
+            Represents Seven/Two suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket72o">
+            <summary>
+            Represents Seven/Two offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket65s">
+            <summary>
+            Represents Six/Five suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket65o">
+            <summary>
+            Represents Six/Five offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket64s">
+            <summary>
+            Represents Six/Four suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket64o">
+            <summary>
+            Represents Six/Four offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket63s">
+            <summary>
+            Represents Six/Three suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket63o">
+            <summary>
+            Represents Six/Three offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket62s">
+            <summary>
+            Represents Six/Two suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket62o">
+            <summary>
+            Represents Six/Two offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket54s">
+            <summary>
+            Represents Five/Four suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket54o">
+            <summary>
+            Represents Five/Four offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket53s">
+            <summary>
+            Represents Five/Three suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket53o">
+            <summary>
+            Represents Five/Three offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket52s">
+            <summary>
+            Represents Five/Two suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket52o">
+            <summary>
+            Represents Five/Two offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket43s">
+            <summary>
+            Represent Four/Three suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket43o">
+            <summary>
+            Represents Four/Three offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket42s">
+            <summary>
+            Represents Four/Two suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket42o">
+            <summary>
+            Represents Four/Two offsuit
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket32s">
+            <summary>
+            Represents Three/Two suited
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.PocketHand169Enum.Pocket32o">
+            <summary>
+            Represents Three/Two offsuit
+            </summary>
+        </member>
+        <member name="T:HoldemHand.Hand.HandTypes">
+            <summary>
+            Possible types of hands in a texas holdem game.
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.HandTypes.HighCard">
+            <summary>
+            Only a high card
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.HandTypes.Pair">
+            <summary>
+            One Pair
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.HandTypes.TwoPair">
+            <summary>
+            Two Pair
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.HandTypes.Trips">
+            <summary>
+            Three of a kind (Trips)
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.HandTypes.Straight">
+            <summary>
+            Straight
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.HandTypes.Flush">
+            <summary>
+            Flush
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.HandTypes.FullHouse">
+            <summary>
+            FullHouse
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.HandTypes.FourOfAKind">
+            <summary>
+            Four of a kind
+            </summary>
+        </member>
+        <member name="F:HoldemHand.Hand.HandTypes.StraightFlush">
+            <summary>
+            Straight Flush
+            </summary>
+        </member>
+    </members>
+</doc>

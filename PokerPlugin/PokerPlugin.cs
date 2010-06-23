@@ -1,5 +1,5 @@
 ﻿/*
- *  The Radio Plugin controls a Radio Stream with the liquidsoap API
+ *  The Poker Plugin to deal some Poker games
  * 
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
@@ -18,33 +18,41 @@
  */
 
 
+
+using HoldemHand;
 using Huffelpuff;
 using Huffelpuff.Plugins;
+using Meebey.SmartIrc4net;
 
-namespace Plugin
+namespace PokerPlugin
 {
-    /// <summary>
-    /// Description of QuizPlugin.
-    /// </summary>
-    public class QuizPlugin : AbstractPlugin
+    public class PokerPlugin : AbstractPlugin
     {
-        public QuizPlugin(IrcBot botInstance) :
-            base(botInstance) { }
-
-        public override string Name
+        public PokerPlugin(IrcBot botInstance)
+            : base(botInstance)
         {
-            get
-            {
-                return "Quiz Bot";
-            }
+
         }
 
         public override void Activate()
         {
+            BotMethods.AddCommand(new Commandlet("!hand", "What Hand is that?", EvaluateHand, this, CommandScope.Both));
+
+            base.Activate();
+        }
+
+        private void EvaluateHand(object sender, IrcEventArgs e)
+        {
+            var destination = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+
+            BotMethods.SendMessage(SendType.Message, destination, Hand.MaskToDescription(Hand.ParseHand(e.Data.MessageArray[1])));
         }
 
         public override void Deactivate()
         {
+            BotMethods.RemoveCommand("!hand");
+
+            base.Deactivate();
         }
 
         public override string AboutHelp()

@@ -16,20 +16,18 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
- 
-using Huffelpuff.Utils;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Timers;
 using Huffelpuff;
 using Huffelpuff.Plugins;
+using Huffelpuff.Utils;
 using Meebey.SmartIrc4net;
-using MySql.Data;
 using MySql.Data.MySqlClient;
 
 namespace Plugin

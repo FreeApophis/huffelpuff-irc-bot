@@ -125,15 +125,7 @@ namespace Huffelpuff
         internal void CleanPlugins()
         {
             // try catch AppDomainUnloadedExceptions (somehow)
-            List<string> del = new List<string>();
-            foreach (KeyValuePair<string, Commandlet> p in commands)
-            {
-                if (p.Value.Handler == null)
-                {
-                    del.Add(p.Key);
-                }
-            }
-            foreach (string s in del)
+            foreach (string s in (from p in commands where p.Value.Handler == null select p.Key).ToList())
             {
                 commands.Remove(s);
             }
@@ -153,7 +145,9 @@ namespace Huffelpuff
         public bool AddCommand(Commandlet cmd)
         {
             if (cmd.AccessString != null)
-                this.acl.AddAccessString(cmd.AccessString);
+            {
+                acl.AddAccessString(cmd.AccessString);
+            }
             if (!commands.ContainsKey(cmd.Command))
             {
                 commands.Add(cmd.Command, cmd);
