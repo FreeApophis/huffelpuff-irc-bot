@@ -18,9 +18,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Huffelpuff.Utils;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -28,6 +26,7 @@ using System.Web;
 using System.Xml;
 using Huffelpuff;
 using Huffelpuff.Plugins;
+using Huffelpuff.Utils;
 using Meebey.SmartIrc4net;
 
 namespace Plugin

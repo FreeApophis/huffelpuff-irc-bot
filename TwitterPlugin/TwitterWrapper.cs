@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Dimebrain.TweetSharp;
 using Dimebrain.TweetSharp.Extensions;
 using Dimebrain.TweetSharp.Fluent;
 using Dimebrain.TweetSharp.Model;
@@ -118,7 +117,7 @@ namespace Plugin
 		}
 		
 		public void RemoveAccount() {
-			PersistentMemory.Instance.RemoveValue(TwitterPlugin.twitteraccountconst, Name);
+			PersistentMemory.Instance.RemoveValue(TwitterPlugin.TwitterAccountConst, Name);
 			PersistentMemory.Instance.RemoveGroup(NameSpace);
 		}
 

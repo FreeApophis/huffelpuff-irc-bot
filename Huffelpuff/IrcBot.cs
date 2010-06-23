@@ -9,6 +9,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -18,7 +19,6 @@ using Huffelpuff.Database;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 using Meebey.SmartIrc4net;
-using Mono.Nat;
 
 namespace Huffelpuff
 {
@@ -29,7 +29,7 @@ namespace Huffelpuff
     [Serializable]
     public class IrcBot : IrcFeatures
     {
-        private BotPluginManager plugManager;
+        private readonly BotPluginManager plugManager;
 
         public Main Db
         {
@@ -39,42 +39,37 @@ namespace Huffelpuff
             }
         }
 
-        private AccessControlList acl;
+        private readonly AccessControlList acl;
 
         public AccessControlList Acl
         {
             get { return acl; }
         }
 
-        private Dictionary<string, Commandlet> commands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
+        private readonly Dictionary<string, Commandlet> commands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
 
-        private bool uPnPSupport;
+        //public bool UPNPSupport { get; private set; }
 
-        public bool UPnPSupport
-        {
-            get { return uPnPSupport; }
-        }
-
-        public const string channelconst = "channel";
+        public const string Channelconst = "channel";
 
         public IrcBot()
         {
-            this.Encoding = System.Text.Encoding.UTF8;
-            this.SendDelay = 3000;
-            this.PingInterval = 120;
-            this.ActiveChannelSyncing = true;
-            this.OnRawMessage += RawMessageHandler;
-            this.AutoRejoin = true;
-            this.AutoRetry = true;
-            this.AutoRetryDelay = 5;
-            this.SupportNonRfc = true;
-            this.OnChannelMessage += CommandDispatcher;
-            this.OnQueryMessage += CommandDispatcher;
-            this.OnConnected += OnBotConnected;
+            Encoding = System.Text.Encoding.UTF8;
+            SendDelay = 3000;
+            PingInterval = 120;
+            ActiveChannelSyncing = true;
+            OnRawMessage += RawMessageHandler;
+            AutoRejoin = true;
+            AutoRetry = true;
+            AutoRetryDelay = 5;
+            SupportNonRfc = true;
+            OnChannelMessage += CommandDispatcher;
+            OnQueryMessage += CommandDispatcher;
+            OnConnected += OnBotConnected;
 
-            this.CtcpVersion = this.VersionString + " (SmartIrc4Net " + Assembly.GetAssembly(typeof(IrcFeatures)).GetName(false).Version + ")";
-            this.CtcpUrl = "http://huffelpuff-irc-bot.origo.ethz.ch/";
-            this.CtcpSource = "https://svn.origo.ethz.ch/huffelpuff-irc-bot/";
+            CtcpVersion = VersionString + " (SmartIrc4Net " + Assembly.GetAssembly(typeof(IrcFeatures)).GetName(false).Version + ")";
+            CtcpUrl = "http://huffelpuff-irc-bot.origo.ethz.ch/";
+            CtcpSource = "https://svn.origo.ethz.ch/huffelpuff-irc-bot/";
 
             // DCC Setup
 
@@ -94,18 +89,18 @@ namespace Huffelpuff
             plugManager = new BotPluginManager(this, "plugins");
 
             //Basic Commands
-            this.AddCommand(new Commandlet("!join", "The command !join <channel> lets the bot join Channel <channel>", this.JoinCommand, this, CommandScope.Both, "engine_join"));
-            this.AddCommand(new Commandlet("!part", "The command !part <channel> lets the bot part Channel <channel>", this.PartCommand, this, CommandScope.Both, "engine_part"));
-            this.AddCommand(new Commandlet("!channels", "The command !channels lists all channels where the bot resides", this.ListChannelCommand, this, CommandScope.Both));
-            this.AddCommand(new Commandlet("!quit", "The command !quit lets the bot quit himself", this.QuitCommand, this, CommandScope.Both, "engine_quit"));
+            AddCommand(new Commandlet("!join", "The command !join <channel> lets the bot join Channel <channel>", JoinCommand, this, CommandScope.Both, "engine_join"));
+            AddCommand(new Commandlet("!part", "The command !part <channel> lets the bot part Channel <channel>", PartCommand, this, CommandScope.Both, "engine_part"));
+            AddCommand(new Commandlet("!channels", "The command !channels lists all channels where the bot resides", ListChannelCommand, this, CommandScope.Both));
+            AddCommand(new Commandlet("!quit", "The command !quit lets the bot quit himself", QuitCommand, this, CommandScope.Both, "engine_quit"));
 
             //Plugin Commands
-            this.AddCommand(new Commandlet("!plugins", "The command !plugins lists all the plugins", this.PluginsCommand, this, CommandScope.Both));
-            this.AddCommand(new Commandlet("!activate", "The command !activate <plugin> activates the Plugin <plugin>", this.ActivateCommand, this, CommandScope.Both, "engine_activate"));
-            this.AddCommand(new Commandlet("!deactivate", "The command !deactivate <plugin> deactivates the Plugin <plugin>", this.DeactivateCommand, this, CommandScope.Both, "engine_deactivate"));
+            AddCommand(new Commandlet("!plugins", "The command !plugins lists all the plugins", PluginsCommand, this, CommandScope.Both));
+            AddCommand(new Commandlet("!activate", "The command !activate <plugin> activates the Plugin <plugin>", ActivateCommand, this, CommandScope.Both, "engine_activate"));
+            AddCommand(new Commandlet("!deactivate", "The command !deactivate <plugin> deactivates the Plugin <plugin>", DeactivateCommand, this, CommandScope.Both, "engine_deactivate"));
 
             //Helper Commands (!commands)
-            this.AddCommand(new Commandlet("!help", "The command !help <topic> gives you help about <topic> (special topics: commands, more)", this.HelpCommand, this, CommandScope.Both));
+            AddCommand(new Commandlet("!help", "The command !help <topic> gives you help about <topic> (special topics: commands, more)", HelpCommand, this, CommandScope.Both));
 
             //Settings Commands
             new SettingCommands(this);
@@ -116,7 +111,7 @@ namespace Huffelpuff
         {
             if (PersistentMemory.Instance.GetValue("nickserv") != null)
             {
-                this.SendMessage(SendType.Message, "nickserv", "identify {0}".Fill(PersistentMemory.Instance.GetValue("nickserv")), Priority.Critical);
+                SendMessage(SendType.Message, "nickserv", "identify {0}".Fill(PersistentMemory.Instance.GetValue("nickserv")), Priority.Critical);
             }
             Console.WriteLine("/msg nickserv identify {0}".Fill(PersistentMemory.Instance.GetValue("nickserv")));
         }
@@ -131,7 +126,8 @@ namespace Huffelpuff
             }
         }
 
-        private void RawMessageHandler(object sender, IrcEventArgs e)
+        [Conditional("DEBUG")]
+        private static void RawMessageHandler(object sender, IrcEventArgs e)
         {
             Log.Instance.Log(e.Data.RawMessage, Level.Trace);
         }
@@ -174,32 +170,30 @@ namespace Huffelpuff
         private void CommandDispatcher(object sender, IrcEventArgs e)
         {
             bool pub = !string.IsNullOrEmpty(e.Data.Channel);
-            if (commands.ContainsKey(e.Data.MessageArray[0]))
+            if (!commands.ContainsKey(e.Data.MessageArray[0])) return;
+            if ((pub && (commands[e.Data.MessageArray[0]].Scope == CommandScope.Private)) ||
+                ((!pub) && (commands[e.Data.MessageArray[0]].Scope == CommandScope.Public)))
+                return;
+
+            // check if access to function is allowed
+            if (!string.IsNullOrEmpty(commands[e.Data.MessageArray[0]].AccessString) && !acl.Access(e.Data.Nick, commands[e.Data.MessageArray[0]].AccessString, true))
+                return;
+
+            if ((commands[e.Data.MessageArray[0]].ChannelList != null) && (!commands[e.Data.MessageArray[0]].ChannelList.Contains(e.Data.Channel)))
+                return;
+
+            if (commands[e.Data.MessageArray[0]].Handler != null)
             {
-                if ((pub && (commands[e.Data.MessageArray[0]].Scope == CommandScope.Private)) ||
-                   ((!pub) && (commands[e.Data.MessageArray[0]].Scope == CommandScope.Public)))
-                    return;
-
-                // check if access to function is allowed
-                if (!string.IsNullOrEmpty(commands[e.Data.MessageArray[0]].AccessString) && !this.acl.Access(e.Data.Nick, commands[e.Data.MessageArray[0]].AccessString, true))
-                    return;
-
-                if ((commands[e.Data.MessageArray[0]].ChannelList != null) && (!commands[e.Data.MessageArray[0]].ChannelList.Contains(e.Data.Channel)))
-                    return;
-
-                if (commands[e.Data.MessageArray[0]].Handler != null)
+                commands[e.Data.MessageArray[0]].Handler.Invoke(sender, e);
+            }
+            else
+            {
+                foreach (AbstractPlugin plug in plugManager.Plugins)
                 {
-                    commands[e.Data.MessageArray[0]].Handler.Invoke(sender, e);
-                }
-                else
-                {
-                    foreach (AbstractPlugin plug in plugManager.Plugins)
+                    if (plug.FullName == (string)commands[e.Data.MessageArray[0]].Owner)
                     {
-                        if (plug.FullName == (string)commands[e.Data.MessageArray[0]].Owner)
-                        {
-                            plug.InvokeHandler(commands[e.Data.MessageArray[0]].HandlerName, e);
-                            return;
-                        }
+                        plug.InvokeHandler(commands[e.Data.MessageArray[0]].HandlerName, e);
+                        return;
                     }
                 }
             }
@@ -208,12 +202,9 @@ namespace Huffelpuff
         private void PluginsCommand(object sender, IrcEventArgs e)
         {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-            List<string> pluginsList = new List<string>();
 
-            foreach (AbstractPlugin p in plugManager.Plugins)
-            {
-                pluginsList.Add(IrcConstants.IrcBold + p.FullName + " [" + ((p.Active ? IrcConstants.IrcColor + "" + (int)IrcColors.LightGreen + "ON" : IrcConstants.IrcColor + "" + (int)IrcColors.LightRed + "OFF")) + IrcConstants.IrcColor + "]" + IrcConstants.IrcBold);
-            }
+            var pluginsList = plugManager.Plugins.Select(p => IrcConstants.IrcBold + p.FullName + " [" + ((p.Active ? IrcConstants.IrcColor + "" + (int)IrcColors.LightGreen + "ON" : IrcConstants.IrcColor + "" + (int)IrcColors.LightRed + "OFF")) + IrcConstants.IrcColor + "]" + IrcConstants.IrcBold).ToList();
+
             foreach (string line in pluginsList.ToLines(300, ", ", "Plugins Loaded: ", " END."))
             {
                 SendMessage(SendType.Message, sendto, line);
@@ -228,22 +219,19 @@ namespace Huffelpuff
                 SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
                 return;
             }
-            List<AbstractPlugin> calledPlugins = new List<AbstractPlugin>();
-            foreach (string param in e.Data.MessageArray.Skip(1))
-            {
-                Wildcard wildcard = new Wildcard(param);
-                foreach (AbstractPlugin plugin in plugManager.Plugins.Where(p => wildcard.IsMatch(p.FullName) || wildcard.IsMatch(p.MainClass)))
-                {
-                    if (!plugin.Active)
-                    {
-                        PersistentMemory.Instance.SetValue("plugin", plugin.FullName);
-                        PersistentMemory.Instance.Flush();
-                        plugin.Activate();
-                    }
-                    calledPlugins.Add(plugin);
 
+            var calledPlugins = new List<AbstractPlugin>();
+            foreach (var plugin in e.Data.MessageArray.Skip(1).Select(p => new Wildcard(p)).SelectMany(wildcard => plugManager.Plugins.Where(p => wildcard.IsMatch(p.FullName) || wildcard.IsMatch(p.MainClass))))
+            {
+                if (!plugin.Active)
+                {
+                    PersistentMemory.Instance.SetValue("plugin", plugin.FullName);
+                    PersistentMemory.Instance.Flush();
+                    plugin.Activate();
                 }
+                calledPlugins.Add(plugin);
             }
+
             foreach (var line in calledPlugins.Select(plugin => "" + plugin.FullName + " [" + ((plugin.Active ? IrcConstants.IrcColor + "" + (int)IrcColors.LightGreen + "ON" : IrcConstants.IrcColor + "" + (int)IrcColors.LightRed + "OFF")) + IrcConstants.IrcColor + "]").ToLines(350, ", ", "Plugins: ", " END."))
             {
                 SendMessage(SendType.Message, sendto, line);
@@ -258,21 +246,18 @@ namespace Huffelpuff
                 SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
                 return;
             }
-            List<AbstractPlugin> calledPlugins = new List<AbstractPlugin>();
-            foreach (string param in e.Data.MessageArray.Skip(1))
+            var calledPlugins = new List<AbstractPlugin>();
+            foreach (var plugin in e.Data.MessageArray.Skip(1).Select(p => new Wildcard(p)).SelectMany(wildcard => plugManager.Plugins.Where(p => wildcard.IsMatch(p.FullName) || wildcard.IsMatch(p.MainClass))))
             {
-                Wildcard wildcard = new Wildcard(param);
-                foreach (AbstractPlugin plugin in plugManager.Plugins.Where(p => wildcard.IsMatch(p.FullName) || wildcard.IsMatch(p.MainClass)))
+                if (plugin.Active)
                 {
-                    if (plugin.Active)
-                    {
-                        PersistentMemory.Instance.RemoveValue("plugin", plugin.FullName);
-                        PersistentMemory.Instance.Flush();
-                        plugin.Deactivate();
-                    }
-                    calledPlugins.Add(plugin);
+                    PersistentMemory.Instance.RemoveValue("plugin", plugin.FullName);
+                    PersistentMemory.Instance.Flush();
+                    plugin.Deactivate();
                 }
+                calledPlugins.Add(plugin);
             }
+
             foreach (var line in calledPlugins.Select(plugin => "" + plugin.FullName + " [" + ((plugin.Active ? IrcConstants.IrcColor + "" + (int)IrcColors.LightGreen + "ON" : IrcConstants.IrcColor + "" + (int)IrcColors.LightRed + "OFF")) + IrcConstants.IrcColor + "]").ToLines(350, ", ", "Plugins: ", " END."))
             {
                 SendMessage(SendType.Message, sendto, line);
@@ -287,14 +272,12 @@ namespace Huffelpuff
                 SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
                 return;
             }
-            foreach (var channel in e.Data.MessageArray.Skip(1))
-            {
-                if (!channel.IsNullOrEmpty())
-                {
-                    this.RfcJoin(channel);
 
-                    PersistentMemory.Instance.ReplaceValue("channel", channel);
-                }
+            foreach (var channel in e.Data.MessageArray.Skip(1).Where(channel => !channel.IsNullOrEmpty()))
+            {
+                RfcJoin(channel);
+
+                PersistentMemory.Instance.ReplaceValue("channel", channel);
             }
             PersistentMemory.Instance.Flush();
         }
@@ -302,7 +285,7 @@ namespace Huffelpuff
         private void ListChannelCommand(object sender, IrcEventArgs e)
         {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-            foreach (string line in PersistentMemory.Instance.GetValues(channelconst).ToLines(350, ", ", "I am in the following channels: ", " END."))
+            foreach (string line in PersistentMemory.Instance.GetValues(Channelconst).ToLines(350, ", ", "I am in the following channels: ", " END."))
             {
                 SendMessage(SendType.Message, sendto, line);
             }
@@ -317,7 +300,7 @@ namespace Huffelpuff
                 return;
             }
 
-            this.RfcPart(e.Data.Message.Substring(6));
+            RfcPart(e.Data.Message.Substring(6));
 
             PersistentMemory.Instance.RemoveValue("channel", e.Data.MessageArray[1]);
             PersistentMemory.Instance.Flush();
@@ -326,9 +309,9 @@ namespace Huffelpuff
         private void QuitCommand(object sender, IrcEventArgs e)
         {
             if (e.Data.MessageArray.Length > 1)
-                this.RfcQuit(e.Data.Message.Substring(6), Priority.Low);
+                RfcQuit(e.Data.Message.Substring(6), Priority.Low);
             else
-                this.RfcQuit(Priority.Low);
+                RfcQuit(Priority.Low);
         }
 
         private void HelpCommand(object sender, IrcEventArgs e)
@@ -336,49 +319,50 @@ namespace Huffelpuff
             string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length < 2)
             {
-                this.SendMessage(SendType.Message, sendto, "You can use the help command to get information about Plugins and Commands:");
-                this.SendMessage(SendType.Message, sendto, "Type !help commands (for commandlist), !plugins (for plugin list), !help <plugin> (for help about <plugin>), !help <command> (for help about <command>)");
+                SendMessage(SendType.Message, sendto, "You can use the help command to get information about Plugins and Commands:");
+                SendMessage(SendType.Message, sendto, "Type !help commands (for commandlist), !plugins (for plugin list), !help <plugin> (for help about <plugin>), !help <command> (for help about <command>)");
             }
             else
             {
-                sendHelp(e.Data.MessageArray[1], sendto, e.Data.Nick);
+                SendHelp(e.Data.MessageArray[1], sendto, e.Data.Nick);
             }
         }
 
-        private void sendHelp(string topic, string sendto, string nick)
+        private void SendHelp(string topic, string sendto, string nick)
         {
-            Dictionary<CommandScope, string> scopeColor = new Dictionary<CommandScope, string>();
+            var scopeColor = new Dictionary<CommandScope, string>();
+            topic = topic.ToLower();
+
             scopeColor.Add(CommandScope.Private, ("" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.LightRed));
             scopeColor.Add(CommandScope.Public, ("" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Blue));
             scopeColor.Add(CommandScope.Both, ("" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Purple));
 
-            topic = topic.ToLower();
             bool helped = false;
 
             // List all commands
             if (topic == "commands")
             {
-                List<string> commandlist = new List<string>();
+                var commandlist = new List<string>();
                 foreach (Commandlet cmd in commands.Values)
                 {
                     if (string.IsNullOrEmpty(cmd.AccessString))
                     {
                         commandlist.Add(scopeColor[cmd.Scope] + cmd.Command + IrcConstants.IrcColor + IrcConstants.IrcBold);
                     }
-                    else if (this.acl.Access(nick, cmd.AccessString, false))
+                    else if (acl.Access(nick, cmd.AccessString, false))
                     {
                         commandlist.Add(scopeColor[cmd.Scope] + "<" + cmd.Command + ">" + IrcConstants.IrcColor + IrcConstants.IrcBold);
                         //commandlist.Add("" + IrcConstants.IrcColor + (int)IrcColors.Green + "<" + scopeColor[cmd.Scope] + cmd.Command + IrcConstants.IrcColor + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Green +  ">" + IrcConstants.IrcColor);
                     }
-                    else
-                    {
-                        //commandlist.Add("<" + scopeColor[cmd.Scope] + cmd.Command + IrcConstants.IrcColor + IrcConstants.IrcBold + ">");
-                    }
+                    //else
+                    //{
+                    //    commandlist.Add("<" + scopeColor[cmd.Scope] + cmd.Command + IrcConstants.IrcColor + IrcConstants.IrcBold + ">");
+                    //}
                 }
 
                 foreach (string com in commandlist.ToLines(350, ", ", "Active Commands (" + scopeColor[CommandScope.Public] + "public" + IrcConstants.IrcColor + IrcConstants.IrcBold + ", " + scopeColor[CommandScope.Private] + "private" + IrcConstants.IrcColor + IrcConstants.IrcBold + ") <restricted>: ", null))
                 {
-                    this.SendMessage(SendType.Message, sendto, com);
+                    SendMessage(SendType.Message, sendto, com);
                 }
                 helped = true;
             }
@@ -386,22 +370,19 @@ namespace Huffelpuff
             // debug list of currently loaded commands
             if (topic == "more")
             {
-                foreach (Commandlet cmd in commands.Values)
+                foreach (var commandlet in commands.Values)
                 {
-                    string owner = (cmd.Handler == null) ? (string)cmd.Owner + "~" : cmd.Owner.GetType().ToString();
-                    this.SendMessage(SendType.Message, sendto, "Command (Scope:" + cmd.Scope.ToString() + "):" + cmd.Command + ", offered by " + owner + " and help provided: " + cmd.HelpText + ((string.IsNullOrEmpty(cmd.AccessString)) ? "" : " (accessString=" + cmd.AccessString + ")"));
+                    string owner = (commandlet.Handler == null) ? (string)commandlet.Owner + "~" : commandlet.Owner.GetType().ToString();
+                    SendMessage(SendType.Message, sendto, "Command (Scope:" + commandlet.Scope + "):" + commandlet.Command + ", offered by " + owner + " and help provided: " + commandlet.HelpText + ((string.IsNullOrEmpty(commandlet.AccessString)) ? "" : " (accessString=" + commandlet.AccessString + ")"));
                 }
                 helped = true;
             }
 
             // maybe in some command?
-            foreach (Commandlet cmd in commands.Values)
+            foreach (var commandlet in commands.Values.Where(cmd => (cmd.Command == topic) || (cmd.Command.Substring(1) == topic) || (cmd.Command == topic.Substring(1))))
             {
-                if ((cmd.Command == topic) || (cmd.Command.Substring(1) == topic) || (cmd.Command == topic.Substring(1)))
-                {
-                    this.SendMessage(SendType.Message, sendto, cmd.HelpText + ((string.IsNullOrEmpty(cmd.AccessString)) ? "" : " (access restricted)"));
-                    helped = true;
-                }
+                SendMessage(SendType.Message, sendto, commandlet.HelpText + ((string.IsNullOrEmpty(commandlet.AccessString)) ? "" : " (access restricted)"));
+                helped = true;
             }
 
             // maybe a  plugin
@@ -412,7 +393,7 @@ namespace Huffelpuff
                 {
                     plugHelp = true;
                 }
-                foreach (string s in p.FullName.ToLower().Split(new char[] { '.' }))
+                foreach (var s in p.FullName.ToLower().Split(new[] { '.' }))
                 {
                     if ((topic == s) && (!helped))
                     {
@@ -422,14 +403,14 @@ namespace Huffelpuff
                 }
                 if (plugHelp)
                 {
-                    this.SendMessage(SendType.Message, sendto, p.AboutHelp());
+                    SendMessage(SendType.Message, sendto, p.AboutHelp());
                     helped = true;
                 }
             }
 
 
             if (!helped)
-                this.SendMessage(SendType.Message, sendto, "Your Helptopic was not found");
+                SendMessage(SendType.Message, sendto, "Your Helptopic was not found");
         }
 
         public void Exit()
@@ -441,10 +422,10 @@ namespace Huffelpuff
             // we are done, lets exit...
             Log.Instance.Log("Exiting...");
 #if DEBUG
-            System.Threading.Thread.Sleep(60000);
+            Thread.Sleep(60000);
 #endif
 
-            System.Environment.Exit(0);
+            Environment.Exit(0);
         }
 
 
@@ -456,10 +437,14 @@ namespace Huffelpuff
             if (PersistentMemory.Instance.GetValue("ProxyServer") != null)
             {
                 Log.Instance.Log("Using Proxy Server: " + PersistentMemory.Instance.GetValue("ProxyServer"));
-                this.ProxyType = Org.Mentalis.Network.ProxySocket.ProxyTypes.Socks5;
-                this.ProxyEndPoint = new IPEndPoint(IPAddress.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new char[] { ':' })[0]), int.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new char[] { ':' })[1]));
-                this.ProxyUser = PersistentMemory.Instance.GetValue("ProxyUser");
-                this.ProxyPass = PersistentMemory.Instance.GetValue("ProxyPass");
+                ProxyType = Org.Mentalis.Network.ProxySocket.ProxyTypes.Socks5;
+                var ip = IPAddress.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new[] { ':' })[0]);
+                if (ip != null)
+                {
+                    ProxyEndPoint = new IPEndPoint(ip, int.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new[] { ':' })[1]));
+                }
+                ProxyUser = PersistentMemory.Instance.GetValue("ProxyUser");
+                ProxyPass = PersistentMemory.Instance.GetValue("ProxyPass");
             }
 
             // the server we want to connect to
@@ -468,7 +453,7 @@ namespace Huffelpuff
             try
             {
                 // here we try to connect to the server and exceptions get handled
-                this.Connect(serverlist, port);
+                Connect(serverlist, port);
                 Log.Instance.Log("successfull connected");
             }
             catch (ConnectionException e)
@@ -481,16 +466,16 @@ namespace Huffelpuff
             try
             {
                 // here we logon and register our nickname and so on
-                this.Login(PersistentMemory.Instance.GetValueOrTodo("nick"), PersistentMemory.Instance.GetValueOrTodo("realname"), 4, PersistentMemory.Instance.GetValueOrTodo("username"), PersistentMemory.Instance.GetValue("serverpass"));
+                Login(PersistentMemory.Instance.GetValueOrTodo("nick"), PersistentMemory.Instance.GetValueOrTodo("realname"), 4, PersistentMemory.Instance.GetValueOrTodo("username"), PersistentMemory.Instance.GetValue("serverpass"));
 
                 // join the channels
-                foreach (string channel in PersistentMemory.Instance.GetValues(channelconst))
+                foreach (string channel in PersistentMemory.Instance.GetValues(Channelconst))
                 {
-                    this.RfcJoin(channel);
+                    RfcJoin(channel);
                 }
 
-                this.Listen();
-                this.Disconnect();
+                Listen();
+                Disconnect();
             }
             catch (ConnectionException)
             {
