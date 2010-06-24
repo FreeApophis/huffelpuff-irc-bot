@@ -18,15 +18,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
 using System.Collections.Generic;
-
+using AIMLbot;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
-using AIMLbot;
 
-namespace Plugin
+namespace AIMLPlugin
 {
     /// <summary>
     /// Description of MyClass.
@@ -42,7 +40,7 @@ namespace Plugin
         }
 
         Bot myAimlBot;
-        Dictionary<string, User> myUsers = new Dictionary<string, User>();
+        readonly Dictionary<string, User> myUsers = new Dictionary<string, User>();
         
         public override void Init()
         {
@@ -58,7 +56,6 @@ namespace Plugin
         public override void Activate()
         {
             BotEvents.OnChannelMessage += BotEvents_OnChannelMessage;
-            //BotEvents.OnQueryMessage += BotEvents_OnQueryMessage;
             
             base.Activate();
         }
@@ -66,7 +63,6 @@ namespace Plugin
         public override  void Deactivate()
         {
             BotEvents.OnChannelMessage -= BotEvents_OnChannelMessage;
-            //BotEvents.OnQueryMessage -= BotEvents_OnQueryMessage;
             
             base.Deactivate();
         }
@@ -78,33 +74,23 @@ namespace Plugin
         
         void BotEvents_OnChannelMessage(object sender, IrcEventArgs e)
         {
-            string msg;
-            if(e.Data.Message.ToLower().Contains(BotMethods.Nickname.ToLower()))
-            {
-                if (e.Data.Message.ToLower().Trim().StartsWith(BotMethods.Nickname.ToLower()))
-                    msg = e.Data.Message.Trim().Substring(BotMethods.Nickname.Length+1);
-                else
-                    msg = e.Data.Message.Trim();
-                User myUser = null;
-                if (myUsers.ContainsKey(e.Data.Nick)) {
-                    myUser = myUsers[e.Data.Nick];
-                } else {
-                    myUser = new User(e.Data.Nick, myAimlBot);
-                    myUser.Predicates.addSetting("name", e.Data.Nick);
-                    
-                    myUsers.Add(e.Data.Nick, myUser);
-                }
-                Request r = new Request(msg, myUser, myAimlBot);
-                Result res = myAimlBot.Chat(r);
-                BotMethods.SendMessage(SendType.Message, e.Data.Channel, res.Output);
-            }
-        }
-        
-        void BotEvents_OnQueryMessage(object sender, IrcEventArgs e)
-        {
-            //throw new NotImplementedException();
-        }
+            if (!e.Data.Message.ToLower().Contains(BotMethods.Nickname.ToLower())) return;
 
-        
+            string msg = e.Data.Message.ToLower().Trim().StartsWith(BotMethods.Nickname.ToLower()) 
+                             ? e.Data.Message.Trim().Substring(BotMethods.Nickname.Length+1) 
+                             : e.Data.Message.Trim();
+            User myUser;
+            if (myUsers.ContainsKey(e.Data.Nick)) {
+                myUser = myUsers[e.Data.Nick];
+            } else {
+                myUser = new User(e.Data.Nick, myAimlBot);
+                myUser.Predicates.addSetting("name", e.Data.Nick);
+                    
+                myUsers.Add(e.Data.Nick, myUser);
+            }
+            var r = new Request(msg, myUser, myAimlBot);
+            var res = myAimlBot.Chat(r);
+            BotMethods.SendMessage(SendType.Message, e.Data.Channel, res.Output);
+        }
     }
 }

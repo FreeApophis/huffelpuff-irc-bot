@@ -99,7 +99,7 @@ namespace Plugin
         }
         
         public void RemoveFeed() {
-            PersistentMemory.Instance.RemoveValue(RssPlugin.rssfeedconst, Name);
+            PersistentMemory.Instance.RemoveValue(RssPlugin.RssFeedConst, Name);
             PersistentMemory.Instance.RemoveGroup(NameSpace);
         }
 

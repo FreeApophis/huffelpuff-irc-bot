@@ -61,7 +61,7 @@ namespace Plugin
         public override void Init()
         {
 
-            foreach (var twitterInfo in PersistentMemory.Instance.GetValues(TwitterAccountConst).Select(a => new TwitterWrapper(a)).Where(twitterInfo => twitterInfo.FriendlyName != PersistentMemory.todoValue))
+            foreach (var twitterInfo in PersistentMemory.Instance.GetValues(TwitterAccountConst).Select(a => new TwitterWrapper(a)).Where(twitterInfo => twitterInfo.FriendlyName != PersistentMemory.TodoValue))
             {
                 twitterAccounts.Add(twitterInfo.FriendlyName, twitterInfo);
                 tocolorize.Add(new ColorText { Text = twitterInfo.User, Color = (int)IrcColors.Blue });

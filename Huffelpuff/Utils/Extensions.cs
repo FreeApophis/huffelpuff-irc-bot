@@ -17,10 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
 
 namespace Huffelpuff.Utils
 {
@@ -33,15 +30,17 @@ namespace Huffelpuff.Utils
         {
             return null;
         }
-        
-        public static bool IsNullOrEmpty(this string str) {
+
+        public static bool IsNullOrEmpty(this string str)
+        {
             return string.IsNullOrEmpty(str);
         }
 
-        public static string Fill(this string str, params object[] args) {
+        public static string Fill(this string str, params object[] args)
+        {
             return string.Format(str, args);
         }
-        
+
         public static List<string> ToLines(this IEnumerable<string> list, int maxlinelength)
         {
             return list.ToLines(maxlinelength, ", ");
@@ -65,40 +64,46 @@ namespace Huffelpuff.Utils
         /// <returns></returns>
         public static List<string> ToLines(this IEnumerable<string> list, int maxlinelength, string seperator, string prefix, string postfix)
         {
-            if (prefix==null) {
-                prefix="";
+            if (prefix == null)
+            {
+                prefix = "";
             }
             bool noSeparator = true;
-            
-            List<string> result = new List<string>();
-            result.Add(prefix);
-            
-            
-            foreach(string s in list)
+
+            var result = new List<string> { prefix };
+
+            foreach (string s in list)
             {
-                if(result[result.Count-1].Length + s.Length + seperator.Length > maxlinelength) {
-                    if(!noSeparator) {
-                        result[result.Count-1]=result[result.Count-1]+seperator;
+                if (result[result.Count - 1].Length + s.Length + seperator.Length > maxlinelength)
+                {
+                    if (!noSeparator)
+                    {
+                        result[result.Count - 1] = result[result.Count - 1] + seperator;
                     }
                     result.Add("");
                     noSeparator = true;
                 }
-                if (noSeparator) {
-                    result[result.Count-1]=result[result.Count-1]+s;
+                if (noSeparator)
+                {
+                    result[result.Count - 1] = result[result.Count - 1] + s;
                     noSeparator = false;
-                } else {
-                    result[result.Count-1]=result[result.Count-1]+seperator+s;
+                }
+                else
+                {
+                    result[result.Count - 1] = result[result.Count - 1] + seperator + s;
                 }
             }
-            if (!string.IsNullOrEmpty(postfix)) {
-                if(result[result.Count-1].Length + postfix.Length > maxlinelength) {
+            if (!string.IsNullOrEmpty(postfix))
+            {
+                if (result[result.Count - 1].Length + postfix.Length > maxlinelength)
+                {
                     result.Add("");
                 }
-                result[result.Count-1]=result[result.Count-1]+postfix;
+                result[result.Count - 1] = result[result.Count - 1] + postfix;
             }
             return result;
         }
-        
+
         /// <summary>
         /// Returns safely the Value at key, or the default value of this type. Alternative to TryGetValue without the out parameter.
         /// </summary>

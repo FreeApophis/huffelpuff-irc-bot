@@ -18,142 +18,156 @@
  */
 
 using System;
-using System.Xml;
+using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
-using System.Collections.Generic;
-
-using Meebey.SmartIrc4net;
 
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
-
+using Meebey.SmartIrc4net;
 
 namespace Plugin
 {
-	/// <summary>
-	/// Description of MyClass.
-	/// </summary>
-	public class RssPlugin : AbstractPlugin
-	{
-		public RssPlugin(IrcBot botInstance) :
-			base(botInstance) {}
-		
-		private Dictionary<string, RssWrapper> rssFeeds = new Dictionary<string, RssWrapper>();
-		private Timer checkInterval;
-		private DateTime lastpost = DateTime.MinValue;
-		
-		public const string rssfeedconst = "rss_feed";
-		public override void Init()
-		{
-			checkInterval = new Timer();
-			checkInterval.Elapsed += checkInterval_Elapsed;
-			checkInterval.Interval = 1 * 90 * 1000; // 90 seconds
-			foreach(string rss in PersistentMemory.Instance.GetValues(rssfeedconst))
-			{
-				RssWrapper rssInfo = new RssWrapper(rss);
-				if (rssInfo.FriendlyName != PersistentMemory.todoValue) {
-					rssFeeds.Add(rssInfo.FriendlyName, rssInfo);
-				}
-			}
-			base.Init();
-		}
+    /// <summary>
+    /// Description of MyClass.
+    /// </summary>
+    public class RssPlugin : AbstractPlugin
+    {
+        public RssPlugin(IrcBot botInstance) :
+            base(botInstance) { }
 
-		void checkInterval_Elapsed(object sender, ElapsedEventArgs e)
-		{
-			if (!BotMethods.IsConnected)
-				return;
-			try {
-				foreach(var rssFeed in rssFeeds.Values) {
-					foreach(var newItem in rssFeed.NewItems()) {
-						foreach(string channel in PersistentMemory.Instance.GetValues(IrcBot.channelconst)) {
-							BotMethods.SendMessage(SendType.Message, channel, ("" + IrcConstants.IrcBold + "New Message" + IrcConstants.IrcBold + " on RSS Feed " + IrcConstants.IrcBold + "'" + IrcConstants.IrcColor + (int)IrcColors.Blue + "{0}" + IrcConstants.IrcColor + "'" + IrcConstants.IrcBold + ": " + IrcConstants.IrcColor + (int)IrcColors.Brown + "{1}" + IrcConstants.IrcColor + " (by " + IrcConstants.IrcBold + "{2}" + IrcConstants.IrcBold + " on " + IrcConstants.IrcColor + (int)IrcColors.Blue + "{3}" + IrcConstants.IrcColor + " go: {4})").Fill(rssFeed.FriendlyName, newItem.Title, newItem.Author, newItem.Published.ToString(), newItem.Link));
-						}
-					}
-				}
-			}catch {}
-			PersistentMemory.Instance.Flush();
-		}
-		
-		public override void Activate()
-		{
-			BotMethods.AddCommand(new Commandlet("!rss", "With the command !rss [<feed> [<#post>]] post you'll get a list of the bots configured RSS feed, stats and posts.", showRss, this, CommandScope.Both));
-			BotMethods.AddCommand(new Commandlet("!+rss", "With the command !+rss <friendlyname> <url> you can add an rss feeds.", adminRss, this, CommandScope.Both, "rss_admin"));
-			BotMethods.AddCommand(new Commandlet("!-rss", "With the command !-rss <friendlyname>  you can remove an rss feeds.", adminRss, this, CommandScope.Both, "rss_admin"));
-			
-			checkInterval.Enabled = true;
-			
-			base.Activate();
-		}
-		
-		public override void Deactivate()
-		{
-			BotMethods.RemoveCommand("!rss");
-			BotMethods.RemoveCommand("!-rss");
-			BotMethods.RemoveCommand("!+rss");
-			
-			checkInterval.Enabled = false;
-			
-			base.Deactivate();
-		}
-		
-		public override string AboutHelp()
-		{
-			return "The Rss Plugins reports new posts on the configured RSS feed to the channel, and it provides access to the complete rss via the !rss command";
-		}
-		
-		private void showRss(object sender, IrcEventArgs e) {
-			string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
-			if (e.Data.MessageArray.Length < 2) {
-				foreach(string lines in rssFeeds.Select(item => item.Value.FriendlyName).ToLines(350, ", ", "Currently checked feeds: ", ".")) {
-					BotMethods.SendMessage(SendType.Message, sendto, lines);
-				}
-				return;
-			}
-			if (e.Data.MessageArray.Length < 3) {
-				if (rssFeeds.ContainsKey(e.Data.MessageArray[1].ToLower())) {
-					var rssFeed = rssFeeds[e.Data.MessageArray[1].ToLower()];
-					BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' has {1} Elements, last post was on: {2}.".Fill(rssFeed.FriendlyName, rssFeed.Count, rssFeed.Last));
-				} else {
-					BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
-				}
-				return;
-			}
-		}
+        private readonly Dictionary<string, RssWrapper> rssFeeds = new Dictionary<string, RssWrapper>();
+        private Timer checkInterval;
+        private DateTime lastpost = DateTime.MinValue;
 
-		private void adminRss(object sender, IrcEventArgs e) {
-			string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick  : e.Data.Channel;
-			switch(e.Data.MessageArray[0].ToLower()) {
-				case "!+rss":
-					if (e.Data.MessageArray.Length < 3) {
-						BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments! Try '!help !+rss'.");
-						return;
-					}
-					if (rssFeeds.ContainsKey(e.Data.MessageArray[1].ToLower())) {
-						BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' already exists.".Fill(rssFeeds[e.Data.MessageArray[1].ToLower()].FriendlyName));
-						break;
-					}
-					PersistentMemory.Instance.SetValue(rssfeedconst, e.Data.MessageArray[1].ToLower());
-					rssFeeds.Add(e.Data.MessageArray[1].ToLower(), new RssWrapper(e.Data.MessageArray[1].ToLower(), e.Data.MessageArray[1], e.Data.MessageArray[2], DateTime.Now));
-					BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully added.".Fill(rssFeeds[e.Data.MessageArray[1].ToLower()].FriendlyName));
-					break;
-				case "!-rss":
-					if (e.Data.MessageArray.Length < 2) {
-						BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments! Try '!help !-rss'.");
-						return;
-					}
-					if (rssFeeds.ContainsKey(e.Data.MessageArray[1].ToLower())) {
-						rssFeeds[e.Data.MessageArray[1].ToLower()].RemoveFeed();
-						rssFeeds.Remove(e.Data.MessageArray[1].ToLower());
-						BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully removed.".Fill(e.Data.MessageArray[1].ToLower()));
-					} else {
-						BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
-					}
-					break;
-				default:
-					break;
-			}
-		}
-	}
+        public const string RssFeedConst = "rss_feed";
+        public override void Init()
+        {
+            checkInterval = new Timer();
+            checkInterval.Elapsed += CheckIntervalElapsed;
+            checkInterval.Interval = 1 * 90 * 1000; // 90 seconds
+            foreach (var rssInfo in PersistentMemory.Instance.GetValues(RssFeedConst).Select(r => new RssWrapper(r)).Where(rssInfo => rssInfo.FriendlyName != PersistentMemory.TodoValue))
+            {
+                rssFeeds.Add(rssInfo.FriendlyName, rssInfo);
+            }
+            base.Init();
+        }
+
+        void CheckIntervalElapsed(object sender, ElapsedEventArgs e)
+        {
+            if (!BotMethods.IsConnected)
+                return;
+            try
+            {
+                foreach (var rssFeed in rssFeeds.Values)
+                {
+                    foreach (var newItem in rssFeed.NewItems())
+                    {
+                        foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+                        {
+                            BotMethods.SendMessage(SendType.Message, channel, ("" + IrcConstants.IrcBold + "New Message" + IrcConstants.IrcBold + " on RSS Feed " + IrcConstants.IrcBold + "'" + IrcConstants.IrcColor + (int)IrcColors.Blue + "{0}" + IrcConstants.IrcColor + "'" + IrcConstants.IrcBold + ": " + IrcConstants.IrcColor + (int)IrcColors.Brown + "{1}" + IrcConstants.IrcColor + " (by " + IrcConstants.IrcBold + "{2}" + IrcConstants.IrcBold + " on " + IrcConstants.IrcColor + (int)IrcColors.Blue + "{3}" + IrcConstants.IrcColor + " go: {4})").Fill(rssFeed.FriendlyName, newItem.Title, newItem.Author, newItem.Published.ToString(), newItem.Link));
+                        }
+                    }
+                }
+            }
+            catch { }
+            PersistentMemory.Instance.Flush();
+        }
+
+        public override void Activate()
+        {
+            BotMethods.AddCommand(new Commandlet("!rss", "With the command !rss [<feed> [<#post>]] post you'll get a list of the bots configured RSS feed, stats and posts.", ShowRss, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!+rss", "With the command !+rss <friendlyname> <url> you can add an rss feeds.", AdminRss, this, CommandScope.Both, "rss_admin"));
+            BotMethods.AddCommand(new Commandlet("!-rss", "With the command !-rss <friendlyname>  you can remove an rss feeds.", AdminRss, this, CommandScope.Both, "rss_admin"));
+
+            checkInterval.Enabled = true;
+
+            base.Activate();
+        }
+
+        public override void Deactivate()
+        {
+            BotMethods.RemoveCommand("!rss");
+            BotMethods.RemoveCommand("!-rss");
+            BotMethods.RemoveCommand("!+rss");
+
+            checkInterval.Enabled = false;
+
+            base.Deactivate();
+        }
+
+        public override string AboutHelp()
+        {
+            return "The Rss Plugins reports new posts on the configured RSS feed to the channel, and it provides access to the complete rss via the !rss command";
+        }
+
+        private void ShowRss(object sender, IrcEventArgs e)
+        {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+            if (e.Data.MessageArray.Length < 2)
+            {
+                foreach (string lines in rssFeeds.Select(item => item.Value.FriendlyName).ToLines(350, ", ", "Currently checked feeds: ", "."))
+                {
+                    BotMethods.SendMessage(SendType.Message, sendto, lines);
+                }
+                return;
+            }
+            if (e.Data.MessageArray.Length < 3)
+            {
+                if (rssFeeds.ContainsKey(e.Data.MessageArray[1].ToLower()))
+                {
+                    var rssFeed = rssFeeds[e.Data.MessageArray[1].ToLower()];
+                    BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' has {1} Elements, last post was on: {2}.".Fill(rssFeed.FriendlyName, rssFeed.Count, rssFeed.Last));
+                }
+                else
+                {
+                    BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
+                }
+                return;
+            }
+        }
+
+        private void AdminRss(object sender, IrcEventArgs e)
+        {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+            switch (e.Data.MessageArray[0].ToLower())
+            {
+                case "!+rss":
+                    if (e.Data.MessageArray.Length < 3)
+                    {
+                        BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments! Try '!help !+rss'.");
+                        return;
+                    }
+                    if (rssFeeds.ContainsKey(e.Data.MessageArray[1].ToLower()))
+                    {
+                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' already exists.".Fill(rssFeeds[e.Data.MessageArray[1].ToLower()].FriendlyName));
+                        break;
+                    }
+                    PersistentMemory.Instance.SetValue(RssFeedConst, e.Data.MessageArray[1].ToLower());
+                    rssFeeds.Add(e.Data.MessageArray[1].ToLower(), new RssWrapper(e.Data.MessageArray[1].ToLower(), e.Data.MessageArray[1], e.Data.MessageArray[2], DateTime.Now));
+                    BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully added.".Fill(rssFeeds[e.Data.MessageArray[1].ToLower()].FriendlyName));
+                    break;
+                case "!-rss":
+                    if (e.Data.MessageArray.Length < 2)
+                    {
+                        BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments! Try '!help !-rss'.");
+                        return;
+                    }
+                    if (rssFeeds.ContainsKey(e.Data.MessageArray[1].ToLower()))
+                    {
+                        rssFeeds[e.Data.MessageArray[1].ToLower()].RemoveFeed();
+                        rssFeeds.Remove(e.Data.MessageArray[1].ToLower());
+                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully removed.".Fill(e.Data.MessageArray[1].ToLower()));
+                    }
+                    else
+                    {
+                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 }

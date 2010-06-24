@@ -215,23 +215,9 @@
     <Compile Include="Utils\WildCard.cs" />
     <Compile Include="Utils\WindowsServiceLogger.cs" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Database" />
-    <Folder Include="IrcCore\" />
-    <Folder Include="IrcCore\" />
-    <Folder Include="IrcCore\" />
-    <Folder Include="IrcCore\" />
-    <Folder Include="Mono.Nat\" />
-    <Folder Include="Mono.Nat\" />
-    <Folder Include="Mono.Nat\" />
-    <Folder Include="Mono.Nat\" />
-    <Folder Include="Mono.Nat\" />
-    <Folder Include="Mono.Nat\Pmp\" />
-    <Folder Include="Mono.Nat\" />
-    <Folder Include="Mono.Nat\Upnp\" />
-    <Folder Include="Mono.Nat\Upnp\" />
-    <Folder Include="Mono.Nat\Upnp\Messages\" />
-    <Folder Include="Mono.Nat\Upnp\Messages\" />
+    <None Include="app.config" />
   </ItemGroup>
   <PropertyGroup>
     <PreBuildEvent>xcopy ..\huffelpuff.db . /y</PreBuildEvent>

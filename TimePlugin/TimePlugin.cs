@@ -40,8 +40,8 @@ namespace Plugin
         
         public override void Activate()
         {
-            BotMethods.AddCommand(new Commandlet("!time", "The command !time givey the current time", nowHandler, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!countdown", "The command !time gives the current time", countdownHandler, this, CommandScope.Public, "access_time_countdown"));
+            BotMethods.AddCommand(new Commandlet("!time", "The command !time givey the current time", NowHandler, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!countdown", "The command !time gives the current time", CountdownHandler, this, CommandScope.Public, "access_time_countdown"));
             
             base.Activate();
         }
@@ -54,11 +54,11 @@ namespace Plugin
             base.Deactivate();
         }
 
-        private void nowHandler(object sender, IrcEventArgs e) {
+        private void NowHandler(object sender, IrcEventArgs e) {
             BotMethods.SendMessage(SendType.Message, e.Data.Nick, "Es ist jetzt " + DateTime.Now.ToString("HH:mm:ss") + "Uhr" + DateTime.Now.ToString("K") + ".");
         }
 
-        private void countdownHandler(object sender, IrcEventArgs e) {
+        private void CountdownHandler(object sender, IrcEventArgs e) {
             
         }
 

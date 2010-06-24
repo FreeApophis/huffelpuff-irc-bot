@@ -17,17 +17,41 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
 
-
-
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using HoldemHand;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
 
-namespace PlugIn
+namespace Plugin
 {
     public class PokerPlugin : AbstractPlugin
     {
+        private readonly Dictionary<char, char> suits = new Dictionary<char, char> { { 's', '♠' }, { 'c', '♣' }, { 'h', '♥' }, { 'd', '♦' } };
+
+        private readonly RandomDeck deck = new RandomDeck();
+
+        private string ToIrcCard(string card)
+        {
+
+            if (card.Length == 2)
+            {
+                string value = card[0] == 'T' ? "10" : card[0].ToString();
+
+                if (card[1] == 's' || card[1] == 'c')
+                {
+                    return IrcConstants.IrcColor + ((int)IrcColors.Black).ToString("00") + value + suits[card[1]] + IrcConstants.IrcNormal;
+                }
+                if (card[1] == 'h' || card[1] == 'd')
+                {
+                    return IrcConstants.IrcColor + ((int)IrcColors.LightRed).ToString("00") + value + suits[card[1]] + IrcConstants.IrcNormal;
+                }
+            }
+            return null;
+        }
+
         public PokerPlugin(IrcBot botInstance)
             : base(botInstance)
         {
@@ -44,11 +68,25 @@ namespace PlugIn
         private void EvaluateHand(object sender, IrcEventArgs e)
         {
             var destination = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+            if (e.Data.MessageArray.Length > 1)
+            {
+                //BotMethods.SendMessage(SendType.Message, destination, Hand.MaskToDescription(Hand.ParseHand(e.Data.MessageArray[1])));
+                BotMethods.SendMessage(SendType.Message, destination, Hand.DescriptionFromHand(e.Data.MessageArray[1]));
+            }
+            else
+            {
+                var hand = new StringBuilder();
+                var mask = new StringBuilder();
+                foreach (var cards in Enumerable.Range(0, 5))
+                {
+                    deck.NextCard();
+                    hand.Append(ToIrcCard(deck.CurrentCard));
+                    mask.Append(deck.CurrentCard);
+                }
 
-            //BotMethods.SendMessage(SendType.Message, destination, Hand.MaskToDescription(Hand.ParseHand(e.Data.MessageArray[1])));
-            BotMethods.SendMessage(SendType.Message, destination, Hand.DescriptionFromHand(e.Data.MessageArray[1]));
-            Hand.HandTypes.
 
+                BotMethods.SendMessage(SendType.Message, destination, hand + " is " + Hand.DescriptionFromHand(mask.ToString()));
+            }
         }
 
         public override void Deactivate()

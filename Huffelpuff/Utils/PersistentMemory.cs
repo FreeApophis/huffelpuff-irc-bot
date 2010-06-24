@@ -18,14 +18,14 @@
  */
 
 
-using Huffelpuff.Utils;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Xml;
 
-namespace Huffelpuff
+namespace Huffelpuff.Utils
 {
     /// <summary>
     /// Easy access to persistent data through an easy OO interface.
@@ -43,69 +43,67 @@ namespace Huffelpuff
     /// </summary>
     public sealed class PersistentMemory : MarshalByRefObject
     {
-        private static PersistentMemory instance = null;
-        
-        public static PersistentMemory Instance {
+        private static PersistentMemory instance;
+
+        public static PersistentMemory Instance
+        {
             get
             {
-                if(instance == null)
-                {
-                    // try to pull out of the AppDomain data
-                    instance = AppDomain.CurrentDomain.GetData("PersistentMemoryInstance") as PersistentMemory;
-
-                    // if it wasn't there, we're the first AppDomain
-                    // so create the instance
-                    if(instance == null)
-                        instance = new PersistentMemory();
-                }
-
-                return instance;
+                // try to pull out of the AppDomain data
+                // if it wasn't there, we're the first AppDomain
+                // so create the instance
+                return instance ?? (instance = AppDomain.CurrentDomain.GetData("PersistentMemoryInstance") as PersistentMemory ?? new PersistentMemory());
             }
         }
-        
-        private static System.Data.DataSet memory;
-        private const string filename = "pmem.xml";
-        private const string baseTable = "baseTBL";
-        private const string baseGroup = "baseGroup";
-        private const string baseKey = "baseKey";
-        private const string baseValue = "baseValue";
-        private const string config = "config";
-        
-        public const string todoValue = "TODO";
-        
+
+        private static DataSet memory;
+        private const string Filename = "pmem.xml";
+        private const string BaseTable = "baseTBL";
+        private const string BaseGroup = "baseGroup";
+        private const string BaseKey = "baseKey";
+        private const string BaseValue = "baseValue";
+        private const string Config = "config";
+
+        public const string TodoValue = "TODO";
+
         /// <summary>
         /// If you want to manipulate directly on the Dataset, you get the full functionality
         /// </summary>
-        public DataSet RawData {
-            get {
+        public DataSet RawData
+        {
+            get
+            {
                 return memory;
             }
         }
-        public static bool Todo {get; private set;}
-        
+        public static bool Todo { get; private set; }
+
         public void CreateBase()
         {
-            if (!memory.Tables.Contains(baseTable))
+            if (!memory.Tables.Contains(BaseTable))
             {
-                try {
-                    memory.Tables.Add(new DataTable(baseTable));
-                    memory.Tables[baseTable].Columns.Add(new DataColumn(baseGroup));
-                    memory.Tables[baseTable].Columns.Add(new DataColumn(baseKey));
-                    memory.Tables[baseTable].Columns.Add(new DataColumn(baseValue));
-                } catch (Exception e) {
+                try
+                {
+                    memory.Tables.Add(new DataTable(BaseTable));
+                    memory.Tables[BaseTable].Columns.Add(new DataColumn(BaseGroup));
+                    memory.Tables[BaseTable].Columns.Add(new DataColumn(BaseKey));
+                    memory.Tables[BaseTable].Columns.Add(new DataColumn(BaseValue));
+                }
+                catch (Exception e)
+                {
                     Log.Instance.Log(e.Message, Level.Error);
                     Log.Instance.Log(e.StackTrace, Level.Error);
                 }
             }
             Flush();
         }
-        
+
         /// <summary>
         /// Makes sure that the Database is written to disk (ie. XML)
         /// </summary>
         public void Flush()
         {
-            memory.WriteXml(filename);
+            memory.WriteXml(Filename);
         }
 
         /// <summary>
@@ -114,8 +112,9 @@ namespace Huffelpuff
         /// <param name="key">Key</param>
         /// <param name="value">Value</param>
         /// <returns>True if it exists</returns>
-        public bool Exists(string key, string value) {
-            return Exists(config, key, value);
+        public bool Exists(string key, string value)
+        {
+            return Exists(Config, key, value);
         }
 
         /// <summary>
@@ -125,10 +124,11 @@ namespace Huffelpuff
         /// <param name="key">Key</param>
         /// <param name="value">Value</param>
         /// <returns>True if it exists</returns>
-        public bool Exists(string group, string key, string value) {
-            return (0!=memory.Tables[baseTable].Select(baseGroup + " = '" + group + "' AND " + baseKey + " = '" + key + "' AND " + baseValue + " = '" + value + "'").Length);
+        public bool Exists(string group, string key, string value)
+        {
+            return (0 != memory.Tables[BaseTable].Select(BaseGroup + " = '" + group + "' AND " + BaseKey + " = '" + key + "' AND " + BaseValue + " = '" + value + "'").Length);
         }
-        
+
         /// <summary>
         /// If a value is not set, this GetValue will write a TODO field into the config file, and also will return TODO instead of null. null wont be a possible value for these keys!
         /// This is meant to be used to create a config file, best to be used during the init of a plugin, because the start up of the bot will be blocked untill all TODO fields are filled!
@@ -136,55 +136,59 @@ namespace Huffelpuff
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public string GetValueOrTodo(string key) {
+        public string GetValueOrTodo(string key)
+        {
             string value = GetValue(key);
-            if ((value == null) || (value == todoValue)) {
-                Todo=true;
-                ReplaceValue(key, todoValue);
-                return todoValue;
+            if ((value == null) || (value == TodoValue))
+            {
+                Todo = true;
+                ReplaceValue(key, TodoValue);
+                return TodoValue;
             }
             return value;
         }
-        
+
         /// <summary>
         /// Returns Value (first if there are multiple) for default domain, or null if it does not exist.
         /// </summary>
         /// <param name="key">Key</param>
         /// <returns>Single Value</returns>
-        public string GetValue(string key) {
-            return GetValue(config, key);
+        public string GetValue(string key)
+        {
+            return GetValue(Config, key);
         }
-        
+
         /// <summary>
         /// If a value is not set, this GetValue will write a TODO field into the config file, and also will return TODO instead of null. null wont be a possible value for these keys!
         /// This is meant to be used to create a config file, best to be used during the init of a plugin, because the start up of the bot will be blocked untill all TODO fields are filled!
         /// 
         /// </summary>
+        /// <param name="group"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public string GetValueOrTodo(string group, string key) {
+        public string GetValueOrTodo(string group, string key)
+        {
             string value = GetValue(group, key);
-            if ((value == null) || (value == todoValue)) {
-                Todo=true;
-                ReplaceValue(group, key, todoValue);
-                return todoValue;
+            if ((value == null) || (value == TodoValue))
+            {
+                Todo = true;
+                ReplaceValue(group, key, TodoValue);
+                return TodoValue;
             }
             return value;
         }
-        
+
         /// <summary>
         /// Returns Value (first if there are multiple) for key in domain group, or null if it does not exist.
         /// </summary>
         /// <param name="group">Data Domain</param>
         /// <param name="key">Key</param>
         /// <returns>Single Value</returns>
-        public string GetValue(string group, string key) {
-            List<string> t = GetValues(group, key);
-            if (t.Count == 0) {
-                return null;
-            } else {
-                return t[0];
-            }
+        public string GetValue(string group, string key)
+        {
+            var t = GetValues(group, key);
+
+            return t.Count == 0 ? null : t[0];
         }
 
         /// <summary>
@@ -194,40 +198,42 @@ namespace Huffelpuff
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public List<string> GetValuesOrTodo(string key) {
-            List<string> values = GetValues(key);
-            if ((values.Count == 0) || (values[0] == todoValue)) {
-                Todo=true;
-                ReplaceValue(key, todoValue);
-                values.Add(todoValue);
+        public List<string> GetValuesOrTodo(string key)
+        {
+            var values = GetValues(key);
+
+            if ((values.Count == 0) || (values[0] == TodoValue))
+            {
+                Todo = true;
+                ReplaceValue(key, TodoValue);
+                values.Add(TodoValue);
             }
             return values;
         }
-        
+
         /// <summary>
         /// Returns Values as a List for a key in default domain, or the empty list if it does not exist.
         /// </summary>
         /// <param name="key">Key</param>
         /// <returns>List of Values</returns>
-        public List<string> GetValues(string key) {
-            return GetValues(config, key);
+        public List<string> GetValues(string key)
+        {
+            return GetValues(Config, key);
         }
-        
+
         /// <summary>
         /// Returns Values as a List for a key in the domain group, or the empty list if it does not exist.
         /// </summary>
         /// <param name="group">Data Domain</param>
         /// <param name="key">Key</param>
         /// <returns>List of Values</returns>
-        public List<string> GetValues(string group, string key) {
-            List<string> values = new List<string>();
-            DataRow[] rows = memory.Tables[baseTable].Select(baseGroup + " = '" + group + "' AND " + baseKey + " = '" + key + "'");
-            foreach(DataRow dr in rows) {
-                values.Add((string)dr[baseValue]);
-            }
-            return values;
+        public List<string> GetValues(string group, string key)
+        {
+            var rows = memory.Tables[BaseTable].Select(BaseGroup + " = '" + group + "' AND " + BaseKey + " = '" + key + "'");
+
+            return rows.Select(dr => (string)dr[BaseValue]).ToList();
         }
-        
+
         /// <summary>
         /// Non-Idempotent Set Value (if you set twice,you'll get a list back) in default domain
         /// </summary>
@@ -236,9 +242,9 @@ namespace Huffelpuff
         /// <returns>Returns true when successfull</returns>
         public bool SetValue(string key, string value)
         {
-            return SetValue(config, key, value);
+            return SetValue(Config, key, value);
         }
-        
+
         /// <summary>
         /// Non-Idempotent Set Value (if you set twice,you'll get a list back) in Domain group
         /// </summary>
@@ -248,26 +254,27 @@ namespace Huffelpuff
         /// <returns>Returns true when successfull</returns>
         public bool SetValue(string group, string key, string value)
         {
-            if (memory.Tables.Contains(baseTable))
+            if (memory.Tables.Contains(BaseTable))
             {
-                DataRow dr = memory.Tables[baseTable].NewRow();
-                dr[baseGroup] = group;
-                dr[baseKey] = key;
-                dr[baseValue] = value;
-                memory.Tables[baseTable].Rows.Add(dr);
+                var dr = memory.Tables[BaseTable].NewRow();
+                dr[BaseGroup] = group;
+                dr[BaseKey] = key;
+                dr[BaseValue] = value;
+                memory.Tables[BaseTable].Rows.Add(dr);
                 return true;
             }
             return false;
         }
-        
+
         /// <summary>
         /// Remove Key Value Pair in default Domain
         /// </summary>
         /// <param name="key">Key</param>
         /// <param name="value">Value</param>
         /// <returns>True if at least on element was removed</returns>
-        public bool RemoveValue(string key, string value) {
-            return RemoveValue(config, key, value);
+        public bool RemoveValue(string key, string value)
+        {
+            return RemoveValue(Config, key, value);
         }
 
         /// <summary>
@@ -277,52 +284,55 @@ namespace Huffelpuff
         /// <param name="key">Key</param>
         /// <param name="value">Value</param>
         /// <returns>True if at least on element was removed</returns>
-        public bool RemoveValue(string group, string key, string value) {
-            if (memory.Tables.Contains(baseTable))
+        public bool RemoveValue(string group, string key, string value)
+        {
+            if (memory.Tables.Contains(BaseTable))
             {
-                bool removed = false;
-                DataRow[] rows = memory.Tables[baseTable].Select(baseGroup + " = '" + group + "' AND " + baseKey + " = '" + key + "' AND " + baseValue + " = '" + value + "'");
-                foreach (DataRow dr in rows) {
-                    memory.Tables[baseTable].Rows.Remove(dr);
+                var removed = false;
+                var rows = memory.Tables[BaseTable].Select(BaseGroup + " = '" + group + "' AND " + BaseKey + " = '" + key + "' AND " + BaseValue + " = '" + value + "'");
+                foreach (var dr in rows)
+                {
+                    memory.Tables[BaseTable].Rows.Remove(dr);
                     removed = true;
                 }
                 return removed;
             }
             return false;
         }
-        
+
         /// <summary>
         /// Remove Multiple Values for a certain group and key for values which start with beginofvalue
         /// </summary>
         /// <param name="key">Key</param>
         /// <param name="beginOfValue">Value which begins with this String will be removed</param>
-        public bool RemoveValueStartingWith(string key, string beginOfValue) {
-            return RemoveValueStartingWith(config, key, beginOfValue);
+        public bool RemoveValueStartingWith(string key, string beginOfValue)
+        {
+            return RemoveValueStartingWith(Config, key, beginOfValue);
         }
-        
+
         /// <summary>
         /// Remove Multiple Values for a certain group and key for values which start with beginofvalue
         /// </summary>
         /// <param name="group">Data Domain</param>
         /// <param name="key">Key</param>
         /// <param name="beginOfValue">Value which begins with this String will be removed</param>
-        public bool RemoveValueStartingWith(string group, string key, string beginOfValue) {
-            if (memory.Tables.Contains(baseTable))
+        public bool RemoveValueStartingWith(string group, string key, string beginOfValue)
+        {
+            if (memory.Tables.Contains(BaseTable))
             {
-                bool removed = false;
-                DataRow[] rows = memory.Tables[baseTable].Select(baseGroup + " = '" + group + "' AND " + baseKey + " = '" + key + "'");
-                foreach (DataRow dr in rows) {
-                    if(((string)dr[baseValue]).StartsWith(beginOfValue)) {
-                        memory.Tables[baseTable].Rows.Remove(dr);
-                        removed = true;
-                    }
+                var removed = false;
+                var rows = memory.Tables[BaseTable].Select(BaseGroup + " = '" + group + "' AND " + BaseKey + " = '" + key + "'");
+                foreach (var dr in rows.Where(dr => ((string)dr[BaseValue]).StartsWith(beginOfValue)))
+                {
+                    memory.Tables[BaseTable].Rows.Remove(dr);
+                    removed = true;
                 }
                 return removed;
             }
             return false;
         }
-        
-        
+
+
         /// <summary>
         /// Removes all values with the specified key in default Domain
         /// </summary>
@@ -330,7 +340,7 @@ namespace Huffelpuff
         /// <returns>True if at least one element was removed</returns>
         public bool RemoveKey(string key)
         {
-            return RemoveKey(config, key);
+            return RemoveKey(Config, key);
         }
 
         /// <summary>
@@ -341,12 +351,13 @@ namespace Huffelpuff
         /// <returns>True if at least one element was removed</returns>
         public bool RemoveKey(string group, string key)
         {
-            if (memory.Tables.Contains(baseTable))
+            if (memory.Tables.Contains(BaseTable))
             {
-                bool removed = false;
-                DataRow[] rows = memory.Tables[baseTable].Select(baseGroup + " = '" + group + "' AND " + baseKey + " = '" + key + "'");
-                foreach (DataRow dr in rows) {
-                    memory.Tables[baseTable].Rows.Remove(dr);
+                var removed = false;
+                var rows = memory.Tables[BaseTable].Select(BaseGroup + " = '" + group + "' AND " + BaseKey + " = '" + key + "'");
+                foreach (var dr in rows)
+                {
+                    memory.Tables[BaseTable].Rows.Remove(dr);
                     removed = true;
                 }
                 return removed;
@@ -360,13 +371,15 @@ namespace Huffelpuff
         /// </summary>
         /// <param name="group">the domain which should be removed</param>
         /// <returns>True if at least one element was removed</returns>
-        public bool RemoveGroup(string group) {
-            if (memory.Tables.Contains(baseTable))
+        public bool RemoveGroup(string group)
+        {
+            if (memory.Tables.Contains(BaseTable))
             {
-                bool removed = false;
-                DataRow[] rows = memory.Tables[baseTable].Select(baseGroup + " = '" + group + "'");
-                foreach (DataRow dr in rows) {
-                    memory.Tables[baseTable].Rows.Remove(dr);
+                var removed = false;
+                var rows = memory.Tables[BaseTable].Select(BaseGroup + " = '" + group + "'");
+                foreach (var dr in rows)
+                {
+                    memory.Tables[BaseTable].Rows.Remove(dr);
                     removed = true;
                 }
                 return removed;
@@ -374,18 +387,19 @@ namespace Huffelpuff
             return false;
         }
 
-        
-        
+
+
         /// <summary>
         /// Replaces key with a new value in the default Domain, if multiple old values exist only one new value will exist after this operation
         /// </summary>
         /// <param name="key">Key</param>
         /// <param name="value">Value</param>
         /// <returns>True if at least one Value was removed, false if the key is new</returns>
-        public bool ReplaceValue(string key, string value) {
-            return ReplaceValue(config, key, value);
+        public bool ReplaceValue(string key, string value)
+        {
+            return ReplaceValue(Config, key, value);
         }
-        
+
         /// <summary>
         /// Replaces key with a new value in the Domain group, if multiple old values exist only one new value will exist after this operation
         /// </summary>
@@ -393,7 +407,8 @@ namespace Huffelpuff
         /// <param name="key">Key</param>
         /// <param name="value">Value</param>
         /// <returns>True if at least one Value was removed, false if the key is new</returns>
-        public bool ReplaceValue(string group, string key, string value) {
+        public bool ReplaceValue(string group, string key, string value)
+        {
             bool removed = RemoveKey(group, key);
             SetValue(group, key, value);
             return removed;
@@ -404,23 +419,22 @@ namespace Huffelpuff
         /// </summary>
         private PersistentMemory()
         {
-            if (AppDomain.CurrentDomain.FriendlyName == "Plugins") {
+            if (AppDomain.CurrentDomain.FriendlyName == "Plugins")
+            {
                 throw new NotImplementedException("this should not happen");
             }
-            FileInfo fi = new FileInfo(PersistentMemory.filename);
-            XmlDataDocument xdoc = new XmlDataDocument();
-            if (fi.Exists) {
-                xdoc.DataSet.ReadXml(filename);
+            var fi = new FileInfo(Filename);
+            var xdoc = new XmlDataDocument();
+            if (fi.Exists)
+            {
+                xdoc.DataSet.ReadXml(Filename);
                 memory = xdoc.DataSet;
-            } else {
+            }
+            else
+            {
                 memory = new DataSet();
             }
             CreateBase();
         }
-        
-        /// <summary>
-        /// static Constructor
-        /// </summary>
-        static PersistentMemory() {}
     }
 }

@@ -25,6 +25,7 @@ using Dimebrain.TweetSharp.Extensions;
 using Dimebrain.TweetSharp.Fluent;
 using Dimebrain.TweetSharp.Model;
 using Huffelpuff;
+using Huffelpuff.Utils;
 
 namespace Plugin
 {

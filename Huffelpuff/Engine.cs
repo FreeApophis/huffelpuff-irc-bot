@@ -17,22 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Data.SQLite;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.ServiceProcess;
-using System.Threading;
 
-using Huffelpuff.Database;
 using Huffelpuff.Utils;
-using Meebey.SmartIrc4net;
-
-#if SERVICE
-
-
-#endif
 
 namespace Huffelpuff
 {
@@ -43,7 +29,7 @@ namespace Huffelpuff
 		public static void Main(string[] args)
 		{
 			Tool.RunOnMono();
-			IrcBot bot = new IrcBot();
+			var bot = new IrcBot();
 			
 			// check for basic settings
 			PersistentMemory.Instance.GetValuesOrTodo("ServerHost");

@@ -18,10 +18,10 @@
  */
 
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using Huffelpuff;
 
 namespace Huffelpuff.Utils
 {
@@ -30,74 +30,81 @@ namespace Huffelpuff.Utils
     /// </summary>
     public class Tool
     {
-        public static bool RunOnMono() {
-            Type t = Type.GetType ("Mono.Runtime");
+        public static bool RunOnMono()
+        {
+            Type t = Type.GetType("Mono.Runtime");
             if (t != null)
-                Log.Instance.Log("Runtime: Mono VM v" + System.Environment.Version);
+                Log.Instance.Log("Runtime: Mono VM v" + Environment.Version);
             else
-                Log.Instance.Log("Runtime: (unkown) MS.NET? v" + System.Environment.Version);
-            
-            Log.Instance.Log("OS     : " + System.Environment.OSVersion.VersionString);
-            Log.Instance.Log("CWD    : " + System.Environment.CurrentDirectory);
-            Log.Instance.Log("Machine: " + System.Environment.MachineName);
-            Log.Instance.Log("CPUs   : " + System.Environment.ProcessorCount);
-            Log.Instance.Log("User   : " + System.Environment.UserName);
-            
+                Log.Instance.Log("Runtime: (unkown) MS.NET? v" + Environment.Version);
+
+            Log.Instance.Log("OS     : " + Environment.OSVersion.VersionString);
+            Log.Instance.Log("CWD    : " + Environment.CurrentDirectory);
+            Log.Instance.Log("Machine: " + Environment.MachineName);
+            Log.Instance.Log("CPUs   : " + Environment.ProcessorCount);
+            Log.Instance.Log("User   : " + Environment.UserName);
+
             return (t != null);
-            
+
         }
-        
+
         private static IPAddress localIP;
-        
-        public static IPAddress LocalIP {
+
+        public static IPAddress LocalIP
+        {
             get { return localIP; }
         }
-        
+
         public static IPAddress TryGetExternalIP()
         {
-            if (PersistentMemory.Instance.GetValue("external_ip") != null) {
-                
+            if (PersistentMemory.Instance.GetValue("external_ip") != null)
+            {
                 // external IP in settings overides any self detection
-                return System.Net.IPAddress.Parse(PersistentMemory.Instance.GetValue("external_ip"));
-            } else {
-                IPAddress currentBest = null;
-                NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
-                foreach(NetworkInterface adapter in  nics)
-                {
-                    if(adapter.OperationalStatus != OperationalStatus.Up) {
-                        continue;
-                    }
-                    
-                    IPInterfaceProperties prop = adapter.GetIPProperties();
-                    foreach(IPAddressInformation ip in prop.UnicastAddresses)
-                    {
-                        if(ip.Address.AddressFamily != AddressFamily.InterNetwork) {
-                            continue;
-                        }
-                        
-                        if(!IsLocalHostIP(ip.Address)) {
-                            if (currentBest == null) {
-                                currentBest = ip.Address;
-                            } else if (!IsLocalIP(ip.Address)) {
-                                currentBest = ip.Address;
-                            }
-                        }
-                    }
-                    
-                }
-                
-                if(IsLocalIP(currentBest)) {
-                    // we will use this for redirect ports;
-                    localIP = currentBest;
-                    if (NAT.Discover()) {
-                        currentBest = NAT.GetExternalIP();
-                    } else {
-                        // TODO: no upnp support on a local adress :: ugly
-                        // further ideas :: userip / whatismyip.com /manual port forward
-                    }
-                }
-                return currentBest;
+                return IPAddress.Parse(PersistentMemory.Instance.GetValue("external_ip"));
             }
+
+            IPAddress currentBest = null;
+            var nics = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (var adapter in nics)
+            {
+                if (adapter.OperationalStatus != OperationalStatus.Up)
+                {
+                    continue;
+                }
+
+                var prop = adapter.GetIPProperties();
+                foreach (var ip in from IPAddressInformation ip in prop.UnicastAddresses
+                                   where ip.Address.AddressFamily == AddressFamily.InterNetwork
+                                   where !IsLocalHostIP(ip.Address)
+                                   select ip)
+                {
+                    if (currentBest == null)
+                    {
+                        currentBest = ip.Address;
+                    }
+                    else if (!IsLocalIP(ip.Address))
+                    {
+                        currentBest = ip.Address;
+                    }
+                }
+
+            }
+
+            if (IsLocalIP(currentBest))
+            {
+                // we will use this for redirect ports;
+                localIP = currentBest;
+                if (NAT.Discover())
+                {
+                    currentBest = NAT.GetExternalIP();
+                }
+                //else
+                //{
+                //     TODO: no upnp support on a local adress :: ugly
+                //     further ideas :: userip / whatismyip.com /manual port forward
+                //}
+            }
+            return currentBest;
         }
 
         /// <summary>
@@ -105,10 +112,13 @@ namespace Huffelpuff.Utils
         /// </summary>
         /// <param name="ip"></param>
         /// <returns></returns>
-        public static bool IsLocalHostIP(IPAddress ip) {
-            if (ip.AddressFamily == AddressFamily.InterNetwork) {
+        public static bool IsLocalHostIP(IPAddress ip)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
                 byte[] ipBytes = ip.GetAddressBytes();
-                if ((ipBytes[0] == 127) && (ipBytes[1] == 0) && (ipBytes[2] == 0)) {
+                if ((ipBytes[0] == 127) && (ipBytes[1] == 0) && (ipBytes[2] == 0))
+                {
                     return true;
                 }
             }
@@ -120,27 +130,33 @@ namespace Huffelpuff.Utils
         /// </summary>
         /// <param name="ip"></param>
         /// <returns></returns>
-        public static bool IsLocalIP(IPAddress ip) {
-            if (ip.AddressFamily == AddressFamily.InterNetwork) {
+        public static bool IsLocalIP(IPAddress ip)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
                 byte[] ipBytes = ip.GetAddressBytes();
 
                 //    10.0.0.0 bis  10.255.255.255 :: 10.0.0.0/8       (1 Class C)
-                if (ipBytes[0] == 10) {
+                if (ipBytes[0] == 10)
+                {
                     return true;
                 }
-                
+
                 //  172.16.0.0 bis  172.31.255.255 :: 172.16.0.0/12   (16 Class B)
-                if ((ipBytes[0] == 172) && (ipBytes[1] > 15) && (ipBytes[1] < 32)) {
+                if ((ipBytes[0] == 172) && (ipBytes[1] > 15) && (ipBytes[1] < 32))
+                {
                     return true;
                 }
-                
+
                 // 192.168.0.0 bis 192.168.255.255 :: 192.168/16     (256 Class C)
-                if ((ipBytes[0] == 192) && (ipBytes[1] == 168)) {
+                if ((ipBytes[0] == 192) && (ipBytes[1] == 168))
+                {
                     return true;
                 }
 
                 // 169.254.0.0 bis 169.254.255.255 :: 169.254.0.0/16    (Zeroconf)
-                if ((ipBytes[0] == 169) && (ipBytes[1] == 255)) {
+                if ((ipBytes[0] == 169) && (ipBytes[1] == 255))
+                {
                     return true;
                 }
             }

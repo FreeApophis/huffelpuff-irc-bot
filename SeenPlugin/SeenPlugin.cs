@@ -23,6 +23,7 @@ using System.IO;
 using System.Xml;
 using Huffelpuff;
 using Huffelpuff.Plugins;
+using Huffelpuff.Utils;
 using Meebey.SmartIrc4net;
 
 namespace Plugin

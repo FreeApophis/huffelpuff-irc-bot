@@ -1,16 +1,8 @@
 using Huffelpuff.Utils;
 using System;
 using System.Collections;
-using System.Data;
 using System.IO;
 using System.Reflection;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
-using System.Security;
-using System.Security.Permissions;
-using System.Security.Policy;
-using System.Text;
-using System.Threading;
 
 namespace Huffelpuff.Plugins
 {
@@ -20,7 +12,7 @@ namespace Huffelpuff.Plugins
     public class LocalLoader : MarshalByRefObject
     {
         AppDomain appDomain;
-        RemoteLoader remoteLoader;
+        readonly RemoteLoader remoteLoader;
 
         /// <summary>
         /// Creates the local loader class
@@ -28,23 +20,23 @@ namespace Huffelpuff.Plugins
         /// <param name="pluginDirectory">The plugin directory</param>
         public LocalLoader(string pluginDirectory)
         {
-            AppDomainSetup setup = new AppDomainSetup();
-            setup.ApplicationName = "Plugins";
-            setup.ApplicationBase = AppDomain.CurrentDomain.BaseDirectory;
-            setup.PrivateBinPath = Path.GetDirectoryName(pluginDirectory).Substring(
-                Path.GetDirectoryName(pluginDirectory).LastIndexOf(Path.DirectorySeparatorChar) + 1);
-            setup.CachePath = Path.Combine(pluginDirectory, "cache" + Path.DirectorySeparatorChar);
-            setup.ShadowCopyFiles = "true";
-            setup.ShadowCopyDirectories = pluginDirectory;
+            var setup = new AppDomainSetup
+            {
+                ApplicationName = "Plugins",
+                ApplicationBase = AppDomain.CurrentDomain.BaseDirectory,
+                PrivateBinPath = Path.GetDirectoryName(pluginDirectory).Substring(Path.GetDirectoryName(pluginDirectory).LastIndexOf(Path.DirectorySeparatorChar) + 1),
+                CachePath = Path.Combine(pluginDirectory, "cache" + Path.DirectorySeparatorChar),
+                ShadowCopyFiles = "true",
+                ShadowCopyDirectories = pluginDirectory
+            };
 
-            appDomain = AppDomain.CreateDomain(
-                "Plugins", null, setup);
+            appDomain = AppDomain.CreateDomain("Plugins", null, setup);
             // Used for a Cross AppDomain Singleton
             appDomain.SetData("PersistentMemoryInstance", PersistentMemory.Instance);
-            
-            appDomain.UnhandledException += new UnhandledExceptionEventHandler(appDomain_UnhandledException);
+
+            appDomain.UnhandledException += appDomain_UnhandledException;
             appDomain.InitializeLifetimeService();
-            
+
             remoteLoader = (RemoteLoader)appDomain.CreateInstanceAndUnwrap(
                 "Huffelpuff",
                 "Huffelpuff.Plugins.RemoteLoader");
@@ -52,7 +44,7 @@ namespace Huffelpuff.Plugins
 
         void appDomain_UnhandledException(object sender, UnhandledExceptionEventArgs ex)
         {
-            Exception e = (Exception) ex.ExceptionObject;
+            var e = (Exception)ex.ExceptionObject;
             Log.Instance.Log(e.Message, Level.Error, ConsoleColor.Red);
             Log.Instance.Log(e.Source, Level.Error, ConsoleColor.Red);
             Log.Instance.Log(e.StackTrace, Level.Error, ConsoleColor.Red);
@@ -175,7 +167,7 @@ namespace Huffelpuff.Plugins
         /// Returns the result of a static method call
         /// </summary>
         /// <param name="typeName">The type to call the static method on</param>
-        /// <param name="propertyName">The name of the method to call</param>
+        /// <param name="methodName">The name of the method to call</param>
         /// <param name="methodParams">The parameters to pass to the method</param>
         /// <returns>The return value of the method</returns>
         public object CallStaticMethod(string typeName, string methodName, object[] methodParams)
