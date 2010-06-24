@@ -24,7 +24,7 @@ using Huffelpuff;
 using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
 
-namespace PokerPlugin
+namespace PlugIn
 {
     public class PokerPlugin : AbstractPlugin
     {
@@ -45,7 +45,10 @@ namespace PokerPlugin
         {
             var destination = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
 
-            BotMethods.SendMessage(SendType.Message, destination, Hand.MaskToDescription(Hand.ParseHand(e.Data.MessageArray[1])));
+            //BotMethods.SendMessage(SendType.Message, destination, Hand.MaskToDescription(Hand.ParseHand(e.Data.MessageArray[1])));
+            BotMethods.SendMessage(SendType.Message, destination, Hand.DescriptionFromHand(e.Data.MessageArray[1]));
+            Hand.HandTypes.
+
         }
 
         public override void Deactivate()

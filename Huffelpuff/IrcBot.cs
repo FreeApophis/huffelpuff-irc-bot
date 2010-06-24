@@ -126,7 +126,6 @@ namespace Huffelpuff
             }
         }
 
-        [Conditional("DEBUG")]
         private static void RawMessageHandler(object sender, IrcEventArgs e)
         {
             Log.Instance.Log(e.Data.RawMessage, Level.Trace);

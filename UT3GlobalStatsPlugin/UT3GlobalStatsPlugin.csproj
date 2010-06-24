@@ -65,23 +65,12 @@
     <Compile Include="Web References\gameSpyWebService\Reference.cs">
       <DependentUpon>Reference.map</DependentUpon>
     </Compile>
-    <Compile Include="Web References\gameSpyWebService\Reference1.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.map</DependentUpon>
-    </Compile>
     <None Include="Web References\gameSpyWebService\Reference.map">
       <Generator>MSDiscoCodeGenerator</Generator>
       <LastGenOutput>Reference1.cs</LastGenOutput>
     </None>
     <None Include="Web References\gameSpyWebService\StorageServer.disco" />
     <None Include="Web References\gameSpyWebService\StorageServer.wsdl" />
-    <None Include="Web References\gameSpyWebService\UT3GlobalStatsPlugin.Web_References.gameSpyWebService.RecordValue.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </None>
-    <None Include="Web References\gameSpyWebService\UT3GlobalStatsPlugin.Web_References.gameSpyWebService.Result.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Huffelpuff\Huffelpuff.csproj">
