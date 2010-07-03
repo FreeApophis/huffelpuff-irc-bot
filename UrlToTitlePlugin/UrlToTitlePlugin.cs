@@ -19,6 +19,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -59,13 +60,12 @@ namespace Plugin
             base.Deactivate();
         }
 
-        private Regex titleMatch = new Regex("(?<=<title>)[^<]*(?=</title>)", RegexOptions.IgnoreCase);
-        private Regex fMatch = new Regex("(?<=f=)[0-9]*");
-        private Regex tMatch = new Regex("(?<=t=)[0-9]*");
-        private Regex pMatch = new Regex("(?<=t=)[0-9]*");
-        private Regex charsetMatch = new Regex("(?<=charset=)[^(;\" )]*", RegexOptions.IgnoreCase);
+        private readonly Regex titleMatch = new Regex("(?<=<title>)[^<]*(?=</title>)", RegexOptions.IgnoreCase);
+        private readonly Regex fMatch = new Regex("(?<=f=)[0-9]*");
+        private readonly Regex tMatch = new Regex("(?<=t=)[0-9]*");
+        private readonly Regex charsetMatch = new Regex("(?<=charset=)[^(;\" )]*", RegexOptions.IgnoreCase);
 
-        private Regex whiteSpaceMatch = new Regex(@"\s+");
+        private readonly Regex whiteSpaceMatch = new Regex(@"\s+");
 
         private void BotEvents_OnChannelMessage(object sender, IrcEventArgs e)
         {
@@ -78,9 +78,9 @@ namespace Plugin
                 {
                     if (e.Data.Message.StartsWith("http://forum.piratenpartei.ch/viewtopic.php?f="))
                     {
-                        string f = fMatch.Match(e.Data.Message).Value;
-                        string t = tMatch.Match(e.Data.Message).Value;
-                        ForumItem item = getTopic("http://forum.piratenpartei.ch/rss.php?f=" + f + "&t=" + t + "&start=last", lang, false);
+                        var f = fMatch.Match(e.Data.Message).Value;
+                        var t = tMatch.Match(e.Data.Message).Value;
+                        var item = GetTopic("http://forum.piratenpartei.ch/rss.php?f=" + f + "&t=" + t + "&start=last", lang, false);
                         if (lang == "fr")
                         {
                             BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Forum des pirates - " + item.Title + " (by " + item.Author + ")");
@@ -92,7 +92,7 @@ namespace Plugin
                     }
                     else if (e.Data.Message.StartsWith("http://"))
                     {
-                        WebClient client = new WebClient();
+                        var client = new WebClient();
 
                         string page = client.DownloadString(e.Data.Message);
                         string charset = charsetMatch.Match(page).Value;
@@ -100,10 +100,11 @@ namespace Plugin
 
                         if (charset.ToLower() != "")
                         {
-                            Encoding enc = System.Text.Encoding.GetEncoding(charset);
-                            byte[] encBytes = client.Encoding.GetBytes(title);
-                            byte[] utfBytes = System.Text.Encoding.Convert(enc, new System.Text.UTF8Encoding(), encBytes);
-                            char[] utfChars = System.Text.Encoding.UTF8.GetChars(utfBytes);
+                            var enc = Encoding.GetEncoding(charset);
+                            var encBytes = client.Encoding.GetBytes(title);
+                            var utfBytes = Encoding.Convert(enc, new UTF8Encoding(), encBytes);
+                            var utfChars = Encoding.UTF8.GetChars(utfBytes);
+
                             title = new String(utfChars);
                         }
 
@@ -114,13 +115,14 @@ namespace Plugin
                     }
                 }
             }
-            catch { }
+            catch
+            { }
 
         }
-        private char c10 = Convert.ToChar(10);
-        private char c13 = Convert.ToChar(13);
+        private readonly char c10 = Convert.ToChar(10);
+        private readonly char c13 = Convert.ToChar(13);
 
-        private string RemoveNewLine(string s)
+        private string RemoveNewLine(IEnumerable<char> s)
         {
             var sb = new StringBuilder();
             foreach (var c in s.Where(c => (c != c10) && (c != c13)))
@@ -130,47 +132,45 @@ namespace Plugin
             return sb.ToString();
         }
 
-        private ForumItem getTopic(string uri, string lang, bool hack)
+        private ForumItem GetTopic(string uri, string lang, bool hack)
         {
 
             ForumItem item = null;
-            WebClient client = new WebClient();
+            var client = new WebClient();
             client.Headers.Add(HttpRequestHeader.AcceptLanguage, lang);
-            XmlReader feed = XmlReader.Create(client.OpenRead(uri));
+            var feed = XmlReader.Create(client.OpenRead(uri));
             while (feed.Read())
             {
-                if ((feed.NodeType == XmlNodeType.Element) && (feed.Name == "item"))
+                if ((feed.NodeType != XmlNodeType.Element) || (feed.Name != "item")) continue;
+                var temp = GetItem(feed);
+                if (temp.Published == DateTime.MinValue)
                 {
-                    var temp = getItem(feed);
-                    if (temp.Published == DateTime.MinValue)
+                    if (!hack && item != null)
                     {
-                        if (!hack)
-                        {
-                            item = getTopic(uri + "&start=" + getHack(item.Description), lang, true);
-                        }
+                        item = GetTopic(uri + "&start=" + GetHack(item.Description), lang, true);
                     }
-                    else
-                    {
-                        item = temp;
-                    }
+                }
+                else
+                {
+                    item = temp;
                 }
             }
             return item;
         }
 
-        private Regex hackMatch = new Regex("(?<=Antworten )[0-9]*", RegexOptions.IgnoreCase);
+        private readonly Regex hackMatch = new Regex("(?<=Antworten )[0-9]*", RegexOptions.IgnoreCase);
 
-        private string getHack(string s)
+        private string GetHack(string s)
         {
             return hackMatch.Match(s).Value;
         }
 
-        private ForumItem getItem(XmlReader feed)
+        private static ForumItem GetItem(XmlReader feed)
         {
 
             string title = "", author = "", desc = "";
 
-            DateTime published = DateTime.MinValue;
+            var published = DateTime.MinValue;
 
             while (feed.Read())
             {

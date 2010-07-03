@@ -24,7 +24,7 @@ using Huffelpuff;
 using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
 
-namespace AIMLPlugin
+namespace Plugin
 {
     /// <summary>
     /// Description of MyClass.

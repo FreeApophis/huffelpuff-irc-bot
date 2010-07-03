@@ -39,7 +39,6 @@ namespace Plugin
 
         private readonly Dictionary<string, RssWrapper> rssFeeds = new Dictionary<string, RssWrapper>();
         private Timer checkInterval;
-        private DateTime lastpost = DateTime.MinValue;
 
         public const string RssFeedConst = "rss_feed";
         public override void Init()
@@ -130,7 +129,7 @@ namespace Plugin
 
         private void AdminRss(object sender, IrcEventArgs e)
         {
-            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             switch (e.Data.MessageArray[0].ToLower())
             {
                 case "!+rss":

@@ -118,7 +118,9 @@
     <Compile Include="Database\DatabaseCommon.cs" />
     <Compile Include="Database\DatabaseExtensions.cs" />
     <Compile Include="Database\Setting.cs" />
-    <Compile Include="HuffelpuffServiceInstaller.cs" />
+    <Compile Include="HuffelpuffServiceInstaller.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="IrcCore\Consts.cs" />
     <Compile Include="IrcCore\EventArgs.cs" />
     <Compile Include="IrcCore\Exceptions.cs" />

@@ -23,14 +23,14 @@ using HoldemHand;
 
 namespace Plugin
 {
-    class RandomDeck
+    internal class RandomDeck
     {
         private List<string> cards;
         private readonly Random random;
 
         public string CurrentCard { get; private set; }
 
-        public RandomDeck()
+        internal RandomDeck()
         {
             cards = new List<string>(Hand.CardTable);
             random = new Random();

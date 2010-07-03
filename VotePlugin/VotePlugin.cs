@@ -17,12 +17,9 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-using System;
-using System.Collections.Generic;
 
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Meebey.SmartIrc4net;
 
 namespace Plugin
 {
@@ -32,9 +29,10 @@ namespace Plugin
     public class VotePlugin : AbstractPlugin
     {
         public VotePlugin(IrcBot botInstance) :
-            base(botInstance) {}
-    
-        public override string AboutHelp() {
+            base(botInstance) { }
+
+        public override string AboutHelp()
+        {
             return "";
         }
     }

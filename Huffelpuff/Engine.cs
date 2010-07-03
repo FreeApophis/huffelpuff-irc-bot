@@ -18,6 +18,8 @@
  */
 
 
+using System.ServiceProcess;
+using System.Threading;
 using Huffelpuff.Utils;
 
 namespace Huffelpuff

@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
-    <RootNamespace>AIMLPlugin</RootNamespace>
+    <RootNamespace>Plugin</RootNamespace>
     <AssemblyName>AIMLPlugin</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -120,10 +120,6 @@
       <Project>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</Project>
       <Name>Huffelpuff</Name>
     </ProjectReference>
-    <Folder Include="AIMLbot\" />
-    <Folder Include="AIMLbot\" />
-    <Folder Include="AIMLbot\" />
-    <Folder Include="AIMLbot\" />
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy .\AIMLPlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>

@@ -17,10 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
 
-using System;
 using System.Reflection;
-using System.Collections.Generic;
-using System.Runtime.Remoting;
 
 using Huffelpuff;
 using Huffelpuff.Plugins;
@@ -33,33 +30,39 @@ namespace Plugin
     /// </summary>
     public class EchoPlugin : AbstractPlugin
     {
-        
-        public EchoPlugin(IrcBot botInstance) : 
-            base(botInstance) {}
-        
-        public override string Name {
-            get {
+
+        public EchoPlugin(IrcBot botInstance) :
+            base(botInstance) { }
+
+        public override string Name
+        {
+            get
+            {
                 return Assembly.GetExecutingAssembly().FullName;
             }
         }
-        
-        public override void Activate() {
-            BotMethods.AddCommand(new Commandlet("!say", "The command !say <your text>, says whatever text you want it to say", sayHandler, this, CommandScope.Both, "echo_access", null));
+
+        public override void Activate()
+        {
+            BotMethods.AddCommand(new Commandlet("!say", "The command !say <your text>, says whatever text you want it to say", SayHandler, this, CommandScope.Both, "echo_access", null));
             base.Activate();
         }
 
-        
-        public override void Deactivate() {
+
+        public override void Deactivate()
+        {
             BotMethods.RemoveCommand("!say");
             base.Deactivate();
         }
-                
-        public override string AboutHelp() {
+
+        public override string AboutHelp()
+        {
             return "This is a very simple Plugin which repeats the message you said";
         }
-                
-        private void sayHandler(object sender, IrcEventArgs e) {
-            BotMethods.SendMessage(SendType.Message, e.Data.Channel, e.Data.Message.Substring(5));            
+
+        private void SayHandler(object sender, IrcEventArgs e)
+        {
+            BotMethods.SendMessage(SendType.Message, e.Data.Channel, e.Data.Message.Substring(5));
         }
     }
 }

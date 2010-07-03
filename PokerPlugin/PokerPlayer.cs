@@ -19,16 +19,27 @@
 
 namespace Plugin
 {
-    class PokerPlayer
+    internal class PokerPlayer
     {
-        public PokerPlayer()
+        internal PokerPlayer()
         {
             ChipStack = 1000;
+            PocketCards = new PocketCards();
         }
 
         public string Nick { get; set; }
         public string Channel { get; set; }
         public int ChipStack { get; set; }
-        public string PocketCards { get; set; }
+        public PocketCards PocketCards { get; set; }
+        public PlayerState State { get; set; }
+    }
+
+    internal enum PlayerState
+    {
+        NotYetPlaying,
+        Dealer,
+        BigBlind,
+        SmallBlind,
+        Player
     }
 }

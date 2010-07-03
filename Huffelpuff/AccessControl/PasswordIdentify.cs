@@ -16,11 +16,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
- 
-using System;
+
 using Meebey.SmartIrc4net;
 
-namespace Huffelpuff
+namespace Huffelpuff.AccessControl
 {
     /// <summary>
     /// Description of PasswordIdentify.
@@ -28,16 +27,11 @@ namespace Huffelpuff
     public class PasswordIdentify : IdentifyUser
     {
         public PasswordIdentify(IrcBot bot) : base(bot) { 
-            bot.AddCommand(new Commandlet("!identify", "You can identify your nick with the !identify <pass> command", passHandler, this, CommandScope.Both));
+            bot.AddCommand(new Commandlet("!identify", "You can identify your nick with the !identify <pass> command", PassHandler, this, CommandScope.Both));
             
         }
-        
-        public override string Identified(string nick)
-        {
-            return base.Identified(nick);
-        }
-        
-        public void passHandler(object sender, IrcEventArgs e) {
+
+        public void PassHandler(object sender, IrcEventArgs e) {
             
         }
         

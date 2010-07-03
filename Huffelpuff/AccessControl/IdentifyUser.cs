@@ -16,21 +16,20 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
- 
-using System;
-using Meebey.SmartIrc4net;
 
-namespace Huffelpuff
+using System;
+
+namespace Huffelpuff.AccessControl
 {
     /// <summary>
     /// Description of IdentifyUser.
     /// </summary>
     public abstract class IdentifyUser : MarshalByRefObject
     {
-        protected IrcBot bot;
-        
-        public IdentifyUser(IrcBot bot) {
-            this.bot = bot;
+        protected IrcBot Bot;
+
+        protected IdentifyUser(IrcBot bot) {
+            Bot = bot;
         }
 
         public virtual string Identified(string nick) {

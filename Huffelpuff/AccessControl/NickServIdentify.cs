@@ -19,108 +19,133 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Meebey.SmartIrc4net;
 using System.Threading;
 
-namespace Huffelpuff
+namespace Huffelpuff.AccessControl
 {
     /// <summary>
     /// Description of NickServ.
     /// </summary>
     public class NickServIdentify : IdentifyUser
     {
-        private int maxWaitTime = 15000;
-        
-        public NickServIdentify(IrcBot bot) : base(bot) {
-            bot.OnPart += new PartEventHandler(bot_OnPart);
-            bot.OnKick += new KickEventHandler(bot_OnKick);
-            bot.OnQuit += new QuitEventHandler(bot_OnQuit);
-            bot.OnNickChange += new NickChangeEventHandler(bot_OnNickChange);
+        private const int MaxWaitTime = 15000;
+
+        public NickServIdentify(IrcBot bot)
+            : base(bot)
+        {
+            bot.OnPart += BotOnPart;
+            bot.OnKick += BotOnKick;
+            bot.OnQuit += BotOnQuit;
+            bot.OnNickChange += BotOnNickChange;
         }
 
-        void bot_OnNickChange(object sender, NickChangeEventArgs e)
+        void BotOnNickChange(object sender, NickChangeEventArgs e)
         {
             RemoveNick(e.OldNickname);
             Identified(e.NewNickname);
         }
 
-        void bot_OnQuit(object sender, QuitEventArgs e)
+        void BotOnQuit(object sender, QuitEventArgs e)
         {
-            if (e.Who == bot.Nickname) {
-                lock (nickCache) {
-                    nickCache.Clear();
+            if (e.Who == Bot.Nickname)
+            {
+                lock (NickCache)
+                {
+                    NickCache.Clear();
                 }
-            } else {
+            }
+            else
+            {
                 RemoveNick(e.Who);
             }
         }
 
-        void bot_OnKick(object sender, KickEventArgs e)
+        void BotOnKick(object sender, KickEventArgs e)
         {
-            if (e.Whom == bot.Nickname) {
-                lock (nickCache) {
-                    nickCache.Clear();
+            if (e.Whom == Bot.Nickname)
+            {
+                lock (NickCache)
+                {
+                    NickCache.Clear();
                 }
-            } else {
+            }
+            else
+            {
                 RemoveNick(e.Whom);
             }
         }
 
-        void bot_OnPart(object sender, PartEventArgs e)
+        void BotOnPart(object sender, PartEventArgs e)
         {
-            if (e.Who == bot.Nickname) {
-                lock (nickCache) {
-                    nickCache.Clear();
+            if (e.Who == Bot.Nickname)
+            {
+                lock (NickCache)
+                {
+                    NickCache.Clear();
                 }
-            } else {
+            }
+            else
+            {
                 RemoveNick(e.Who);
             }
         }
-        
-        private void RemoveNick(string nick) {
-            lock (nickCache) {
-                nickCache.Remove(nick);
+
+        private void RemoveNick(string nick)
+        {
+            lock (NickCache)
+            {
+                NickCache.Remove(nick);
             }
         }
-        
-        public Dictionary<string, string> nickCache = new Dictionary<string, string>();
 
-        public string IdToNick(string id) {
-            lock (nickCache) {
-                foreach(KeyValuePair<string, string> kvp in nickCache) {
-                    if (kvp.Value == id) {
-                        return kvp.Key;
-                    }
-                    
+        public Dictionary<string, string> NickCache = new Dictionary<string, string>();
+
+        public string IdToNick(string id)
+        {
+            lock (NickCache)
+            {
+                foreach (var kvp in NickCache.Where(kvp => kvp.Value == id))
+                {
+                    return kvp.Key;
                 }
             }
             return null;
         }
-        
+
         DateTime lastCheck;
         public override string Identified(string nick)
         {
             string id;
-            if (nickCache.TryGetValue(nick, out id)) {
-                if ((id != null) || (lastCheck.AddSeconds(10) > DateTime.Now)) {
+            if (NickCache.TryGetValue(nick, out id))
+            {
+                if ((id != null) || (lastCheck.AddSeconds(10) > DateTime.Now))
+                {
                     return id;
                 }
             }
-            
+
             lastCheck = DateTime.Now;
-            NickServIdentifyRequest nsir = new NickServIdentifyRequest(nick, bot);
-            
-            if (nickCache.ContainsKey(nick)) {
-                nickCache.Remove(nick);
+            var nsir = new NickServIdentifyRequest(nick, Bot);
+
+            if (NickCache.ContainsKey(nick))
+            {
+                NickCache.Remove(nick);
             }
-            
-            lock (nsir)  {
-                if (Monitor.Wait (nsir, maxWaitTime)) {
-                    lock (nickCache) {
-                        if(!nickCache.ContainsKey(nick))
-                            nickCache.Add(nick, nsir.Identity);
+
+            lock (nsir)
+            {
+                if (Monitor.Wait(nsir, MaxWaitTime))
+                {
+                    lock (NickCache)
+                    {
+                        if (!NickCache.ContainsKey(nick))
+                            NickCache.Add(nick, nsir.Identity);
                     }
-                } else {
+                }
+                else
+                {
                     return null;
                 }
             }

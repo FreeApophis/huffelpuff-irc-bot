@@ -23,7 +23,7 @@ using System;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 
-namespace ChannelModerator
+namespace Plugin
 {
     /// <summary>
     /// Ready for kick, op and war ;)
@@ -32,22 +32,24 @@ namespace ChannelModerator
     {
         public ChannelModeratorPlugin(IrcBot botInstance) :
             base(botInstance) {}
-        
-        public override void Init()
-        {
-            base.Init();
-        }
-        
+
         public override void Activate ()
         {
             BotMethods.AddCommand(new Commandlet("!kick", "kicks an annyoing user", kickUser, this));
+            BotMethods.AddCommand(new Commandlet("!ban", "ban an annyoing user", banUser, this));
             
             base.Activate();
         }
-        
+
+        private void banUser(object sender, IrcEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
         public override void Deactivate ()
         {
             BotMethods.RemoveCommand("!kick");
+            BotMethods.RemoveCommand("!ban");
             
             base.Deactivate();
         }
@@ -59,7 +61,7 @@ namespace ChannelModerator
         
         private void kickUser(object sender, IrcEventArgs e) 
         {
-            
+            throw new NotImplementedException();            
         }
     }
 }

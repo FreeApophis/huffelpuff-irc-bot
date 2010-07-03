@@ -1,7 +1,7 @@
 /*
  *  UT3GlobalStatsPlugin, Access to the GameSpy Stats for UT3
  * 
- *  Copyright (c) 2007-2009 Thomas Bruderer <apophis@apophis.ch> <http://www.apophis.ch>
+ *  Copyright (c) 2007-2010 Thomas Bruderer <apophis@apophis.ch> <http://www.apophis.ch>
  *  Copyright (c) 2005,2006 Luigi Auriemma <aluigi@autistici.org> <http://aluigi.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -18,12 +18,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
 
-using Huffelpuff.Utils;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using Huffelpuff.Utils;
 
 namespace Plugin
 {
@@ -33,20 +33,20 @@ namespace Plugin
     // If you want to look in the original code look at : http://aluigi.altervista.org/papers.htm (gslogincheck)
     public class GameSpyClient
     {
-        private const string host = "gpcm.gamespy.com";
-        private const int port = 29900;
-        private Random randomN = new Random();
-        private const string spaces48 = "                                                ";
+        private const string Host = "gpcm.gamespy.com";
+        private const int Port = 29900;
+        private readonly Random randomN = new Random();
+        private const string Spaces48 = "                                                ";
         private const int BufferSize = 2048;
-        private TcpClient client = null;
-        private NetworkStream ns = null;
+        private TcpClient client;
+        private NetworkStream ns;
         private string sessionkey;
-        public string getTicket(string nick, string pass, bool verbose)
+        public string GetTicket(string nick, string pass, bool verbose)
         {
-            byte[] buffer = new byte[BufferSize];
+            var buffer = new byte[BufferSize];
             try
             {
-                client = new TcpClient(host, port);
+                client = new TcpClient(Host, Port);
             }
             catch (SocketException)
             {
@@ -56,10 +56,10 @@ namespace Plugin
             ns = client.GetStream();
             int len = ns.Read(buffer, 0, BufferSize);
             string receive1 = Encoding.ASCII.GetString(buffer, 0, len);
-            string serverChallenge = getParameterValue(receive1, "challenge");
+            string serverChallenge = GetParameterValue(receive1, "challenge");
             if (string.IsNullOrEmpty(serverChallenge)) { Log.Instance.Log("no challenge"); }
-            string clientChallenge = createRandomString(32);
-            string response = getResponseValue(nick, pass, clientChallenge, serverChallenge);
+            string clientChallenge = CreateRandomString(32);
+            string response = GetResponseValue(nick, pass, clientChallenge, serverChallenge);
             string login = "\\login\\" +
                            "\\challenge\\" + clientChallenge +
                            "\\uniquenick\\" + nick +
@@ -77,41 +77,41 @@ namespace Plugin
             buffer = new byte[BufferSize];
             len = ns.Read(buffer, 0, BufferSize);
             string receive2 = Encoding.ASCII.GetString(buffer, 0, len);
-            if (!string.IsNullOrEmpty(getParameterValue(receive2, "errmsg")))
-                Log.Instance.Log(getParameterValue(receive2, "errmsg"));
-            sessionkey = getParameterValue(receive2, "sesskey");
-            return getParameterValue(receive2, "lt");
+            if (!string.IsNullOrEmpty(GetParameterValue(receive2, "errmsg")))
+                Log.Instance.Log(GetParameterValue(receive2, "errmsg"));
+            sessionkey = GetParameterValue(receive2, "sesskey");
+            return GetParameterValue(receive2, "lt");
         }
 
-        public void logOut()
+        public void LogOut()
         {
             string logout = "\\logout\\" +
                             "\\sesskey\\" + sessionkey +
                             "\\final\\";
             byte[] buffer = Encoding.ASCII.GetBytes(logout);
-            if (ns!=null)
+            if (ns != null)
                 ns.Write(buffer, 0, logout.Length);
         }
 
-        static char[] alphanumeric = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
+        static readonly char[] Alphanumeric = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
                             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
                             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
                             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
                             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
 
-        private string createRandomString(int length)
+        private string CreateRandomString(int length)
         {
             string s = "";
 
             while (length > 0)
             {
                 --length;
-                s += alphanumeric[randomN.Next(62)];
+                s += Alphanumeric[randomN.Next(62)];
             }
             return s;
         }
 
-        private string getParameterValue(string message, string parameter)
+        private static string GetParameterValue(string message, string parameter)
         {
             char[] backslash = { '\\' };
             string[] parts = message.Split(backslash);
@@ -123,7 +123,7 @@ namespace Plugin
             }
             return "";
         }
-        static string[] BtoH = { "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "0a", "0b", "0c", "0d", "0e", "0f", 
+        static readonly string[] BtoH = { "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "0a", "0b", "0c", "0d", "0e", "0f", 
                                   "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "1a", "1b", "1c", "1d", "1e", "1f", 
                                   "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "2a", "2b", "2c", "2d", "2e", "2f", 
                                   "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "3a", "3b", "3c", "3d", "3e", "3f", 
@@ -139,22 +139,14 @@ namespace Plugin
                                   "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "da", "db", "dc", "dd", "de", "df", 
                                   "e0", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "ea", "eb", "ec", "ed", "ee", "ef", 
                                   "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "fa", "fb", "fc", "fd", "fe", "ff" };
-        private string getResponseValue(string nickname, string password, string clientChallenge, string serverChallenge)
+        private static string GetResponseValue(string nickname, string password, string clientChallenge, string serverChallenge)
         {
-            MD5 createMD5 = MD5.Create();
-            byte[] passwordHash = createMD5.ComputeHash(Encoding.ASCII.GetBytes(password));
-            string pwmd5 = "";
-            foreach (byte b in passwordHash)
-            {
-                pwmd5 += BtoH[b];
-            }
-            byte[] finalHash = createMD5.ComputeHash(Encoding.ASCII.GetBytes(pwmd5 + spaces48 + nickname + clientChallenge + serverChallenge + pwmd5));
-            string result = "";
-            foreach (byte b in finalHash)
-            {
-                result += BtoH[b];
-            }
-            return result;
+            var createMd5 = MD5.Create();
+            var passwordHash = createMd5.ComputeHash(Encoding.ASCII.GetBytes(password));
+            var pwmd5 = passwordHash.Aggregate("", (current, b) => current + BtoH[b]);
+            var finalHash = createMd5.ComputeHash(Encoding.ASCII.GetBytes(pwmd5 + Spaces48 + nickname + clientChallenge + serverChallenge + pwmd5));
+
+            return finalHash.Aggregate("", (current, b) => current + BtoH[b]);
         }
     }
 }

@@ -31,6 +31,7 @@ namespace Huffelpuff.Plugins
             };
 
             appDomain = AppDomain.CreateDomain("Plugins", null, setup);
+
             // Used for a Cross AppDomain Singleton
             appDomain.SetData("PersistentMemoryInstance", PersistentMemory.Instance);
 

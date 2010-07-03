@@ -13,8 +13,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading;
-
-using Huffelpuff.Database;
+using Huffelpuff.AccessControl;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 using Meebey.SmartIrc4net;

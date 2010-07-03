@@ -1,15 +1,31 @@
-﻿using System;
+﻿/*
+ *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
+ *  File created by apophis at 14.09.2009 19:02
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace Plugin
 {
     class MagicCalculator
     {
-        private List<WebCalculator> calculators = new List<WebCalculator>();
-        private List<CalculationResult> results = new List<CalculationResult>();
+        private readonly List<WebCalculator> calculators = new List<WebCalculator>();
+        private readonly List<CalculationResult> results = new List<CalculationResult>();
 
         public MagicCalculator()
         {
@@ -21,12 +37,9 @@ namespace Plugin
         public CalculationResult Calculate(string equation)
         {
             CalculateAll(equation);
-            foreach (CalculationResult result in results)
+            foreach (var result in results.Where(result => result.HasResult))
             {
-                if (result.HasResult)
-                {
-                    return result;
-                }
+                return result;
             }
             return CalculationResult.NoResult();
         }
@@ -34,9 +47,9 @@ namespace Plugin
         public List<CalculationResult> CalculateAll(string equation)
         {
             results.Clear();
-            foreach (WebCalculator calc in calculators)
+            foreach (var calc in calculators)
             {
-                ThreadPool.QueueUserWorkItem(new WaitCallback(calulatorThreadStarter), new { Calc = calc, Eq = equation });
+                ThreadPool.QueueUserWorkItem(CalulatorThreadStarter, new { Calc = calc, Eq = equation });
             }
             while (results.Count < calculators.Count)
             {
@@ -46,14 +59,14 @@ namespace Plugin
 
         }
 
-        private void calulatorThreadStarter(object state)
+        private void CalulatorThreadStarter(object state)
         {
             var tState = Cast(state, new { Calc = (WebCalculator)new DummyCalculator(), Eq = "" });
             results.Add(tState.Calc.Calculate(tState.Eq));
         }
 
-        private T Cast<T>(object obj, T type)
-        {
+        private static T Cast<T>(object obj, T t)
+        {    
             return (T)obj;
         }
 

@@ -46,6 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PocketCards.cs" />
+    <Compile Include="PokerGame.cs" />
     <Compile Include="PokerPlayer.cs" />
     <Compile Include="PokerPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

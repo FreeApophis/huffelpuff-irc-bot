@@ -1,9 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
+﻿/*
+ *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
+ *  File created by apophis at 14.09.2009 19:02
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+using System;
 using System.IO;
+using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 
@@ -11,44 +27,45 @@ namespace Plugin
 {
     class OctaveCalculator : WebCalculator
     {
-        private const string urlBase = "http://hara.mimuw.edu.pl/weboctave/web/index.php";
-        private Regex resultMatch = new Regex("(?<=gt;</span>).*(?=</pre><p class=\"msg\">)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        private Regex whiteSpaceMatch = new Regex(@"\s+");
+        private const string URLBase = "http://hara.mimuw.edu.pl/weboctave/web/index.php";
+        private readonly Regex resultMatch = new Regex("(?<=gt;</span>).*(?=</pre><p class=\"msg\">)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        private readonly Regex whiteSpaceMatch = new Regex(@"\s+");
         public override CalculationResult Calculate(string equation)
         {
-            try {
-                string requestString = "submit=Submit%20to%20Octave&commands=" + HttpUtility.UrlEncode(equation);
+            try
+            {
+                var requestString = "submit=Submit%20to%20Octave&commands=" + HttpUtility.UrlEncode(equation);
 
-                ASCIIEncoding encoding = new ASCIIEncoding();
+                var encoding = new ASCIIEncoding();
                 byte[] data = encoding.GetBytes(requestString);
 
-                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(urlBase);
+                var request = (HttpWebRequest)WebRequest.Create(URLBase);
                 request.ServicePoint.Expect100Continue = false;
                 request.Method = "POST";
                 request.ContentType = "application/x-www-form-urlencoded";
                 request.ContentLength = data.Length;
-                Stream stream = request.GetRequestStream();
+                var stream = request.GetRequestStream();
                 stream.Write(data, 0, data.Length);
                 stream.Flush();
 
-                StreamReader reader = new StreamReader(request.GetResponse().GetResponseStream());
-                string query = reader.ReadToEnd();
+                var reader = new StreamReader(request.GetResponse().GetResponseStream());
+                var query = reader.ReadToEnd();
 
 
-                Match match = resultMatch.Match(query);
+                var match = resultMatch.Match(query);
 
-                string[] lines = match.Value.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                var lines = match.Value.Split(new[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
                 if (lines.Length > 1)
                 {
                     if (lines.Length > 2)
                     {
-                        string result = ""; int i = 0;
+                        var result = ""; int i = 0;
                         if (!lines[1].StartsWith("ans"))
                         {
-                            result = lines[1]+" ";
+                            result = lines[1] + " ";
                         }
-                        foreach (string line in lines)
+                        foreach (var line in lines)
                         {
                             if (i > 2)
                             {
@@ -62,28 +79,23 @@ namespace Plugin
                         }
                         return new CalculationResult(result, lines[0] + " => " + result, true);
                     }
-                    else
-                    {
-                        string[] splitres = lines[1].Split(new char[] { '=' });
-                        return new CalculationResult(splitres[1], lines[0] + " => " + RemoveAns(lines[1]), false);
-                    }
-
+                    var splitres = lines[1].Split(new[] { '=' });
+                    return new CalculationResult(splitres[1], lines[0] + " => " + RemoveAns(lines[1]), false);
                 }
-                else
-                {
-                    return CalculationResult.NoResult();
-                }
-            } catch (Exception) {
+                return CalculationResult.NoResult();
+            }
+            catch (Exception)
+            {
                 return CalculationResult.NoResult();
             }
         }
 
-        private string RemoveAns(string res)
+        private static string RemoveAns(string res)
         {
             return res.Replace("ans = ", "");
         }
 
-        public string parseSpecial(string result)
+        public string ParseSpecial(string result)
         {
             return result;
         }

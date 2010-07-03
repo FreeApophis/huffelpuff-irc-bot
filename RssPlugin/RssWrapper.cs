@@ -32,31 +32,39 @@ namespace Plugin
     public class RssWrapper
     {
         public string Name { get; private set; }
-        public string NameSpace {
-            get{
+        public string NameSpace
+        {
+            get
+            {
                 return "rssfeed_" + Name;
             }
         }
-        
+
         private const string friendlynameconst = "friendlyname";
         private string friendlyName;
-        public string FriendlyName {
-            get  {
+        public string FriendlyName
+        {
+            get
+            {
                 return friendlyName;
             }
-            set {
+            set
+            {
                 PersistentMemory.Instance.SetValue(NameSpace, friendlynameconst, value);
                 friendlyName = value;
             }
         }
-        
+
         private const string urlconst = "url";
         private string url;
-        public string Url {
-            get  {
+        public string Url
+        {
+            get
+            {
                 return url;
             }
-            set {
+            set
+            {
                 PersistentMemory.Instance.SetValue(NameSpace, urlconst, value);
                 url = value;
             }
@@ -64,145 +72,163 @@ namespace Plugin
 
         private const string lastconst = "lastdate";
         private DateTime last;
-        public DateTime Last {
-            get  {
+        public DateTime Last
+        {
+            get
+            {
                 return last;
             }
-            set {
+            set
+            {
                 PersistentMemory.Instance.SetValue(NameSpace, lastconst, value.ToString());
                 last = value;
             }
         }
-        
+
         private List<RssItem> cachedItems = new List<RssItem>();
-        
+
         public RssWrapper(string name)
         {
             Name = name;
             friendlyName = PersistentMemory.Instance.GetValueOrTodo(NameSpace, friendlynameconst);
             url = PersistentMemory.Instance.GetValueOrTodo(NameSpace, urlconst);
-            
+
             string lastDateTimeString = PersistentMemory.Instance.GetValue(NameSpace, lastconst);
             last = (lastDateTimeString == null) ? DateTime.MinValue : DateTime.Parse(lastDateTimeString);
         }
-        
+
         public RssWrapper(string name, string friendlyName, string url, DateTime last)
         {
             Name = name;
             this.friendlyName = friendlyName;
             this.url = url;
             this.last = last;
-            
+
             PersistentMemory.Instance.ReplaceValue(NameSpace, friendlynameconst, friendlyName);
             PersistentMemory.Instance.ReplaceValue(NameSpace, urlconst, url);
             PersistentMemory.Instance.ReplaceValue(NameSpace, lastconst, last.ToString());
         }
-        
-        public void RemoveFeed() {
+
+        public void RemoveFeed()
+        {
             PersistentMemory.Instance.RemoveValue(RssPlugin.RssFeedConst, Name);
             PersistentMemory.Instance.RemoveGroup(NameSpace);
         }
 
-        
+
         /// <summary>
         /// Returns new posts on the Rss Feed, this call is not idempotent
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<RssItem> NewItems () {
-            cachedItems = getRss();
+        public IEnumerable<RssItem> NewItems()
+        {
+            cachedItems = GetRss();
             var newItems = cachedItems.Where(item => item.Published > last).OrderBy(item => item.Published).ToList();
-            if (newItems.Count() > 0) {
+            if (newItems.Count() > 0)
+            {
                 last = newItems.OrderByDescending(item => item.Published).Take(1).Single().Published;
                 PersistentMemory.Instance.ReplaceValue(NameSpace, lastconst, last.ToString());
             }
             return newItems;
         }
-        
-        
-        
-        public RssItem this[int i] {
-            get {
-                if(i < cachedItems.Count) {
+
+
+
+        public RssItem this[int i]
+        {
+            get
+            {
+                if (i < cachedItems.Count)
+                {
                     return cachedItems[i];
                 }
                 return null;
             }
         }
-        
-        public int Count {
-            get {
+
+        public int Count
+        {
+            get
+            {
                 return cachedItems.Count;
             }
         }
 
-        
-        private List<RssItem> getRss()
+
+        private List<RssItem> GetRss()
         {
-            List<RssItem> rss = new List<RssItem>();
+            var rss = new List<RssItem>();
 
             XmlReader feed = XmlReader.Create(url);
-            while(feed.Read()){
-                if ((feed.NodeType == XmlNodeType.Element) && (feed.Name == "item")) {
-                    rss.Add(getItem(feed));
+            while (feed.Read())
+            {
+                if ((feed.NodeType == XmlNodeType.Element) && (feed.Name == "item"))
+                {
+                    rss.Add(GetItem(feed));
                 }
             }
             return rss;
         }
-        
-        private RssItem getItem(XmlReader feed)  {
 
-            string title = "", author = ""; string link = ""; string desc = ""; string category = ""; string content = "";
+        private static RssItem GetItem(XmlReader feed)
+        {
+            string title = "", author = "", link = "", desc = "", category = "", content = "";
 
-            DateTime published = DateTime.MinValue;
-            
-            while(feed.Read()){
-                if ((feed.NodeType == XmlNodeType.EndElement) && (feed.Name == "item")) {
+            var published = DateTime.MinValue;
+
+            while (feed.Read())
+            {
+                if ((feed.NodeType == XmlNodeType.EndElement) && (feed.Name == "item"))
+                {
                     break;
                 }
-                if (feed.NodeType == XmlNodeType.Element) {
-                    switch(feed.Name) {
-                            // Main Items every RSS feed has
-                        case "title":
-                            title = feed.ReadElementContentAsString();
-                            break;
-                        case "link":
-                            link = feed.ReadElementContentAsString();
-                            break;
-                        case "description":
-                            desc = feed.ReadElementContentAsString();
-                            break;
-                            // The pubDate is important for notifying
-                        case "pubDate":
-                            string str = feed.ReadElementContentAsString();
-                            DateTime.TryParse(str, out published);
-                            break;
-                            // Some more RSS 2.0 Standard fields.
-                        case "category":
-                            category = feed.ReadElementContentAsString();
-                            break;
-                        case "author":
-                            author = feed.ReadElementContentAsString();
-                            break;
-                        case "guid":
-                            //link = feed.ReadElementContentAsString();
-                            break;
-                            // Special ones (for vBulletin)
-                        case "content:encoded":
-                            content = feed.ReadElementContentAsString();
-                            break;
-                        case "dc:creator":
-                            author = feed.ReadElementContentAsString();
-                            break;
-                        case "comments":
-                            //Comment
-                            break;
-                        case "wfw:commentRss":
-                            //Comment LInk
-                            break;
-                        default:
-                            Log.Instance.Log("unparsed Element: " + feed.Name);
-                            break;
-                    }
+                if (feed.NodeType != XmlNodeType.Element)
+                {
+                    break;
+                }
+                switch (feed.Name)
+                {
+                    // Main Items every RSS feed has
+                    case "title":
+                        title = feed.ReadElementContentAsString();
+                        break;
+                    case "link":
+                        link = feed.ReadElementContentAsString();
+                        break;
+                    case "description":
+                        desc = feed.ReadElementContentAsString();
+                        break;
+                    // The pubDate is important for notifying
+                    case "pubDate":
+                        string str = feed.ReadElementContentAsString();
+                        DateTime.TryParse(str, out published);
+                        break;
+                    // Some more RSS 2.0 Standard fields.
+                    case "category":
+                        category = feed.ReadElementContentAsString();
+                        break;
+                    case "author":
+                        author = feed.ReadElementContentAsString();
+                        break;
+                    case "guid":
+                        //link = feed.ReadElementContentAsString();
+                        break;
+                    // Special ones (for vBulletin)
+                    case "content:encoded":
+                        content = feed.ReadElementContentAsString();
+                        break;
+                    case "dc:creator":
+                        author = feed.ReadElementContentAsString();
+                        break;
+                    case "comments":
+                        //Comment
+                        break;
+                    case "wfw:commentRss":
+                        //Comment LInk
+                        break;
+                    default:
+                        Log.Instance.Log("unparsed Element: " + feed.Name);
+                        break;
                 }
             }
             return new RssItem(title, author, published, link, desc, category, content);

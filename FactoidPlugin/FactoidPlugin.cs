@@ -25,7 +25,7 @@ using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 using Meebey.SmartIrc4net;
 
-namespace FactoidPlugin
+namespace Plugin
 {
     /// <summary>
     /// Supports !factoid, !factoid > nick, !factoid | nick

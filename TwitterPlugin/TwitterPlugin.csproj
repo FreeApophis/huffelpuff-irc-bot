@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
-    <RootNamespace>TwitterPlugin</RootNamespace>
+    <RootNamespace>Plugin</RootNamespace>
     <AssemblyName>TwitterPlugin</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -65,7 +65,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TinyUrl.cs" />
+    <Compile Include="UrlShortener.cs" />
     <Compile Include="TwitterWrapper.cs" />
     <Compile Include="TwitterPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

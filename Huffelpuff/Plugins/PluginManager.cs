@@ -1,16 +1,11 @@
-using Huffelpuff.Utils;
 using System;
 using System.Collections;
-using System.Data;
 using System.IO;
 using System.Reflection;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
-using System.Security;
-using System.Security.Permissions;
 using System.Security.Policy;
 using System.Text;
 using System.Threading;
+using Huffelpuff.Utils;
 
 namespace Huffelpuff.Plugins
 {
@@ -156,13 +151,12 @@ namespace Huffelpuff.Plugins
 			started = true;
 			if (autoReload)
 			{
-				fileSystemWatcher = new FileSystemWatcher(pluginDirectory);
-				fileSystemWatcher.EnableRaisingEvents = true;
-				fileSystemWatcher.Changed += new FileSystemEventHandler(fileSystemWatcher_Changed);
-				fileSystemWatcher.Deleted += new FileSystemEventHandler(fileSystemWatcher_Changed);
-				fileSystemWatcher.Created += new FileSystemEventHandler(fileSystemWatcher_Changed);
+				fileSystemWatcher = new FileSystemWatcher(pluginDirectory) {EnableRaisingEvents = true};
+			    fileSystemWatcher.Changed += fileSystemWatcher_Changed;
+				fileSystemWatcher.Deleted += fileSystemWatcher_Changed;
+				fileSystemWatcher.Created += fileSystemWatcher_Changed;
 
-				pluginReloadThread = new Thread(new ThreadStart(this.ReloadThreadLoop));
+				pluginReloadThread = new Thread(ReloadThreadLoop);
 				pluginReloadThread.Start();
 			}
 			ReloadPlugins();
@@ -205,7 +199,7 @@ namespace Huffelpuff.Plugins
 				throw new InvalidOperationException("PluginManager has not been started.");
 			}
 			compilerErrors = new ArrayList();
-			DirectoryInfo directory = new DirectoryInfo(pluginDirectory);
+			var directory = new DirectoryInfo(pluginDirectory);
 			if (pluginSources == PluginSourceEnum.DynamicAssemblies ||
 				pluginSources == PluginSourceEnum.Both)
 			{
@@ -346,13 +340,12 @@ namespace Huffelpuff.Plugins
 					}
 					else
 					{
-						fileSystemWatcher = new FileSystemWatcher(pluginDirectory);
-						fileSystemWatcher.EnableRaisingEvents = true;
-						fileSystemWatcher.Changed += new FileSystemEventHandler(fileSystemWatcher_Changed);
-						fileSystemWatcher.Deleted += new FileSystemEventHandler(fileSystemWatcher_Changed);
-						fileSystemWatcher.Created += new FileSystemEventHandler(fileSystemWatcher_Changed);
+						fileSystemWatcher = new FileSystemWatcher(pluginDirectory) {EnableRaisingEvents = true};
+					    fileSystemWatcher.Changed += fileSystemWatcher_Changed;
+						fileSystemWatcher.Deleted += fileSystemWatcher_Changed;
+						fileSystemWatcher.Created += fileSystemWatcher_Changed;
 
-						pluginReloadThread = new Thread(new ThreadStart(this.ReloadThreadLoop));
+						pluginReloadThread = new Thread(ReloadThreadLoop);
 						pluginReloadThread.Start();
 					}
 				}
@@ -478,14 +471,14 @@ namespace Huffelpuff.Plugins
 			return localLoader.GetStaticPropertyValue(typeName, propertyName);
 		}
 
-		/// <summary>
-		/// Returns the result of a static method call
-		/// </summary>
-		/// <param name="typeName">The type to call the static method on</param>
-		/// <param name="propertyName">The name of the method to call</param>
-		/// <param name="methodParams">The parameters to pass to the method</param>
-		/// <returns>The return value of the method</returns>
-		public object CallStaticMethod(string typeName, string methodName, object[] methodParams)
+	    /// <summary>
+	    /// Returns the result of a static method call
+	    /// </summary>
+	    /// <param name="typeName">The type to call the static method on</param>
+	    /// <param name="methodName"></param>
+	    /// <param name="methodParams">The parameters to pass to the method</param>
+	    /// <returns>The return value of the method</returns>
+	    public object CallStaticMethod(string typeName, string methodName, object[] methodParams)
 		{
 			if (!started)
 			{

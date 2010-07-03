@@ -1,4 +1,7 @@
-﻿/*
+﻿using System;
+using Huffelpuff;
+using Huffelpuff.Plugins;
+/*
  *  <project description>
  * 
  *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
@@ -18,10 +21,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 using Meebey.SmartIrc4net;
-using System;
-using System.Collections.Generic;
-using Huffelpuff;
-using Huffelpuff.Plugins;
 
 namespace Plugin
 {

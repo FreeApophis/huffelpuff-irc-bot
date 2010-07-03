@@ -18,7 +18,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -35,12 +34,9 @@ namespace Plugin
     /// </summary>
     public class WikipediaPlugin : AbstractPlugin
     {
-        public WikipediaPlugin(IrcBot botInstance) : base(botInstance) { }
+        private const string RequestBaseEn = "http://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
 
-        public override void Init()
-        {
-            base.Init();
-        }
+        public WikipediaPlugin(IrcBot botInstance) : base(botInstance) { }
 
         public override void Activate()
         {
@@ -78,7 +74,7 @@ namespace Plugin
             }
 
             var document = new XmlDocument();
-            var request = WebRequest.Create("http://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=" + word.ToString().Replace(' ', '_')) as HttpWebRequest;
+            var request = WebRequest.Create(RequestBaseEn + word.ToString().Replace(' ', '_')) as HttpWebRequest;
 
             if (request == null) return;
 
@@ -115,6 +111,7 @@ namespace Plugin
 
             //Bold text
             text = Regex.Replace(text, "'''(.*?)'''", IrcConstants.IrcBold + "$1" + IrcConstants.IrcNormal);
+            text = Regex.Replace(text, "''(.*?)''", IrcConstants.IrcUnderline + "$1" + IrcConstants.IrcNormal);
 
             // remove everything after the first caption
             text = Regex.Replace(text, "==.*", string.Empty);

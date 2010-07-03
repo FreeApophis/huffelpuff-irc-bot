@@ -17,10 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Meebey.SmartIrc4net;
-using System;
-
-namespace Huffelpuff
+namespace Huffelpuff.AccessControl
 {
     /// <summary>
     /// Description of HostIdentify.
@@ -28,11 +25,12 @@ namespace Huffelpuff
     public class HostIdentify : IdentifyUser
     {
         public HostIdentify(IrcBot bot) : base(bot) { }
-        
+
         public override string Identified(string nick)
         {
-            IrcUser user = bot.GetIrcUser(nick);
-            if (user != null)  {
+            var user = Bot.GetIrcUser(nick);
+            if (user != null)
+            {
                 return "host/" + user.Host;
             }
             return "host/";
