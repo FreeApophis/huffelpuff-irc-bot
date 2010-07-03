@@ -18,7 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
+using System.Linq;
 using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using Huffelpuff;
 using Huffelpuff.Plugins;
@@ -59,9 +63,22 @@ namespace Plugin
 
         private void WikiHandler(object sender, IrcEventArgs e)
         {
+            var word = new StringBuilder();
+            var first = true;
+            foreach (var c in e.Data.Message)
+            {
+                if (first && c == ' ')
+                {
+                    first = false;
+                }
+                if (!first)
+                {
+                    word.Append(c);
+                }
+            }
 
             var document = new XmlDocument();
-            var request = WebRequest.Create("http://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=Sex") as HttpWebRequest;
+            var request = WebRequest.Create("http://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=" + word.ToString().Replace(' ', '_')) as HttpWebRequest;
 
             if (request == null) return;
 
@@ -70,8 +87,44 @@ namespace Plugin
 
             if (document.DocumentElement == null) return;
 
-            var node = document.DocumentElement.FirstChild.FirstChild.FirstChild.FirstChild.FirstChild;
-            BotMethods.SendMessage(SendType.Message, e.Data.Channel, node.InnerText.Substring(0, 200));
+            var text = document.DocumentElement.InnerText;
+
+            BotMethods.SendMessage(SendType.Message, e.Data.Channel, FilterText(text));
+        }
+
+        private static string FilterText(string text)
+        {
+            // Normalize Whitespace, spaces only, makes regex easie
+            text = Regex.Replace(text, "\\s", " ");
+
+            // Remove Special
+            text = Regex.Replace(text, "{{(.*?)}}", string.Empty);
+
+            // Remove 2 level of [[
+            text = Regex.Replace(text, "\\[\\[([^\\]]*?)(\\[\\[.*?\\]\\].*?)+\\]\\]", string.Empty);
+
+            //Remove Image
+            text = Regex.Replace(text, "\\[\\[Image(.*?)\\]\\]", string.Empty);
+
+            //Remove Refernces
+            text = Regex.Replace(text, "<ref[^<]*?</ref>", string.Empty);
+
+            // Remove Internal links
+            text = Regex.Replace(text, "\\[\\[([^\\]]*?)\\|(.*?)\\]\\]", "$2");
+            text = Regex.Replace(text, "\\[\\[(.*?)\\]\\]", "$1");
+
+            //Bold text
+            text = Regex.Replace(text, "'''(.*?)'''", IrcConstants.IrcBold + "$1" + IrcConstants.IrcNormal);
+
+            // remove everything after the first caption
+            text = Regex.Replace(text, "==.*", string.Empty);
+
+            text = text.Trim();
+            if (text.Any())
+            {
+                return text.Length > 300 ? text.Substring(0, 300) : text;
+            }
+            return "No entry";
         }
     }
 }
