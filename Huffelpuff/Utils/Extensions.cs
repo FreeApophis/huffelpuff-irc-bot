@@ -115,11 +115,7 @@ namespace Huffelpuff.Utils
         public static TValue GetSafe<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key)
         {
             TValue result;
-            if (dictionary.TryGetValue(key, out result))
-            {
-                return result;
-            }
-            return default(TValue);
+            return dictionary.TryGetValue(key, out result) ? result : default(TValue);
         }
     }
 }

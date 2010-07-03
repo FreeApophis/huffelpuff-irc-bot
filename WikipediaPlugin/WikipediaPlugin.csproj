@@ -59,7 +59,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DotNetWikiBot.cs" />
     <Compile Include="WikipediaPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
