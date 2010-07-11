@@ -95,7 +95,10 @@ namespace Plugin
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
         /*
                 private readonly Regex whiteSpaceMatch = new Regex(@"\s+");

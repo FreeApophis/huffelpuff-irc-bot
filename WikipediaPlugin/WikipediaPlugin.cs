@@ -57,6 +57,9 @@ namespace Plugin
             return "Wikipedia Plugin!!!";
         }
 
+
+        private const string Redirect = "#REDIRECT";
+
         private void WikiHandler(object sender, IrcEventArgs e)
         {
             var word = new StringBuilder();
@@ -73,25 +76,46 @@ namespace Plugin
                 }
             }
 
+            while (true)
+            {
+                var msg = GetWikiArticle(word);
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, msg);
+
+                if (msg == null || !msg.StartsWith(Redirect)) return;
+
+                if (msg.StartsWith(Redirect))
+                {
+                    word = new StringBuilder(msg.Substring(Redirect.Length + 1));
+                }
+            }
+        }
+
+        private static string GetWikiArticle(StringBuilder word)
+        {
             var document = new XmlDocument();
             var request = WebRequest.Create(RequestBaseEn + word.ToString().Replace(' ', '_')) as HttpWebRequest;
 
-            if (request == null) return;
+            if (request == null) return null;
 
             request.UserAgent = "Mozilla/5.0 (Huffelpuff)";
             document.Load(request.GetResponse().GetResponseStream());
 
-            if (document.DocumentElement == null) return;
+            if (document.DocumentElement == null) return null;
 
             var text = document.DocumentElement.InnerText;
-
-            BotMethods.SendMessage(SendType.Message, e.Data.Channel, FilterText(text));
+            return FilterText(text);
         }
 
         private static string FilterText(string text)
         {
-            // Normalize Whitespace, spaces only, makes regex easie
+            // Normalize Whitespace, spaces only, makes regex easier
             text = Regex.Replace(text, "\\s", " ");
+
+            // Text in another language
+            text = Regex.Replace(text, "{{lang\\-([^{}|]*)\\|([^}]*)}}", "$2 ($1)");
+
+            // Remove 2 level of {{
+            text = Regex.Replace(text, "{{([^}]*?)({{.*?}}.*?)+}}", string.Empty);
 
             // Remove Special
             text = Regex.Replace(text, "{{(.*?)}}", string.Empty);
@@ -102,12 +126,16 @@ namespace Plugin
             //Remove Image
             text = Regex.Replace(text, "\\[\\[Image(.*?)\\]\\]", string.Empty);
 
-            //Remove Refernces
-            text = Regex.Replace(text, "<ref[^<]*?</ref>", string.Empty);
-
             // Remove Internal links
             text = Regex.Replace(text, "\\[\\[([^\\]]*?)\\|(.*?)\\]\\]", "$2");
             text = Regex.Replace(text, "\\[\\[(.*?)\\]\\]", "$1");
+
+            //Remove Refernces
+            text = Regex.Replace(text, "<ref[^<]*?</ref>", string.Empty);
+
+            // Remove HTML
+            text = Regex.Replace(text, "<[^<]*>", string.Empty);
+            text = Regex.Replace(text, "&nbsp;", " ");
 
             //Bold text
             text = Regex.Replace(text, "'''(.*?)'''", IrcConstants.IrcBold + "$1" + IrcConstants.IrcNormal);
@@ -119,7 +147,7 @@ namespace Plugin
             text = text.Trim();
             if (text.Any())
             {
-                return text.Length > 300 ? text.Substring(0, 300) : text;
+                return text.Length > 350 ? text.Substring(0, 350) : text;
             }
             return "No entry";
         }

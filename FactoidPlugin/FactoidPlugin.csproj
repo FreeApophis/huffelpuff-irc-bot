@@ -70,6 +70,9 @@
       <Name>Huffelpuff</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy .\FactoidPlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
   </PropertyGroup>
