@@ -9,6 +9,7 @@
   !define PROGRAM_NAME "Huffelpuff"
   !define PROGRAM_EXE "Huffelpuff.exe"
   !define PROGRAM_VERSION "1.0beta"
+  !define BUILD_PATH "..\Huffelpuff\bin\"
 
 ;***** Variables *****
 
@@ -62,15 +63,15 @@ InstType "Full"
 InstType "Minimal"
 
 
-SectionGroup /e "!Qtalk"
-Section "-Qtalk" mainQtalkSec
+SectionGroup /e "!Huffelpuff Service"
+Section "-Huffelpuff" mainHuffelpuffSec
   SectionIn 1 2 RO
   SetOutPath "$INSTDIR"
  
-  File "TODOPATH\${PROGRAM_EXE}"
+  File "${BUILD_PATH}\${PROGRAM_EXE}"
 
-  SetOutPath "$APPDATA\Qnective\"
-  File "DBHere"
+  SetOutPath "$APPDATA\Huffelpuff\"
+  ;File "DBHere"
   
   ;preparing the Add / Remove Program
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
@@ -118,6 +119,48 @@ Section "-Qtalk" mainQtalkSec
 SectionEnd
 SectionGroupEnd
 
+SectionGroup /e "!Huffelpuff Plugins"
+Section "AIML"
+  SectionIn 1
+  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  File "${BUILD_PATH}\plugins\AIMLPlugin.dll"
+SectionEnd
+Section "Calculator"
+  SectionIn 1
+  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  File "${BUILD_PATH}\plugins\CalculatorPlugin.dll"
+SectionEnd
+Section "Factoid"
+  SectionIn 1
+  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  File "${BUILD_PATH}\plugins\FactoidPlugin.dll"
+SectionEnd
+Section "RSS"
+  SectionIn 1
+  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  File "${BUILD_PATH}\plugins\RSSPlugin.dll"
+SectionEnd
+Section "Seen"
+  SectionIn 1
+  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  File "${BUILD_PATH}\plugins\SeenPlugin.dll"
+SectionEnd
+Section "Twitter"
+  SectionIn 1
+  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  File "${BUILD_PATH}\plugins\TwitterPlugin.dll"
+SectionEnd
+Section "UrlToTitle"
+  SectionIn 1
+  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  File "${BUILD_PATH}\plugins\UrlToTitlePlugin.dll"
+SectionEnd
+Section "Wikipedia"
+  SectionIn 1
+  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  File "${BUILD_PATH}\plugins\WikipediaPlugin.dll"
+SectionEnd
+SectionGroupEnd
 
 ;***** Descriptions *****
 
@@ -127,23 +170,22 @@ SectionGroupEnd
 
   ;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${mainQtalkSec} $(DESC_mainHuffelpuffSec)
+  !insertmacro MUI_DESCRIPTION_TEXT ${mainHuffelpuffSec} $(DESC_mainHuffelpuffSec)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;***** Uninstaller Sections *****
 
 
-SectionGroup /e "un.QTalk"
+SectionGroup /e "un.Huffelpuff"
 Section "Uninstall"
   SectionIn 1 2 RO
   
   Delete "$INSTDIR\${PROGRAM_EXE}"	
-  Delete "$INSTDIR\*.dll"	
   Delete "$INSTDIR\Uninstall.exe"
   
   RMDir "$INSTDIR"
 
-  DeleteRegKey /ifempty HKCU "Software\Qtalk"
+  DeleteRegKey /ifempty HKCU "Software\Huffelpuff"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}"
   
   !insertmacro MUI_STARTMENU_GETFOLDER "Application" $StartMenuFolder
@@ -151,11 +193,14 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\$StartMenuFolder\Uninstall ${PROGRAM_NAME}.lnk"
   RMDir "$SMPROGRAMS\$StartMenuFolder"
 
+  Delete "$APPDATA\Huffelpuff\plugins\*"
+  RMDir "$APPDATA\Huffelpuff\plugins"
+
 SectionEnd
 
 Section /o "un.Settings"
-  Delete "$APPDATA\Qnective\*"
-  RMDir "$APPDATA\Qnective"
+  Delete "$APPDATA\Huffelpuff\*"
+  RMDir "$APPDATA\Huffelpuff"
 SectionEnd
 
 SectionGroupEnd
@@ -187,11 +232,12 @@ Function .onInit
   StrCmp $R0 "" done
 
 isAppRunning: 
-  FindProcDLL::FindProc "${PROGRAM_EXE}"
-  IntCmp $R0 1 0 notRunning
-  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION "${PROGRAM_NAME} is running. Please close it first" \
-  IDOK isAppRunning    
-	Abort
+;  TODO install FindProcDLL and uncomment next 5 lines
+;  FindProcDLL::FindProc "${PROGRAM_EXE}"
+;  IntCmp $R0 1 0 notRunning
+;  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION "${PROGRAM_NAME} is running. Please close it first" \
+;  IDOK isAppRunning    
+;	Abort
 notRunning:
  
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
