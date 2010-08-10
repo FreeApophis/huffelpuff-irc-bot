@@ -17,108 +17,86 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+using System;
+using System.Configuration.Install;
+using System.Diagnostics;
+using System.Reflection;
+using System.ServiceProcess;
 using System.ServiceProcess;
 using System.Threading;
 using Huffelpuff.Utils;
 
 namespace Huffelpuff
 {
-	#if !SERVICE
-	class Engine
-	{
+    class Engine
+    {
 
-		public static void Main(string[] args)
-		{
-			Tool.RunOnMono();
-			var bot = new IrcBot();
-			
-			// check for basic settings
-			PersistentMemory.Instance.GetValuesOrTodo("ServerHost");
-			PersistentMemory.Instance.GetValuesOrTodo("ServerPort");
-			PersistentMemory.Instance.GetValueOrTodo("nick");
-			PersistentMemory.Instance.GetValueOrTodo("realname");
-			PersistentMemory.Instance.GetValueOrTodo("username");
-			
-			if(PersistentMemory.Todo) {
-				PersistentMemory.Instance.Flush();
-				Log.Instance.Log("Edit your config file: there are some TODOs left.", Level.Fatal);
-				bot.Exit();
-			}
-			bot.Start();  /*blocking*/
-		}
-	}
-	#else
-	
-	public class ServiceEngine : ServiceBase
-	{
-		public static string HuffelpuffServiceName = "Huffelpuff IRC Bot";
-		private Thread botThread;
-		private IrcBot bot;
-		
-		public ServiceEngine()
-		{
-			this.ServiceName = HuffelpuffServiceName;
-			this.EventLog.Log = "Application";
+        public static void Main(string[] args)
+        {
+            if (Environment.UserInteractive)
+            {
+                var parameter = string.Concat(args);
+                switch (parameter)
+                {
+                    case "--install":
+                        ManagedInstallerClass.InstallHelper(new[] { Assembly.GetExecutingAssembly().Location });
+                        return;
+                    case "--uninstall":
+                        ManagedInstallerClass.InstallHelper(new[] { "/u", Assembly.GetExecutingAssembly().Location });
+                        return;
+                }
 
-			this.CanHandlePowerEvent = false;
-			this.CanPauseAndContinue = false;
-			this.CanShutdown = true;
-			this.CanStop = true;
-		}
+                Tool.RunOnMono();
+                var bot = GetBot();
 
-		static void Main()
-		{
-			ServiceBase.Run(new ServiceEngine());
-		}
+                /* blocking */
+                bot.Start();
+            }
+            else
+            {
+                PersistentMemory.Instance.SetValue("HERE", "HERE");
+                PersistentMemory.Instance.Flush();
 
-		protected override void Dispose(bool disposing)
-		{
-			base.Dispose(disposing);
-		}
+                try
+                {
+                    var servicesToRun = new ServiceBase[] { new ServiceEngine { Bot = GetBot() } };
+                    ServiceBase.Run(servicesToRun);
+                }
+                catch (Exception ex)
+                {
+                    string SourceName = "WindowsService.ExceptionLog";
+                    if (!EventLog.SourceExists(SourceName))
+                    {
+                        EventLog.CreateEventSource(SourceName, "Application");
+                    }
 
-		protected override void OnStart(string[] args)
-		{
-			Tool.RunOnMono();
-			bot = new IrcBot();
-			
-			// check for basic settings
-			PersistentMemory.Instance.GetValuesOrTodo("ServerHost");
-			PersistentMemory.Instance.GetValuesOrTodo("ServerPort");
-			PersistentMemory.Instance.GetValueOrTodo("nick");
-			PersistentMemory.Instance.GetValueOrTodo("realname");
-			PersistentMemory.Instance.GetValueOrTodo("username");
-			
-			if(PersistentMemory.Todo) {
-				PersistentMemory.Instance.Flush();
-				Log.Instance.Log("Edit your config file: there are some TODOs left.", Level.Fatal);
-				bot.Exit();
-			}
-			
-			botThread = new Thread(bot.Start);
-			botThread.Start();
-			
-			base.OnStart(args);
-		}
+                    var eventLog = new EventLog { Source = SourceName };
+                    string message = string.Format("Exception: {0} \n\nStack: {1}", ex.Message, ex.StackTrace);
+                    eventLog.WriteEntry(message, EventLogEntryType.Error);
+                }
+            }
+        }
 
+        private static IrcBot GetBot()
+        {
+            var bot = new IrcBot();
 
-		protected override void OnStop()
-		{
-			bot.RfcQuit("Service shut down", Priority.Low);
-			while(bot.IsConnected) {
-				Thread.Sleep(100);
-			}
-			base.OnStop();
-		}
+            // check for basic settings
+            PersistentMemory.Instance.GetValuesOrTodo("ServerHost");
+            PersistentMemory.Instance.GetValuesOrTodo("ServerPort");
+            PersistentMemory.Instance.GetValueOrTodo("nick");
+            PersistentMemory.Instance.GetValueOrTodo("realname");
+            PersistentMemory.Instance.GetValueOrTodo("username");
 
-		protected override void OnShutdown()
-		{
-			bot.RfcQuit("Service shut down", Priority.Low);
-			while(bot.IsConnected) {
-				Thread.Sleep(100);
-			}
-			base.OnShutdown();
-		}
-	}
-	#endif
+            if (PersistentMemory.Todo)
+            {
+                PersistentMemory.Instance.Flush();
+                Log.Instance.Log("Edit your config file: there are some TODOs left.", Level.Fatal);
+                bot.Exit();
+            }
+            return bot;
+        }
+    }
 }
+
+

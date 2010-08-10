@@ -27,14 +27,9 @@ namespace Huffelpuff
     [Serializable]
     public class IrcBot : IrcFeatures
     {
-        private readonly BotPluginManager plugManager;
+        private BotPluginManager plugManager;
 
-        private readonly AccessControlList acl;
-
-        public AccessControlList Acl
-        {
-            get { return acl; }
-        }
+        public AccessControlList Acl { get; private set; }
 
         private readonly Dictionary<string, Commandlet> commands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
 
@@ -42,8 +37,13 @@ namespace Huffelpuff
 
         public const string Channelconst = "channel";
 
-        public IrcBot()
+        private bool isSetup;
+
+        private void SetupOnce()
         {
+            if (isSetup) return;
+            isSetup = true;
+
             Encoding = System.Text.Encoding.UTF8;
             SendDelay = 3000;
             PingInterval = 120;
@@ -66,14 +66,14 @@ namespace Huffelpuff
             /* todo: find NAT / or our IP */
 
             //Setting up Access Control
-            acl = new AccessControlList(this);
-            acl.Init();
+            Acl = new AccessControlList(this);
+            Acl.Init();
 
             // Add Identify Plugin suitable (or all)
-            acl.AddIdentifyPlugin(new NickServIdentify(this));
-            acl.AddIdentifyPlugin(new HostIdentify(this));
-            acl.AddIdentifyPlugin(new PasswordIdentify(this));
-            acl.AddIdentifyPlugin(new NickIdentify(this));
+            Acl.AddIdentifyPlugin(new NickServIdentify(this));
+            Acl.AddIdentifyPlugin(new HostIdentify(this));
+            Acl.AddIdentifyPlugin(new PasswordIdentify(this));
+            Acl.AddIdentifyPlugin(new NickIdentify(this));
 
             // Plugin needs the Handlers from IRC we load the plugins after we set everything up
             plugManager = new BotPluginManager(this, "plugins");
@@ -103,7 +103,6 @@ namespace Huffelpuff
             {
                 SendMessage(SendType.Message, "nickserv", "identify {0}".Fill(PersistentMemory.Instance.GetValue("nickserv")), Priority.Critical);
             }
-            Console.WriteLine("/msg nickserv identify {0}".Fill(PersistentMemory.Instance.GetValue("nickserv")));
         }
 
 
@@ -131,7 +130,7 @@ namespace Huffelpuff
         {
             if (cmd.AccessString != null)
             {
-                acl.AddAccessString(cmd.AccessString);
+                Acl.AddAccessString(cmd.AccessString);
             }
             if (!commands.ContainsKey(cmd.Command))
             {
@@ -167,7 +166,7 @@ namespace Huffelpuff
                 return;
 
             // check if access to function is allowed
-            if (!string.IsNullOrEmpty(commands[e.Data.MessageArray[0]].AccessString) && !acl.Access(e.Data.Nick, commands[e.Data.MessageArray[0]].AccessString, true))
+            if (!string.IsNullOrEmpty(commands[e.Data.MessageArray[0]].AccessString) && !Acl.Access(e.Data.Nick, commands[e.Data.MessageArray[0]].AccessString, true))
                 return;
 
             if ((commands[e.Data.MessageArray[0]].ChannelList != null) && (!commands[e.Data.MessageArray[0]].ChannelList.Contains(e.Data.Channel)))
@@ -342,7 +341,7 @@ namespace Huffelpuff
                     {
                         commandlist.Add(scopeColor[commandlet.Scope] + commandlet.Command + IrcConstants.IrcColor + IrcConstants.IrcBold);
                     }
-                    else if (acl.Access(nick, commandlet.AccessString, false))
+                    else if (Acl.Access(nick, commandlet.AccessString, false))
                     {
                         commandlist.Add(scopeColor[commandlet.Scope] + "<" + commandlet.Command + ">" + IrcConstants.IrcColor + IrcConstants.IrcBold);
                         //commandlist.Add("" + IrcConstants.IrcColor + (int)IrcColors.Green + "<" + scopeColor[cmd.Scope] + cmd.Command + IrcConstants.IrcColor + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Green +  ">" + IrcConstants.IrcColor);
@@ -411,8 +410,6 @@ namespace Huffelpuff
         {
             PersistentMemory.Instance.Flush();
 
-            plugManager.ShutDown();
-
             // we are done, lets exit...
             Log.Instance.Log("Exiting...");
 #if DEBUG
@@ -427,6 +424,8 @@ namespace Huffelpuff
         public void Start()
         {
             Thread.CurrentThread.Name = "Main";
+
+            SetupOnce();
 
             if (PersistentMemory.Instance.GetValue("ProxyServer") != null)
             {

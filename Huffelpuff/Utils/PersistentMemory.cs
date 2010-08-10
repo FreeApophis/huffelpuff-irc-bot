@@ -103,7 +103,8 @@ namespace Huffelpuff.Utils
         /// </summary>
         public void Flush()
         {
-            memory.WriteXml(Filename);
+            var fi = new FileInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Huffelpuff", Filename));
+            memory.WriteXml(fi.FullName);
         }
 
         /// <summary>
@@ -423,11 +424,12 @@ namespace Huffelpuff.Utils
             {
                 throw new NotImplementedException("this should not happen");
             }
-            var fi = new FileInfo(Filename);
+
+            var fi = new FileInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Huffelpuff", Filename));
             var xdoc = new XmlDataDocument();
             if (fi.Exists)
             {
-                xdoc.DataSet.ReadXml(Filename);
+                xdoc.DataSet.ReadXml(fi.FullName);
                 memory = xdoc.DataSet;
             }
             else

@@ -18,9 +18,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if SERVICE
-
-using System;
 using System.ComponentModel;
 using System.Configuration.Install;
 using System.ServiceProcess;
@@ -30,24 +27,25 @@ namespace Huffelpuff
     [RunInstaller(true)]
     public class  HuffelpuffServiceInstaller : Installer
     {
+        private readonly ServiceProcessInstaller processInstaller;
+        private readonly ServiceInstaller serviceInstaller;
+
         public HuffelpuffServiceInstaller()
         {
-            ServiceProcessInstaller serviceProcessInstaller = new ServiceProcessInstaller();
-            ServiceInstaller serviceInstaller = new ServiceInstaller();
+            processInstaller = new ServiceProcessInstaller();
+            serviceInstaller = new ServiceInstaller();
 
-            serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
-            serviceProcessInstaller.Username = null;
-            serviceProcessInstaller.Password = null;
+            processInstaller.Account = ServiceAccount.LocalSystem;
+            processInstaller.Username = null;
+            processInstaller.Password = null;
 
             //# Service Information
-            serviceInstaller.DisplayName = "Huffelpuff IRC Bot Service";
+            serviceInstaller.DisplayName = ServiceEngine.HuffelpuffServiceName;
             serviceInstaller.StartType = ServiceStartMode.Automatic;
             serviceInstaller.ServiceName = ServiceEngine.HuffelpuffServiceName;
 
-            this.Installers.Add(serviceProcessInstaller);
-            this.Installers.Add(serviceInstaller);
+            Installers.Add(processInstaller);
+            Installers.Add(serviceInstaller);
         }
     }
 }
-
-#endif

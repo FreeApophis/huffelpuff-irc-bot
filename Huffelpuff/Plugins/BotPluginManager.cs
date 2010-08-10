@@ -60,15 +60,15 @@ namespace Huffelpuff.Plugins
 
         
 
-        private List<string> oldPlugs = new List<string>();
+        private readonly List<string> oldPlugs = new List<string>();
         private void Plugins_PluginsReloaded(object sender, EventArgs e)
         {
             plugins.Clear();
             bot.CleanPlugins();
             
-            foreach(string pluginName in pluginManager.GetSubclasses("Huffelpuff.Plugins.AbstractPlugin"))
+            foreach(var pluginName in pluginManager.GetSubclasses("Huffelpuff.Plugins.AbstractPlugin"))
             {
-                AbstractPlugin p = (AbstractPlugin)pluginManager.CreateInstance(pluginName, BindingFlags.CreateInstance, new object[] {bot});
+                var p = (AbstractPlugin)pluginManager.CreateInstance(pluginName, BindingFlags.CreateInstance, new object[] {bot});
                 p.Init();
                 
                 if (p.Ready) {
