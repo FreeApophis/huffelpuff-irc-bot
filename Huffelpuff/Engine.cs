@@ -54,9 +54,6 @@ namespace Huffelpuff
             }
             else
             {
-                PersistentMemory.Instance.SetValue("HERE", "HERE");
-                PersistentMemory.Instance.Flush();
-
                 try
                 {
                     var servicesToRun = new ServiceBase[] { new ServiceEngine { Bot = GetBot() } };
@@ -64,15 +61,7 @@ namespace Huffelpuff
                 }
                 catch (Exception ex)
                 {
-                    string SourceName = "WindowsService.ExceptionLog";
-                    if (!EventLog.SourceExists(SourceName))
-                    {
-                        EventLog.CreateEventSource(SourceName, "Application");
-                    }
-
-                    var eventLog = new EventLog { Source = SourceName };
-                    string message = string.Format("Exception: {0} \n\nStack: {1}", ex.Message, ex.StackTrace);
-                    eventLog.WriteEntry(message, EventLogEntryType.Error);
+                    ServiceEngine.WriteToLog(string.Format("Exception: {0} \n\nStack: {1}", ex.Message, ex.StackTrace), EventLogEntryType.Error);
                 }
             }
         }

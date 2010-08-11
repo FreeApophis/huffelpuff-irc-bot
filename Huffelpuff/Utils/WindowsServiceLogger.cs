@@ -29,18 +29,16 @@ namespace Huffelpuff.Utils
 
         public WindowsServiceLogger()
         {
-            appLog = new EventLog { Source = "Huffelpuff" };
         }
 
         public override void Log(string message)
         {
-            appLog.WriteEntry(message);
+            ServiceEngine.WriteToLog(message);
         }
 
         public override void Log(string message, Level level)
         {
-            EventLogEntryType entryType = LevelToEventLogEntryType(level);
-            appLog.WriteEntry(message, entryType);
+            ServiceEngine.WriteToLog(message, LevelToEventLogEntryType(level));
         }
 
         private static EventLogEntryType LevelToEventLogEntryType(Level level)
@@ -66,8 +64,7 @@ namespace Huffelpuff.Utils
 
         public override void Log(string message, Level level, ConsoleColor color)
         {
-            EventLogEntryType entryType = LevelToEventLogEntryType(level);
-            appLog.WriteEntry(message, entryType);
+            ServiceEngine.WriteToLog(message, LevelToEventLogEntryType(level));
         }
 
         public override Level MinLogLevel { get; set; }

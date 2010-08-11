@@ -34,9 +34,6 @@ namespace Huffelpuff
 
         public ServiceEngine()
         {
-            ServiceName = "My Windows Service";
-            EventLog.Log = "Application";
-
             ServiceName = HuffelpuffServiceName;
 
             CanHandlePowerEvent = false;
@@ -48,12 +45,10 @@ namespace Huffelpuff
 
         protected override void OnStart(string[] args)
         {
-            PersistentMemory.Instance.SetValue("OnStart", "Start");
-            PersistentMemory.Instance.Flush();
-            
+
             botThread = new Thread(Bot.Start) { IsBackground = true };
             botThread.Start();
-            
+
             base.OnStart(args);
         }
 
@@ -76,6 +71,17 @@ namespace Huffelpuff
                 Thread.Sleep(100);
             }
             base.OnShutdown();
+        }
+
+        public static void WriteToLog(string message, EventLogEntryType eventLogEntryType = EventLogEntryType.Information)
+        {
+            if (!EventLog.SourceExists(HuffelpuffServiceName))
+            {
+                EventLog.CreateEventSource(HuffelpuffServiceName, "Application");
+            }
+
+            var eventLog = new EventLog { Source = HuffelpuffServiceName };
+            eventLog.WriteEntry(message, eventLogEntryType);
         }
     }
 }

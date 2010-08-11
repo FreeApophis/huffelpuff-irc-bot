@@ -21,38 +21,42 @@ using System;
 
 namespace Huffelpuff.Utils
 {
-    public static class Log {
-        
+    public static class Log
+    {
+
         private static Logger instance;
-        
-        public static Logger Instance {
-            get {
-                if (instance != null) {
+
+        public static Logger Instance
+        {
+            get
+            {
+                if (instance != null)
+                {
                     return instance;
-                } else {
-                    #if SERVICE
+                }
+                if (!Environment.UserInteractive)
+                {
                     return instance = new WindowsServiceLogger();
-                    #else
-                    switch (PersistentMemory.Instance.GetValue("logger")) {
-                        case "console":
-                            return instance = new ConsoleLogger();
-                        default:
-                            return instance = new NullLogger();
-                    }
-                    #endif
+                }
+                switch (PersistentMemory.Instance.GetValue("logger"))
+                {
+                    case "console":
+                        return instance = new ConsoleLogger();
+                    default:
+                        return instance = new NullLogger();
                 }
             }
         }
     }
-    
+
     /// <summary>
     /// Description of Logger.
     /// </summary>
     public abstract class Logger
     {
-        public abstract void Log(string Message);
-        public abstract void Log(string Message, Level level);
-        public abstract void Log(string Message, Level level, ConsoleColor color);
+        public abstract void Log(string message);
+        public abstract void Log(string message, Level level);
+        public abstract void Log(string message, Level level, ConsoleColor color);
         public abstract Level MinLogLevel { get; set; }
     }
 }

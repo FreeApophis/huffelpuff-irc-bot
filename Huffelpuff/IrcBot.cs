@@ -427,6 +427,8 @@ namespace Huffelpuff
 
             SetupOnce();
 
+            ServiceEngine.WriteToLog("Setup done");
+
             if (PersistentMemory.Instance.GetValue("ProxyServer") != null)
             {
                 Log.Instance.Log("Using Proxy Server: " + PersistentMemory.Instance.GetValue("ProxyServer"));

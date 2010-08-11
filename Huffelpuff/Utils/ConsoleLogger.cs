@@ -21,36 +21,39 @@ using System;
 
 namespace Huffelpuff.Utils
 {
-	public class ConsoleLogger : Logger 
-	{
-        public override void Log(string Message)
+    public class ConsoleLogger : Logger
+    {
+        public override void Log(string message)
         {
-            Console.WriteLine(Message);
+            Console.WriteLine(message);
         }
-        
-        public override void Log(string Message, Level level)
+
+        public override void Log(string message, Level level)
         {
-            Console.WriteLine("{0}: {1}", level.ToString(), Message);
+            Console.WriteLine("{0}: {1}", level, message);
         }
-        
-        public override void Log(string Message, Level level, ConsoleColor color)
+
+        public override void Log(string message, Level level, ConsoleColor color)
         {
             ConsoleColor lastColor = Console.ForegroundColor;
             Console.ForegroundColor = color;
-            Console.WriteLine("{0}: {1}", level.ToString(), Message);
+            Console.WriteLine("{0}: {1}", level, message);
             Console.ForegroundColor = lastColor;
-            
+
         }
-        
+
         private Level minLogLevel;
-        
-        public override Level MinLogLevel {
-            get {
+
+        public override Level MinLogLevel
+        {
+            get
+            {
                 return minLogLevel;
             }
-            set {
+            set
+            {
                 minLogLevel = value;
             }
         }
-	}
+    }
 }
