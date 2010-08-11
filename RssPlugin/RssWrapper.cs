@@ -72,7 +72,7 @@ namespace Plugin
             }
         }
 
-        private const string CredentialsConst = "url";
+        private const string CredentialsConst = "credentials";
         private string credentials;
         public string Credentials
         {
@@ -110,7 +110,7 @@ namespace Plugin
             Name = name;
             friendlyName = PersistentMemory.Instance.GetValueOrTodo(NameSpace, FriendlyNameConst);
             url = PersistentMemory.Instance.GetValueOrTodo(NameSpace, UrlConst);
-            credentials = PersistentMemory.Instance.GetValue(NameSpace, UrlConst);
+            credentials = PersistentMemory.Instance.GetValue(NameSpace, CredentialsConst);
 
             string lastDateTimeString = PersistentMemory.Instance.GetValue(NameSpace, LastConst);
             last = (lastDateTimeString == null) ? DateTime.MinValue : DateTime.Parse(lastDateTimeString);
@@ -135,12 +135,14 @@ namespace Plugin
             {
                 PersistentMemory.Instance.ReplaceValue(NameSpace, CredentialsConst, credentials);
             }
+            PersistentMemory.Instance.Flush();
         }
 
         public void RemoveFeed()
         {
             PersistentMemory.Instance.RemoveValue(RssPlugin.RssFeedConst, Name);
             PersistentMemory.Instance.RemoveGroup(NameSpace);
+            PersistentMemory.Instance.Flush();
         }
 
 
