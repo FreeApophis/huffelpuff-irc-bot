@@ -9,499 +9,465 @@ using Huffelpuff.Utils;
 
 namespace Huffelpuff.Plugins
 {
-	/// <summary>
-	/// The PluginManager tracks changes to the plugin directory, handles reloading of the plugins,
-	/// and monitoring the plugin directory.
-	/// </summary>
-	public class PluginManager
-	{
-		private bool started = false;
-		private bool autoReload = true;
-		private IList compilerErrors = null;
-		private bool ignoreErrors = true;
-		private PluginSourceEnum pluginSources = PluginSourceEnum.Both;
-		protected string pluginDirectory = null;
-		protected FileSystemWatcher fileSystemWatcher = null;
-		protected DateTime changeTime = new DateTime(0);
-		protected Thread pluginReloadThread = null;
-		protected string lockObject = "{PLUGINMANAGERLOCK}";
-		protected bool beginShutdown = false;
-		protected bool active = true;
-		protected AppDomain pluginAppDomain = null;
-		protected AppDomainSetup pluginAppDomainSetup = null;
-		protected RemoteLoader remoteLoader = null;
-		protected LocalLoader localLoader = null;
-		protected IList references = new ArrayList();
+    /// <summary>
+    /// The PluginManager tracks changes to the plugin directory, handles reloading of the plugins,
+    /// and monitoring the plugin directory.
+    /// </summary>
+    public class PluginManager
+    {
+        private bool started;
+        private bool autoReload = true;
+        private IList compilerErrors;
+        private bool ignoreErrors = true;
+        private PluginSourceEnum pluginSources = PluginSourceEnum.Both;
+        protected string PluginDirectory;
+        protected FileSystemWatcher FileWatcher;
+        protected DateTime ChangeTime = new DateTime(0);
+        protected Thread PluginReloadThread;
+        protected string LockObject = "{PLUGINMANAGERLOCK}";
+        protected bool BeginShutdown;
+        protected bool Active = true;
+        protected AppDomain PluginAppDomain;
+        protected AppDomainSetup PluginAppDomainSetup;
+        protected RemoteLoader RemoteLoader;
+        protected LocalLoader LocalLoader;
+        protected IList References = new ArrayList();
 
-		/// <summary>
-		/// Constructs a plugin manager
-		/// </summary>
-		public PluginManager() : this("plugins", true)
-		{
-		}
+        /// <summary>
+        /// Constructs a plugin manager
+        /// </summary>
+        /// <param name="pluginRelativePath">The relative path to the plugins directory</param>
+        /// <param name="autoReload">Should auto reload on file changes</param>
+        public PluginManager(string pluginRelativePath = "plugins", bool autoReload = true)
+        {
+            this.autoReload = autoReload;
 
-		/// <summary>
-		/// Constructs a plugin manager
-		/// </summary>
-		/// <param name="pluginRelativePath">The relative path to the plugins directory</param>
-		public PluginManager(string pluginRelativePath) : this(pluginRelativePath, true)
-		{
-		}
+            PluginDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Huffelpuff");
+            PluginDirectory = Path.Combine(PluginDirectory, pluginRelativePath);
 
-		/// <summary>
-		/// Constructs a plugin manager
-		/// </summary>
-		/// <param name="autoReload">Should auto reload on file changes</param>
-		public PluginManager(bool autoReload) : this("plugins", autoReload)
-		{
-		}
+            LocalLoader = new LocalLoader(PluginDirectory);
 
-		/// <summary>
-		/// Constructs a plugin manager
-		/// </summary>
-		/// <param name="pluginRelativePath">The relative path to the plugins directory</param>
-		/// <param name="autoReload">Should auto reload on file changes</param>
-		public PluginManager(string pluginRelativePath, bool autoReload)
-		{
-			this.autoReload = autoReload;
-			string assemblyLoc = Assembly.GetExecutingAssembly().Location;
-			string currentDirectory = assemblyLoc.Substring(0, assemblyLoc.LastIndexOf(Path.DirectorySeparatorChar) + 1);
-			pluginDirectory = Path.Combine(currentDirectory, pluginRelativePath);
-			if (!pluginDirectory.EndsWith(Path.DirectorySeparatorChar.ToString()))
-			{
-				pluginDirectory = pluginDirectory + Path.DirectorySeparatorChar;
-			}
-			
-			localLoader = new LocalLoader(pluginDirectory);
+            // Add the most common references since plugin authors can't control which references they
+            // use in scripts.  Adding a reference later that already exists does nothing.
+            AddReference("Accessibility.dll");
+            AddReference("Microsoft.Vsa.dll");
+            AddReference("System.Configuration.Install.dll");
+            AddReference("System.Data.dll");
+            AddReference("System.Design.dll");
+            AddReference("System.DirectoryServices.dll");
+            AddReference("System.Drawing.Design.dll");
+            AddReference("System.Drawing.dll");
+            AddReference("System.EnterpriseServices.dll");
+            AddReference("System.Management.dll");
+            AddReference("System.Runtime.Remoting.dll");
+            AddReference("System.Runtime.Serialization.Formatters.Soap.dll");
+            AddReference("System.Security.dll");
+            AddReference("System.ServiceProcess.dll");
+            AddReference("System.Web.dll");
+            AddReference("System.Web.RegularExpressions.dll");
+            AddReference("System.Web.Services.dll");
+            AddReference("System.Windows.Forms.Dll");
+            AddReference("System.XML.dll");
 
-			// Add the most common references since plugin authors can't control which references they
-			// use in scripts.  Adding a reference later that already exists does nothing.
-			AddReference("Accessibility.dll");
-			AddReference("Microsoft.Vsa.dll");
-			AddReference("System.Configuration.Install.dll");
-			AddReference("System.Data.dll");
-			AddReference("System.Design.dll");
-			AddReference("System.DirectoryServices.dll");
-			AddReference("System.Drawing.Design.dll");
-			AddReference("System.Drawing.dll");
-			AddReference("System.EnterpriseServices.dll");
-			AddReference("System.Management.dll");
-			AddReference("System.Runtime.Remoting.dll");
-			AddReference("System.Runtime.Serialization.Formatters.Soap.dll");
-			AddReference("System.Security.dll");
-			AddReference("System.ServiceProcess.dll");
-			AddReference("System.Web.dll");
-			AddReference("System.Web.RegularExpressions.dll");
-			AddReference("System.Web.Services.dll");
-			AddReference("System.Windows.Forms.Dll");
-			AddReference("System.XML.dll");
-			
-		}
+        }
 
-		/// <summary>
-		/// The destructor for the plugin manager
-		/// </summary>
-		~PluginManager()
-		{
-			Stop();
-		}
+        /// <summary>
+        /// The destructor for the plugin manager
+        /// </summary>
+        ~PluginManager()
+        {
+            Stop();
+        }
 
-		/// <summary>
-		/// Fires when the plugins have been reloaded and references to the old objects need
-		/// to be updated.
-		/// </summary>
-		public event EventHandler PluginsReloaded;
+        /// <summary>
+        /// Fires when the plugins have been reloaded and references to the old objects need
+        /// to be updated.
+        /// </summary>
+        public event EventHandler PluginsReloaded;
 
-		/// <summary>
-		/// Handles changes to the file system in the plugin directory
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void fileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
-		{
-			changeTime = DateTime.Now + new TimeSpan(0, 0, 10);
-		}
+        /// <summary>
+        /// Handles changes to the file system in the plugin directory
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FileWatcherChanged(object sender, FileSystemEventArgs e)
+        {
+            ChangeTime = DateTime.Now + new TimeSpan(0, 0, 10);
+        }
 
-		/// <summary>
-		/// The main updater thread loop.
-		/// </summary>
-		protected void ReloadThreadLoop()
-		{
-			if (!started)
-			{
-				throw new InvalidOperationException("PluginManager has not been started.");
-			}
-			DateTime invalidTime = new DateTime(0);
-			while (!beginShutdown)
-			{
-				if (changeTime != invalidTime && DateTime.Now > changeTime)
-				{
-					ReloadPlugins();
-				}
-				Thread.Sleep(5000);
-			}
-			active = false;
-		}
+        /// <summary>
+        /// The main updater thread loop.
+        /// </summary>
+        protected void ReloadThreadLoop()
+        {
+            if (!started)
+            {
+                throw new InvalidOperationException("PluginManager has not been started.");
+            }
+            var invalidTime = new DateTime(0);
+            while (!BeginShutdown)
+            {
+                if (ChangeTime != invalidTime && DateTime.Now > ChangeTime)
+                {
+                    ReloadPlugins();
+                }
+                Thread.Sleep(5000);
+            }
+            Active = false;
+        }
 
-		/// <summary>
-		/// Initializes the plugin manager
-		/// </summary>
-		public void Start()
-		{
-			started = true;
-			if (autoReload)
-			{
-				fileSystemWatcher = new FileSystemWatcher(pluginDirectory) {EnableRaisingEvents = true};
-			    fileSystemWatcher.Changed += fileSystemWatcher_Changed;
-				fileSystemWatcher.Deleted += fileSystemWatcher_Changed;
-				fileSystemWatcher.Created += fileSystemWatcher_Changed;
+        /// <summary>
+        /// Initializes the plugin manager
+        /// </summary>
+        public void Start()
+        {
+            started = true;
+            if (autoReload)
+            {
+                FileWatcher = new FileSystemWatcher(PluginDirectory) { EnableRaisingEvents = true };
+                FileWatcher.Changed += FileWatcherChanged;
+                FileWatcher.Deleted += FileWatcherChanged;
+                FileWatcher.Created += FileWatcherChanged;
 
-				pluginReloadThread = new Thread(ReloadThreadLoop);
-				pluginReloadThread.Start();
-			}
-			ReloadPlugins();
-		}
+                PluginReloadThread = new Thread(ReloadThreadLoop);
+                PluginReloadThread.Start();
+            }
+            ReloadPlugins();
+        }
 
-		/// <summary>
-		/// Reloads all plugins in the plugins directory
-		/// </summary>
-		public void ReloadPlugins()
-		{
-			if (!started)
-			{
-				throw new InvalidOperationException("PluginManager has not been started.");
-			}
-			lock (lockObject)
-			{
-				localLoader.Unload();
-				localLoader = new LocalLoader(pluginDirectory);
-				try {
-				    LoadUserAssemblies();
-				} catch (Exception e) {
-				    Log.Instance.Log(e.Message, Level.Error, ConsoleColor.Red);
-				}
+        /// <summary>
+        /// Reloads all plugins in the plugins directory
+        /// </summary>
+        public void ReloadPlugins()
+        {
+            if (!started)
+            {
+                throw new InvalidOperationException("PluginManager has not been started.");
+            }
+            lock (LockObject)
+            {
+                LocalLoader.Unload();
+                LocalLoader = new LocalLoader(PluginDirectory);
+                try
+                {
+                    LoadUserAssemblies();
+                }
+                catch (Exception e)
+                {
+                    Log.Instance.Log(e.Message, Level.Error, ConsoleColor.Red);
+                }
 
-				changeTime = new DateTime(0);
-				if (PluginsReloaded != null)
-				{
-					PluginsReloaded(this, new EventArgs());
-				}
-			}
-		}
+                ChangeTime = new DateTime(0);
+                if (PluginsReloaded != null)
+                {
+                    PluginsReloaded(this, new EventArgs());
+                }
+            }
+        }
 
-		/// <summary>
-		/// Loads all user created plugin assemblies
-		/// </summary>
-		protected void LoadUserAssemblies()
-		{
-			if (!started)
-			{
-				throw new InvalidOperationException("PluginManager has not been started.");
-			}
-			compilerErrors = new ArrayList();
-			var directory = new DirectoryInfo(pluginDirectory);
-			if (pluginSources == PluginSourceEnum.DynamicAssemblies ||
-				pluginSources == PluginSourceEnum.Both)
-			{
-				foreach (FileInfo file in directory.GetFiles("*.dll"))
-				{	
-					try
-					{
-						localLoader.LoadAssembly(file.FullName);
-					}
-					catch (PolicyException e)
-					{
-						throw new PolicyException(
-							String.Format("Cannot load {0} - code requires privilege to execute", file.Name),
-							e);
-					}
-				}
-			}
-			if (pluginSources == PluginSourceEnum.DynamicCompilation ||
-				pluginSources == PluginSourceEnum.Both)
-			{
-				// Load all C# scripts
-				{
-					ArrayList scriptList;
-					scriptList = new ArrayList();
-					foreach (FileInfo file in directory.GetFiles("*.cs"))
-					{
-						scriptList.Add(file.FullName);
-					}
-					LoadScriptBatch((string[])scriptList.ToArray(typeof(string)));
-				}
-				// Load all VB.net scripts
-				{
-					ArrayList scriptList;
-					scriptList = new ArrayList();
-					foreach (FileInfo file in directory.GetFiles("*.vb"))
-					{
-						scriptList.Add(file.FullName);
-					}
-					LoadScriptBatch((string[])scriptList.ToArray(typeof(string)));
-				}
-				// Load all JScript scripts
-				{
-					ArrayList scriptList;
-					scriptList = new ArrayList();
-					foreach (FileInfo file in directory.GetFiles("*.js"))
-					{
-						scriptList.Add(file.FullName);
-					}
-					LoadScriptBatch((string[])scriptList.ToArray(typeof(string)));
-				}
-			}
-		}
+        /// <summary>
+        /// Loads all user created plugin assemblies
+        /// </summary>
+        protected void LoadUserAssemblies()
+        {
+            if (!started)
+            {
+                throw new InvalidOperationException("PluginManager has not been started.");
+            }
+            compilerErrors = new ArrayList();
+            var directory = new DirectoryInfo(PluginDirectory);
+            if (pluginSources == PluginSourceEnum.DynamicAssemblies ||
+                pluginSources == PluginSourceEnum.Both)
+            {
+                foreach (var file in directory.GetFiles("*.dll"))
+                {
+                    try
+                    {
+                        LocalLoader.LoadAssembly(file.FullName);
+                    }
+                    catch (PolicyException e)
+                    {
+                        throw new PolicyException(String.Format("Cannot load {0} - code requires privilege to execute", file.Name), e);
+                    }
+                }
+            }
+            if (pluginSources != PluginSourceEnum.DynamicCompilation && pluginSources != PluginSourceEnum.Both) return;
 
-		/// <summary>
-		/// Batch loads a set of scripts of the same language
-		/// </summary>
-		/// <param name="filenames">The list of script filenames to load</param>
-		private void LoadScriptBatch(string[] filenames)
-		{
-			if (filenames.Length > 0)
-			{
-				IList errors = localLoader.LoadScripts(filenames, references);
-				if (errors.Count > 0)
-				{
-					// If there are compiler errors record them and the file they occurred in
-					foreach (string error in errors)
-					{
-						compilerErrors.Add(error);
-					}
-					if (!ignoreErrors)
-					{
-						StringBuilder aggregateErrorText = new StringBuilder();
-						foreach (string error in errors)
-						{
-							aggregateErrorText.Append(error + "\r\n");
-						}
-						throw new InvalidOperationException(
-							"\r\nCompiler error(s) have occurred:\r\n\r\n " +
-							aggregateErrorText.ToString() + "\r\n");
-					}
-				}
-			}
-		}
+            // Load all C# scripts
+            {
+                var scriptList = new ArrayList();
+                foreach (FileInfo file in directory.GetFiles("*.cs"))
+                {
+                    scriptList.Add(file.FullName);
+                }
+                LoadScriptBatch((string[])scriptList.ToArray(typeof(string)));
+            }
 
-		/// <summary>
-		/// Adds a reference to the plugin manager to be used when compiling scripts
-		/// </summary>
-		/// <param name="referenceToDll">The reference to the dll to add</param>
-		public void AddReference(string referenceToDll)
-		{
-			if (!references.Contains(referenceToDll))
-			{
-				references.Add(referenceToDll);
-			}
-		}
+            // Load all VB.net scripts
+            {
+                var scriptList = new ArrayList();
+                foreach (var file in directory.GetFiles("*.vb"))
+                {
+                    scriptList.Add(file.FullName);
+                }
+                LoadScriptBatch((string[])scriptList.ToArray(typeof(string)));
+            }
 
-		/// <summary>
-		/// Shuts down the plugin manager
-		/// </summary>
-		public void Stop()
-		{
-			try
-			{
-				started = false;
-				localLoader.Unload();
-				beginShutdown = true;
-				while (active)
-				{
-					Thread.Sleep(100);
-				}
-			}
-			catch
-			{
-				// We don't want to get any exceptions thrown if unloading fails for some reason.
-			}
-		}
+            // Load all JScript scripts
+            {
+                var scriptList = new ArrayList();
+                foreach (var file in directory.GetFiles("*.js"))
+                {
+                    scriptList.Add(file.FullName);
+                }
+                LoadScriptBatch((string[])scriptList.ToArray(typeof(string)));
+            }
+        }
 
-		/// <summary>
-		/// Should auto reload on file changes
-		/// </summary>
-		public bool AutoReload
-		{
-			get
-			{
-				return autoReload;
-			}
-			set
-			{
-				if (autoReload != value)
-				{
-					autoReload = value;
-					if (!autoReload)
-					{
-						fileSystemWatcher.EnableRaisingEvents = false;
-						Stop();
-						pluginReloadThread = null;
-						fileSystemWatcher = null;
-					}
-					else
-					{
-						fileSystemWatcher = new FileSystemWatcher(pluginDirectory) {EnableRaisingEvents = true};
-					    fileSystemWatcher.Changed += fileSystemWatcher_Changed;
-						fileSystemWatcher.Deleted += fileSystemWatcher_Changed;
-						fileSystemWatcher.Created += fileSystemWatcher_Changed;
+        /// <summary>
+        /// Batch loads a set of scripts of the same language
+        /// </summary>
+        /// <param name="filenames">The list of script filenames to load</param>
+        private void LoadScriptBatch(string[] filenames)
+        {
+            if (filenames.Length <= 0) return;
+            var errors = LocalLoader.LoadScripts(filenames, References);
+            if (errors.Count <= 0) return;
 
-						pluginReloadThread = new Thread(ReloadThreadLoop);
-						pluginReloadThread.Start();
-					}
-				}
-			}
-		}
+            // If there are compiler errors record them and the file they occurred in
+            foreach (string error in errors)
+            {
+                compilerErrors.Add(error);
+            }
+            if (!ignoreErrors)
+            {
+                var aggregateErrorText = new StringBuilder();
+                foreach (string error in errors)
+                {
+                    aggregateErrorText.Append(error + "\r\n");
+                }
+                throw new InvalidOperationException("\r\nCompiler error(s) have occurred:\r\n\r\n " + aggregateErrorText + "\r\n");
+            }
+        }
 
-		/// <summary>
-		/// Determines whether an exception will be thrown if a compiler error occurs in a script file
-		/// </summary>
-		public bool IgnoreErrors
-		{
-			get
-			{
-				return ignoreErrors;
-			}
-			set
-			{
-				ignoreErrors = value;
-			}
-		}
+        /// <summary>
+        /// Adds a reference to the plugin manager to be used when compiling scripts
+        /// </summary>
+        /// <param name="referenceToDll">The reference to the dll to add</param>
+        public void AddReference(string referenceToDll)
+        {
+            if (!References.Contains(referenceToDll))
+            {
+                References.Add(referenceToDll);
+            }
+        }
 
-		/// <summary>
-		/// The type of plugin sources that will be managed by the plugin manager
-		/// </summary>
-		public PluginSourceEnum PluginSources
-		{
-			get
-			{
-				return pluginSources;
-			}
-			set
-			{
-				pluginSources = value;
-			}
-		}
+        /// <summary>
+        /// Shuts down the plugin manager
+        /// </summary>
+        public void Stop()
+        {
+            try
+            {
+                started = false;
+                LocalLoader.Unload();
+                BeginShutdown = true;
+                while (Active)
+                {
+                    Thread.Sleep(100);
+                }
+            }
+            catch
+            {
+                // We don't want to get any exceptions thrown if unloading fails for some reason.
+            }
+        }
 
-		/// <summary>
-		/// The list of all compiler errors for all scripts.
-		/// Null if no compilation has ever occurred, empty list if compilation succeeded
-		/// </summary>
-		public IList CompilerErrors
-		{
-			get
-			{
-				if (!started)
-				{
-					throw new InvalidOperationException("PluginManager has not been started.");
-				}
-				return compilerErrors;
-			}
-		}
+        /// <summary>
+        /// Should auto reload on file changes
+        /// </summary>
+        public bool AutoReload
+        {
+            get
+            {
+                return autoReload;
+            }
+            set
+            {
+                if (autoReload != value)
+                {
+                    autoReload = value;
+                    if (!autoReload)
+                    {
+                        FileWatcher.EnableRaisingEvents = false;
+                        Stop();
+                        PluginReloadThread = null;
+                        FileWatcher = null;
+                    }
+                    else
+                    {
+                        FileWatcher = new FileSystemWatcher(PluginDirectory) { EnableRaisingEvents = true };
+                        FileWatcher.Changed += FileWatcherChanged;
+                        FileWatcher.Deleted += FileWatcherChanged;
+                        FileWatcher.Created += FileWatcherChanged;
 
-		/// <summary>
-		/// The list of loaded plugin assemblies
-		/// </summary>
-		public string[] Assemblies
-		{
-			get
-			{
-				if (!started)
-				{
-					throw new InvalidOperationException("PluginManager has not been started.");
-				}
-				return localLoader.Assemblies;
-			}
-		}
+                        PluginReloadThread = new Thread(ReloadThreadLoop);
+                        PluginReloadThread.Start();
+                    }
+                }
+            }
+        }
 
-		/// <summary>
-		/// The list of loaded plugin types
-		/// </summary>
-		public string[] Types
-		{
-			get
-			{
-				if (!started)
-				{
-					throw new InvalidOperationException("PluginManager has not been started.");
-				}
-				return localLoader.Types;
-			}
-		}
+        /// <summary>
+        /// Determines whether an exception will be thrown if a compiler error occurs in a script file
+        /// </summary>
+        public bool IgnoreErrors
+        {
+            get
+            {
+                return ignoreErrors;
+            }
+            set
+            {
+                ignoreErrors = value;
+            }
+        }
 
-		/// <summary>
-		/// Retrieves the type objects for all subclasses of the given type within the loaded plugins.
-		/// </summary>
-		/// <param name="baseClass">The base class</param>
-		/// <returns>All subclases</returns>
-		public string[] GetSubclasses(string baseClass)
-		{
-			if (!started)
-			{
-				throw new InvalidOperationException("PluginManager has not been started.");
-			}
-			return localLoader.GetSubclasses(baseClass);
-		}
+        /// <summary>
+        /// The type of plugin sources that will be managed by the plugin manager
+        /// </summary>
+        public PluginSourceEnum PluginSources
+        {
+            get
+            {
+                return pluginSources;
+            }
+            set
+            {
+                pluginSources = value;
+            }
+        }
 
-		/// <summary>
-		/// Determines if this loader manages the specified type
-		/// </summary>
-		/// <param name="typeName">The type to check if this PluginManager handles</param>
-		/// <returns>True if this PluginManager handles the type</returns>
-		public bool ManagesType(string typeName)
-		{
-			if (!started)
-			{
-				throw new InvalidOperationException("PluginManager has not been started.");
-			}
-			return localLoader.ManagesType(typeName);
-		}
+        /// <summary>
+        /// The list of all compiler errors for all scripts.
+        /// Null if no compilation has ever occurred, empty list if compilation succeeded
+        /// </summary>
+        public IList CompilerErrors
+        {
+            get
+            {
+                if (!started)
+                {
+                    throw new InvalidOperationException("PluginManager has not been started.");
+                }
+                return compilerErrors;
+            }
+        }
 
-		/// <summary>
-		/// Returns the value of a static property
-		/// </summary>
-		/// <param name="typeName">The type to retrieve the static property value from</param>
-		/// <param name="propertyName">The name of the property to retrieve</param>
-		/// <returns>The value of the static property</returns>
-		public object GetStaticPropertyValue(string typeName, string propertyName)
-		{
-			if (!started)
-			{
-				throw new InvalidOperationException("PluginManager has not been started.");
-			}
-			return localLoader.GetStaticPropertyValue(typeName, propertyName);
-		}
+        /// <summary>
+        /// The list of loaded plugin assemblies
+        /// </summary>
+        public string[] Assemblies
+        {
+            get
+            {
+                if (!started)
+                {
+                    throw new InvalidOperationException("PluginManager has not been started.");
+                }
+                return LocalLoader.Assemblies;
+            }
+        }
 
-	    /// <summary>
-	    /// Returns the result of a static method call
-	    /// </summary>
-	    /// <param name="typeName">The type to call the static method on</param>
-	    /// <param name="methodName"></param>
-	    /// <param name="methodParams">The parameters to pass to the method</param>
-	    /// <returns>The return value of the method</returns>
-	    public object CallStaticMethod(string typeName, string methodName, object[] methodParams)
-		{
-			if (!started)
-			{
-				throw new InvalidOperationException("PluginManager has not been started.");
-			}
-			return localLoader.CallStaticMethod(typeName, methodName, methodParams);
-		}
+        /// <summary>
+        /// The list of loaded plugin types
+        /// </summary>
+        public string[] Types
+        {
+            get
+            {
+                if (!started)
+                {
+                    throw new InvalidOperationException("PluginManager has not been started.");
+                }
+                return LocalLoader.Types;
+            }
+        }
 
-		/// <summary>
-		/// Returns a proxy to an instance of the specified plugin type
-		/// </summary>
-		/// <param name="typeName">The name of the type to create an instance of</param>
-		/// <param name="bindingFlags">The binding flags for the constructor</param>
-		/// <param name="constructorParams">The parameters to pass to the constructor</param>
-		/// <returns>The constructed object</returns>
-		public MarshalByRefObject CreateInstance(string typeName, BindingFlags bindingFlags,
-			object[] constructorParams)
-		{
-			if (!started)
-			{
-				throw new InvalidOperationException("PluginManager has not been started.");
-			}
-			return localLoader.CreateInstance(typeName, bindingFlags, constructorParams);
-		}
-	}
+        /// <summary>
+        /// Retrieves the type objects for all subclasses of the given type within the loaded plugins.
+        /// </summary>
+        /// <param name="baseClass">The base class</param>
+        /// <returns>All subclases</returns>
+        public string[] GetSubclasses(string baseClass)
+        {
+            if (!started)
+            {
+                throw new InvalidOperationException("PluginManager has not been started.");
+            }
+            return LocalLoader.GetSubclasses(baseClass);
+        }
+
+        /// <summary>
+        /// Determines if this loader manages the specified type
+        /// </summary>
+        /// <param name="typeName">The type to check if this PluginManager handles</param>
+        /// <returns>True if this PluginManager handles the type</returns>
+        public bool ManagesType(string typeName)
+        {
+            if (!started)
+            {
+                throw new InvalidOperationException("PluginManager has not been started.");
+            }
+            return LocalLoader.ManagesType(typeName);
+        }
+
+        /// <summary>
+        /// Returns the value of a static property
+        /// </summary>
+        /// <param name="typeName">The type to retrieve the static property value from</param>
+        /// <param name="propertyName">The name of the property to retrieve</param>
+        /// <returns>The value of the static property</returns>
+        public object GetStaticPropertyValue(string typeName, string propertyName)
+        {
+            if (!started)
+            {
+                throw new InvalidOperationException("PluginManager has not been started.");
+            }
+            return LocalLoader.GetStaticPropertyValue(typeName, propertyName);
+        }
+
+        /// <summary>
+        /// Returns the result of a static method call
+        /// </summary>
+        /// <param name="typeName">The type to call the static method on</param>
+        /// <param name="methodName"></param>
+        /// <param name="methodParams">The parameters to pass to the method</param>
+        /// <returns>The return value of the method</returns>
+        public object CallStaticMethod(string typeName, string methodName, object[] methodParams)
+        {
+            if (!started)
+            {
+                throw new InvalidOperationException("PluginManager has not been started.");
+            }
+            return LocalLoader.CallStaticMethod(typeName, methodName, methodParams);
+        }
+
+        /// <summary>
+        /// Returns a proxy to an instance of the specified plugin type
+        /// </summary>
+        /// <param name="typeName">The name of the type to create an instance of</param>
+        /// <param name="bindingFlags">The binding flags for the constructor</param>
+        /// <param name="constructorParams">The parameters to pass to the constructor</param>
+        /// <returns>The constructed object</returns>
+        public MarshalByRefObject CreateInstance(string typeName, BindingFlags bindingFlags,
+            object[] constructorParams)
+        {
+            if (!started)
+            {
+                throw new InvalidOperationException("PluginManager has not been started.");
+            }
+            return LocalLoader.CreateInstance(typeName, bindingFlags, constructorParams);
+        }
+    }
 }

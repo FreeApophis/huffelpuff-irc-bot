@@ -2,7 +2,7 @@
  *  This is the Factoid Plugin, the usage is very similar to ubottu.
  *  You can generate arbitrary !commands to reply with prefabricated text.
  * 
- *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
+ *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

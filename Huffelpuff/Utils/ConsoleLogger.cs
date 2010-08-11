@@ -35,7 +35,7 @@ namespace Huffelpuff.Utils
 
         public override void Log(string message, Level level, ConsoleColor color)
         {
-            ConsoleColor lastColor = Console.ForegroundColor;
+            var lastColor = Console.ForegroundColor;
             Console.ForegroundColor = color;
             Console.WriteLine("{0}: {1}", level, message);
             Console.ForegroundColor = lastColor;

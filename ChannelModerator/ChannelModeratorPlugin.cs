@@ -1,8 +1,7 @@
 /*
- *  <project description>
+ *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
  * 
- *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
- *  File created by apophis at 14.09.2009 19:02
+ *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 using Meebey.SmartIrc4net;
 using System;
 using Huffelpuff;
@@ -31,37 +31,37 @@ namespace Plugin
     public class ChannelModeratorPlugin : AbstractPlugin
     {
         public ChannelModeratorPlugin(IrcBot botInstance) :
-            base(botInstance) {}
+            base(botInstance) { }
 
-        public override void Activate ()
+        public override void Activate()
         {
-            BotMethods.AddCommand(new Commandlet("!kick", "kicks an annyoing user", kickUser, this));
-            BotMethods.AddCommand(new Commandlet("!ban", "ban an annyoing user", banUser, this));
-            
+            BotMethods.AddCommand(new Commandlet("!kick", "kicks an annyoing user", KickUser, this));
+            BotMethods.AddCommand(new Commandlet("!ban", "ban an annyoing user", BanUser, this));
+
             base.Activate();
         }
 
-        private void banUser(object sender, IrcEventArgs e)
+        private void BanUser(object sender, IrcEventArgs e)
         {
             throw new NotImplementedException();
         }
 
-        public override void Deactivate ()
+        public override void Deactivate()
         {
             BotMethods.RemoveCommand("!kick");
             BotMethods.RemoveCommand("!ban");
-            
+
             base.Deactivate();
         }
-        
+
         public override string AboutHelp()
         {
             return "The channel moderator plugins, manages your channel...";
         }
-        
-        private void kickUser(object sender, IrcEventArgs e) 
+
+        private void KickUser(object sender, IrcEventArgs e)
         {
-            throw new NotImplementedException();            
+            throw new NotImplementedException();
         }
     }
 }

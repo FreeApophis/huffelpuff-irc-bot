@@ -1,8 +1,7 @@
 ﻿/*
- *  The File Plugin Demonstrates the Use of DCC Send to transfer files 
- *  to another IRC Client.
+ *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
  * 
- *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
+ *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,13 +14,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-using System;
-using System.IO;
-using System.Reflection;
-using System.Collections.Generic;
 
 using Huffelpuff;
 using Huffelpuff.Plugins;
@@ -35,25 +29,26 @@ namespace Plugin
     public class FileServerPlugin : AbstractPlugin
     {
 
-        public FileServerPlugin(IrcBot botInstance) : base(botInstance) {}
-        
+        public FileServerPlugin(IrcBot botInstance) : base(botInstance) { }
+
         public override void Activate()
         {
             BotMethods.AddCommand(new Commandlet("!download", "Starts a DCC Filetransfer to you", SendFile, this));
             base.Activate();
-        }        
-        
+        }
+
         public override void Deactivate()
         {
             BotMethods.RemoveCommand("!download");
             base.Deactivate();
         }
-        
-        
-        public override string AboutHelp() {
+
+
+        public override string AboutHelp()
+        {
             return "File Plugin Help";
         }
-        
+
         public void SendFile(object sender, IrcEventArgs e)
         {
             BotMethods.SendFile(e.Data.Nick, "./Huffelpuff.exe");

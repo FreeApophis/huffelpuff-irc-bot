@@ -1,11 +1,11 @@
 ﻿/*
- *  UT3GlobalStatsPlugin, Access to the GameSpy Stats for UT3
+ *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
  * 
- *  Copyright (c) 2007-2009 Thomas Bruderer <apophis@apophis.ch> <http://www.apophis.ch>
+ *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
@@ -37,7 +37,7 @@ namespace Plugin
         public RssPlugin(IrcBot botInstance) :
             base(botInstance) { }
 
-        private Dictionary<string, RssWrapper> rssFeeds = new Dictionary<string, RssWrapper>();
+        private readonly Dictionary<string, RssWrapper> rssFeeds = new Dictionary<string, RssWrapper>();
         private Timer checkInterval;
 
         public const string RssFeedConst = "rss_feed";
@@ -63,7 +63,7 @@ namespace Plugin
                 {
                     foreach (var newItem in rssFeed.NewItems())
                     {
-                        foreach (string channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+                        foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
                         {
                             BotMethods.SendMessage(SendType.Message, channel, ("" + IrcConstants.IrcBold + "'" + IrcConstants.IrcColor + (int)IrcColors.Blue + "{0}" + IrcConstants.IrcColor + "'" + IrcConstants.IrcBold + ": " + IrcConstants.IrcColor + (int)IrcColors.Brown + "{1}" + IrcConstants.IrcColor).Fill(rssFeed.FriendlyName, newItem.Title));
                         }

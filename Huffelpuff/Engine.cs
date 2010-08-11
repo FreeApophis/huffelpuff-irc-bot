@@ -1,7 +1,7 @@
 ﻿/*
  *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
  * 
- *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
+ *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,13 +17,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 using System;
 using System.Configuration.Install;
-using System.Diagnostics;
 using System.Reflection;
 using System.ServiceProcess;
-using System.ServiceProcess;
-using System.Threading;
 using Huffelpuff.Utils;
 
 namespace Huffelpuff
@@ -61,7 +59,7 @@ namespace Huffelpuff
                 }
                 catch (Exception ex)
                 {
-                    ServiceEngine.WriteToLog(string.Format("Exception: {0} \n\nStack: {1}", ex.Message, ex.StackTrace), EventLogEntryType.Error);
+                    Log.Instance.Log(string.Format("Exception: {0} \n\nStack: {1}", ex.Message, ex.StackTrace), Level.Error);
                 }
             }
         }

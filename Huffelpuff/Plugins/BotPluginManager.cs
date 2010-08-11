@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Linq;
 using Huffelpuff.Utils;
 using System;
 using System.Collections.Generic;
@@ -30,94 +31,105 @@ namespace Huffelpuff.Plugins
     /// </summary>
     public class BotPluginManager
     {
-        private PluginManager pluginManager;
-        private IrcBot bot;
-        private List<AbstractPlugin> plugins = new List<AbstractPlugin>();
-        public List<AbstractPlugin> Plugins {
-            get {
+        private readonly PluginManager pluginManager;
+        private readonly IrcBot bot;
+        private readonly List<AbstractPlugin> plugins = new List<AbstractPlugin>();
+        public List<AbstractPlugin> Plugins
+        {
+            get
+            {
                 return plugins;
             }
         }
-        
+
         public BotPluginManager(IrcBot bot, string relPluginPath)
         {
             this.bot = bot;
-            this.bot.AddCommand(new Commandlet("!reload", "!reload unloads and reloads all the plugins", reloadPlugins, this, CommandScope.Both, "pluginmanager_reload"));
-            
+            this.bot.AddCommand(new Commandlet("!reload", "!reload unloads and reloads all the plugins", ReloadPlugins, this, CommandScope.Both, "pluginmanager_reload"));
+
             pluginManager = new PluginManager(relPluginPath);
-            pluginManager.PluginsReloaded += new EventHandler(Plugins_PluginsReloaded);
+            pluginManager.PluginsReloaded += Plugins_PluginsReloaded;
             pluginManager.IgnoreErrors = false;
-            pluginManager.PluginSources =  PluginSourceEnum.Both;
-            
+            pluginManager.PluginSources = PluginSourceEnum.Both;
+
             pluginManager.AddReference("Huffelpuff.exe");
-            
+
             pluginManager.Start();
         }
 
-        private void reloadPlugins(object sender, IrcEventArgs e) {
+        private void ReloadPlugins(object sender, IrcEventArgs e)
+        {
             pluginManager.ReloadPlugins();
         }
 
-        
+
 
         private readonly List<string> oldPlugs = new List<string>();
         private void Plugins_PluginsReloaded(object sender, EventArgs e)
         {
             plugins.Clear();
             bot.CleanPlugins();
-            
-            foreach(var pluginName in pluginManager.GetSubclasses("Huffelpuff.Plugins.AbstractPlugin"))
+
+            foreach (var pluginName in pluginManager.GetSubclasses("Huffelpuff.Plugins.AbstractPlugin"))
             {
-                var p = (AbstractPlugin)pluginManager.CreateInstance(pluginName, BindingFlags.CreateInstance, new object[] {bot});
+                var p = (AbstractPlugin)pluginManager.CreateInstance(pluginName, BindingFlags.CreateInstance, new object[] { bot });
                 p.Init();
-                
-                if (p.Ready) {
+
+                if (p.Ready)
+                {
                     plugins.Add(p);
-                } else {
+                }
+                else
+                {
                     Log.Instance.Log(" [FAILED] " + pluginName + " (Init failed)", Level.Info, ConsoleColor.Red);
                 }
             }
 
-            foreach(AbstractPlugin ap in plugins)
+            foreach (var plugin in plugins)
             {
-                if (oldPlugs.Contains(ap.AssemblyName)) {
-                    Log.Instance.Log(" [RELOAD] " + ap.FullName, Level.Info, ConsoleColor.DarkGreen);
-                    oldPlugs.Remove(ap.AssemblyName);
-                } else {
-                    Log.Instance.Log("  [LOAD]  " + ap.FullName, Level.Info, ConsoleColor.Green);
+                if (oldPlugs.Contains(plugin.AssemblyName))
+                {
+                    Log.Instance.Log(" [RELOAD] " + plugin.FullName, Level.Info, ConsoleColor.DarkGreen);
+                    oldPlugs.Remove(plugin.AssemblyName);
+                }
+                else
+                {
+                    Log.Instance.Log("  [LOAD]  " + plugin.FullName, Level.Info, ConsoleColor.Green);
                 }
             }
-            
-            foreach (string s in oldPlugs) {
+
+            foreach (var s in oldPlugs)
+            {
                 Log.Instance.Log(" [REMOVE] " + s, Level.Info, ConsoleColor.Red);
             }
 
             oldPlugs.Clear();
-            foreach(AbstractPlugin ap in plugins)
+            foreach (var plugin in plugins)
             {
-                oldPlugs.Add(ap.AssemblyName);
+                oldPlugs.Add(plugin.AssemblyName);
             }
 
-            
-            foreach(string pluginname in PersistentMemory.Instance.GetValues("plugin")) {
-                foreach(AbstractPlugin p in plugins) {
-                    if (pluginname==p.FullName) {
-                        p.Activate();
-                    }
-                }
+
+            foreach (var plugin in PersistentMemory.Instance.GetValues("plugin").SelectMany(pluginname => plugins.Where(p => pluginname == p.FullName)))
+            {
+                plugin.Activate();
             }
         }
-        
+
         public void ShutDown()
         {
-            foreach(AbstractPlugin p in plugins) {
-                try {
+            foreach (var p in plugins)
+            {
+                try
+                {
                     p.Deactivate();
                     p.DeInit();
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     /* Plugins Domain does not Exist */
                 }
-                
+
             }
 
         }

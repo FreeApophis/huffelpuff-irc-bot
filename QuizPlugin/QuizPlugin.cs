@@ -1,5 +1,5 @@
 ﻿/*
- *  The Radio Plugin controls a Radio Stream with the liquidsoap API
+ *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
  * 
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
@@ -14,7 +14,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 

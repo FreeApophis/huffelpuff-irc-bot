@@ -1,7 +1,7 @@
 ﻿/*
  *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
  * 
- *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
+ *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

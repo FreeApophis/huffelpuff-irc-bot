@@ -1,9 +1,7 @@
 ﻿/*
- *  Versatile Calculator framework, calculates you almost everything, 
- *  and uses as many useful parsers as possible and easily available.
+ *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
  * 
- *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
- *  File created by apophis at 14.09.2009 19:02
+ *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +16,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 
 using System;
 using Huffelpuff;
@@ -48,8 +47,8 @@ namespace Plugin
 
         public override void Activate()
         {
-            BotMethods.AddCommand(new Commandlet("!calc", "!calc <function> calculates plenty of different equations, different backends are used. Here are some working Examples: 3*3*3, 20!, 1km^3 in teaspoons, x*(x+2)=15, 2*Pi, 1 USD in CHF, three times four, A = [1, 2, 3]; B=4; A*B, unidrnd(10), S = [2,1,4;3,2,2;-2,2,3]; D = diag(diag(S),0)", CalculateHandler, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!eval", "!eval <function> calculates plenty of different equations, different backends are used. eval returns not only the result but the whole equation again. Here are some working Examples: 3*3*3, 20!, 1km^3 in teaspoons, x*(x+2)=15, 2*Pi, 1 USD in CHF, three times four, A = [1, 2, 3]; B=4; A*B, unidrnd(10), S = [2,1,4;3,2,2;-2,2,3]; D = diag(diag(S),0)", EvaluateHandler, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!calc", "!calc <function> calculates plenty of different equations, different backends are used. Here are some working Examples: 3*3*3, 20!, 1km^3 in teaspoons, x*(x+2)=15, 2*Pi, 1 USD in CHF, three times four, A = [1, 2, 3]; B=4; A*B, unidrnd(10), S = [2,1,4;3,2,2;-2,2,3]; D = diag(diag(S),0)", CalculateHandler, this));
+            BotMethods.AddCommand(new Commandlet("!eval", "!eval <function> calculates plenty of different equations, different backends are used. eval returns not only the result but the whole equation again. Here are some working Examples: 3*3*3, 20!, 1km^3 in teaspoons, x*(x+2)=15, 2*Pi, 1 USD in CHF, three times four, A = [1, 2, 3]; B=4; A*B, unidrnd(10), S = [2,1,4;3,2,2;-2,2,3]; D = diag(diag(S),0)", EvaluateHandler, this));
 
             base.Activate();
         }

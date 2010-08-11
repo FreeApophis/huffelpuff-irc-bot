@@ -1,14 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Xml;
 /*
- *  <project description>
+ *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
  * 
- *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
- *  File created by apophis at 05.09.2009 12:30
+ *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +16,13 @@ using System.Xml;
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 using Huffelpuff.Utils;
 
@@ -168,11 +168,7 @@ namespace Plugin
         {
             get
             {
-                if (i < cachedItems.Count)
-                {
-                    return cachedItems[i];
-                }
-                return null;
+                return i < cachedItems.Count ? cachedItems[i] : null;
             }
         }
 
@@ -216,7 +212,7 @@ namespace Plugin
 
         private static RssItem GetRssItem(XElement item)
         {
-            var published = DateTime.MinValue;
+            DateTime published;
 
             DateTime.TryParse(item.Descendants("pubDate").Select(n => n.Value).FirstOrDefault(), out published);
 
@@ -234,7 +230,7 @@ namespace Plugin
         private static RssItem GetAtomItem(XElement entry)
         {
             string author = null, link = null;
-            var published = DateTime.MinValue;
+            DateTime published;
 
             DateTime.TryParse(entry.Descendants(AtomNamespace + "published").Select(n => n.Value).FirstOrDefault(), out published);
 
