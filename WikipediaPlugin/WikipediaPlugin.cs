@@ -62,6 +62,8 @@ namespace Plugin
 
         private void WikiHandler(object sender, IrcEventArgs e)
         {
+            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+
             var word = new StringBuilder();
             var first = true;
             foreach (var c in e.Data.Message)
@@ -79,7 +81,7 @@ namespace Plugin
             while (true)
             {
                 var msg = GetWikiArticle(word);
-                BotMethods.SendMessage(SendType.Message, e.Data.Channel, msg);
+                BotMethods.SendMessage(SendType.Message, sendto, msg);
 
                 if (msg == null || !msg.StartsWith(Redirect)) return;
 
