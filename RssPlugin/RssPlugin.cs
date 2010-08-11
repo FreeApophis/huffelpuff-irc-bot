@@ -70,7 +70,10 @@ namespace Plugin
                     }
                 }
             }
-            catch { }
+            catch (Exception exception)
+            {
+                Log.Instance.Log(exception.Message, Level.Error, ConsoleColor.Red);
+            }
             PersistentMemory.Instance.Flush();
         }
 
