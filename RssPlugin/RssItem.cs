@@ -17,67 +17,81 @@ namespace Plugin
     {
         public RssItem(string title, string author, DateTime published, string link, string desc, string category, string content)
         {
-            this.title = title;    
-            this.author = author;    
-            this.published = published;  
+            this.title = title;
+            this.author = author;
+            this.published = published;
             this.link = link;
             this.desc = desc;
             this.category = category;
             this.content = content;
         }
 
-        private string link; 
-        
-        public string Link {
-            get {
+        private string link;
+
+        public string Link
+        {
+            get
+            {
                 return link;
             }
         }
-        
-        private string desc; 
-        
-        public string Desc {
-            get { 
-                return desc; 
+
+        private string desc;
+
+        public string Desc
+        {
+            get
+            {
+                return desc;
             }
         }
-        
+
         private string category;
-        
-        public string Category {
-            get { 
+
+        public string Category
+        {
+            get
+            {
                 return category;
             }
         }
-        
+
         private string content;
-        
-        public string Content {
-            get { 
+
+        public string Content
+        {
+            get
+            {
                 return content;
             }
         }
-        
+
         private string title;
-            
-        public string Title {
-            get {
+
+        public string Title
+        {
+            get
+            {
                 return title;
             }
         }
 
         private string author;
 
-        public string Author {
-            get {
+        public string Author
+        {
+            get
+            {
                 return author;
             }
         }
-        
+
         private DateTime published;
 
-        public DateTime Published {
-            get {
+        public DateTime Published
+        {
+            get
+            {
                 return published;
             }
         }

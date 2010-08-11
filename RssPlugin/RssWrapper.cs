@@ -1,3 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Xml;
 /*
  *  <project description>
  * 
@@ -17,12 +23,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+using System.Xml.Linq;
 using Huffelpuff.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
-using Huffelpuff;
 
 namespace Plugin
 {
@@ -40,7 +42,7 @@ namespace Plugin
             }
         }
 
-        private const string friendlynameconst = "friendlyname";
+        private const string FriendlyNameConst = "friendlyname";
         private string friendlyName;
         public string FriendlyName
         {
@@ -50,12 +52,12 @@ namespace Plugin
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, friendlynameconst, value);
+                PersistentMemory.Instance.SetValue(NameSpace, FriendlyNameConst, value);
                 friendlyName = value;
             }
         }
 
-        private const string urlconst = "url";
+        private const string UrlConst = "url";
         private string url;
         public string Url
         {
@@ -65,12 +67,28 @@ namespace Plugin
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, urlconst, value);
+                PersistentMemory.Instance.SetValue(NameSpace, UrlConst, value);
                 url = value;
             }
         }
 
-        private const string lastconst = "lastdate";
+        private const string CredentialsConst = "url";
+        private string credentials;
+        public string Credentials
+        {
+            get
+            {
+                return credentials;
+            }
+            set
+            {
+                PersistentMemory.Instance.SetValue(NameSpace, CredentialsConst, value);
+                credentials = value;
+            }
+        }
+
+
+        private const string LastConst = "lastdate";
         private DateTime last;
         public DateTime Last
         {
@@ -80,7 +98,7 @@ namespace Plugin
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, lastconst, value.ToString());
+                PersistentMemory.Instance.SetValue(NameSpace, LastConst, value.ToString());
                 last = value;
             }
         }
@@ -90,23 +108,33 @@ namespace Plugin
         public RssWrapper(string name)
         {
             Name = name;
-            friendlyName = PersistentMemory.Instance.GetValueOrTodo(NameSpace, friendlynameconst);
-            url = PersistentMemory.Instance.GetValueOrTodo(NameSpace, urlconst);
+            friendlyName = PersistentMemory.Instance.GetValueOrTodo(NameSpace, FriendlyNameConst);
+            url = PersistentMemory.Instance.GetValueOrTodo(NameSpace, UrlConst);
+            credentials = PersistentMemory.Instance.GetValue(NameSpace, UrlConst);
 
-            string lastDateTimeString = PersistentMemory.Instance.GetValue(NameSpace, lastconst);
+            string lastDateTimeString = PersistentMemory.Instance.GetValue(NameSpace, LastConst);
             last = (lastDateTimeString == null) ? DateTime.MinValue : DateTime.Parse(lastDateTimeString);
         }
 
-        public RssWrapper(string name, string friendlyName, string url, DateTime last)
+        public RssWrapper(string name, string friendlyName, string url, DateTime last, string credentials)
         {
             Name = name;
             this.friendlyName = friendlyName;
             this.url = url;
             this.last = last;
+            this.credentials = credentials;
 
-            PersistentMemory.Instance.ReplaceValue(NameSpace, friendlynameconst, friendlyName);
-            PersistentMemory.Instance.ReplaceValue(NameSpace, urlconst, url);
-            PersistentMemory.Instance.ReplaceValue(NameSpace, lastconst, last.ToString());
+            PersistentMemory.Instance.ReplaceValue(NameSpace, FriendlyNameConst, friendlyName);
+            PersistentMemory.Instance.ReplaceValue(NameSpace, UrlConst, url);
+            PersistentMemory.Instance.ReplaceValue(NameSpace, LastConst, last.ToString());
+            if (credentials == null)
+            {
+                PersistentMemory.Instance.RemoveKey(NameSpace, CredentialsConst);
+            }
+            else
+            {
+                PersistentMemory.Instance.ReplaceValue(NameSpace, CredentialsConst, credentials);
+            }
         }
 
         public void RemoveFeed()
@@ -127,7 +155,7 @@ namespace Plugin
             if (newItems.Count() > 0)
             {
                 last = newItems.OrderByDescending(item => item.Published).Take(1).Single().Published;
-                PersistentMemory.Instance.ReplaceValue(NameSpace, lastconst, last.ToString());
+                PersistentMemory.Instance.ReplaceValue(NameSpace, LastConst, last.ToString());
             }
             return newItems;
         }
@@ -154,84 +182,76 @@ namespace Plugin
             }
         }
 
+        private static readonly XNamespace AtomNamespace = "http://www.w3.org/2005/Atom";
+        private static readonly XNamespace PurlNamespace = "http://purl.org/dc/elements/1.1/";
 
         private List<RssItem> GetRss()
         {
-            var rss = new List<RssItem>();
+            var request = (HttpWebRequest)WebRequest.Create(url);
 
-            XmlReader feed = XmlReader.Create(url);
-            while (feed.Read())
+            if (!string.IsNullOrEmpty(credentials))
             {
-                if ((feed.NodeType == XmlNodeType.Element) && (feed.Name == "item"))
-                {
-                    rss.Add(GetItem(feed));
-                }
+                request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(credentials)));
             }
+
+            var response = (HttpWebResponse)request.GetResponse();
+            var stream = response.GetResponseStream();
+            var reader = XmlReader.Create(stream);
+
+            var rssFeed = XDocument.Load(reader);
+
+            var atomEntry = XName.Get("entry", AtomNamespace.NamespaceName);
+            var rssEntry = XName.Get("item", "");
+
+            // Parse RSS
+            var rss = rssFeed.Descendants(atomEntry).Select(GetAtomItem).Where(rssItem => rssItem != null).ToList();
+
+            //Parse Rss
+            rss.AddRange(rssFeed.Descendants(rssEntry).Select(GetRssItem).Where(rssItem => rssItem != null).ToList());
+
             return rss;
         }
 
-        private static RssItem GetItem(XmlReader feed)
+        private static RssItem GetRssItem(XElement item)
         {
-            string title = "", author = "", link = "", desc = "", category = "", content = "";
-
             var published = DateTime.MinValue;
 
-            while (feed.Read())
+            DateTime.TryParse(item.Descendants("pubDate").Select(n => n.Value).FirstOrDefault(), out published);
+
+            var title = item.Descendants("title").Select(n => n.Value).FirstOrDefault();
+            var author = item.Descendants("author").Select(n => n.Value).FirstOrDefault() ??
+                item.Descendants(PurlNamespace + "creator").Select(n => n.Value).FirstOrDefault();
+            var link = item.Descendants("link").Select(n => n.Value).FirstOrDefault();
+            var description = item.Descendants("description").Select(n => n.Value).FirstOrDefault();
+            var category = item.Descendants("category").Select(n => n.Value).FirstOrDefault();
+            var content = item.Descendants("content").Select(n => n.Value).FirstOrDefault();
+
+            return (title != null) ? new RssItem(title, author, published, link, description, category, content) : null;
+        }
+
+        private static RssItem GetAtomItem(XElement entry)
+        {
+            string author = null, link = null;
+            var published = DateTime.MinValue;
+
+            DateTime.TryParse(entry.Descendants(AtomNamespace + "published").Select(n => n.Value).FirstOrDefault(), out published);
+
+            var title = entry.Descendants(AtomNamespace + "title").Select(n => n.Value).FirstOrDefault();
+            var authorEntry = entry.Descendants(AtomNamespace + "author").FirstOrDefault();
+            if (authorEntry != null)
             {
-                if ((feed.NodeType == XmlNodeType.EndElement) && (feed.Name == "item"))
-                {
-                    break;
-                }
-                if (feed.NodeType != XmlNodeType.Element)
-                {
-                    break;
-                }
-                switch (feed.Name)
-                {
-                    // Main Items every RSS feed has
-                    case "title":
-                        title = feed.ReadElementContentAsString();
-                        break;
-                    case "link":
-                        link = feed.ReadElementContentAsString();
-                        break;
-                    case "description":
-                        desc = feed.ReadElementContentAsString();
-                        break;
-                    // The pubDate is important for notifying
-                    case "pubDate":
-                        string str = feed.ReadElementContentAsString();
-                        DateTime.TryParse(str, out published);
-                        break;
-                    // Some more RSS 2.0 Standard fields.
-                    case "category":
-                        category = feed.ReadElementContentAsString();
-                        break;
-                    case "author":
-                        author = feed.ReadElementContentAsString();
-                        break;
-                    case "guid":
-                        //link = feed.ReadElementContentAsString();
-                        break;
-                    // Special ones (for vBulletin)
-                    case "content:encoded":
-                        content = feed.ReadElementContentAsString();
-                        break;
-                    case "dc:creator":
-                        author = feed.ReadElementContentAsString();
-                        break;
-                    case "comments":
-                        //Comment
-                        break;
-                    case "wfw:commentRss":
-                        //Comment LInk
-                        break;
-                    default:
-                        Log.Instance.Log("unparsed Element: " + feed.Name);
-                        break;
-                }
+                author = authorEntry.Descendants(AtomNamespace + "name").Select(n => n.Value).FirstOrDefault();
             }
-            return new RssItem(title, author, published, link, desc, category, content);
+            var linkEntry = entry.Descendants(AtomNamespace + "link").Select(n => n.Attribute(("href"))).FirstOrDefault();
+            if (linkEntry != null)
+            {
+                link = linkEntry.Value;
+            }
+            var description = entry.Descendants(AtomNamespace + "summary").Select(n => n.Value).FirstOrDefault();
+            var category = entry.Descendants("todo").Select(n => n.Value).FirstOrDefault();
+            var content = entry.Descendants("todo").Select(n => n.Value).FirstOrDefault();
+
+            return (title != null) ? new RssItem(title, author, published, link, description, category, content) : null;
         }
     }
 }
