@@ -29,12 +29,12 @@ namespace Plugin
         public RssItem(string title, string author, DateTime published, string link, string desc, string category, string content)
         {
             this.title = title;
-            this.author = author;
+            this.author = author ?? string.Empty;
             this.published = published;
-            this.link = link;
-            this.desc = desc;
-            this.category = category;
-            this.content = content;
+            this.link = link ?? string.Empty;
+            this.desc = desc ?? string.Empty;
+            this.category = category ?? string.Empty;
+            this.content = content ?? string.Empty;
         }
 
         private string link;

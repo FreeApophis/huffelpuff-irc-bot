@@ -17,7 +17,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Huffelpuff.Utils
 {
@@ -39,6 +41,23 @@ namespace Huffelpuff.Utils
         public static string Fill(this string str, params object[] args)
         {
             return string.Format(str, args);
+        }
+
+        public static string FillKeyword(this string str, params string[] args)
+        {
+            if (args.Length % 2 != 0) throw new IndexOutOfRangeException("the arguments must be in pairs");
+            var index = 0;
+
+            while (index < args.Length)
+            {
+                var key = args[index].ToString();
+                var value = args[index + 1].ToString();
+
+                str = str.Replace(key, value);
+
+                index += 2;
+            }
+            return str;
         }
 
         public static List<string> ToLines(this IEnumerable<string> list, int maxlinelength)
@@ -116,6 +135,35 @@ namespace Huffelpuff.Utils
         {
             TValue result;
             return dictionary.TryGetValue(key, out result) ? result : default(TValue);
+        }
+
+        public static string MessageTime(this DateTime time)
+        {
+            return time.ToString("HH:mm K", new CultureInfo("DE-ch", true));
+        }
+
+
+        public static string Ago(this DateTime time)
+        {
+            return (DateTime.Now - time).Ago();
+        }
+
+
+        public static string Ago(this TimeSpan ago)
+        {
+            if (ago.Days > 0)
+            {
+                return ago.Days + ((ago.Days == 1) ? " day" : " days") + " ago";
+            }
+            if (ago.Hours > 0)
+            {
+                return ago.Hours + ((ago.Days == 1) ? " hour" : " hours") + " ago";
+            }
+            if (ago.Minutes > 0)
+            {
+                return ago.Minutes + ((ago.Days == 1) ? " minute" : " minutes") + " ago";
+            }
+            return ago.Seconds + ((ago.Days == 1) ? " second" : " seconds") + " ago";
         }
     }
 }

@@ -25,6 +25,7 @@ using Huffelpuff;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 using Meebey.SmartIrc4net;
+using System.Text.RegularExpressions;
 
 
 namespace Plugin
@@ -41,6 +42,8 @@ namespace Plugin
         private Timer checkInterval;
 
         public const string RssFeedConst = "rss_feed";
+        const string RssFormatConst = "rss_format";
+
         public override void Init()
         {
             checkInterval = new Timer();
@@ -65,7 +68,7 @@ namespace Plugin
                     {
                         foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
                         {
-                            BotMethods.SendMessage(SendType.Message, channel, ("" + IrcConstants.IrcBold + "'" + IrcConstants.IrcColor + (int)IrcColors.Blue + "{0}" + IrcConstants.IrcColor + "'" + IrcConstants.IrcBold + ": " + IrcConstants.IrcColor + (int)IrcColors.Brown + "{1}" + IrcConstants.IrcColor).Fill(rssFeed.FriendlyName, newItem.Title));
+                            SendFormattedItem(rssFeed, newItem, channel);
                         }
                     }
                 }
@@ -77,9 +80,51 @@ namespace Plugin
             PersistentMemory.Instance.Flush();
         }
 
+
+        private void SendFormattedItem(RssWrapper rssFeed, RssItem rssItem, string sendto)
+        {
+            if (rssFeed == null || rssItem == null) return;
+
+            BotMethods.SendMessage(SendType.Message, sendto,
+                MessageFormat.FillKeyword(
+                    "%FEEDTITLE%", rssFeed.FriendlyName,
+                    "%FEEDURL%", rssFeed.Url,
+                    "%TITLE%", StripHtml(rssItem.Title),
+                    "%AUTHOR%", rssItem.Author,
+                    "%CATEGORY%", rssItem.Category,
+                    "%CONTENT%", StripHtml(rssItem.Content),
+                    "%DESCRIPTION%", StripHtml(rssItem.Desc),
+                    "%LINK%", rssItem.Link,
+                    "%DATE%", rssItem.Published.ToString(),
+                    "%AGO%", rssItem.Published.Ago()
+                ));
+        }
+
+        private string messageFormat;
+        protected string MessageFormat
+        {
+            get
+            {
+                messageFormat = messageFormat ?? PersistentMemory.Instance.GetValue(RssFormatConst) ?? sourceMessageFormat;
+                return messageFormat;
+            }
+        }
+
+        private static string StripHtml(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+                return string.Empty;
+
+            str = Regex.Replace(str, "<[^<]*>", string.Empty);
+            str = Regex.Replace(str, "&nbsp;", " ");
+
+            return str;
+        }
+
         public override void Activate()
         {
-            BotMethods.AddCommand(new Commandlet("!rss", "With the command !rss [<feed> [<#post>]] post you'll get a list of the bots configured RSS feed, stats and posts.", ShowRss, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!rss", "With the command !rss [<feed> [<#post>]] post you'll get a list of the bots configured RSS feed, stats and posts.", ShowRss, this));
+            BotMethods.AddCommand(new Commandlet("!rssformat", "With the command !rssfromat <formatstring> you can customize your RSS messages. [Vars: %FEEDTITLE% %FEEDURL% %TITLE% %AUTHOR% %CATEGORY% %CONTENT% %DESCRIPTION% %LINK% %DATE% %AGO%.]. You can reset to the initial setting with: !rssformat RESET", SetFormat, this, CommandScope.Both, "rss_admin"));
             BotMethods.AddCommand(new Commandlet("!+rss", "With the command !+rss <friendlyname> <url> [username:password] you can add an rss feeds even with a basic authentication.", AdminRss, this, CommandScope.Both, "rss_admin"));
             BotMethods.AddCommand(new Commandlet("!-rss", "With the command !-rss <friendlyname>  you can remove an rss feeds.", AdminRss, this, CommandScope.Both, "rss_admin"));
 
@@ -91,6 +136,7 @@ namespace Plugin
         public override void Deactivate()
         {
             BotMethods.RemoveCommand("!rss");
+            BotMethods.RemoveCommand("!rssformat");
             BotMethods.RemoveCommand("!-rss");
             BotMethods.RemoveCommand("!+rss");
 
@@ -104,6 +150,35 @@ namespace Plugin
             return "The Rss Plugins reports new posts on the configured RSS feed to the channel, and it provides access to the complete rss via the !rss command";
         }
 
+        private readonly string sourceMessageFormat = "" + IrcConstants.IrcBold + "New Message" + IrcConstants.IrcBold +
+                                       " on RSS Feed " + IrcConstants.IrcBold + "'" + IrcConstants.IrcColor +
+                                       (int)IrcColors.Blue + "%FEEDTITLE%" + IrcConstants.IrcColor + "'" +
+                                       IrcConstants.IrcBold + ": " + IrcConstants.IrcColor + (int)IrcColors.Brown +
+                                       "%TITLE%" + IrcConstants.IrcColor + " (by " + IrcConstants.IrcBold + "%AUTHOR%" +
+                                       IrcConstants.IrcBold + " on " + IrcConstants.IrcColor + (int)IrcColors.Blue +
+                                       "%DATE%" + IrcConstants.IrcColor + " go: %LINK%)";
+
+        private void SetFormat(object sender, IrcEventArgs e)
+        {
+            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+            if (e.Data.MessageArray.Length < 2)
+            {
+                BotMethods.SendMessage(SendType.Message, sendto, MessageFormat);
+            }
+            else
+            {
+                messageFormat = null;
+                if (e.Data.MessageArray[1] == "RESET")
+                {
+                    PersistentMemory.Instance.RemoveKey(RssFormatConst);
+                }
+                else
+                {
+                    PersistentMemory.Instance.ReplaceValue(RssFormatConst, e.Data.Message.Substring(e.Data.MessageArray[0].Length + 1));
+                }
+            }
+        }
+
         private void ShowRss(object sender, IrcEventArgs e)
         {
             var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
@@ -115,17 +190,32 @@ namespace Plugin
                 }
                 return;
             }
-            if (e.Data.MessageArray.Length >= 3) return;
+            if (e.Data.MessageArray.Length < 3)
+            {
+                if (rssFeeds.ContainsKey(e.Data.MessageArray[1].ToLower()))
+                {
+                    var rssFeed = rssFeeds[e.Data.MessageArray[1].ToLower()];
+                    BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' has {1} Elements, last post was on: {2}.".Fill(rssFeed.FriendlyName, rssFeed.Count, rssFeed.Last));
+                }
+                else
+                {
+                    BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
+                }
+                return;
+            }
             if (rssFeeds.ContainsKey(e.Data.MessageArray[1].ToLower()))
             {
                 var rssFeed = rssFeeds[e.Data.MessageArray[1].ToLower()];
-                BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' has {1} Elements, last post was on: {2}.".Fill(rssFeed.FriendlyName, rssFeed.Count, rssFeed.Last));
+                int index;
+                if (int.TryParse(e.Data.MessageArray[2], out index))
+                {
+                    SendFormattedItem(rssFeed, rssFeed[index], sendto);
+                }
             }
             else
             {
                 BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
             }
-            return;
         }
 
         private void AdminRss(object sender, IrcEventArgs e)

@@ -22,13 +22,13 @@ using System.Linq;
 using System.Reflection;
 using System.Timers;
 using System.Web;
-
-using Dimebrain.TweetSharp;
-using Dimebrain.TweetSharp.Extensions;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 using Meebey.SmartIrc4net;
+using TweetSharp.Extensions;
+using TweetSharp.Twitter.Extensions;
+using TweetSharp.Twitter.Model;
 
 namespace Plugin
 {
@@ -44,8 +44,7 @@ namespace Plugin
         private readonly Dictionary<string, TwitterWrapper> twitterAccounts = new Dictionary<string, TwitterWrapper>();
 
         public const string TwitterAccountConst = "twitter_account";
-        public static TwitterClientInfo ClientInfo = new TwitterClientInfo { ClientName = "Huffelpuff IRC Bot - Twitter Plugin", ClientUrl = "http://huffelpuff-irc-bot.origo.ethz.ch/", ClientVersion = "1.0", ConsumerKey = "yRaZB2ljtZ1ldg84Uvu4Iw", ConsumerSecret = "26SPIqzqcfQZPsgchKipqWLX3bCGu7vw0JaAUghuKs" };
-
+        private const string TweetFormatConst = "twitter_format";
 
         public override void Init()
         {
@@ -76,9 +75,7 @@ namespace Plugin
                     {
                         foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
                         {
-                            BotMethods.SendMessage(SendType.Message, channel, "{8}New Mention{9} ({7}): {0} (by {6}{1}{6} ({2}/{3}/{4}) - {5})".Fill(
-                                Colorize(mention.Text), mention.User.ScreenName, mention.User.StatusesCount, mention.User.FriendsCount, mention.User.FollowersCount, mention.CreatedDate.ToRelativeTime(),
-                                IrcConstants.IrcBold, mention.Id, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + "" + (int)IrcColors.Orange, "" + IrcConstants.IrcColor + IrcConstants.IrcBold));
+                            SendFormattedItem(twitteraccount.Value, mention, channel);
                         }
                     }
                 }
@@ -99,6 +96,7 @@ namespace Plugin
                 Console.WriteLine(ex.Message);
             }
         }
+
         /*
                 private readonly Regex whiteSpaceMatch = new Regex(@"\s+");
 
@@ -139,13 +137,14 @@ namespace Plugin
         {
             BotMethods.AddCommand(new Commandlet("!tweet", "The !tweet <account> <text> command tweets a message to the account. If there is only 1 account, the account name can be omitted.", TweetHandler, this, CommandScope.Public, "twitter_access"));
             BotMethods.AddCommand(new Commandlet("!retweet", "The !retweet <account> <id> command retweets a message, just enter the ID of the tweet. If there is only 1 account, the account name can be omitted.", TweetHandler, this, CommandScope.Public, "twitter_access"));
-            BotMethods.AddCommand(new Commandlet("!tweet-stats", "The !tweet-stats.", TweetStatsHandler, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!tweet-trends", "The !tweet-stats.", TweetTrendsHandler, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!mentionformat", "With the command !tweetformat <formatstring> you can customize your Tweets. [Vars: %FEEDNAME% %ACCOUNT% %TWEET% %ID% %SCREENNAME% %AUTHOR% %LOCATION% %DATE% %AGO% %#FOLLOW% %#STATUS% %#FRIENDS% %#FAVS% %#LANG% %#USERURL%]. You can reset to the initial setting with: !tweetformat RESET", SetFormat, this, CommandScope.Both, "twitter_admin"));
+            BotMethods.AddCommand(new Commandlet("!tweet-stats", "The !tweet-stats.", TweetStatsHandler, this));
+            BotMethods.AddCommand(new Commandlet("!tweet-trends", "The !tweet-stats.", TweetTrendsHandler, this));
             BotMethods.AddCommand(new Commandlet("!+tweet", "With the command !+tweet <friendlyname> [<username> <password>] you can add a tweets.", AdminTweet, this, CommandScope.Private, "twitter_admin"));
             BotMethods.AddCommand(new Commandlet("!-tweet", "With the command !-tweet <friendlyname> you can remove a tweets.", AdminTweet, this, CommandScope.Private, "twitter_admin"));
             BotMethods.AddCommand(new Commandlet("!+tag", "With the command !+tag you can add a search tag.", TagHandler, this, CommandScope.Both, "twitter_admin"));
             BotMethods.AddCommand(new Commandlet("!-tag", "With the command !-tag you can remove a search tag.", TagHandler, this, CommandScope.Both, "twitter_admin"));
-            BotMethods.AddCommand(new Commandlet("!utf8", "!utf8 äöü", Utf8Handler, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!utf8", "!utf8 äöü", Utf8Handler, this));
 
             checkInterval.Enabled = true;
             base.Activate();
@@ -155,6 +154,7 @@ namespace Plugin
         public override void Deactivate()
         {
             BotMethods.RemoveCommand("!tweet");
+            BotMethods.RemoveCommand("!mentionformat");
             BotMethods.RemoveCommand("!tweet-stats");
             BotMethods.RemoveCommand("!tweet-trends");
             BotMethods.RemoveCommand("!+tweet");
@@ -186,30 +186,6 @@ namespace Plugin
             }
         }
 
-        /*
-                private string MessageTime(DateTime time)
-                {
-                    return time.ToString("HH:mm K", new CultureInfo("DE-ch", true));
-                }
-
-
-                private string Ago(TimeSpan ago)
-                {
-                    if (ago.Days > 0)
-                    {
-                        return ago.Days + ((ago.Days == 1) ? " day" : " days") + " ago";
-                    }
-                    if (ago.Hours > 0)
-                    {
-                        return ago.Hours + ((ago.Days == 1) ? " hour" : " hours") + " ago";
-                    }
-                    if (ago.Minutes > 0)
-                    {
-                        return ago.Minutes + ((ago.Days == 1) ? " minute" : " minutes") + " ago";
-                    }
-                    return ago.Seconds + ((ago.Days == 1) ? " second" : " seconds") + " ago";
-                }
-        */
 
         private void TagHandler(object sender, IrcEventArgs e)
         {
@@ -245,6 +221,11 @@ namespace Plugin
             if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower()))
             {
                 var user = twitterAccounts[e.Data.MessageArray[1].ToLower()].GetStats();
+                if (user == null)
+                {
+                    PrintFail(sendto, twitterAccounts[e.Data.MessageArray[1].ToLower()].LastResponse);
+                    return;
+                }
                 BotMethods.SendMessage(SendType.Message, sendto, "Followers: {0}, Friends: {1}, Statuses: {2}, -> {3}"
                                        .Fill(user.FollowersCount, user.FriendsCount, user.StatusesCount, user.Url));
             }
@@ -254,21 +235,64 @@ namespace Plugin
             }
         }
 
+        private bool asciiArt = true;
+        private void PrintFail(string sendto, TwitterResult result)
+        {
+            if (result.IsFailWhale)
+            {
+                if (asciiArt)
+                {
+                    BotMethods.SendMessage(SendType.Message, sendto, "     FAIL WHALE!");
+                    BotMethods.SendMessage(SendType.Message, sendto, "W     W      W        ");
+                    BotMethods.SendMessage(SendType.Message, sendto, "W        W  W     W    ");
+                    BotMethods.SendMessage(SendType.Message, sendto, "              '.  W      ");
+                    BotMethods.SendMessage(SendType.Message, sendto, "  .-\"\"-._     \\ \\.--|  ");
+                    BotMethods.SendMessage(SendType.Message, sendto, " /       \"-..__) .-'   ");
+                    BotMethods.SendMessage(SendType.Message, sendto, "|     _         /      ");
+                    BotMethods.SendMessage(SendType.Message, sendto, "\'-.__,   .__.,'       ");
+                    BotMethods.SendMessage(SendType.Message, sendto, " `'----'._\\--'      ");
+                    BotMethods.SendMessage(SendType.Message, sendto, "VVVVVVVVVVVVVVVVVVVVV");
+                }
+                else
+                {
+                    BotMethods.SendMessage(SendType.Message, sendto, "Twitter is over capacity - we have a Fail Whale");
+                }
+            }
+
+            if (result.IsNetworkError)
+            {
+                BotMethods.SendMessage(SendType.Message, sendto, "Network error occured");
+            }
+
+            if (result.IsTwitterError)
+            {
+                BotMethods.SendMessage(SendType.Message, sendto, "Twitter error occured");
+            }
+
+            if (result.IsServiceError)
+            {
+                BotMethods.SendMessage(SendType.Message, sendto, "Service error occured");
+            }
+
+        }
+
         private void TweetTrendsHandler(object sender, IrcEventArgs e)
         {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-            var trends = twitterAccounts.First().Value.GetTrends();
-            if (trends == null)
-            {
-                BotMethods.SendMessage(SendType.Message, sendto, "Trends failed");
-            }
-            else
+            var account = twitterAccounts.FirstOrDefault().Value ?? new TwitterWrapper();
+
+
+            var trends = account.GetTrends();
+            if (trends != null)
             {
                 foreach (var line in trends.Trends.Select(trend => trend.Name).ToLines(350, ", ", "Current trends: ", ""))
                 {
                     BotMethods.SendMessage(SendType.Message, sendto, line);
                 }
+                return;
             }
+
+            BotMethods.SendMessage(SendType.Message, sendto, "Trends failed");
         }
 
         private void TweetHandler(object sender, IrcEventArgs e)
@@ -312,7 +336,10 @@ namespace Plugin
                     BotMethods.SendMessage(SendType.Message, sendto, "Error on feed '{0}': {1}".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName, error.ErrorMessage));
                     return;
                 }
-                catch (Exception) { }
+                catch (Exception exception)
+                {
+                    Log.Instance.Log(exception.Message, Level.Error);
+                }
             }
             else if (twitterAccounts.Count == 1)
             {
@@ -366,6 +393,65 @@ namespace Plugin
                     break;
                 default:
                     break;
+            }
+        }
+
+        private readonly string sourceMessageFormat = "{8}New Mention{9} ({7}): {0} (by {6}{1}{6} ({2}/{3}/{4}) - {5})"
+            .Fill("%TWEET%", "%SCREENNAME%", "%#STATUS%", "%#FRIENDS%", "%#FOLLOW%", "%AGO%", IrcConstants.IrcBold, "%ID%",
+            "" + IrcConstants.IrcBold + IrcConstants.IrcColor + "" + (int)IrcColors.Orange,
+            "" + IrcConstants.IrcColor + IrcConstants.IrcBold);
+        private string messageFormat;
+        protected string MessageFormat
+        {
+            get
+            {
+                messageFormat = messageFormat ?? PersistentMemory.Instance.GetValue(TweetFormatConst) ?? sourceMessageFormat;
+                return messageFormat;
+            }
+        }
+
+        private void SendFormattedItem(TwitterWrapper twitteraccount, TwitterStatus mention, string sendto)
+        {
+            if (twitteraccount == null || mention == null) return;
+
+            BotMethods.SendMessage(SendType.Message, sendto,
+                MessageFormat.FillKeyword(
+                    "%FEEDNAME%", twitteraccount.FriendlyName,
+                    "%ACCOUNT%", twitteraccount.Name,
+                    "%TWEET%", Colorize(mention.Text),
+                    "%ID%", mention.Id.ToString(),
+                    "%SCREENNAME%", mention.User.ScreenName,
+                    "%AUTHOR%", mention.User.Name,
+                    "%LOCATION%", mention.Location.ToString(),
+                    "%DATE%", mention.CreatedDate.ToString(),
+                    "%AGO%", mention.CreatedDate.ToRelativeTime(),
+                    "%#FOLLOW%", mention.User.FollowersCount.ToString(),
+                    "%#STATUS%", mention.User.StatusesCount.ToString(),
+                    "%#FRIENDS%", mention.User.FriendsCount.ToString(),
+                    "%#FAVS%", mention.User.FavouritesCount.ToString(),
+                    "%#LANG%", mention.User.Language,
+                    "%#USERURL%", mention.User.Url
+                ));
+        }
+
+        private void SetFormat(object sender, IrcEventArgs e)
+        {
+            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+            if (e.Data.MessageArray.Length < 2)
+            {
+                BotMethods.SendMessage(SendType.Message, sendto, MessageFormat);
+            }
+            else
+            {
+                messageFormat = null;
+                if (e.Data.MessageArray[1] == "RESET")
+                {
+                    PersistentMemory.Instance.RemoveKey(TweetFormatConst);
+                }
+                else
+                {
+                    PersistentMemory.Instance.ReplaceValue(TweetFormatConst, e.Data.Message.Substring(e.Data.MessageArray[0].Length + 1));
+                }
             }
         }
     }

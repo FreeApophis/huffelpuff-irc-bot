@@ -1,4 +1,4 @@
-/*
+/* 
  *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
  * 
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
@@ -20,10 +20,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dimebrain.TweetSharp.Extensions;
-using Dimebrain.TweetSharp.Fluent;
-using Dimebrain.TweetSharp.Model;
 using Huffelpuff.Utils;
+using TweetSharp;
+using TweetSharp.Model;
+using TweetSharp.Twitter.Extensions;
+using TweetSharp.Twitter.Fluent;
+using TweetSharp.Twitter.Model;
 
 namespace Plugin
 {
@@ -32,6 +34,39 @@ namespace Plugin
     /// </summary>
     public class TwitterWrapper
     {
+        public static TwitterClientInfo ClientInfo = new TwitterClientInfo
+        {
+            ClientName = "Huffelpuff IRC Bot - Twitter Plugin",
+            ClientUrl = "http://huffelpuff-irc-bot.origo.ethz.ch/",
+            ClientVersion = "1.0",
+            ConsumerKey = "yRaZB2ljtZ1ldg84Uvu4Iw",
+            ConsumerSecret = "26SPIqzqcfQZPsgchKipqWLX3bCGu7vw0JaAUghuKs"
+        };
+
+        private TwitterResult lastResponse;
+        public TwitterResult LastResponse
+        {
+            get
+            {
+                return lastResponse;
+            }
+        }
+
+        public OAuthToken AuthToken
+        {
+            get
+            {
+                var twitter = FluentTwitter
+                    .CreateRequest()
+                    .Configuration
+                    .UseHttps()
+                    .Authentication
+                    .GetClientAuthAccessToken(ClientInfo.ConsumerKey, ClientInfo.ConsumerSecret, User, Pass);
+                var response = lastResponse = twitter.Request();
+                return response.AsToken();
+            }
+        }
+
         public string Name { get; private set; }
         public string NameSpace
         {
@@ -104,6 +139,11 @@ namespace Plugin
 
         private readonly Dictionary<string, DateTime> lastTag = new Dictionary<string, DateTime>();
 
+        public TwitterWrapper()
+        {
+            // this is a dummy constructor: if you need an object desperatly!
+        }
+
         public TwitterWrapper(string name)
         {
             Name = name;
@@ -138,9 +178,10 @@ namespace Plugin
 
         private IEnumerable<TwitterStatus> GetMentions()
         {
+            var token = AuthToken;
             var mentions = FluentTwitter
-                .CreateRequest(TwitterPlugin.ClientInfo)
-                .AuthenticateAs(user, pass)
+                .CreateRequest(ClientInfo)
+                .AuthenticateWith(token.Token, token.TokenSecret)
                 .Statuses()
                 .Mentions()
                 .AsJson()
@@ -177,9 +218,10 @@ namespace Plugin
 
         private IEnumerable<TwitterSearchStatus> SearchTag(string tag)
         {
+            var token = AuthToken;
             return FluentTwitter
-                .CreateRequest(TwitterPlugin.ClientInfo)
-                .AuthenticateAs(user, pass)
+                .CreateRequest(ClientInfo)
+                .AuthenticateWith(token.Token, token.TokenSecret)
                 .Search()
                 .Query()
                 .ContainingHashTag(tag)
@@ -189,11 +231,10 @@ namespace Plugin
                 .Statuses;
         }
 
-        public Dimebrain.TweetSharp.Model.Twitter.TwitterSearchTrends GetTrends()
+        public TwitterSearchTrends GetTrends()
         {
             return FluentTwitter
-                .CreateRequest(TwitterPlugin.ClientInfo)
-                .AuthenticateAs(user, pass)
+                .CreateRequest(ClientInfo)
                 .Search()
                 .Trends()
                 .Current()
@@ -209,14 +250,16 @@ namespace Plugin
         /// <returns>returns the response as a string</returns>
         public TwitterResult SendStatus(string message, bool retweet)
         {
+            var token = AuthToken;
+            if (token == null) return null;
             if (retweet)
             {
                 long statusId;
                 if (long.TryParse(message, out statusId))
                 {
                     return FluentTwitter
-                        .CreateRequest(TwitterPlugin.ClientInfo)
-                        .AuthenticateAs(user, pass)
+                        .CreateRequest(ClientInfo)
+                        .AuthenticateWith(token.Token, token.TokenSecret)
                         .Statuses()
                         .Retweet(statusId, RetweetMode.SymbolPrefix)
                         .AsJson()
@@ -225,8 +268,8 @@ namespace Plugin
             }
 
             return FluentTwitter
-                .CreateRequest(TwitterPlugin.ClientInfo)
-                .AuthenticateAs(user, pass)
+                .CreateRequest(ClientInfo)
+                .AuthenticateWith(token.Token, token.TokenSecret)
                 .Statuses()
                 .Update(message)
                 .AsJson()
@@ -241,9 +284,11 @@ namespace Plugin
         /// <returns>the current Twitter User</returns>
         public TwitterUser GetStats()
         {
+            var token = AuthToken;
+            if (token == null) return null;
             return FluentTwitter
-                .CreateRequest(TwitterPlugin.ClientInfo)
-                .AuthenticateAs(user, pass)
+                .CreateRequest(ClientInfo)
+                .AuthenticateWith(token.Token, token.TokenSecret)
                 .Statuses()
                 .OnUserTimeline()
                 .AsJson()

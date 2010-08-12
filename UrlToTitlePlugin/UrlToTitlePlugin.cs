@@ -42,19 +42,19 @@ namespace Plugin
 
         public override string AboutHelp()
         {
-            return "Translates any discussion";
+            return "If an Url is sent on a single line the Bot tries to get the Title of the page and posts it to the channel";
         }
 
         public override void Activate()
         {
-            BotEvents.OnChannelMessage += BotEvents_OnChannelMessage;
+            BotEvents.OnChannelMessage += BotEventsOnChannelMessage;
 
             base.Activate();
         }
 
         public override void Deactivate()
         {
-            BotEvents.OnChannelMessage -= BotEvents_OnChannelMessage;
+            BotEvents.OnChannelMessage -= BotEventsOnChannelMessage;
 
             base.Deactivate();
         }
@@ -66,7 +66,7 @@ namespace Plugin
 
         private readonly Regex whiteSpaceMatch = new Regex(@"\s+");
 
-        private void BotEvents_OnChannelMessage(object sender, IrcEventArgs e)
+        private void BotEventsOnChannelMessage(object sender, IrcEventArgs e)
         {
             try
             {

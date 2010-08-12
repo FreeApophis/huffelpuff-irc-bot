@@ -48,11 +48,11 @@ namespace Huffelpuff.Plugins
             this.bot.AddCommand(new Commandlet("!reload", "!reload unloads and reloads all the plugins", ReloadPlugins, this, CommandScope.Both, "pluginmanager_reload"));
 
             pluginManager = new PluginManager(relPluginPath);
-            pluginManager.PluginsReloaded += Plugins_PluginsReloaded;
+            pluginManager.PluginsReloaded += PluginsPluginsReloaded;
             pluginManager.IgnoreErrors = false;
             pluginManager.PluginSources = PluginSourceEnum.Both;
 
-            pluginManager.AddReference("Huffelpuff.exe");
+            pluginManager.AddReference(Assembly.GetEntryAssembly().Location);
 
             pluginManager.Start();
         }
@@ -65,7 +65,7 @@ namespace Huffelpuff.Plugins
 
 
         private readonly List<string> oldPlugs = new List<string>();
-        private void Plugins_PluginsReloaded(object sender, EventArgs e)
+        private void PluginsPluginsReloaded(object sender, EventArgs e)
         {
             plugins.Clear();
             bot.CleanPlugins();
@@ -73,7 +73,15 @@ namespace Huffelpuff.Plugins
             foreach (var pluginName in pluginManager.GetSubclasses("Huffelpuff.Plugins.AbstractPlugin"))
             {
                 var p = (AbstractPlugin)pluginManager.CreateInstance(pluginName, BindingFlags.CreateInstance, new object[] { bot });
-                p.Init();
+                try
+                {
+                    p.Init();
+                }
+                catch (Exception exception)
+                {
+                    Log.Instance.Log(" [Exception] " + pluginName + " (Exception: " + exception.Message + ")", Level.Info, ConsoleColor.Red);
+                    continue;
+                }
 
                 if (p.Ready)
                 {
@@ -125,13 +133,11 @@ namespace Huffelpuff.Plugins
                     p.Deactivate();
                     p.DeInit();
                 }
-                catch (Exception)
+                catch (Exception exception)
                 {
-                    /* Plugins Domain does not Exist */
+                    Log.Instance.Log(exception.Message, Level.Info, ConsoleColor.Red);
                 }
-
             }
-
         }
     }
 }

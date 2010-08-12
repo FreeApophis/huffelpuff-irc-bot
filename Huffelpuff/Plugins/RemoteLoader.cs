@@ -41,7 +41,6 @@ namespace Huffelpuff.Plugins
         /// <param name="fullname">The full filename of the assembly to load</param>
         public void LoadAssembly(string fullname)
         {
-            string path = Path.GetDirectoryName(fullname);
             string filename = Path.GetFileNameWithoutExtension(fullname);
 
             Assembly assembly = Assembly.Load(filename);
@@ -149,11 +148,7 @@ namespace Huffelpuff.Plugins
         /// <returns>All subclases</returns>
         public string[] GetSubclasses(string baseClass)
         {
-            Type baseClassType = Type.GetType(baseClass);
-            if (baseClassType == null)
-            {
-                baseClassType = GetTypeByName(baseClass);
-            }
+            Type baseClassType = Type.GetType(baseClass) ?? GetTypeByName(baseClass);
             if (baseClassType == null)
             {
                 throw new ArgumentException("Cannot find a type of name " + baseClass +

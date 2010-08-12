@@ -168,6 +168,10 @@ namespace Plugin
         {
             get
             {
+                if (cachedItems.Count == 0)
+                {
+                    cachedItems = GetRss();
+                }
                 return i < cachedItems.Count ? cachedItems[i] : null;
             }
         }
@@ -232,7 +236,9 @@ namespace Plugin
             string author = null, link = null;
             DateTime published;
 
-            DateTime.TryParse(entry.Descendants(AtomNamespace + "published").Select(n => n.Value).FirstOrDefault(), out published);
+            DateTime.TryParse(
+                entry.Descendants(AtomNamespace + "published").Select(n => n.Value).FirstOrDefault() ??
+                entry.Descendants(AtomNamespace + "updated").Select(n => n.Value).FirstOrDefault(), out published);
 
             var title = entry.Descendants(AtomNamespace + "title").Select(n => n.Value).FirstOrDefault();
             var authorEntry = entry.Descendants(AtomNamespace + "author").FirstOrDefault();

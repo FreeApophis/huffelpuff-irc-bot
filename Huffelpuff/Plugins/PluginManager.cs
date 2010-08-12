@@ -42,7 +42,7 @@ namespace Huffelpuff.Plugins
         {
             this.autoReload = autoReload;
 
-            PluginDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Huffelpuff");
+            PluginDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             PluginDirectory = Path.Combine(PluginDirectory, pluginRelativePath);
 
             LocalLoader = new LocalLoader(PluginDirectory);
@@ -124,6 +124,9 @@ namespace Huffelpuff.Plugins
             started = true;
             if (autoReload)
             {
+                var dir = new DirectoryInfo(PluginDirectory);
+                if (!dir.Exists) { dir.Create(); }
+
                 FileWatcher = new FileSystemWatcher(PluginDirectory) { EnableRaisingEvents = true };
                 FileWatcher.Changed += FileWatcherChanged;
                 FileWatcher.Deleted += FileWatcherChanged;

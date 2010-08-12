@@ -24,7 +24,7 @@ namespace Huffelpuff.Plugins
             {
                 ApplicationName = "Plugins",
                 ApplicationBase = AppDomain.CurrentDomain.BaseDirectory,
-                PrivateBinPath = Path.GetDirectoryName(pluginDirectory).Substring(Path.GetDirectoryName(pluginDirectory).LastIndexOf(Path.DirectorySeparatorChar) + 1),
+                PrivateBinPath = "plugins",
                 CachePath = Path.Combine(pluginDirectory, "cache" + Path.DirectorySeparatorChar),
                 ShadowCopyFiles = "true",
                 ShadowCopyDirectories = pluginDirectory
@@ -34,16 +34,20 @@ namespace Huffelpuff.Plugins
 
             // Used for a Cross AppDomain Singleton
             appDomain.SetData("PersistentMemoryInstance", PersistentMemory.Instance);
+            appDomain.AssemblyResolve += new ResolveEventHandler(AppDomainAssemblyResolve);
 
-            appDomain.UnhandledException += appDomain_UnhandledException;
+            appDomain.UnhandledException += AppDomainUnhandledException;
             appDomain.InitializeLifetimeService();
 
-            remoteLoader = (RemoteLoader)appDomain.CreateInstanceAndUnwrap(
-                "Huffelpuff",
-                "Huffelpuff.Plugins.RemoteLoader");
+            remoteLoader = (RemoteLoader)appDomain.CreateInstanceAndUnwrap("Huffelpuff", "Huffelpuff.Plugins.RemoteLoader");
         }
 
-        void appDomain_UnhandledException(object sender, UnhandledExceptionEventArgs ex)
+        static Assembly AppDomainAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            return null;
+        }
+
+        static void AppDomainUnhandledException(object sender, UnhandledExceptionEventArgs ex)
         {
             var e = (Exception)ex.ExceptionObject;
             Log.Instance.Log(e.Message, Level.Error, ConsoleColor.Red);
