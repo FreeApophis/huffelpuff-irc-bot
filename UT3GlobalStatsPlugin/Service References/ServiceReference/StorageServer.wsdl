@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://gamespy.net/sake" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://gamespy.net/sake" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://gamespy.net/sake" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://gamespy.net/sake" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
   <wsdl:types>
     <s:schema elementFormDefault="qualified" targetNamespace="http://gamespy.net/sake">
-      <s:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
-      <s:import namespace="http://schemas.xmlsoap.org/wsdl/" />
       <s:element name="CreateRecord">
         <s:complexType>
           <s:sequence>
@@ -115,6 +113,12 @@
           <s:enumeration value="FilterInvalid" />
           <s:enumeration value="SortInvalid" />
           <s:enumeration value="TargetFilterInvalid" />
+          <s:enumeration value="CertificateInvalid" />
+          <s:enumeration value="UnknownError" />
+          <s:enumeration value="AlreadyReported" />
+          <s:enumeration value="NotModerated" />
+          <s:enumeration value="CategoryInvalid" />
+          <s:enumeration value="DuplicateRecord" />
         </s:restriction>
       </s:simpleType>
       <s:element name="UpdateRecord">
@@ -312,6 +316,39 @@
           </s:sequence>
         </s:complexType>
       </s:element>
+      <s:element name="GetMyImages">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="gameid" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="profileid" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="loginTicket" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetMyImagesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="GetMyImagesResult" type="tns:Result" />
+            <s:element minOccurs="0" maxOccurs="1" name="values" type="tns:ArrayOfArrayOfRecordValue" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteImage">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="gameid" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="fileid" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="loginTicket" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteImageResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="DeleteImageResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
     </s:schema>
   </wsdl:types>
   <wsdl:message name="CreateRecordSoapIn">
@@ -374,6 +411,18 @@
   <wsdl:message name="GetRecordLimitSoapOut">
     <wsdl:part name="parameters" element="tns:GetRecordLimitResponse" />
   </wsdl:message>
+  <wsdl:message name="GetMyImagesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetMyImages" />
+  </wsdl:message>
+  <wsdl:message name="GetMyImagesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetMyImagesResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteImageSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteImage" />
+  </wsdl:message>
+  <wsdl:message name="DeleteImageSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteImageResponse" />
+  </wsdl:message>
   <wsdl:portType name="StorageServerSoap">
     <wsdl:operation name="CreateRecord">
       <wsdl:input message="tns:CreateRecordSoapIn" />
@@ -414,6 +463,14 @@
     <wsdl:operation name="GetRecordLimit">
       <wsdl:input message="tns:GetRecordLimitSoapIn" />
       <wsdl:output message="tns:GetRecordLimitSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetMyImages">
+      <wsdl:input message="tns:GetMyImagesSoapIn" />
+      <wsdl:output message="tns:GetMyImagesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteImage">
+      <wsdl:input message="tns:DeleteImageSoapIn" />
+      <wsdl:output message="tns:DeleteImageSoapOut" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="StorageServerSoap" type="tns:StorageServerSoap">
@@ -508,6 +565,24 @@
         <soap:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="GetMyImages">
+      <soap:operation soapAction="http://gamespy.net/sake/GetMyImages" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteImage">
+      <soap:operation soapAction="http://gamespy.net/sake/DeleteImage" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
   </wsdl:binding>
   <wsdl:binding name="StorageServerSoap12" type="tns:StorageServerSoap">
     <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
@@ -594,6 +669,24 @@
     </wsdl:operation>
     <wsdl:operation name="GetRecordLimit">
       <soap12:operation soapAction="http://gamespy.net/sake/GetRecordLimit" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMyImages">
+      <soap12:operation soapAction="http://gamespy.net/sake/GetMyImages" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteImage">
+      <soap12:operation soapAction="http://gamespy.net/sake/DeleteImage" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>

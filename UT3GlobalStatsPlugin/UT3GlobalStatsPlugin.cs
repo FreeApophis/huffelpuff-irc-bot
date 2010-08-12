@@ -20,10 +20,10 @@
 using System.Linq;
 using Huffelpuff.Utils;
 using System;
-using System.Collections.Generic;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
+using Plugin.ServiceReference;
 
 namespace Plugin
 {
@@ -35,12 +35,12 @@ namespace Plugin
         public Ut3GlobalStatsPlugin(IrcBot botInstance) : base(botInstance) { }
 
         private GameSpyClient gsClient;
-        private StorageServer gsStorage;
+        private StorageServerSoap gsStorage;
 
         private string ticket;
         private DateTime lastused = DateTime.MinValue;
 
-        private const int Ut3GameID = 1727;
+        private const int Ut3GameId = 1727;
         private const string StatsTable = "PlayerStats_v2";
 
         public override string Name
@@ -54,7 +54,7 @@ namespace Plugin
         public override void Init()
         {
             gsClient = new GameSpyClient();
-            gsStorage = new StorageServer();
+            gsStorage = new StorageServerSoapClient();
             base.Init();
         }
 
@@ -94,8 +94,8 @@ namespace Plugin
 
             // *** hard coded query ***
             const bool cacheFlag = false;
-            var ownerIds = new List<int>();
-            var queryFields = new List<string> { "row", "Nick", "Pure_PlayerDM_ELO", "Pure_PlayerDM_EVENT_KILLS", "Pure_PlayerDM_EVENT_DEATHS" };
+            var ownerIds = new ArrayOfInt();
+            var queryFields = new ArrayOfString { "row", "Nick", "Pure_PlayerDM_ELO", "Pure_PlayerDM_EVENT_KILLS", "Pure_PlayerDM_EVENT_DEATHS" };
             const int surrounding = 0;
             const int limit = 0;
             const int offset = 0;
@@ -109,10 +109,14 @@ namespace Plugin
 
             try
             {
-                var s = gsStorage.SearchForRecords(Ut3GameID, ticket, StatsTable, queryFields.ToArray(), filter, orderBy, offset, limit, targetFilter, surrounding, ownerIds.ToArray(), cacheFlag, out values);
-                if (s != Result.Success)
+                var searchForRecordsRequest = new SearchForRecordsRequest(new SearchForRecordsRequestBody(Ut3GameId, ticket, StatsTable, queryFields, filter,
+                                                      orderBy, offset, limit, targetFilter, surrounding, ownerIds, cacheFlag));
+                var recordsResponse = gsStorage.SearchForRecords(searchForRecordsRequest);
+                values = recordsResponse.Body.values;
+
+                if (recordsResponse.Body.SearchForRecordsResult == Result.Success)
                 {
-                    Log.Instance.Log("Webservice returned '" + s + "' instead of success.");
+                    Log.Instance.Log("Webservice returned '" + recordsResponse + "' instead of success.");
                     return;
                 }
             }
@@ -135,8 +139,8 @@ namespace Plugin
 
             // *** hard coded query ***
             const bool cacheFlag = false;
-            var ownerIds = new List<int>();
-            var queryFields = new List<string> { "row", "Nick", "Pure_PlayerDM_ELO", "Pure_PlayerDM_EVENT_KILLS", "Pure_PlayerDM_EVENT_DEATHS" };
+            var ownerIds = new ArrayOfInt();
+            var queryFields = new ArrayOfString { "row", "Nick", "Pure_PlayerDM_ELO", "Pure_PlayerDM_EVENT_KILLS", "Pure_PlayerDM_EVENT_DEATHS" };
             const int surrounding = 0;
             const int limit = 10;
             const int offset = 0;
@@ -150,10 +154,13 @@ namespace Plugin
 
             try
             {
-                var s = gsStorage.SearchForRecords(Ut3GameID, ticket, StatsTable, queryFields.ToArray(), filter, orderBy, offset, limit, targetFilter, surrounding, ownerIds.ToArray(), cacheFlag, out values);
-                if (s != Result.Success)
+                var searchForRecordsRequest = new SearchForRecordsRequest(new SearchForRecordsRequestBody(Ut3GameId, ticket, StatsTable, queryFields, filter,
+                                                      orderBy, offset, limit, targetFilter, surrounding, ownerIds, cacheFlag));
+                var recordsResponse = gsStorage.SearchForRecords(searchForRecordsRequest);
+                values = recordsResponse.Body.values;
+                if (recordsResponse.Body.SearchForRecordsResult == Result.Success)
                 {
-                    Log.Instance.Log("Webservice returned '" + s + "' instead of success.");
+                    Log.Instance.Log("Webservice returned '" + recordsResponse.Body.SearchForRecordsResult + "' instead of success.");
                     return;
                 }
             }
