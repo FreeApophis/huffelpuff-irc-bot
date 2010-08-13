@@ -26,6 +26,7 @@ using TweetSharp.Model;
 using TweetSharp.Twitter.Extensions;
 using TweetSharp.Twitter.Fluent;
 using TweetSharp.Twitter.Model;
+using TweetSharp.Twitter.Service;
 
 namespace Plugin
 {
@@ -43,30 +44,6 @@ namespace Plugin
             ConsumerSecret = "26SPIqzqcfQZPsgchKipqWLX3bCGu7vw0JaAUghuKs"
         };
 
-        private TwitterResult lastResponse;
-        public TwitterResult LastResponse
-        {
-            get
-            {
-                return lastResponse;
-            }
-        }
-
-        public OAuthToken AuthToken
-        {
-            get
-            {
-                var twitter = FluentTwitter
-                    .CreateRequest()
-                    .Configuration
-                    .UseHttps()
-                    .Authentication
-                    .GetClientAuthAccessToken(ClientInfo.ConsumerKey, ClientInfo.ConsumerSecret, User, Pass);
-                var response = lastResponse = twitter.Request();
-                return response.AsToken();
-            }
-        }
-
         public string Name { get; private set; }
         public string NameSpace
         {
@@ -77,7 +54,7 @@ namespace Plugin
         }
 
 
-        private const string Friendlynameconst = "friendlyname";
+        private const string FriendlynameConst = "friendlyname";
         private string friendlyName;
         public string FriendlyName
         {
@@ -87,12 +64,12 @@ namespace Plugin
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, Friendlynameconst, value);
+                PersistentMemory.Instance.SetValue(NameSpace, FriendlynameConst, value);
                 friendlyName = value;
             }
         }
 
-        private const string Userconst = "user";
+        private const string UserConst = "user";
         private string user;
         public string User
         {
@@ -102,23 +79,46 @@ namespace Plugin
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, Userconst, value);
+                PersistentMemory.Instance.SetValue(NameSpace, UserConst, value);
                 user = value;
             }
         }
 
-        private const string Passconst = "pass";
-        private string pass;
-        public string Pass
+        private const string TokenConst = "token";
+        private string token;
+        public string Token
         {
             get
             {
-                return pass;
+                if (token == null)
+                {
+                    CreateNewRequestToken();
+                }
+                return token;
             }
             set
             {
-                PersistentMemory.Instance.SetValue("twitteraccount_" + Name, Passconst, value);
-                pass = value;
+                PersistentMemory.Instance.SetValue(NameSpace, TokenConst, value);
+                token = value;
+            }
+        }
+
+        private const string TokenSecretConst = "tokensecret";
+        private string tokenSecret;
+        public string TokenSecret
+        {
+            get
+            {
+                if (tokenSecret == null)
+                {
+                    CreateNewRequestToken();
+                }
+                return tokenSecret;
+            }
+            set
+            {
+                PersistentMemory.Instance.SetValue(NameSpace, TokenSecretConst, value);
+                tokenSecret = value;
             }
         }
 
@@ -147,26 +147,58 @@ namespace Plugin
         public TwitterWrapper(string name)
         {
             Name = name;
-            friendlyName = PersistentMemory.Instance.GetValueOrTodo(NameSpace, Friendlynameconst);
-            user = PersistentMemory.Instance.GetValueOrTodo(NameSpace, Userconst);
-            pass = PersistentMemory.Instance.GetValueOrTodo(NameSpace, Passconst);
+            friendlyName = PersistentMemory.Instance.GetValueOrTodo(NameSpace, FriendlynameConst);
+            user = PersistentMemory.Instance.GetValueOrTodo(NameSpace, UserConst);
+            token = PersistentMemory.Instance.GetValue(NameSpace, TokenConst);
 
             string lastDateTimeString = PersistentMemory.Instance.GetValue(NameSpace, Lastconst);
             last = (lastDateTimeString == null) ? DateTime.MinValue : DateTime.Parse(lastDateTimeString);
         }
 
-        public TwitterWrapper(string name, string friendlyName, string user, string pass)
+        public TwitterWrapper(string name, string friendlyName, string user)
         {
             this.friendlyName = friendlyName;
             this.user = user;
-            this.pass = pass;
             last = DateTime.MinValue;
             Name = name;
 
-            PersistentMemory.Instance.ReplaceValue(NameSpace, Friendlynameconst, friendlyName);
-            PersistentMemory.Instance.ReplaceValue(NameSpace, Userconst, user);
-            PersistentMemory.Instance.ReplaceValue(NameSpace, Passconst, pass);
+            PersistentMemory.Instance.ReplaceValue(NameSpace, FriendlynameConst, friendlyName);
+            PersistentMemory.Instance.ReplaceValue(NameSpace, UserConst, user);
             PersistentMemory.Instance.ReplaceValue(NameSpace, Lastconst, last.ToString());
+
+            CreateNewRequestToken();
+        }
+
+        public string AuthenticationUrl { get; private set; }
+        public OAuthToken UnauthorizedToken { get; private set; }
+
+        private void CreateNewRequestToken()
+        {
+            var service = new TwitterService(ClientInfo);
+
+            UnauthorizedToken = service.GetRequestToken(ClientInfo.ConsumerKey, ClientInfo.ConsumerSecret);
+            AuthenticationUrl = FluentTwitter.CreateRequest().Authentication.GetAuthorizationUrl(UnauthorizedToken.Token);
+        }
+
+        public bool AuthenticateToken(string pin)
+        {
+            var service = new TwitterService(ClientInfo);
+            var accessToken = service.GetAccessToken(UnauthorizedToken, pin);
+
+            Token = accessToken.Token;
+            TokenSecret = accessToken.TokenSecret;
+
+            return IsTweetAuthenticated;
+        }
+
+        internal bool IsTweetAuthenticated
+        {
+            get
+            {
+                var service = new TwitterService(ClientInfo);
+                service.AuthenticateWith(Token, TokenSecret);
+                return service.Error == null;
+            }
         }
 
         public void RemoveAccount()
@@ -178,10 +210,14 @@ namespace Plugin
 
         private IEnumerable<TwitterStatus> GetMentions()
         {
-            var token = AuthToken;
+            if (Token == null)
+            {
+                return null;
+            }
+
             var mentions = FluentTwitter
                 .CreateRequest(ClientInfo)
-                .AuthenticateWith(token.Token, token.TokenSecret)
+                .AuthenticateWith(Token, TokenSecret)
                 .Statuses()
                 .Mentions()
                 .AsJson()
@@ -218,10 +254,9 @@ namespace Plugin
 
         private IEnumerable<TwitterSearchStatus> SearchTag(string tag)
         {
-            var token = AuthToken;
             return FluentTwitter
                 .CreateRequest(ClientInfo)
-                .AuthenticateWith(token.Token, token.TokenSecret)
+                .AuthenticateWith(Token, TokenSecret)
                 .Search()
                 .Query()
                 .ContainingHashTag(tag)
@@ -250,8 +285,6 @@ namespace Plugin
         /// <returns>returns the response as a string</returns>
         public TwitterResult SendStatus(string message, bool retweet)
         {
-            var token = AuthToken;
-            if (token == null) return null;
             if (retweet)
             {
                 long statusId;
@@ -259,7 +292,7 @@ namespace Plugin
                 {
                     return FluentTwitter
                         .CreateRequest(ClientInfo)
-                        .AuthenticateWith(token.Token, token.TokenSecret)
+                        .AuthenticateWith(Token, TokenSecret)
                         .Statuses()
                         .Retweet(statusId, RetweetMode.SymbolPrefix)
                         .AsJson()
@@ -269,7 +302,7 @@ namespace Plugin
 
             return FluentTwitter
                 .CreateRequest(ClientInfo)
-                .AuthenticateWith(token.Token, token.TokenSecret)
+                .AuthenticateWith(Token, TokenSecret)
                 .Statuses()
                 .Update(message)
                 .AsJson()
@@ -284,11 +317,10 @@ namespace Plugin
         /// <returns>the current Twitter User</returns>
         public TwitterUser GetStats()
         {
-            var token = AuthToken;
             if (token == null) return null;
             return FluentTwitter
                 .CreateRequest(ClientInfo)
-                .AuthenticateWith(token.Token, token.TokenSecret)
+                .AuthenticateWith(Token, TokenSecret)
                 .Statuses()
                 .OnUserTimeline()
                 .AsJson()

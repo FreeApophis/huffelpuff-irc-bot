@@ -140,11 +140,12 @@ namespace Plugin
             BotMethods.AddCommand(new Commandlet("!mentionformat", "With the command !tweetformat <formatstring> you can customize your Tweets. [Vars: %FEEDNAME% %ACCOUNT% %TWEET% %ID% %SCREENNAME% %AUTHOR% %LOCATION% %DATE% %AGO% %#FOLLOW% %#STATUS% %#FRIENDS% %#FAVS% %#LANG% %#USERURL%]. You can reset to the initial setting with: !tweetformat RESET", SetFormat, this, CommandScope.Both, "twitter_admin"));
             BotMethods.AddCommand(new Commandlet("!tweet-stats", "The !tweet-stats.", TweetStatsHandler, this));
             BotMethods.AddCommand(new Commandlet("!tweet-trends", "The !tweet-stats.", TweetTrendsHandler, this));
-            BotMethods.AddCommand(new Commandlet("!+tweet", "With the command !+tweet <friendlyname> [<username> <password>] you can add a tweets.", AdminTweet, this, CommandScope.Private, "twitter_admin"));
-            BotMethods.AddCommand(new Commandlet("!-tweet", "With the command !-tweet <friendlyname> you can remove a tweets.", AdminTweet, this, CommandScope.Private, "twitter_admin"));
+            BotMethods.AddCommand(new Commandlet("!+tweet", "With the command !+tweet <friendlyname> [<username>] you can add a tweets. The authentication will be done interactive.", AdminTweet, this, CommandScope.Both, "twitter_admin"));
+            BotMethods.AddCommand(new Commandlet("!-tweet", "With the command !-tweet <friendlyname> you can remove a tweets.", AdminTweet, this, CommandScope.Both, "twitter_admin"));
             BotMethods.AddCommand(new Commandlet("!+tag", "With the command !+tag you can add a search tag.", TagHandler, this, CommandScope.Both, "twitter_admin"));
             BotMethods.AddCommand(new Commandlet("!-tag", "With the command !-tag you can remove a search tag.", TagHandler, this, CommandScope.Both, "twitter_admin"));
             BotMethods.AddCommand(new Commandlet("!utf8", "!utf8 äöü", Utf8Handler, this));
+            BotMethods.AddCommand(new Commandlet("!pin", "!utf8 äöü", PinHandler, this));
 
             checkInterval.Enabled = true;
             base.Activate();
@@ -161,6 +162,7 @@ namespace Plugin
             BotMethods.RemoveCommand("!-tweet");
             BotMethods.RemoveCommand("!+tag");
             BotMethods.RemoveCommand("!-tag");
+            BotMethods.RemoveCommand("!pin");
             BotMethods.RemoveCommand("!utf8");
 
             checkInterval.Enabled = false;
@@ -221,11 +223,6 @@ namespace Plugin
             if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower()))
             {
                 var user = twitterAccounts[e.Data.MessageArray[1].ToLower()].GetStats();
-                if (user == null)
-                {
-                    PrintFail(sendto, twitterAccounts[e.Data.MessageArray[1].ToLower()].LastResponse);
-                    return;
-                }
                 BotMethods.SendMessage(SendType.Message, sendto, "Followers: {0}, Friends: {1}, Statuses: {2}, -> {3}"
                                        .Fill(user.FollowersCount, user.FriendsCount, user.StatusesCount, user.Url));
             }
@@ -351,7 +348,32 @@ namespace Plugin
                 return;
             }
         }
+        private void PinHandler(object sender, IrcEventArgs e)
+        {
+            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+            if (e.Data.MessageArray.Length < 3)
+            {
+                BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments: use !pin <feed> <pin>");
+                return;
+            }
+            var friendlyname = e.Data.MessageArray[1];
+            if (!twitterAccounts.ContainsKey(friendlyname))
+            {
+                BotMethods.SendMessage(SendType.Message, sendto, "Unknown feed: use !pin <feed> <pin>");
+                return;
+            }
+            var pin = e.Data.MessageArray[2];
 
+            if (twitterAccounts[friendlyname].AuthenticateToken(pin))
+            {
+                BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' is authorized, you can tweet now!".Fill(friendlyname));
+
+            }
+            else
+            {
+                BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' authorization failed. Please go to {1} validate account and activate account by !pin {0} <pin>".Fill(friendlyname, twitterAccounts[friendlyname].AuthenticationUrl));
+            }
+        }
 
         private void AdminTweet(object sender, IrcEventArgs e)
         {
@@ -360,19 +382,20 @@ namespace Plugin
             switch (e.Data.MessageArray[0].ToLower())
             {
                 case "!+tweet":
-                    if (e.Data.MessageArray.Length < 4)
+                    if (e.Data.MessageArray.Length < 3)
                     {
                         BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments for 'add'! Try '!help !+tweet'.");
                         return;
                     }
-                    if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower()))
+                    var friendlyname = e.Data.MessageArray[1].ToLower();
+                    if (twitterAccounts.ContainsKey(friendlyname))
                     {
                         BotMethods.SendMessage(SendType.Message, sendto, "Tweet '{0}' already exists.".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName));
                         break;
                     }
-                    PersistentMemory.Instance.SetValue(TwitterAccountConst, e.Data.MessageArray[1].ToLower());
-                    twitterAccounts.Add(e.Data.MessageArray[1].ToLower(), new TwitterWrapper(e.Data.MessageArray[1].ToLower(), e.Data.MessageArray[1], e.Data.MessageArray[2], e.Data.MessageArray[3]));
-                    BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully added.".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName));
+                    PersistentMemory.Instance.SetValue(TwitterAccountConst, friendlyname);
+                    twitterAccounts.Add(friendlyname, new TwitterWrapper(friendlyname, e.Data.MessageArray[1], e.Data.MessageArray[2]));
+                    BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully added. Please go to {1} validate account and activate account by !pin {0} <pin>".Fill(friendlyname, twitterAccounts[friendlyname].AuthenticationUrl));
                     break;
                 case "!-tweet":
                     if (e.Data.MessageArray.Length < 2)
