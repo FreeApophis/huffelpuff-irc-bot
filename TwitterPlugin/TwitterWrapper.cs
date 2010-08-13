@@ -33,9 +33,9 @@ namespace Plugin
     /// <summary>
     /// Description of TwitterInfos.
     /// </summary>
-    public class TwitterWrapper
+    internal class TwitterWrapper
     {
-        public static TwitterClientInfo ClientInfo = new TwitterClientInfo
+        private static readonly TwitterClientInfo ClientInfo = new TwitterClientInfo
         {
             ClientName = "Huffelpuff IRC Bot - Twitter Plugin",
             ClientUrl = "http://huffelpuff-irc-bot.origo.ethz.ch/",
@@ -44,8 +44,8 @@ namespace Plugin
             ConsumerSecret = "26SPIqzqcfQZPsgchKipqWLX3bCGu7vw0JaAUghuKs"
         };
 
-        public string Name { get; private set; }
-        public string NameSpace
+        internal string Name { get; private set; }
+        private string NameSpace
         {
             get
             {
@@ -56,7 +56,7 @@ namespace Plugin
 
         private const string FriendlynameConst = "friendlyname";
         private string friendlyName;
-        public string FriendlyName
+        internal string FriendlyName
         {
             get
             {
@@ -71,7 +71,7 @@ namespace Plugin
 
         private const string UserConst = "user";
         private string user;
-        public string User
+        internal string User
         {
             get
             {
@@ -86,7 +86,7 @@ namespace Plugin
 
         private const string TokenConst = "token";
         private string token;
-        public string Token
+        private string Token
         {
             get
             {
@@ -103,9 +103,21 @@ namespace Plugin
             }
         }
 
+        public bool IsAuthenticated
+        {
+            get
+            {
+                if (tokenSecret == null)
+                {
+                    CreateNewRequestToken();
+                }
+                return tokenSecret != null;
+            }
+        }
+
         private const string TokenSecretConst = "tokensecret";
         private string tokenSecret;
-        public string TokenSecret
+        private string TokenSecret
         {
             get
             {
@@ -124,7 +136,7 @@ namespace Plugin
 
         private const string Lastconst = "lastdate";
         private DateTime last;
-        public DateTime Last
+        internal DateTime Last
         {
             get
             {
@@ -137,14 +149,11 @@ namespace Plugin
             }
         }
 
-        private readonly Dictionary<string, DateTime> lastTag = new Dictionary<string, DateTime>();
+        public static TwitterResult LastResult { get; private set; }
 
-        public TwitterWrapper()
-        {
-            // this is a dummy constructor: if you need an object desperatly!
-        }
+        private static readonly Dictionary<string, DateTime> LastTag = new Dictionary<string, DateTime>();
 
-        public TwitterWrapper(string name)
+        internal TwitterWrapper(string name)
         {
             Name = name;
             friendlyName = PersistentMemory.Instance.GetValueOrTodo(NameSpace, FriendlynameConst);
@@ -155,7 +164,7 @@ namespace Plugin
             last = (lastDateTimeString == null) ? DateTime.MinValue : DateTime.Parse(lastDateTimeString);
         }
 
-        public TwitterWrapper(string name, string friendlyName, string user)
+        internal TwitterWrapper(string name, string friendlyName, string user)
         {
             this.friendlyName = friendlyName;
             this.user = user;
@@ -169,8 +178,8 @@ namespace Plugin
             CreateNewRequestToken();
         }
 
-        public string AuthenticationUrl { get; private set; }
-        public OAuthToken UnauthorizedToken { get; private set; }
+        internal string AuthenticationUrl { get; private set; }
+        private OAuthToken UnauthorizedToken { get; set; }
 
         private void CreateNewRequestToken()
         {
@@ -180,28 +189,37 @@ namespace Plugin
             AuthenticationUrl = FluentTwitter.CreateRequest().Authentication.GetAuthorizationUrl(UnauthorizedToken.Token);
         }
 
-        public bool AuthenticateToken(string pin)
+        internal bool AuthenticateToken(string pin)
         {
             var service = new TwitterService(ClientInfo);
-            var accessToken = service.GetAccessToken(UnauthorizedToken, pin);
+            try
+            {
+                var accessToken = service.GetAccessToken(UnauthorizedToken, pin);
+                Token = accessToken.Token;
+                TokenSecret = accessToken.TokenSecret;
 
-            Token = accessToken.Token;
-            TokenSecret = accessToken.TokenSecret;
-
-            return IsTweetAuthenticated;
+                return IsTweetAuthenticated;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         internal bool IsTweetAuthenticated
         {
             get
             {
+                if (string.IsNullOrEmpty(Token))
+                    return true;
+
                 var service = new TwitterService(ClientInfo);
                 service.AuthenticateWith(Token, TokenSecret);
                 return service.Error == null;
             }
         }
 
-        public void RemoveAccount()
+        internal void RemoveAccount()
         {
             PersistentMemory.Instance.RemoveValue(TwitterPlugin.TwitterAccountConst, Name);
             PersistentMemory.Instance.RemoveGroup(NameSpace);
@@ -210,11 +228,6 @@ namespace Plugin
 
         private IEnumerable<TwitterStatus> GetMentions()
         {
-            if (Token == null)
-            {
-                return null;
-            }
-
             var mentions = FluentTwitter
                 .CreateRequest(ClientInfo)
                 .AuthenticateWith(Token, TokenSecret)
@@ -223,10 +236,11 @@ namespace Plugin
                 .AsJson()
                 .Request();
 
+            LastResult = mentions;
             return mentions.AsStatuses();
         }
 
-        public IEnumerable<TwitterStatus> GetNewMentions()
+        internal IEnumerable<TwitterStatus> GetNewMentions()
         {
             var mentions = GetMentions();
             if (mentions == null)
@@ -240,41 +254,43 @@ namespace Plugin
             return newMentions;
         }
 
-        public IEnumerable<TwitterSearchStatus> SearchNewTag(string tag)
+        internal static IEnumerable<TwitterSearchStatus> SearchNewTag(string tag)
         {
             var allTags = SearchTag(tag);
-            var time = lastTag.ContainsKey(tag) ? lastTag[tag] : DateTime.Now.AddHours(-3);
+            var time = LastTag.ContainsKey(tag) ? LastTag[tag] : DateTime.Now.AddHours(-3);
             var newTags = allTags.Where(tss => tss.CreatedDate > time).OrderBy(tss => tss.CreatedDate).ToList();
             if (newTags.Count() > 0)
             {
-                lastTag[tag] = newTags.OrderByDescending(tss => tss.CreatedDate).Take(1).Single().CreatedDate;
+                LastTag[tag] = newTags.OrderByDescending(tss => tss.CreatedDate).Take(1).Single().CreatedDate;
             }
             return newTags;
         }
 
-        private IEnumerable<TwitterSearchStatus> SearchTag(string tag)
+        private static IEnumerable<TwitterSearchStatus> SearchTag(string tag)
         {
-            return FluentTwitter
+            var result = FluentTwitter
                 .CreateRequest(ClientInfo)
-                .AuthenticateWith(Token, TokenSecret)
                 .Search()
                 .Query()
                 .ContainingHashTag(tag)
                 .AsJson()
-                .Request()
-                .AsSearchResult()
-                .Statuses;
+                .Request();
+
+            LastResult = result;
+            return result.AsSearchResult().Statuses;
         }
 
-        public TwitterSearchTrends GetTrends()
+        internal static TwitterSearchTrends GetTrends()
         {
-            return FluentTwitter
+            var result = FluentTwitter
                 .CreateRequest(ClientInfo)
                 .Search()
                 .Trends()
                 .Current()
-                .Request()
-                .AsSearchTrends();
+                .Request();
+
+            LastResult = result;
+            return result.AsSearchTrends();
         }
 
         /// <summary>
@@ -283,30 +299,38 @@ namespace Plugin
         /// <param name="message">string with maximum 140 characters</param>
         /// <param name="retweet"></param>
         /// <returns>returns the response as a string</returns>
-        public TwitterResult SendStatus(string message, bool retweet)
+        internal TwitterResult SendStatus(string message, bool retweet)
         {
+            TwitterResult result = null;
             if (retweet)
             {
                 long statusId;
                 if (long.TryParse(message, out statusId))
                 {
-                    return FluentTwitter
-                        .CreateRequest(ClientInfo)
-                        .AuthenticateWith(Token, TokenSecret)
-                        .Statuses()
-                        .Retweet(statusId, RetweetMode.SymbolPrefix)
-                        .AsJson()
-                        .Request();
+                    result = FluentTwitter
+                       .CreateRequest(ClientInfo)
+                       .AuthenticateWith(Token, TokenSecret)
+                       .Statuses()
+                       .Retweet(statusId, RetweetMode.SymbolPrefix)
+                       .AsJson()
+                       .Request();
                 }
             }
 
-            return FluentTwitter
-                .CreateRequest(ClientInfo)
-                .AuthenticateWith(Token, TokenSecret)
-                .Statuses()
-                .Update(message)
-                .AsJson()
-                .Request();
+            if (result == null)
+            {
+
+                result = FluentTwitter
+                   .CreateRequest(ClientInfo)
+                   .AuthenticateWith(Token, TokenSecret)
+                   .Statuses()
+                   .Update(message)
+                   .AsJson()
+                   .Request();
+            }
+
+            LastResult = result;
+            return result;
 
         }
 
@@ -315,19 +339,18 @@ namespace Plugin
         /// Missing method in TweetSharp
         /// </summary>
         /// <returns>the current Twitter User</returns>
-        public TwitterUser GetStats()
+        internal TwitterUser GetStats()
         {
-            if (token == null) return null;
-            return FluentTwitter
+            var result = FluentTwitter
                 .CreateRequest(ClientInfo)
                 .AuthenticateWith(Token, TokenSecret)
                 .Statuses()
                 .OnUserTimeline()
                 .AsJson()
-                .Request()
-                .AsStatuses()
-                .First()
-                .User;
+                .Request();
+
+            LastResult = result;
+            return result.AsStatuses().First().User;
         }
     }
 }

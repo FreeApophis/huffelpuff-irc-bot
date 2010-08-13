@@ -172,8 +172,16 @@ namespace Huffelpuff
             if (!commands.ContainsKey(e.Data.MessageArray[0]))
                 return;
 
-            if ((pub && (commands[e.Data.MessageArray[0]].Scope == CommandScope.Private)) || ((!pub) && (commands[e.Data.MessageArray[0]].Scope == CommandScope.Public)))
+            if (pub && (commands[e.Data.MessageArray[0]].Scope == CommandScope.Private))
+            {
+                SendMessage(SendType.Message, e.Data.Nick, "This command can only be invoked privatly in a query.");
                 return;
+            }
+            if ((!pub) && (commands[e.Data.MessageArray[0]].Scope == CommandScope.Public))
+            {
+                SendMessage(SendType.Message, e.Data.Nick, "This command can only be invoked publicly in a channel.");
+                return;
+            }
 
             // check if access to function is allowed
             if (!string.IsNullOrEmpty(commands[e.Data.MessageArray[0]].AccessString) && !Acl.Access(e.Data.Nick, commands[e.Data.MessageArray[0]].AccessString, true))

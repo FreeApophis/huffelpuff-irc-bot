@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Huffelpuff.Utils
 {
@@ -164,6 +165,14 @@ namespace Huffelpuff.Utils
                 return ago.Minutes + ((ago.Days == 1) ? " minute" : " minutes") + " ago";
             }
             return ago.Seconds + ((ago.Days == 1) ? " second" : " seconds") + " ago";
+        }
+
+
+        private static readonly Regex WhiteSpaceMatch = new Regex(@"\s+");
+
+        public static string RemoveDuplicateWhiteSpace(this string str)
+        {
+            return WhiteSpaceMatch.Replace(str, " ");
         }
     }
 }
