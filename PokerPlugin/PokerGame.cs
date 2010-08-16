@@ -19,6 +19,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Plugin
 {
@@ -26,7 +28,7 @@ namespace Plugin
     {
         internal PokerGame()
         {
-            players = new List<PokerPlayer>();
+            players = new Queue<PokerPlayer>();
             State = GameState.CleanBoard;
             deck = new RandomDeck();
         }
@@ -37,16 +39,26 @@ namespace Plugin
             {
                 case GameState.CleanBoard:
                     Start();
+                    State = GameState.PreFlop;
                     break;
-                case GameState.PocketCards:
+                case GameState.PreFlop:
+                    BetRound();
+                    State = GameState.Flop;
                     break;
                 case GameState.Flop:
+                    BetRound();
+                    State = GameState.Turn;
                     break;
                 case GameState.Turn:
+                    BetRound();
+                    State = GameState.River;
                     break;
                 case GameState.River:
+                    PotPayOut();
+                    State = GameState.PayOut;
                     break;
                 case GameState.PayOut:
+                    State = GameState.CleanBoard;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -54,11 +66,12 @@ namespace Plugin
             return State;
         }
 
+
         private void Start()
         {
             deck.InitDeck();
 
-            foreach (var player in players)
+            foreach (var player in players.Where(player => player.State != PlayerState.NotYetPlaying))
             {
                 deck.NextCard();
                 player.PocketCards.Card1 = deck.CurrentCard;
@@ -67,24 +80,39 @@ namespace Plugin
                 player.PocketCards.Card2 = deck.CurrentCard;
             }
 
-            State = GameState.PocketCards;
+
+        }
+
+        private void BetRound()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void PotPayOut()
+        {
+            throw new NotImplementedException();
         }
 
         private readonly RandomDeck deck;
 
         public GameState State { get; private set; }
 
-        private readonly List<PokerPlayer> players;
+        private readonly Queue<PokerPlayer> players;
 
-        public List<PokerPlayer> Players
+        public ReadOnlyCollection<PokerPlayer> Players
         {
-            get { return players; }
+            get { return new ReadOnlyCollection<PokerPlayer>(players.ToList()); }
+        }
+
+        internal void NextDealer()
+        {
+            players.Enqueue(players.Dequeue());
         }
 
         public enum GameState
         {
             CleanBoard,
-            PocketCards,
+            PreFlop,
             Flop,
             Turn,
             River,

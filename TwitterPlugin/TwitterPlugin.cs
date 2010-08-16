@@ -29,6 +29,7 @@ using Meebey.SmartIrc4net;
 using TweetSharp.Extensions;
 using TweetSharp.Twitter.Extensions;
 using TweetSharp.Twitter.Model;
+using TweetSharp.Twitter.Service;
 
 namespace Plugin
 {
@@ -124,7 +125,7 @@ namespace Plugin
                 return Assembly.GetExecutingAssembly().FullName;
             }
         }
-
+        
         public override void Activate()
         {
             BotMethods.AddCommand(new Commandlet("!tweet", "The !tweet <account> <text> command tweets a message to the account. If there is only 1 account, the account name can be omitted.", TweetHandler, this, CommandScope.Public, "twitter_access"));
@@ -139,6 +140,8 @@ namespace Plugin
             BotMethods.AddCommand(new Commandlet("!mentionformat", "With the command !tweetformat <formatstring> you can customize your Tweets. [Vars: %FEEDNAME% %ACCOUNT% %TWEET% %ID% %SCREENNAME% %AUTHOR% %LOCATION% %DATE% %AGO% %#FOLLOW% %#STATUS% %#FRIENDS% %#FAVS% %#LANG% %#USERURL%]. You can reset to the initial setting with: !tweetformat RESET", SetFormat, this, CommandScope.Both, "twitter_admin"));
             BotMethods.AddCommand(new Commandlet("!utf8", "!utf8 äöü", Utf8Handler, this));
             BotMethods.AddCommand(new Commandlet("!pin", "!utf8 äöü", PinHandler, this));
+            
+            
 
             checkInterval.Enabled = true;
             base.Activate();

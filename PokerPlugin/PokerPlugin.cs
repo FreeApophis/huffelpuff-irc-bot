@@ -58,12 +58,20 @@ namespace Plugin
 
         }
 
+
+        Dictionary<string, PokerGame> games = new Dictionary<string, PokerGame>();
         public override void Activate()
         {
-            BotMethods.AddCommand(new Commandlet("!joinpoker", "What Hand is that?", JoinGame, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!bet", "What Hand is that?", EvaluateHand, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!fold", "What Hand is that?", EvaluateHand, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!check", "What Hand is that?", EvaluateHand, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!joinpoker", "Join the Pokertable and participate in the game the next round.", JoinGame, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!partpoker", "Stand up and leave the table, this also happens when you Part the Channel or Quit.", JoinGame, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!bet", "!bet <money> will bet that amount money.", EvaluateHand, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!fold", "With !fold you make an unconditional fold of your cards.", EvaluateHand, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!check", "With !check you are checking the current round.", EvaluateHand, this, CommandScope.Both));
+
+            foreach (var channel in BotMethods.GetChannels())
+            {
+                games.Add(channel, new PokerGame());
+            }
 
             base.Activate();
         }
@@ -71,7 +79,10 @@ namespace Plugin
 
         public override void Deactivate()
         {
+            games.Clear();
+
             BotMethods.RemoveCommand("!joinpoker");
+            BotMethods.RemoveCommand("!partpoker");
             BotMethods.RemoveCommand("!bet");
             BotMethods.RemoveCommand("!fold");
             BotMethods.RemoveCommand("!check");

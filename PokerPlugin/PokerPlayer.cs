@@ -37,9 +37,6 @@ namespace Plugin
     internal enum PlayerState
     {
         NotYetPlaying,
-        Dealer,
-        BigBlind,
-        SmallBlind,
         Player
     }
 }

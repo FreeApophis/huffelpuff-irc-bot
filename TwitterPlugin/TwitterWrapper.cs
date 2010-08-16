@@ -153,6 +153,8 @@ namespace Plugin
 
         private static readonly Dictionary<string, DateTime> LastTag = new Dictionary<string, DateTime>();
 
+        private TwitterService twitterStreamService = new TwitterService(ClientInfo);
+
         internal TwitterWrapper(string name)
         {
             Name = name;
