@@ -52,14 +52,15 @@ namespace Huffelpuff
             }
             else
             {
+
                 try
                 {
                     var servicesToRun = new ServiceBase[] { new ServiceEngine { Bot = GetBot() } };
                     ServiceBase.Run(servicesToRun);
                 }
-                catch (Exception ex)
+                catch (Exception exception)
                 {
-                    Log.Instance.Log(string.Format("Exception: {0} \n\nStack: {1}", ex.Message, ex.StackTrace), Level.Error);
+                    Log.Instance.Log(exception);
                 }
             }
         }

@@ -75,7 +75,7 @@ namespace Plugin
             }
             catch (Exception exception)
             {
-                Log.Instance.Log(exception.Message, Level.Error, ConsoleColor.Red);
+                Log.Instance.Log(exception);
             }
             PersistentMemory.Instance.Flush();
         }

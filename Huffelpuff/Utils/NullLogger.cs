@@ -39,7 +39,12 @@ namespace Huffelpuff.Utils
             return;
         }
 
-        public override Level MinLogLevel { get; set; }
+        public override void Log(Exception exception)
+        {
+            return;
+        }
 
+        public override Level MinLogLevel { get; set; }
+        public override bool Verbose { get; set; }
     }
 }

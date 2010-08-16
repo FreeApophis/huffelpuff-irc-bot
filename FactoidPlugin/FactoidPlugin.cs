@@ -47,6 +47,7 @@ namespace Plugin
 
         public override void Deactivate()
         {
+            BotMethods.RemoveCommand("!facts");
             BotMethods.RemoveCommand("!+fact");
             BotMethods.RemoveCommand("!-fact");
 
@@ -147,7 +148,7 @@ namespace Plugin
             if (factKey != null)
             {
                 var factValue = DatabaseCommon.Db.FactValues.Where(facts => facts.FactKeyID == factKey.ID).SingleOrDefault();
-                
+
                 if (factValue != null)
                 {
                     DatabaseCommon.Db.FactValues.DeleteOnSubmit(factValue);

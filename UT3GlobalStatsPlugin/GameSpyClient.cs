@@ -50,14 +50,14 @@ namespace Plugin
             }
             catch (SocketException)
             {
-                Log.Instance.Log("No connection: check internet connection and open port tcp 29900");
+                Log.Instance.Log("No connection: check internet connection and open port tcp 29900", Level.Fail);
                 return null;
             }
             ns = client.GetStream();
             int len = ns.Read(buffer, 0, BufferSize);
             string receive1 = Encoding.ASCII.GetString(buffer, 0, len);
             string serverChallenge = GetParameterValue(receive1, "challenge");
-            if (string.IsNullOrEmpty(serverChallenge)) { Log.Instance.Log("no challenge"); }
+            if (string.IsNullOrEmpty(serverChallenge)) { Log.Instance.Log("no challenge", Level.Trace); }
             string clientChallenge = CreateRandomString(32);
             string response = GetResponseValue(nick, pass, clientChallenge, serverChallenge);
             string login = "\\login\\" +

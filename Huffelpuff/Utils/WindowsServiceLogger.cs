@@ -1,4 +1,4 @@
-﻿/*
+﻿/* 
  *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
  * 
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
@@ -26,11 +26,13 @@ namespace Huffelpuff.Utils
     {
         public override void Log(string message)
         {
-            ServiceEngine.WriteToLog(message);
+            Log(message, Level.Info);
         }
 
         public override void Log(string message, Level level)
         {
+            if (!IsLogged(Level.Info)) return;
+
             ServiceEngine.WriteToLog(message, LevelToEventLogEntryType(level));
         }
 
@@ -57,9 +59,20 @@ namespace Huffelpuff.Utils
 
         public override void Log(string message, Level level, ConsoleColor color)
         {
-            ServiceEngine.WriteToLog(message, LevelToEventLogEntryType(level));
+            Log(message, level);
+        }
+
+        public override void Log(Exception exception)
+        {
+            Log(exception.Message, Level.Error);
+            if (Verbose)
+            {
+                Log(exception.StackTrace, Level.Info);
+            }
         }
 
         public override Level MinLogLevel { get; set; }
+
+        public override bool Verbose { get; set; }
     }
 }

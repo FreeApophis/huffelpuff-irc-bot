@@ -60,7 +60,7 @@ namespace Plugin
 
         public override void Activate()
         {
-            BotMethods.AddCommand(new Commandlet("!joingame", "What Hand is that?", JoinGame, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!joinpoker", "What Hand is that?", JoinGame, this, CommandScope.Both));
             BotMethods.AddCommand(new Commandlet("!bet", "What Hand is that?", EvaluateHand, this, CommandScope.Both));
             BotMethods.AddCommand(new Commandlet("!fold", "What Hand is that?", EvaluateHand, this, CommandScope.Both));
             BotMethods.AddCommand(new Commandlet("!check", "What Hand is that?", EvaluateHand, this, CommandScope.Both));
@@ -68,9 +68,20 @@ namespace Plugin
             base.Activate();
         }
 
+
+        public override void Deactivate()
+        {
+            BotMethods.RemoveCommand("!joinpoker");
+            BotMethods.RemoveCommand("!bet");
+            BotMethods.RemoveCommand("!fold");
+            BotMethods.RemoveCommand("!check");
+
+            base.Deactivate();
+        }
+
         private static void JoinGame(object sender, IrcEventArgs e)
         {
-            
+
         }
 
         private void EvaluateHand(object sender, IrcEventArgs e)
@@ -97,15 +108,7 @@ namespace Plugin
             }
         }
 
-        public override void Deactivate()
-        {
-            BotMethods.RemoveCommand("!poker");
-            BotMethods.RemoveCommand("!bet");
-            BotMethods.RemoveCommand("!fold");
-            BotMethods.RemoveCommand("!check");
 
-            base.Deactivate();
-        }
 
         public override string AboutHelp()
         {

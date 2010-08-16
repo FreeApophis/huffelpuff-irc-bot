@@ -68,7 +68,7 @@ namespace Huffelpuff.AccessControl
 
             if (e.Data.ReplyCode == ReplyCode.WhoIsRegistered)
             {
-                Log.Instance.Log(e.Data.Message, Level.Info);
+                Log.Instance.Log(e.Data.Message, Level.Trace);
             }
         }
 

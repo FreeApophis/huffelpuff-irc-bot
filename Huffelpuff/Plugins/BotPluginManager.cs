@@ -18,6 +18,7 @@
  */
 
 using System.Linq;
+using System.Threading;
 using Huffelpuff.Utils;
 using System;
 using System.Collections.Generic;
@@ -60,6 +61,13 @@ namespace Huffelpuff.Plugins
         private void ReloadPlugins(object sender, IrcEventArgs e)
         {
             pluginManager.ReloadPlugins();
+
+            // The following call prevents the OnChannelMessage/OnQueryMessage Event to be processed further, 
+            // cause at this points its not guaranteed that the other Event Handlers still exists. 
+            // Because all objects out of this AppDomain are destroyed now. However we are still in the 
+            // Event Handling. We stop that here. 
+            // This means that "!reload" gets special treating and cannot be used for anything else.
+            Thread.CurrentThread.Abort();
         }
 
 

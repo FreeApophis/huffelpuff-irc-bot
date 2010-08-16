@@ -51,7 +51,7 @@ namespace Plugin
         }
                 
         public override string AboutHelp() {
-            return "This is a very simple Plugin which gives its version on !example.";
+            return "This is a very simple Plugin which gives its version on !example !!!";
         }
                 
         private void exampleHandler(object sender, IrcEventArgs e) {

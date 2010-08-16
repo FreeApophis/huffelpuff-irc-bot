@@ -116,13 +116,13 @@ namespace Plugin
 
                 if (recordsResponse.Body.SearchForRecordsResult == Result.Success)
                 {
-                    Log.Instance.Log("Webservice returned '" + recordsResponse + "' instead of success.");
+                    Log.Instance.Log("Webservice returned '" + recordsResponse + "' instead of success.", Level.Fail);
                     return;
                 }
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Log.Instance.Log(ex.Message);
+                Log.Instance.Log(exception);
                 return;
             }
 
@@ -164,9 +164,9 @@ namespace Plugin
                     return;
                 }
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Log.Instance.Log(ex.Message, Level.Error);
+                Log.Instance.Log(exception);
                 return;
             }
             foreach (var msg in values.Select(perPlayerValues => RecordValueToString(perPlayerValues[0]) + ". " + RecordValueToString(perPlayerValues[1]) + " ELO: " + RecordValueToString(perPlayerValues[2]) + " Kills: " + RecordValueToString(perPlayerValues[3]) + " Deaths: " + RecordValueToString(perPlayerValues[4])))

@@ -203,7 +203,7 @@ namespace Plugin
             }
             catch (Exception exception)
             {
-                Log.Instance.Log(exception.Message, Level.Warning, ConsoleColor.DarkYellow);
+                Log.Instance.Log(exception);
                 return false;
             }
         }

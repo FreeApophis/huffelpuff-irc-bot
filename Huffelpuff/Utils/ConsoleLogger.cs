@@ -25,35 +25,44 @@ namespace Huffelpuff.Utils
     {
         public override void Log(string message)
         {
-            Console.WriteLine(message);
+            if (!IsLogged(Level.Info)) return;
+
+            Console.WriteLine("{0}: {1}", Level.Info, message);
         }
 
         public override void Log(string message, Level level)
         {
+            if (!IsLogged(level)) return;
+
             Console.WriteLine("{0}: {1}", level, message);
         }
 
         public override void Log(string message, Level level, ConsoleColor color)
         {
+            if (!IsLogged(level)) return;
+
             var lastColor = Console.ForegroundColor;
             Console.ForegroundColor = color;
             Console.WriteLine("{0}: {1}", level, message);
             Console.ForegroundColor = lastColor;
-
         }
 
-        private Level minLogLevel;
-
-        public override Level MinLogLevel
+        public override void Log(Exception exception)
         {
-            get
+            if (!IsLogged(Level.Error)) return;
+
+            var lastColor = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("{0}: {1}", Level.Error, exception.Message);
+
+            if (Verbose)
             {
-                return minLogLevel;
-            }
-            set
-            {
-                minLogLevel = value;
+                Console.ForegroundColor = lastColor;
+                Console.WriteLine("{0}: {1}", Level.Info, exception.StackTrace);
             }
         }
+
+        public override Level MinLogLevel { get; set; }
+        public override bool Verbose { get; set; }
     }
 }

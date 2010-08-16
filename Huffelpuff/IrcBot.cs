@@ -116,12 +116,38 @@ namespace Huffelpuff
         }
 
 
+        /// <summary>
+        /// This command makes sure that no command is bound to an unloaded appdomain.
+        /// If there still are commands which are bound the wrong appdomain, these will be unbound and reported as unclean.
+        /// Each Plugin must remove all commands from the commands list on deactivate!
+        /// </summary>
         internal void CleanPlugins()
         {
-            // try catch AppDomainUnloadedExceptions (somehow)
-            foreach (var s in (from p in commands where p.Value.Handler == null select p.Key).ToList())
+            var toRemove = new List<string>();
+
+            foreach (var commandlet in commands)
             {
-                commands.Remove(s);
+                try
+                {
+                    if (commandlet.Value.Handler == null)
+                    {
+                        toRemove.Add(commandlet.Key);
+                    }
+                }
+                catch (AppDomainUnloadedException)
+                {
+                    Log.Instance.Log("Plugin with command '{0}' was not cleaned up".Fill(commandlet.Key), Level.Warning);
+
+                    if (!toRemove.Contains(commandlet.Key))
+                    {
+                        toRemove.Add(commandlet.Key);
+                    }
+                }
+            }
+
+            foreach (var command in toRemove)
+            {
+                commands.Remove(command);
             }
         }
 
@@ -257,6 +283,19 @@ namespace Huffelpuff
                     PersistentMemory.Instance.RemoveValue("plugin", plugin.FullName);
                     PersistentMemory.Instance.Flush();
                     plugin.Deactivate();
+
+                    var plug = plugin;
+                    foreach (var command in (from commandlet in commands
+                                             let abstractPlugin = commandlet.Value.Owner as string
+                                             let command = commandlet.Key
+                                             where abstractPlugin != null && abstractPlugin == plug.FullName
+                                             select command).ToList())
+                    {
+                        commands.Remove(command);
+                        Log.Instance.Log("BUG in Plugin: Forefully deactivated Command '{0}' in Plugin {1}.".Fill(command, plugin.FullName), Level.Warning);
+                    }
+
+
                 }
                 calledPlugins.Add(plugin);
             }
@@ -426,6 +465,7 @@ namespace Huffelpuff
 
         public void Exit()
         {
+            //TODO: Safe exit
             PersistentMemory.Instance.Flush();
 
             // we are done, lets exit...
@@ -447,7 +487,7 @@ namespace Huffelpuff
 
             if (PersistentMemory.Instance.GetValue("ProxyServer") != null)
             {
-                Log.Instance.Log("Using Proxy Server: " + PersistentMemory.Instance.GetValue("ProxyServer"));
+                Log.Instance.Log("Using Proxy Server: " + PersistentMemory.Instance.GetValue("ProxyServer"), Level.Trace);
                 ProxyType = Org.Mentalis.Network.ProxySocket.ProxyTypes.Socks5;
                 var ip = IPAddress.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new[] { ':' })[0]);
                 if (ip != null)
@@ -465,12 +505,12 @@ namespace Huffelpuff
             {
                 // here we try to connect to the server and exceptions get handled
                 Connect(serverlist, port);
-                Log.Instance.Log("successfull connected");
+                Log.Instance.Log("successfull connected", Level.Info);
             }
-            catch (ConnectionException e)
+            catch (ConnectionException exception)
             {
                 // something went wrong, the reason will be shown
-                Log.Instance.Log("couldn't connect! Reason: " + e.Message);
+                Log.Instance.Log(exception);
                 Exit();
             }
 
@@ -492,11 +532,10 @@ namespace Huffelpuff
             {
                 Exit();
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
                 // this should not happen by just in case we handle it nicely
-                Log.Instance.Log("Error occurred! Message: " + e.Message, Level.Error);
-                Log.Instance.Log("Exception: " + e.StackTrace, Level.Error);
+                Log.Instance.Log(exception);
                 Exit();
             }
         }

@@ -155,9 +155,9 @@ namespace Huffelpuff.Plugins
                 {
                     LoadUserAssemblies();
                 }
-                catch (Exception e)
+                catch (Exception exception)
                 {
-                    Log.Instance.Log(e.Message, Level.Error, ConsoleColor.Red);
+                    Log.Instance.Log(exception);
                 }
 
                 ChangeTime = new DateTime(0);

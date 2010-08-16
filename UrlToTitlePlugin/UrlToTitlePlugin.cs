@@ -114,8 +114,10 @@ namespace Plugin
                     }
                 }
             }
-            catch
-            { }
+            catch (Exception exception)
+            {
+                Log.Instance.Log(exception);
+            }
 
         }
         private readonly char c10 = Convert.ToChar(10);
@@ -205,7 +207,7 @@ namespace Plugin
                         case "guid": feed.Read();
                             //guid
                             break;
-                        default: Log.Instance.Log("unparsed Element: " + feed.Name);
+                        default: Log.Instance.Log("unparsed Element: " + feed.Name, Level.Info);
                             break;
                     }
                 }

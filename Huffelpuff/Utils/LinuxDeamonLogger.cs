@@ -25,29 +25,31 @@ namespace Huffelpuff.Utils
     {
         public override void Log(string message)
         {
+            if (!IsLogged(Level.Info)) return;
+
             throw new NotImplementedException();
         }
 
         public override void Log(string message, Level level)
         {
+            if (!IsLogged(level)) return;
+
             throw new NotImplementedException();
         }
 
         public override void Log(string message, Level level, ConsoleColor color)
         {
+            if (!IsLogged(level)) return;
+
             throw new NotImplementedException();
         }
 
-        public override Level MinLogLevel
+        public override void Log(Exception exception)
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
+            throw new NotImplementedException();
         }
+
+        public override Level MinLogLevel { get; set; }
+        public override bool Verbose { get; set; }
     }
 }

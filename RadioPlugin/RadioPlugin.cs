@@ -316,9 +316,9 @@ namespace Plugin
                 new Tag(Tracks[(int)dr["trackID"]], (string)dr["tagIdstr"], (double)dr["weight"]);
             }
 
-            Log.Instance.Log("Artists : " + Artists.Count);
-            Log.Instance.Log("Albums  : " + Albums.Count);
-            Log.Instance.Log("Tracks  : " + Tracks.Count);
+            Log.Instance.Log("Artists : " + Artists.Count, Level.Trace);
+            Log.Instance.Log("Albums  : " + Albums.Count, Level.Trace);
+            Log.Instance.Log("Tracks  : " + Tracks.Count, Level.Trace);
 
             scheduler.Elapsed += new ElapsedEventHandler(mainScheduler);
 

@@ -89,10 +89,9 @@ namespace Huffelpuff.Utils
                     memory.Tables[BaseTable].Columns.Add(new DataColumn(BaseKey));
                     memory.Tables[BaseTable].Columns.Add(new DataColumn(BaseValue));
                 }
-                catch (Exception e)
+                catch (Exception exception)
                 {
-                    Log.Instance.Log(e.Message, Level.Error);
-                    Log.Instance.Log(e.StackTrace, Level.Error);
+                    Log.Instance.Log(exception);
                 }
             }
             Flush();

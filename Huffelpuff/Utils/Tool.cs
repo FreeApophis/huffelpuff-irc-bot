@@ -34,15 +34,15 @@ namespace Huffelpuff.Utils
         {
             Type t = Type.GetType("Mono.Runtime");
             if (t != null)
-                Log.Instance.Log("Runtime: Mono VM v" + Environment.Version);
+                Log.Instance.Log("Runtime: Mono VM v" + Environment.Version, Level.Info);
             else
-                Log.Instance.Log("Runtime: (unkown) MS.NET? v" + Environment.Version);
+                Log.Instance.Log("Runtime: (unkown) MS.NET? v" + Environment.Version, Level.Info);
 
-            Log.Instance.Log("OS     : " + Environment.OSVersion.VersionString);
-            Log.Instance.Log("CWD    : " + Environment.CurrentDirectory);
-            Log.Instance.Log("Machine: " + Environment.MachineName);
-            Log.Instance.Log("CPUs   : " + Environment.ProcessorCount);
-            Log.Instance.Log("User   : " + Environment.UserName);
+            Log.Instance.Log("OS     : " + Environment.OSVersion.VersionString, Level.Info);
+            Log.Instance.Log("CWD    : " + Environment.CurrentDirectory, Level.Info);
+            Log.Instance.Log("Machine: " + Environment.MachineName, Level.Info);
+            Log.Instance.Log("CPUs   : " + Environment.ProcessorCount, Level.Info);
+            Log.Instance.Log("User   : " + Environment.UserName, Level.Info);
 
             return (t != null);
 

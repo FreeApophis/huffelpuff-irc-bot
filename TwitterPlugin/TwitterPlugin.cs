@@ -95,7 +95,7 @@ namespace Plugin
             }
             catch (Exception exception)
             {
-                Log.Instance.Log(exception.Message, Level.Warning, ConsoleColor.DarkYellow);
+                Log.Instance.Log(exception);
             }
         }
 
@@ -148,6 +148,7 @@ namespace Plugin
         public override void Deactivate()
         {
             BotMethods.RemoveCommand("!tweet");
+            BotMethods.RemoveCommand("!retweet");
             BotMethods.RemoveCommand("!tweet-stats");
             BotMethods.RemoveCommand("!tweet-trends");
             BotMethods.RemoveCommand("!+tweet");
@@ -336,7 +337,7 @@ namespace Plugin
                     }
                     else
                     {
-                        Log.Instance.Log(exception.Message, Level.Warning, ConsoleColor.DarkYellow);
+                        Log.Instance.Log(exception);
                     }
                 }
             }

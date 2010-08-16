@@ -212,6 +212,7 @@
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Utils\Level.cs" />
     <Compile Include="Utils\LinuxDeamonLogger.cs" />
+    <Compile Include="Utils\Log.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\NullLogger.cs" />
     <Compile Include="Utils\PersistentMemory.cs" />
