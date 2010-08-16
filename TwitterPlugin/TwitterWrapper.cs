@@ -159,6 +159,7 @@ namespace Plugin
             friendlyName = PersistentMemory.Instance.GetValueOrTodo(NameSpace, FriendlynameConst);
             user = PersistentMemory.Instance.GetValueOrTodo(NameSpace, UserConst);
             token = PersistentMemory.Instance.GetValue(NameSpace, TokenConst);
+            tokenSecret = PersistentMemory.Instance.GetValue(NameSpace, TokenSecretConst);
 
             string lastDateTimeString = PersistentMemory.Instance.GetValue(NameSpace, Lastconst);
             last = (lastDateTimeString == null) ? DateTime.MinValue : DateTime.Parse(lastDateTimeString);
@@ -200,8 +201,9 @@ namespace Plugin
 
                 return IsTweetAuthenticated;
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                Log.Instance.Log(exception.Message, Level.Warning, ConsoleColor.DarkYellow);
                 return false;
             }
         }

@@ -93,9 +93,9 @@ namespace Plugin
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Console.WriteLine(ex.Message);
+                Log.Instance.Log(exception.Message, Level.Warning, ConsoleColor.DarkYellow);
             }
         }
 
