@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
 using DDay.iCal;
 using Huffelpuff;
 using Huffelpuff.Plugins;
@@ -31,15 +32,24 @@ namespace Plugin
 
         public CalendarPlugin(IrcBot botInstance) : base(botInstance) { }
 
+        private IICalendarCollection calendars;
         public override void Init()
         {
+            calendars = iCalendar.LoadFromUri(new Uri("http://www.piraten-partei.ch/calendar-event/ical"));
+
+            foreach (var calendar in calendars)
+            {
+                foreach (var @event in calendar.Events)
+                {
+                    Console.WriteLine(@event.Location);
+                    Console.WriteLine(@event.Start.ToString());
+                }
+            }
             
-            
-            base.Init();
         }
 
         public override void Activate()
-        {            
+        {
 
             active = true;
 

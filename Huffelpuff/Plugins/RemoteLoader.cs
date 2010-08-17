@@ -33,7 +33,7 @@ namespace Huffelpuff.Plugins
     public class RemoteLoader : MarshalByRefObject
     {
         protected ArrayList TypeList = new ArrayList();
-        protected ArrayList assemblyList = new ArrayList();
+        protected ArrayList AssemblyList = new ArrayList();
 
         /// <summary>
         /// Loads the assembly into the remote domain
@@ -44,7 +44,7 @@ namespace Huffelpuff.Plugins
             string filename = Path.GetFileNameWithoutExtension(fullname);
 
             Assembly assembly = Assembly.Load(filename);
-            assemblyList.Add(assembly);
+            AssemblyList.Add(assembly);
             foreach (Type loadedType in assembly.GetTypes())
             {
                 TypeList.Add(loadedType);
@@ -63,7 +63,7 @@ namespace Huffelpuff.Plugins
             try
             {
                 Assembly scriptAssembly = assemblyFactory.CreateAssembly(filename, references);
-                assemblyList.Add(scriptAssembly);
+                AssemblyList.Add(scriptAssembly);
                 foreach (Type loadedType in scriptAssembly.GetTypes())
                 {
                     TypeList.Add(loadedType);
@@ -95,7 +95,7 @@ namespace Huffelpuff.Plugins
             try
             {
                 Assembly scriptAssembly = assemblyFactory.CreateAssembly(filenames, references);
-                assemblyList.Add(scriptAssembly);
+                AssemblyList.Add(scriptAssembly);
                 foreach (Type loadedType in scriptAssembly.GetTypes())
                 {
                     TypeList.Add(loadedType);
@@ -134,7 +134,7 @@ namespace Huffelpuff.Plugins
         public string[] GetAssemblies()
         {
             var assemblyNameList = new ArrayList();
-            foreach (Assembly userAssembly in assemblyList)
+            foreach (Assembly userAssembly in AssemblyList)
             {
                 assemblyNameList.Add(userAssembly.FullName);
             }
@@ -173,7 +173,7 @@ namespace Huffelpuff.Plugins
             object[] constructorParams)
         {
             Assembly owningAssembly = null;
-            foreach (var assembly in assemblyList.Cast<Assembly>().Where(assembly => assembly.GetType(typeName) != null))
+            foreach (var assembly in AssemblyList.Cast<Assembly>().Where(assembly => assembly.GetType(typeName) != null))
             {
                 owningAssembly = assembly;
             }

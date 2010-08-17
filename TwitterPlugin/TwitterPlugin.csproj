@@ -87,7 +87,7 @@
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy .\TwitterPlugin.* ..\..\Huffelpuff\bin\plugins /y
-xcopy .\*.dll ..\..\Huffelpuff\bin /y</PostBuildEvent>
+xcopy ..\libs\*.dll ..\..\Huffelpuff\bin /y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>

@@ -37,7 +37,7 @@ namespace Huffelpuff
     [Serializable]
     public class IrcBot : IrcFeatures
     {
-        private BotPluginManager plugManager;
+        protected BotPluginManager PlugManager { get; private set; }
 
         public AccessControlList Acl { get; private set; }
 
@@ -86,25 +86,48 @@ namespace Huffelpuff
             Acl.AddIdentifyPlugin(new NickIdentify(this));
 
             // Plugin needs the Handlers from IRC we load the plugins after we set everything up
-            plugManager = new BotPluginManager(this, "plugins");
+            PlugManager = new BotPluginManager(this, "plugins");
+            PlugManager.PluginLoadEvent += PlugManagerPluginLoadEvent;
 
             //Basic Commands
             AddCommand(new Commandlet("!join", "The command !join <channel> lets the bot join Channel <channel>", JoinCommand, this, CommandScope.Both, "engine_join"));
             AddCommand(new Commandlet("!part", "The command !part <channel> lets the bot part Channel <channel>", PartCommand, this, CommandScope.Both, "engine_part"));
-            AddCommand(new Commandlet("!channels", "The command !channels lists all channels where the bot resides", ListChannelCommand, this, CommandScope.Both));
+            AddCommand(new Commandlet("!channels", "The command !channels lists all channels where the bot resides", ListChannelCommand, this));
             AddCommand(new Commandlet("!quit", "The command !quit lets the bot quit himself", QuitCommand, this, CommandScope.Both, "engine_quit"));
 
             //Plugin Commands
-            AddCommand(new Commandlet("!plugins", "The command !plugins lists all the plugins", PluginsCommand, this, CommandScope.Both));
+            AddCommand(new Commandlet("!plugins", "The command !plugins lists all the plugins", PluginsCommand, this));
             AddCommand(new Commandlet("!activate", "The command !activate <plugin> activates the Plugin <plugin>", ActivateCommand, this, CommandScope.Both, "engine_activate"));
             AddCommand(new Commandlet("!deactivate", "The command !deactivate <plugin> deactivates the Plugin <plugin>", DeactivateCommand, this, CommandScope.Both, "engine_deactivate"));
 
             //Helper Commands (!commands)
-            AddCommand(new Commandlet("!help", "The command !help <topic> gives you help about <topic> (special topics: commands, more)", HelpCommand, this, CommandScope.Both));
+            AddCommand(new Commandlet("!help", "The command !help <topic> gives you help about <topic> (special topics: commands, more)", HelpCommand, this));
 
             //Settings Commands
             new SettingCommands(this);
 
+        }
+
+        static void PlugManagerPluginLoadEvent(object sender, BotPluginManager.PluginLoadEventArgs e)
+        {
+            switch (e.EventType)
+            {
+                case BotPluginManager.PluginLoadEventType.Failed:
+                    Log.Instance.Log(" [FAILED] " + e.PluginName + " (Init failed)", Level.Info, ConsoleColor.Red);
+                    break;
+                case BotPluginManager.PluginLoadEventType.Reload:
+                    Log.Instance.Log(" [RELOAD] " + e.PluginName, Level.Info, ConsoleColor.DarkGreen);
+                    break;
+                case BotPluginManager.PluginLoadEventType.Update:
+                    Log.Instance.Log(" [UPDATE] " + e.PluginName, Level.Info, ConsoleColor.DarkGreen);
+                    break;
+                case BotPluginManager.PluginLoadEventType.Load:
+                    Log.Instance.Log("  [LOAD]  " + e.PluginName, Level.Info, ConsoleColor.Green);
+                    break;
+                case BotPluginManager.PluginLoadEventType.Remove:
+                    Log.Instance.Log(" [REMOVE] " + e.PluginName, Level.Info, ConsoleColor.Red);
+                    break;
+            }
         }
 
         void OnBotConnected(object sender, EventArgs e)
@@ -222,7 +245,7 @@ namespace Huffelpuff
             }
             else
             {
-                foreach (var plug in plugManager.Plugins.Where(plug => plug.FullName == (string)commands[e.Data.MessageArray[0]].Owner))
+                foreach (var plug in PlugManager.Plugins.Where(plug => plug.FullName == (string)commands[e.Data.MessageArray[0]].Owner))
                 {
                     plug.InvokeHandler(commands[e.Data.MessageArray[0]].HandlerName, e);
                     return;
@@ -233,7 +256,7 @@ namespace Huffelpuff
         private void PluginsCommand(object sender, IrcEventArgs e)
         {
             var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-            var pluginsList = plugManager.Plugins.Select(p => IrcConstants.IrcBold + p.FullName + " [" + ((p.Active ? IrcConstants.IrcColor + "" + (int)IrcColors.LightGreen + "ON" : IrcConstants.IrcColor + "" + (int)IrcColors.LightRed + "OFF")) + IrcConstants.IrcColor + "]" + IrcConstants.IrcBold);
+            var pluginsList = PlugManager.Plugins.Select(p => IrcConstants.IrcBold + p.FullName + " [" + ((p.Active ? IrcConstants.IrcColor + "" + (int)IrcColors.LightGreen + "ON" : IrcConstants.IrcColor + "" + (int)IrcColors.LightRed + "OFF")) + IrcConstants.IrcColor + "]" + IrcConstants.IrcBold);
 
             foreach (var line in pluginsList.ToLines(300, ", ", "Plugins Loaded: ", " END."))
             {
@@ -251,7 +274,7 @@ namespace Huffelpuff
             }
 
             var calledPlugins = new List<AbstractPlugin>();
-            foreach (var plugin in e.Data.MessageArray.Skip(1).Select(p => new Wildcard(p)).SelectMany(wildcard => plugManager.Plugins.Where(p => wildcard.IsMatch(p.FullName) || wildcard.IsMatch(p.MainClass))))
+            foreach (var plugin in e.Data.MessageArray.Skip(1).Select(p => new Wildcard(p)).SelectMany(wildcard => PlugManager.Plugins.Where(p => wildcard.IsMatch(p.FullName) || wildcard.IsMatch(p.MainClass))))
             {
                 if (!plugin.Active)
                 {
@@ -276,7 +299,7 @@ namespace Huffelpuff
                 return;
             }
             var calledPlugins = new List<AbstractPlugin>();
-            foreach (AbstractPlugin plugin in e.Data.MessageArray.Skip(1).Select(p => new Wildcard(p)).SelectMany(wildcard => plugManager.Plugins.Where(p => wildcard.IsMatch(p.FullName) || wildcard.IsMatch(p.MainClass))))
+            foreach (AbstractPlugin plugin in e.Data.MessageArray.Skip(1).Select(p => new Wildcard(p)).SelectMany(wildcard => PlugManager.Plugins.Where(p => wildcard.IsMatch(p.FullName) || wildcard.IsMatch(p.MainClass))))
             {
                 if (plugin.Active)
                 {
@@ -436,7 +459,7 @@ namespace Huffelpuff
             }
 
             // maybe a  plugin
-            foreach (AbstractPlugin p in plugManager.Plugins)
+            foreach (AbstractPlugin p in PlugManager.Plugins)
             {
                 bool plugHelp = false;
                 if (topic == p.FullName.ToLower())

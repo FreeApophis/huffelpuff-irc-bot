@@ -70,9 +70,41 @@ namespace Huffelpuff.Plugins
             Thread.CurrentThread.Abort();
         }
 
+        private readonly Dictionary<string, string> oldPlugs = new Dictionary<string, string>();
 
+        public enum PluginLoadEventType
+        {
+            Failed,
+            Update,
+            Load,
+            Reload,
+            Remove
+        }
 
-        private readonly List<string> oldPlugs = new List<string>();
+        public class PluginLoadEventArgs : EventArgs
+        {
+            public PluginLoadEventArgs(string pluginName, PluginLoadEventType pluginLoadEventType, AbstractPlugin plugin)
+            {
+                PluginName = pluginName;
+                EventType = pluginLoadEventType;
+                Plugin = plugin;
+            }
+
+            public string PluginName { get; private set; }
+            public PluginLoadEventType EventType { get; private set; }
+            public AbstractPlugin Plugin { get; private set; }
+        }
+
+        public delegate void PluginEventHandler(object sender, PluginLoadEventArgs e);
+
+        public event PluginEventHandler PluginLoadEvent;
+
+        private void OnPluginLoadEvent(PluginLoadEventArgs e)
+        {
+            if (PluginLoadEvent != null)
+                PluginLoadEvent(this, e);
+        }
+
         private void PluginsPluginsReloaded(object sender, EventArgs e)
         {
             plugins.Clear();
@@ -87,7 +119,7 @@ namespace Huffelpuff.Plugins
                 }
                 catch (Exception exception)
                 {
-                    Log.Instance.Log(" [Exception] " + pluginName + " (Exception: " + exception.Message + ")", Level.Info, ConsoleColor.Red);
+                    Log.Instance.Log(exception);
                     continue;
                 }
 
@@ -97,32 +129,39 @@ namespace Huffelpuff.Plugins
                 }
                 else
                 {
-                    Log.Instance.Log(" [FAILED] " + pluginName + " (Init failed)", Level.Info, ConsoleColor.Red);
+                    OnPluginLoadEvent(new PluginLoadEventArgs(pluginName, PluginLoadEventType.Failed, null));
                 }
             }
 
             foreach (var plugin in plugins)
             {
-                if (oldPlugs.Contains(plugin.AssemblyName))
+                var assemblyParts = GetAssemblyParts(plugin.AssemblyName);
+                string assemblyVersion = assemblyParts.AssemblyVersion;
+                string assemblyName = assemblyParts.AssemblyName;
+
+                string newAssemblyVersion;
+                PluginLoadEventType loadType;
+                if (oldPlugs.TryGetValue(assemblyName, out newAssemblyVersion))
                 {
-                    Log.Instance.Log(" [RELOAD] " + plugin.FullName, Level.Info, ConsoleColor.DarkGreen);
-                    oldPlugs.Remove(plugin.AssemblyName);
+                    loadType = assemblyVersion != newAssemblyVersion ? PluginLoadEventType.Update : PluginLoadEventType.Reload;
+                    oldPlugs.Remove(assemblyName);
                 }
                 else
                 {
-                    Log.Instance.Log("  [LOAD]  " + plugin.FullName, Level.Info, ConsoleColor.Green);
+                    loadType = PluginLoadEventType.Load;
                 }
+                OnPluginLoadEvent(new PluginLoadEventArgs(plugin.FullName, loadType, plugin));
             }
 
             foreach (var s in oldPlugs)
             {
-                Log.Instance.Log(" [REMOVE] " + s, Level.Info, ConsoleColor.Red);
+                OnPluginLoadEvent(new PluginLoadEventArgs(s.Key, PluginLoadEventType.Remove, null));
             }
 
             oldPlugs.Clear();
-            foreach (var plugin in plugins)
+            foreach (var assemblyParts in plugins.Select(plugin => GetAssemblyParts(plugin.AssemblyName)))
             {
-                oldPlugs.Add(plugin.AssemblyName);
+                oldPlugs.Add(assemblyParts.AssemblyName, assemblyParts.AssemblyVersion);
             }
 
 
@@ -130,6 +169,21 @@ namespace Huffelpuff.Plugins
             {
                 plugin.Activate();
             }
+        }
+
+        private class AssemblyParts
+        {
+            public string AssemblyName { get; set; }
+            public string AssemblyVersion { get; set; }
+        }
+
+        private static AssemblyParts GetAssemblyParts(string fullAssemblyName)
+        {
+            var assemblyParts = fullAssemblyName.Split(new[] { ", " }, 4, StringSplitOptions.None);
+            var assemblyName = assemblyParts[0];
+            var assemblyVersion = assemblyParts[1];
+
+            return new AssemblyParts { AssemblyName = assemblyName, AssemblyVersion = assemblyVersion };
         }
 
         public void ShutDown()

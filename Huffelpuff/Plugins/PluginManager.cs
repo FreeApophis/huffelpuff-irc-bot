@@ -280,9 +280,10 @@ namespace Huffelpuff.Plugins
                     Thread.Sleep(100);
                 }
             }
-            catch
+            catch (Exception exception)
             {
                 // We don't want to get any exceptions thrown if unloading fails for some reason.
+                Log.Instance.Log(exception);
             }
         }
 
@@ -297,26 +298,25 @@ namespace Huffelpuff.Plugins
             }
             set
             {
-                if (autoReload != value)
-                {
-                    autoReload = value;
-                    if (!autoReload)
-                    {
-                        FileWatcher.EnableRaisingEvents = false;
-                        Stop();
-                        PluginReloadThread = null;
-                        FileWatcher = null;
-                    }
-                    else
-                    {
-                        FileWatcher = new FileSystemWatcher(PluginDirectory) { EnableRaisingEvents = true };
-                        FileWatcher.Changed += FileWatcherChanged;
-                        FileWatcher.Deleted += FileWatcherChanged;
-                        FileWatcher.Created += FileWatcherChanged;
+                if (autoReload == value) return;
 
-                        PluginReloadThread = new Thread(ReloadThreadLoop);
-                        PluginReloadThread.Start();
-                    }
+                autoReload = value;
+                if (!autoReload)
+                {
+                    FileWatcher.EnableRaisingEvents = false;
+                    Stop();
+                    PluginReloadThread = null;
+                    FileWatcher = null;
+                }
+                else
+                {
+                    FileWatcher = new FileSystemWatcher(PluginDirectory) { EnableRaisingEvents = true };
+                    FileWatcher.Changed += FileWatcherChanged;
+                    FileWatcher.Deleted += FileWatcherChanged;
+                    FileWatcher.Created += FileWatcherChanged;
+
+                    PluginReloadThread = new Thread(ReloadThreadLoop);
+                    PluginReloadThread.Start();
                 }
             }
         }
