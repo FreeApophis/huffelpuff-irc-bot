@@ -39,16 +39,19 @@ namespace Plugin
 {
     /*
      * This Plugin should be an example to anyone who wants to write a plugin.
-     * It should describe all the main stepts to write an own plugin, and describes
+     * It should describe all the main stepts to write your own plugin, and describes
      * the intentions behinde several design decisions.
      * 
      * 1.) A Plugin will run in another Appdomain thant the mainbot, that was done
      * to make it possible to load, unload and reload Plugins on runtime. This makes
-     * several things a bit difficult.
+     * several things a bit difficult. But the Infrastructure is Abstracting that
+     * away from you. The Plugin infrastrucutre is very simple, but has a very 
+     * powerfull access to the IRC bot Infrastructure.
+     * 
      */
     public class CommentedExamplePlugin : AbstractPlugin
     {
-        
+
         /* 
          * The  constructor should always look like this, the base class Constructor
          * sets up most part of the infrastructure to use the Bot from a plugin.
@@ -58,8 +61,8 @@ namespace Plugin
          * to initialize, use Init() for it!
          */
         public CommentedExamplePlugin(IrcBot botInstance) :
-            base(botInstance) {}
-        
+            base(botInstance) { }
+
         /*
          * AboutHelp() is the only function you have to override from the 
          * AbstractPlugin Class. If you implement the above Constructor
@@ -71,7 +74,7 @@ namespace Plugin
         {
             return "This is the help about the whole CommentedExamplePlugin";
         }
-        
+
         /*
          * Anything you want to do during initialisation, or what your normally
          * want to do in a constructor, you do it here!
@@ -79,11 +82,71 @@ namespace Plugin
          * This method is only called once during the lifecylce of the object.
          * Either when the bot loads the plugins initially, or when all the
          * plugins get reloaded.
-        */
+         * 
+         * TIPS:
+         * * You dont have to override this method for a working Plugin.
+         * NEEDED:
+         * * Call base.Activate() at the end of the Method.
+         * 
+         */
         public override void Init()
         {
-            
+            // OnTick should be called every 60 seconds.
+            TickInterval = 60;
+
             base.Init();
+        }
+
+        /* 
+         * TIPS:
+         * * You dont have to override this method for a working Plugin.
+         * NEEDED:
+         * * Call base.Activate() at the end of the Method.
+         * 
+         */
+        public override void Activate()
+        {
+            base.Activate();
+        }
+
+        /* 
+         * TIPS:
+         * * You dont have to override this method for a working Plugin.
+         * NEEDED:
+         * * Call base.Activate() at the end of the Method.
+         * 
+         */
+        public override void Deactivate()
+        {
+            base.Deactivate();
+        }
+
+        /* 
+         * TIPS:
+         * * You dont have to override this method for a working Plugin.
+         * NEEDED:
+         * * Call base.Activate() at the end of the Method.
+         * 
+         */
+        public override void DeInit()
+        {
+            base.DeInit();
+        }
+
+        /*
+         * Often your Plugin needs to perform certain tasks, for that we can
+         * offer you the OnTick Event which can be called in intervalls of
+         * multiples of 30 seconds. We set in Init() the
+         * TickInterval to 60 seconds. this method will therfore be called 
+         * every 60 seconds (if the Plugins is activated)
+         * 
+         * TIPS:
+         * * If you do not set TickInterval or set TickInterval = 0;
+         *   This Method won't be call at all.
+         */
+        public override void OnTick()
+        {
+
         }
     }
 }

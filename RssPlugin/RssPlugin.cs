@@ -20,12 +20,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Timers;
+using System.Text.RegularExpressions;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 using Meebey.SmartIrc4net;
-using System.Text.RegularExpressions;
 
 
 namespace Plugin
@@ -39,16 +38,15 @@ namespace Plugin
             base(botInstance) { }
 
         private readonly Dictionary<string, RssWrapper> rssFeeds = new Dictionary<string, RssWrapper>();
-        private Timer checkInterval;
 
         public const string RssFeedConst = "rss_feed";
         const string RssFormatConst = "rss_format";
 
         public override void Init()
         {
-            checkInterval = new Timer();
-            checkInterval.Elapsed += CheckIntervalElapsed;
-            checkInterval.Interval = 1 * 90 * 1000; // 90 seconds
+            // 90 seconds tick intervall
+            TickInterval = 90;
+
             foreach (var rssInfo in PersistentMemory.Instance.GetValues(RssFeedConst).Select(rss => new RssWrapper(rss)).Where(rssInfo => rssInfo.FriendlyName != PersistentMemory.TodoValue))
             {
                 rssFeeds.Add(rssInfo.FriendlyName, rssInfo);
@@ -56,30 +54,22 @@ namespace Plugin
             base.Init();
         }
 
-        void CheckIntervalElapsed(object sender, ElapsedEventArgs e)
+        public override void OnTick()
         {
             if (!BotMethods.IsConnected)
                 return;
-            try
+            foreach (var rssFeed in rssFeeds.Values)
             {
-                foreach (var rssFeed in rssFeeds.Values)
+                foreach (var newItem in rssFeed.NewItems())
                 {
-                    foreach (var newItem in rssFeed.NewItems())
+                    foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
                     {
-                        foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
-                        {
-                            SendFormattedItem(rssFeed, newItem, channel);
-                        }
+                        SendFormattedItem(rssFeed, newItem, channel);
                     }
                 }
             }
-            catch (Exception exception)
-            {
-                Log.Instance.Log(exception);
-            }
             PersistentMemory.Instance.Flush();
         }
-
 
         private void SendFormattedItem(RssWrapper rssFeed, RssItem rssItem, string sendto)
         {
@@ -128,8 +118,6 @@ namespace Plugin
             BotMethods.AddCommand(new Commandlet("!+rss", "With the command !+rss <friendlyname> <url> [username:password] you can add an rss feeds even with a basic authentication.", AdminRss, this, CommandScope.Both, "rss_admin"));
             BotMethods.AddCommand(new Commandlet("!-rss", "With the command !-rss <friendlyname>  you can remove an rss feeds.", AdminRss, this, CommandScope.Both, "rss_admin"));
 
-            checkInterval.Enabled = true;
-
             base.Activate();
         }
 
@@ -139,8 +127,6 @@ namespace Plugin
             BotMethods.RemoveCommand("!rssformat");
             BotMethods.RemoveCommand("!-rss");
             BotMethods.RemoveCommand("!+rss");
-
-            checkInterval.Enabled = false;
 
             base.Deactivate();
         }

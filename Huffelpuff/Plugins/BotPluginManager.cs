@@ -19,12 +19,14 @@
 
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Timers;
 using Huffelpuff.Utils;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Meebey.SmartIrc4net;
+using Timer = System.Timers.Timer;
 
 namespace Huffelpuff.Plugins
 {
@@ -201,7 +203,7 @@ namespace Huffelpuff.Plugins
             {
                 try
                 {
-                    if (plugin.ShallITick(AbstractPlugin.MinTickIntervall))
+                    if (plugin.Active && plugin.ShallITick(AbstractPlugin.MinTickIntervall))
                     {
                         stopwatch.Restart();
                         plugin.OnTick();

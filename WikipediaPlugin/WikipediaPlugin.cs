@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -33,13 +34,18 @@ namespace Plugin
     /// </summary>
     public class WikipediaPlugin : AbstractPlugin
     {
-        private const string RequestBaseEn = "http://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
 
+        private const string RequestBaseEn = "http://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
+        private const string RequestBaseDe = "http://de.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
+        private const string RequestBaseFr = "http://fr.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
+        private const string RequestBaseIt = "http://it.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
+
+        private readonly List<string> requestBases = new List<string> { RequestBaseDe, RequestBaseEn, RequestBaseFr, RequestBaseIt };
         public WikipediaPlugin(IrcBot botInstance) : base(botInstance) { }
 
         public override void Activate()
         {
-            BotMethods.AddCommand(new Commandlet("!w", "!w <word> Returns the wikipedia desciption.", WikiHandler, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!w", "!w <word> Returns the wikipedia desciption.", WikiHandler, this));
 
             base.Activate();
         }
@@ -58,6 +64,7 @@ namespace Plugin
 
 
         private const string Redirect = "#REDIRECT";
+        private const string NoEntry = "No entry";
 
         private void WikiHandler(object sender, IrcEventArgs e)
         {
@@ -76,25 +83,31 @@ namespace Plugin
                     word.Append(c);
                 }
             }
-
-            while (true)
+            foreach (var requestBase in requestBases)
             {
-                var msg = GetWikiArticle(word);
-                BotMethods.SendMessage(SendType.Message, sendto, msg);
-
-                if (msg == null || !msg.StartsWith(Redirect)) return;
-
-                if (msg.StartsWith(Redirect))
+                while (true)
                 {
-                    word = new StringBuilder(msg.Substring(Redirect.Length + 1));
+                    var msg = GetWikiArticle(word, requestBase);
+                    BotMethods.SendMessage(SendType.Message, sendto, msg);
+
+                    if (msg == null || !msg.StartsWith(Redirect)) return;
+
+                    if (msg.StartsWith(Redirect))
+                    {
+                        word = new StringBuilder(msg.Substring(Redirect.Length + 1));
+                    }
+                    if (msg.StartsWith(NoEntry))
+                        break;
                 }
             }
+            
+            BotMethods.SendMessage(SendType.Message, sendto, NoEntry);
         }
 
-        private static string GetWikiArticle(StringBuilder word)
+        private static string GetWikiArticle(StringBuilder word, string requestBase)
         {
             var document = new XmlDocument();
-            var request = WebRequest.Create(RequestBaseEn + word.ToString().Replace(' ', '_')) as HttpWebRequest;
+            var request = WebRequest.Create(requestBase + word.ToString().Replace(' ', '_')) as HttpWebRequest;
 
             if (request == null) return null;
 
@@ -150,7 +163,7 @@ namespace Plugin
             {
                 return text.Length > 350 ? text.Substring(0, 350) : text;
             }
-            return "No entry";
+            return NoEntry;
         }
     }
 }
