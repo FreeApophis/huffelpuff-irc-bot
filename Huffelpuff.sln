@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Huffelpuff", "Huffelpuff\Huffelpuff.csproj", "{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoPlugin", "EchoPlugin\EchoPlugin.csproj", "{DD1D95FD-3E44-4651-877F-DA5DC41A334B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeenPlugin", "SeenPlugin\SeenPlugin.csproj", "{FFFA980F-D17E-43DD-AC3D-A989EDBC680A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilePlugin", "FilePlugin\FilePlugin.csproj", "{D6454C93-D557-45B4-A26E-CA1B55D47AAD}"
@@ -59,14 +57,6 @@ Global
 		{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{DD1D95FD-3E44-4651-877F-DA5DC41A334B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DD1D95FD-3E44-4651-877F-DA5DC41A334B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DD1D95FD-3E44-4651-877F-DA5DC41A334B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{DD1D95FD-3E44-4651-877F-DA5DC41A334B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{DD1D95FD-3E44-4651-877F-DA5DC41A334B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DD1D95FD-3E44-4651-877F-DA5DC41A334B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DD1D95FD-3E44-4651-877F-DA5DC41A334B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{DD1D95FD-3E44-4651-877F-DA5DC41A334B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{FFFA980F-D17E-43DD-AC3D-A989EDBC680A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FFFA980F-D17E-43DD-AC3D-A989EDBC680A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFFA980F-D17E-43DD-AC3D-A989EDBC680A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
