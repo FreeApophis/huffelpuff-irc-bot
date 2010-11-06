@@ -34,6 +34,45 @@ namespace Huffelpuff.Plugins
         protected bool ready;
         protected bool active;
 
+        public const int MinTickIntervall = 30;
+
+        private int tickInterval;
+
+        /// <summary>
+        /// the OnTick Event is called every TickIntervall seconds. Tickinterva. Set to 0 (Standard) when you dont need a tick event.
+        /// </summary>
+        public int TickInterval
+        {
+            get
+            {
+                return tickInterval;
+            }
+            protected set
+            {
+                if (value < 0)
+                {
+                    tickInterval = 0;
+                }
+                else
+                {
+                    tickInterval = value - (value % MinTickIntervall);
+                }
+            }
+        }
+
+        private int timeUntilTick;
+        public bool ShallITick(int secs)
+        {
+            timeUntilTick -= secs;
+            if (timeUntilTick <= 0)
+            {
+                timeUntilTick = tickInterval;
+                return true;
+            }
+            return false;
+        }
+
+
         /// <summary>
         /// Please only implement a Constructor with one Argument of type IrcBot
         /// </summary>
@@ -161,6 +200,11 @@ namespace Huffelpuff.Plugins
         public virtual void DeInit()
         {
             ready = false;
+        }
+
+        public virtual void OnTick()
+        {
+
         }
 
         public abstract string AboutHelp();

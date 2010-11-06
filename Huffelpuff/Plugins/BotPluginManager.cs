@@ -17,8 +17,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Diagnostics;
 using System.Linq;
-using System.Threading;
+using System.Timers;
 using Huffelpuff.Utils;
 using System;
 using System.Collections.Generic;
@@ -47,6 +48,9 @@ namespace Huffelpuff.Plugins
         {
             this.bot = bot;
             this.bot.AddCommand(new Commandlet("!reload", "!reload unloads and reloads all the plugins", ReloadPlugins, this, CommandScope.Both, "pluginmanager_reload"));
+
+            eventTimer = new Timer { Enabled = true, Interval = AbstractPlugin.MinTickIntervall * 1000 };
+            eventTimer.Elapsed += EventTick;
 
             pluginManager = new PluginManager(relPluginPath);
             pluginManager.PluginsReloaded += PluginsPluginsReloaded;
@@ -184,6 +188,32 @@ namespace Huffelpuff.Plugins
             var assemblyVersion = assemblyParts[1];
 
             return new AssemblyParts { AssemblyName = assemblyName, AssemblyVersion = assemblyVersion };
+        }
+        private readonly Timer eventTimer;
+        private readonly Stopwatch stopwatch = new Stopwatch();
+
+        private void EventTick(object sender, ElapsedEventArgs args)
+        {
+            if (!bot.IsConnected)
+                return;
+
+            foreach (var plugin in Plugins)
+            {
+                try
+                {
+                    if (plugin.ShallITick(AbstractPlugin.MinTickIntervall))
+                    {
+                        stopwatch.Restart();
+                        plugin.OnTick();
+                        Log.Instance.Log("Tick: " + plugin.FullName + " took " + stopwatch.ElapsedMilliseconds + "ms");
+                    }
+                }
+                catch (Exception exception)
+                {
+                    Log.Instance.Log("Exception in Tick event of Plugin " + plugin.FullName, Level.Error, ConsoleColor.Red);
+                    Log.Instance.Log(exception.Message, Level.Error, ConsoleColor.Red);
+                }
+            }
         }
 
         public void ShutDown()

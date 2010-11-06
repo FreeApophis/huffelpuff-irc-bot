@@ -115,7 +115,7 @@ namespace Plugin
 
         private static string Shorten(string text)
         {
-            return UrlShortener.GetUnuUrl(text);
+            return UrlShortener.GetTinyUrl(text);
         }
 
         public override string Name
