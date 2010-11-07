@@ -70,5 +70,15 @@ namespace PiVotePlugin
         Completed(this, new EventArgs());
       }
     }
+
+    protected void OutTable(StringTable table)
+    {
+      string[] lines = table.Render().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+
+      foreach (string line in lines)
+      {
+        BotMethods.SendMessage(SendType.Message, Channel, line);
+      }
+    }
   }
 }

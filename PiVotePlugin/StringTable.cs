@@ -29,6 +29,7 @@ namespace PiVotePlugin
   {
     private List<int> columns;
     private List<List<string>> data;
+    private bool hasHeader = true;
 
     public StringTable()
     {
@@ -37,15 +38,26 @@ namespace PiVotePlugin
       this.data.Add(new List<string>());
     }
 
-    public void AddColumn(string header, int length)
+    public void SetColumnCount(int count)
     {
-      this.columns.Add(length);
+      this.hasHeader = false;
+      count.Times(() => this.columns.Add(1));
+    }
+
+    public void AddColumn(string header)
+    {
+      this.columns.Add(header.Length + 1);
       this.data[0].Add(header);
     }
 
     public void AddRow(params string[] text)
     {
       this.data.Add(new List<string>(text));
+
+      for (int index = 0; index < text.Length; index++)
+      {
+        this.columns[index] = Math.Max(this.columns[index], text[index].Length + 1);
+      }
     }
 
     public string Render()
@@ -61,8 +73,10 @@ namespace PiVotePlugin
           builder.Append(Fixed(row[columnIndex], this.columns[columnIndex]));
         }
 
-        if (rowIndex == 0)
+        if (rowIndex == 0 && this.hasHeader)
         {
+          builder.AppendLine();
+
           for (int columnIndex = 0; columnIndex < row.Count; columnIndex++)
           {
             builder.Append(Line(this.columns[columnIndex]));

@@ -44,31 +44,48 @@ namespace PiVotePlugin
     public override void Begin()
     {
       BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: Getting voting list.");
-      Client.GetVotingList(CertificateStorage, Environment.CurrentDirectory, GetVotingListCompleted);
+      Client.GetCertificateStorage(CertificateStorage, GetCertificateStorageComplete);
+    }
+
+    private void GetCertificateStorageComplete(Certificate serverCertificate, Exception exception)
+    {
+      if (exception == null)
+      {
+        Client.GetVotingList(CertificateStorage, Environment.CurrentDirectory, GetVotingListCompleted);
+      }
+      else
+      {
+        BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: " + exception.Message);
+      }
     }
 
     private void GetVotingListCompleted(IEnumerable<VotingDescriptor> votings, Exception exception)
     {
-      BotMethods.SendMessage(SendType.Message, Channel, string.Format("Pi-Vote: There are {0} votings.", votings.Count()));
-
-      StringTable table = new StringTable();
-
-      table.AddColumn("Title", 24);
-      table.AddColumn("From", 12);
-      table.AddColumn("Until", 12);
-      table.AddColumn("Status", 12); 
-
-      foreach (VotingDescriptor voting in votings.OrderBy(v => v.VoteFrom))
+      if (exception == null)
       {
-        table.AddRow(voting.Title.Text, voting.VoteFrom.ToShortDateString(), voting.VoteUntil.ToShortDateString(), voting.Status.Text(), voting.EnvelopeCount.ToString());
+        StringTable table = new StringTable();
+
+        table.AddColumn("No");
+        table.AddColumn("Title");
+        table.AddColumn("From");
+        table.AddColumn("Until");
+        table.AddColumn("Status");
+        table.AddColumn("Votes");
+
+        int number = 0;
+
+        foreach (VotingDescriptor voting in votings.OrderBy(v => v.VoteFrom))
+        {
+          table.AddRow(number.ToString(), voting.Title.Text, voting.VoteFrom.ToShortDateString(), voting.VoteUntil.ToShortDateString(), voting.Status.Text(), voting.EnvelopeCount.ToString());
+          number++;
+        }
+
+        BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: Voting list:");
+        OutTable(table);
       }
-
-      BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: Voting list:"); 
-      string[] lines = table.Render().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-
-      foreach (string line in lines)
+      else
       {
-        BotMethods.SendMessage(SendType.Message, Channel, line);
+        BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: " + exception.Message);
       }
 
       OnCompleted();
@@ -78,7 +95,7 @@ namespace PiVotePlugin
     {
       get
       {
-        return this.Client.CurrentOperation == null ? "Unknown status." : this.Client.CurrentOperation.Text;
+        return "Listing votes : " + (this.Client.CurrentOperation == null ? "Unknown status." : this.Client.CurrentOperation.Text) + ".";
       }
     }
   }

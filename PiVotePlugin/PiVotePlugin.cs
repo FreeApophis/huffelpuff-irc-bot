@@ -36,8 +36,12 @@ namespace PiVotePlugin
 {
   public class PiVotePlugin : AbstractPlugin
   {
-    private const string CommandListVotings = "pivote-list";
+    private const string CommandListVotings = "!pivote-list";
     private const string CommandListVotingsDescription = "Lists all votings";
+    private const string CommandStatus = "!pivote-status";
+    private const string CommandStatusDescription = "Status of the Pi-Vote plugin";
+    private const string CommandTally = "!pivote-tally";
+    private const string CommandTallyDescription = "Tally a voting";
 
     private const string PiVoteServerAddress = "pivote.piratenpartei.ch";
     private const int PiVoteServerPort = 4242;
@@ -68,6 +72,8 @@ namespace PiVotePlugin
       this.client.Connect(serverIpEndPoint);
 
       BotMethods.AddCommand(new Commandlet(CommandListVotings, CommandListVotingsDescription, ListVotingsHandler, this));
+      BotMethods.AddCommand(new Commandlet(CommandTally, CommandTallyDescription, TallyHandler, this));
+      BotMethods.AddCommand(new Commandlet(CommandStatus, CommandStatusDescription, StatusHandler, this));
 
       base.Activate();
     }
@@ -75,6 +81,32 @@ namespace PiVotePlugin
     public override void Deactivate()
     {
       BotMethods.RemoveCommand(CommandListVotings);
+
+      base.Deactivate();
+    }
+
+    private void StatusHandler(object sender, IrcEventArgs e)
+    {
+      if (this.actionQueue.Count == 0)
+      {
+        BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Pi-Vote: No action currently executing.");
+      }
+      else
+      {
+        var action = this.actionQueue.Peek();
+        BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Pi-Vote: " + action.StatusMessage);
+
+        if (this.actionQueue.Count > 1)
+        {
+          BotMethods.SendMessage(SendType.Message, e.Data.Channel, string.Format("Pi-Vote: {0} more action queued.", this.actionQueue.Count - 1));
+        }
+      }
+    }
+
+    private void TallyHandler(object sender, IrcEventArgs e)
+    {
+      var action = new TallyAction(BotMethods, this.client, this.certificateStorage, e);
+      AddAction(action);
     }
 
     private void ListVotingsHandler(object sender, IrcEventArgs e)
