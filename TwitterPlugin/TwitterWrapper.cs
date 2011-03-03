@@ -22,11 +22,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Huffelpuff.Utils;
 using TweetSharp;
-using TweetSharp.Model;
-using TweetSharp.Twitter.Extensions;
-using TweetSharp.Twitter.Fluent;
-using TweetSharp.Twitter.Model;
-using TweetSharp.Twitter.Service;
 
 namespace Plugin
 {
@@ -149,11 +144,9 @@ namespace Plugin
             }
         }
 
-        public static TwitterResult LastResult { get; private set; }
-
         private static readonly Dictionary<string, DateTime> LastTag = new Dictionary<string, DateTime>();
 
-        private TwitterService twitterStreamService = new TwitterService(ClientInfo);
+        public static TwitterResponse LastResponse { get; private set; }
 
         internal TwitterWrapper(string name)
         {
@@ -181,15 +174,15 @@ namespace Plugin
             CreateNewRequestToken();
         }
 
-        internal string AuthenticationUrl { get; private set; }
-        private OAuthToken UnauthorizedToken { get; set; }
+        internal Uri AuthenticationUrl { get; private set; }
+        private OAuthRequestToken UnauthorizedToken { get; set; }
 
         private void CreateNewRequestToken()
         {
             var service = new TwitterService(ClientInfo);
 
-            UnauthorizedToken = service.GetRequestToken(ClientInfo.ConsumerKey, ClientInfo.ConsumerSecret);
-            AuthenticationUrl = FluentTwitter.CreateRequest().Authentication.GetAuthorizationUrl(UnauthorizedToken.Token);
+            UnauthorizedToken = service.GetRequestToken();
+            AuthenticationUrl = service.GetAuthorizationUri(UnauthorizedToken);
         }
 
         internal bool AuthenticateToken(string pin)
@@ -200,6 +193,8 @@ namespace Plugin
                 var accessToken = service.GetAccessToken(UnauthorizedToken, pin);
                 Token = accessToken.Token;
                 TokenSecret = accessToken.TokenSecret;
+
+                PersistentMemory.Instance.Flush();
 
                 return IsTweetAuthenticated;
             }
@@ -219,8 +214,19 @@ namespace Plugin
 
                 var service = new TwitterService(ClientInfo);
                 service.AuthenticateWith(Token, TokenSecret);
-                return service.Error == null;
+                return service.VerifyCredentials() != null;
             }
+        }
+
+        internal void ResetToken()
+        {
+            Token = null;
+            TokenSecret = null;
+            AuthenticationUrl = null;
+            UnauthorizedToken = null;
+            PersistentMemory.Instance.Flush();
+
+            CreateNewRequestToken();
         }
 
         internal void RemoveAccount()
@@ -232,16 +238,11 @@ namespace Plugin
 
         private IEnumerable<TwitterStatus> GetMentions()
         {
-            var mentions = FluentTwitter
-                .CreateRequest(ClientInfo)
-                .AuthenticateWith(Token, TokenSecret)
-                .Statuses()
-                .Mentions()
-                .AsJson()
-                .Request();
+            var service = new TwitterService(ClientInfo);
+            service.AuthenticateWith(Token, TokenSecret);
 
-            LastResult = mentions;
-            return mentions.AsStatuses();
+            LastResponse = service.Response;
+            return service.ListTweetsMentioningMe();
         }
 
         internal IEnumerable<TwitterStatus> GetNewMentions()
@@ -272,29 +273,18 @@ namespace Plugin
 
         private static IEnumerable<TwitterSearchStatus> SearchTag(string tag)
         {
-            var result = FluentTwitter
-                .CreateRequest(ClientInfo)
-                .Search()
-                .Query()
-                .ContainingHashTag(tag)
-                .AsJson()
-                .Request();
+            var service = new TwitterService(ClientInfo);
 
-            LastResult = result;
-            return result.AsSearchResult().Statuses;
+            LastResponse = service.Response;
+            return service.Search(tag).Statuses;
         }
 
-        internal static TwitterSearchTrends GetTrends()
+        internal static TwitterTrends GetTrends()
         {
-            var result = FluentTwitter
-                .CreateRequest(ClientInfo)
-                .Search()
-                .Trends()
-                .Current()
-                .Request();
+            var service = new TwitterService(ClientInfo);
 
-            LastResult = result;
-            return result.AsSearchTrends();
+            LastResponse = service.Response;
+            return service.ListCurrentTrends();
         }
 
         /// <summary>
@@ -303,38 +293,13 @@ namespace Plugin
         /// <param name="message">string with maximum 140 characters</param>
         /// <param name="retweet"></param>
         /// <returns>returns the response as a string</returns>
-        internal TwitterResult SendStatus(string message, bool retweet)
+        internal TwitterStatus SendStatus(string message, bool retweet)
         {
-            TwitterResult result = null;
-            if (retweet)
-            {
-                long statusId;
-                if (long.TryParse(message, out statusId))
-                {
-                    result = FluentTwitter
-                       .CreateRequest(ClientInfo)
-                       .AuthenticateWith(Token, TokenSecret)
-                       .Statuses()
-                       .Retweet(statusId, RetweetMode.SymbolPrefix)
-                       .AsJson()
-                       .Request();
-                }
-            }
+            var service = new TwitterService(ClientInfo);
+            service.AuthenticateWith(Token, TokenSecret);
 
-            if (result == null)
-            {
-
-                result = FluentTwitter
-                   .CreateRequest(ClientInfo)
-                   .AuthenticateWith(Token, TokenSecret)
-                   .Statuses()
-                   .Update(message)
-                   .AsJson()
-                   .Request();
-            }
-
-            LastResult = result;
-            return result;
+            LastResponse = service.Response;
+            return service.SendTweet(message);
 
         }
 
@@ -345,16 +310,11 @@ namespace Plugin
         /// <returns>the current Twitter User</returns>
         internal TwitterUser GetStats()
         {
-            var result = FluentTwitter
-                .CreateRequest(ClientInfo)
-                .AuthenticateWith(Token, TokenSecret)
-                .Statuses()
-                .OnUserTimeline()
-                .AsJson()
-                .Request();
+            var service = new TwitterService(ClientInfo);
+            service.AuthenticateWith(Token, TokenSecret);
 
-            LastResult = result;
-            return result.AsStatuses().First().User;
+            LastResponse = service.Response;
+            return service.GetUserProfile();
         }
     }
 }

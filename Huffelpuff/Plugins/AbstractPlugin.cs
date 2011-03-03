@@ -31,15 +31,15 @@ namespace Huffelpuff.Plugins
     {
         protected IrcBot BotMethods;
         protected SharedClientSide BotEvents;
-        protected bool ready;
-        protected bool active;
+        private bool ready;
+        private bool active;
 
         public const int MinTickIntervall = 30;
 
         private int tickInterval;
 
         /// <summary>
-        /// the OnTick Event is called every TickIntervall seconds. Tickinterva. Set to 0 (Standard) when you dont need a tick event.
+        /// the OnTick Event is called every TickIntervall seconds. Tickinterval set to 0 (Standard) when you dont need a tick event.
         /// </summary>
         public int TickInterval
         {
@@ -49,9 +49,13 @@ namespace Huffelpuff.Plugins
             }
             protected set
             {
-                if (value < 0)
+                if (value <= 0)
                 {
                     tickInterval = 0;
+                }
+                else if (value < MinTickIntervall)
+                {
+                    tickInterval = MinTickIntervall;
                 }
                 else
                 {
@@ -63,6 +67,9 @@ namespace Huffelpuff.Plugins
         private int timeUntilTick;
         public bool ShallITick(int secs)
         {
+            if (tickInterval == 0)
+                return false;
+
             timeUntilTick -= secs;
             if (timeUntilTick <= 0)
             {

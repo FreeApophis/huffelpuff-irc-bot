@@ -1,0 +1,38 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>ServerHost</baseKey>
+    <baseValue>TODO</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>ServerPort</baseKey>
+    <baseValue>TODO</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>nick</baseKey>
+    <baseValue>TODO</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>realname</baseKey>
+    <baseValue>TODO</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>username</baseKey>
+    <baseValue>TODO</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>channel</baseKey>
+    <baseValue>#TODO</baseValue>
+  </baseTBL>
+  <baseTBL>
+    <baseGroup>config</baseGroup>
+    <baseKey>botmaster</baseKey>
+    <baseValue>ns/TODO</baseValue>
+  </baseTBL>
+</NewDataSet>

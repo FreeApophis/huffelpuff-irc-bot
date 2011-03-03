@@ -22,13 +22,14 @@ using System;
 using System.Collections.Generic;
 
 /* 
- * To write a Plugin you need to set a Reference to the Huffelpuff-project
- *  If you work with the source, make a new Project for your Plugin and add
- *  project reference to the Project.
- *  If you work with the executable directly, Add a reference to the
- *  Huffelpuff.exe
+ * To write a Plugin you need to set a Reference to the Huffelpuff-project 
+ * and also to the SmartIrc4Net Project.
+ * If you work with the source, make a new Project for your Plugin and add
+ * project reference to the Project.
+ * If you work with the executable directly, Add a reference to the
+ * Huffelpuff.exe And SmartIrc4Net.dll
  * 
- *  normally you need the following namesspaces from the project:
+ * normally you need the following namesspaces from the project:
  */
 using Huffelpuff;
 using Huffelpuff.Plugins;
@@ -142,7 +143,7 @@ namespace Plugin
          * 
          * TIPS:
          * * If you do not set TickInterval or set TickInterval = 0;
-         *   This Method won't be call at all.
+         *   This Method won't be called at all.
          */
         public override void OnTick()
         {

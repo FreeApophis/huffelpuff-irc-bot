@@ -22,6 +22,7 @@ using System;
 using System.Configuration.Install;
 using System.Reflection;
 using System.ServiceProcess;
+using System.Windows.Forms;
 using Huffelpuff.Utils;
 
 namespace Huffelpuff
@@ -41,6 +42,9 @@ namespace Huffelpuff
                         return;
                     case "--uninstall":
                         ManagedInstallerClass.InstallHelper(new[] { "/u", Assembly.GetExecutingAssembly().Location });
+                        return;
+                    case "--config":
+                        Tool.Configure();
                         return;
                 }
 

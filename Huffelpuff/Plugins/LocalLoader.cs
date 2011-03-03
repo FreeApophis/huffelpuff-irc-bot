@@ -34,7 +34,7 @@ namespace Huffelpuff.Plugins
 
             // Used for a Cross AppDomain Singleton
             appDomain.SetData("PersistentMemoryInstance", PersistentMemory.Instance);
-            appDomain.AssemblyResolve += new ResolveEventHandler(AppDomainAssemblyResolve);
+            appDomain.AssemblyResolve += AppDomainAssemblyResolve;
 
             appDomain.UnhandledException += AppDomainUnhandledException;
             appDomain.InitializeLifetimeService();
@@ -187,8 +187,7 @@ namespace Huffelpuff.Plugins
         /// <param name="bindingFlags">The binding flags for the constructor</param>
         /// <param name="constructorParams">The parameters to pass to the constructor</param>
         /// <returns>The constructed object</returns>
-        public MarshalByRefObject CreateInstance(string typeName, BindingFlags bindingFlags,
-                                                 object[] constructorParams)
+        public MarshalByRefObject CreateInstance(string typeName, BindingFlags bindingFlags, object[] constructorParams)
         {
             return remoteLoader.CreateInstance(typeName, bindingFlags, constructorParams);
         }

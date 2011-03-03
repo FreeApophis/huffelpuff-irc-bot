@@ -22,137 +22,136 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
-using Pirate.PiVote;
 using Pirate.PiVote.Crypto;
 using Pirate.PiVote.Rpc;
 
 namespace PiVotePlugin
 {
-  public class PiVotePlugin : AbstractPlugin
-  {
-    private const string CommandListVotings = "!pivote-list";
-    private const string CommandListVotingsDescription = "Lists all votings";
-    private const string CommandStatus = "!pivote-status";
-    private const string CommandStatusDescription = "Status of the Pi-Vote plugin";
-    private const string CommandTally = "!pivote-tally";
-    private const string CommandTallyDescription = "Tally a voting";
-
-    private const string PiVoteServerAddress = "pivote.piratenpartei.ch";
-    private const int PiVoteServerPort = 4242;
-
-    private CertificateStorage certificateStorage;
-    private VotingClient client;
-    private Queue<PiVoteAction> actionQueue;
-
-    public PiVotePlugin(IrcBot botInstance)
-      : base(botInstance)
+    public class PiVotePlugin : AbstractPlugin
     {
-    }
+        private const string CommandListVotings = "!pivote-list";
+        private const string CommandListVotingsDescription = "Lists all votings";
+        private const string CommandStatus = "!pivote-status";
+        private const string CommandStatusDescription = "Status of the Pi-Vote plugin";
+        private const string CommandTally = "!pivote-tally";
+        private const string CommandTallyDescription = "Tally a voting";
 
-    public override void Activate()
-    {
-      this.actionQueue = new Queue<PiVoteAction>();
-      this.certificateStorage = new CertificateStorage();
+        private const string PiVoteServerAddress = "pivote.piratenpartei.ch";
+        private const int PiVoteServerPort = 4242;
 
-      if (!this.certificateStorage.TryLoadRoot())
-      {
-        throw new Exception("Cannot find root certificate file.");
-      }
+        private CertificateStorage certificateStorage;
+        private VotingClient client;
+        private Queue<PiVoteAction> actionQueue;
 
-      this.client = new VotingClient(this.certificateStorage);
-
-      IPAddress serverIpAddress = Dns.GetHostEntry(PiVoteServerAddress).AddressList.First();
-      IPEndPoint serverIpEndPoint = new IPEndPoint(serverIpAddress, PiVoteServerPort);
-      this.client.Connect(serverIpEndPoint);
-
-      BotMethods.AddCommand(new Commandlet(CommandListVotings, CommandListVotingsDescription, ListVotingsHandler, this));
-      BotMethods.AddCommand(new Commandlet(CommandTally, CommandTallyDescription, TallyHandler, this));
-      BotMethods.AddCommand(new Commandlet(CommandStatus, CommandStatusDescription, StatusHandler, this));
-
-      base.Activate();
-    }
-
-    public override void Deactivate()
-    {
-      BotMethods.RemoveCommand(CommandListVotings);
-
-      base.Deactivate();
-    }
-
-    private void StatusHandler(object sender, IrcEventArgs e)
-    {
-      if (this.actionQueue.Count == 0)
-      {
-        BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Pi-Vote: No action currently executing.");
-      }
-      else
-      {
-        var action = this.actionQueue.Peek();
-        BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Pi-Vote: " + action.StatusMessage);
-
-        if (this.actionQueue.Count > 1)
+        public PiVotePlugin(IrcBot botInstance)
+            : base(botInstance)
         {
-          BotMethods.SendMessage(SendType.Message, e.Data.Channel, string.Format("Pi-Vote: {0} more action queued.", this.actionQueue.Count - 1));
         }
-      }
-    }
 
-    private void TallyHandler(object sender, IrcEventArgs e)
-    {
-      var action = new TallyAction(BotMethods, this.client, this.certificateStorage, e);
-      AddAction(action);
-    }
+        public override void Activate()
+        {
+            actionQueue = new Queue<PiVoteAction>();
+            certificateStorage = new CertificateStorage();
 
-    private void ListVotingsHandler(object sender, IrcEventArgs e)
-    {
-      var action = new ListVotingsAction(BotMethods, this.client, this.certificateStorage, e);
-      AddAction(action);
-    }
+            if (!certificateStorage.TryLoadRoot())
+            {
+                throw new Exception("Cannot find root certificate file.");
+            }
 
-    private void AddAction(PiVoteAction action)
-    {
-      this.actionQueue.Enqueue(action);
-      action.Completed += new EventHandler(Action_Completed);
+            client = new VotingClient(certificateStorage);
 
-      if (this.actionQueue.Count == 1)
-      {
-        StartAction();
-      }
-      else
-      {
-        BotMethods.SendMessage(SendType.Message, action.Channel, "Pi-Vote: Your request was placed in queue.");
-      }
-    }
+            var serverIpAddress = Dns.GetHostEntry(PiVoteServerAddress).AddressList.First();
+            var serverIpEndPoint = new IPEndPoint(serverIpAddress, PiVoteServerPort);
+            client.Connect(serverIpEndPoint);
 
-    private void Action_Completed(object sender, EventArgs e)
-    {
-      this.actionQueue.Peek().Completed -= new EventHandler(Action_Completed);
-      this.actionQueue.Dequeue();
-      StartAction();
-    }
+            BotMethods.AddCommand(new Commandlet(CommandListVotings, CommandListVotingsDescription, ListVotingsHandler, this));
+            BotMethods.AddCommand(new Commandlet(CommandTally, CommandTallyDescription, TallyHandler, this));
+            BotMethods.AddCommand(new Commandlet(CommandStatus, CommandStatusDescription, StatusHandler, this));
 
-    private void StartAction()
-    {
-      if (this.actionQueue.Count > 0)
-      {
-        this.actionQueue.Peek().Begin();
-      }
-    }
+            base.Activate();
+        }
 
-    public override string AboutHelp()
-    {
-      return "Pi-Vote Plugin";
-    }
+        public override void Deactivate()
+        {
+            BotMethods.RemoveCommand(CommandListVotings);
 
-    public override string Name
-    {
-      get { return "Pi-Vote Plugin"; }
+            base.Deactivate();
+        }
+
+        private void StatusHandler(object sender, IrcEventArgs e)
+        {
+            if (actionQueue.Count == 0)
+            {
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Pi-Vote: No action currently executing.");
+            }
+            else
+            {
+                var action = actionQueue.Peek();
+                BotMethods.SendMessage(SendType.Message, e.Data.Channel, "Pi-Vote: " + action.StatusMessage);
+
+                if (actionQueue.Count > 1)
+                {
+                    BotMethods.SendMessage(SendType.Message, e.Data.Channel, string.Format("Pi-Vote: {0} more action queued.", actionQueue.Count - 1));
+                }
+            }
+        }
+
+        private void TallyHandler(object sender, IrcEventArgs e)
+        {
+            var action = new TallyAction(BotMethods, client, certificateStorage, e);
+            AddAction(action);
+        }
+
+        private void ListVotingsHandler(object sender, IrcEventArgs e)
+        {
+            var action = new ListVotingsAction(BotMethods, client, certificateStorage, e);
+            AddAction(action);
+        }
+
+        private void AddAction(PiVoteAction action)
+        {
+            actionQueue.Enqueue(action);
+            action.Completed += Action_Completed;
+
+            if (actionQueue.Count == 1)
+            {
+                StartAction();
+            }
+            else
+            {
+                BotMethods.SendMessage(SendType.Message, action.Channel, "Pi-Vote: Your request was placed in queue.");
+            }
+        }
+
+        private void Action_Completed(object sender, EventArgs e)
+        {
+            actionQueue.Peek().Completed -= Action_Completed;
+            actionQueue.Dequeue();
+            StartAction();
+        }
+
+        private void StartAction()
+        {
+            if (actionQueue.Count > 0)
+            {
+                actionQueue.Peek().Begin();
+            }
+        }
+
+        public override string AboutHelp()
+        {
+            return "Pi-Vote Plugin";
+        }
+
+        public override string Name
+        {
+            get
+            {
+                return "Pi-Vote Plugin";
+            }
+        }
     }
-  }
 }

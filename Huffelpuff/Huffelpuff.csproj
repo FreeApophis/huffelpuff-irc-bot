@@ -22,6 +22,21 @@
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <OutputPath>bin\</OutputPath>
@@ -70,6 +85,9 @@
     <Optimize>true</Optimize>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Huffelpuff.Engine</StartupObject>
+  </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Reference Include="DbLinq">
@@ -97,8 +115,10 @@
     <Reference Include="System.Data.SQLite">
       <HintPath>lib\System.Data.SQLite.DLL</HintPath>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Security" />
     <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -121,37 +141,6 @@
     <Compile Include="HuffelpuffServiceInstaller.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="IrcCore\Consts.cs" />
-    <Compile Include="IrcCore\EventArgs.cs" />
-    <Compile Include="IrcCore\Exceptions.cs" />
-    <Compile Include="IrcCore\IrcClient\BanInfo.cs" />
-    <Compile Include="IrcCore\IrcClient\Channel.cs" />
-    <Compile Include="IrcCore\IrcClient\ChannelInfo.cs" />
-    <Compile Include="IrcCore\IrcClient\ChannelUser.cs" />
-    <Compile Include="IrcCore\IrcClient\Delegates.cs" />
-    <Compile Include="IrcCore\IrcClient\EventArgs.cs" />
-    <Compile Include="IrcCore\IrcClient\IrcClient.cs" />
-    <Compile Include="IrcCore\IrcClient\IrcMessageData.cs" />
-    <Compile Include="IrcCore\IrcClient\IrcUser.cs" />
-    <Compile Include="IrcCore\IrcClient\NonRfcChannel.cs" />
-    <Compile Include="IrcCore\IrcClient\NonRfcChannelUser.cs" />
-    <Compile Include="IrcCore\IrcClient\ServerProperties.cs" />
-    <Compile Include="IrcCore\IrcClient\WhoInfo.cs" />
-    <Compile Include="IrcCore\IrcCommands\IrcCommands.cs" />
-    <Compile Include="IrcCore\IrcCommands\Rfc2812.cs" />
-    <Compile Include="IrcCore\IrcConnection\Delegates.cs" />
-    <Compile Include="IrcCore\IrcConnection\EventArgs.cs" />
-    <Compile Include="IrcCore\IrcConnection\IrcConnection.cs" />
-    <Compile Include="IrcCore\IrcConnection\IrcProperties.cs" />
-    <Compile Include="IrcCore\IrcConnection\IrcTcpClient.cs" />
-    <Compile Include="IrcCore\IrcFeatures\DccChat.cs" />
-    <Compile Include="IrcCore\IrcFeatures\DccConnection.cs" />
-    <Compile Include="IrcCore\IrcFeatures\DccSend.cs" />
-    <Compile Include="IrcCore\IrcFeatures\Delegates.cs" />
-    <Compile Include="IrcCore\IrcFeatures\EventArgs.cs" />
-    <Compile Include="IrcCore\IrcFeatures\IrcConstants.cs" />
-    <Compile Include="IrcCore\IrcFeatures\IrcFeatures.cs" />
-    <Compile Include="IrcCore\Logger.cs" />
     <Compile Include="Mono.Nat\AbstractNatDevice.cs" />
     <Compile Include="Mono.Nat\AsyncResults\AsyncResult.cs" />
     <Compile Include="Mono.Nat\Enums\MapState.cs" />
@@ -208,6 +197,12 @@
     <Compile Include="SocksProxy\Socks4Handler.cs" />
     <Compile Include="SocksProxy\Socks5Handler.cs" />
     <Compile Include="SocksProxy\SocksHandler.cs" />
+    <Compile Include="Utils\ConfigForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Utils\ConfigForm.Designer.cs">
+      <DependentUpon>ConfigForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Utils\ConsoleLogger.cs" />
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Utils\Level.cs" />
@@ -221,9 +216,41 @@
     <Compile Include="Utils\WildCard.cs" />
     <Compile Include="Utils\WindowsServiceLogger.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\SmartIrc4Net\src\SmartIrc4Net.csproj">
+      <Project>{BFB6AD56-7EE1-4F29-BEE1-50BC09137178}</Project>
+      <Name>SmartIrc4Net</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Utils\ConfigForm.resx">
+      <DependentUpon>ConfigForm.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <PreBuildEvent>xcopy ..\huffelpuff.db . /y</PreBuildEvent>

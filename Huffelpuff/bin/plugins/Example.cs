@@ -42,12 +42,14 @@ namespace Plugin
         
         public override void Activate() {
             BotMethods.AddCommand(new Commandlet("!example", "The command !example will send a message with Version to the Channel", exampleHandler, this, CommandScope.Public));
-            active = true;
+
+            base.Activate();
         }
 
         public override void Deactivate() {
             BotMethods.RemoveCommand("!example");
-            active = false;
+
+            base.Deactivate();
         }
                 
         public override string AboutHelp() {

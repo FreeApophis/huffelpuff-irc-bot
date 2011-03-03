@@ -51,8 +51,8 @@ namespace Huffelpuff.Utils
 
             while (index < args.Length)
             {
-                var key = args[index].ToString();
-                var value = args[index + 1].ToString();
+                var key = args[index];
+                var value = args[index + 1];
 
                 str = str.Replace(key, value);
 
@@ -64,6 +64,34 @@ namespace Huffelpuff.Utils
         public static List<string> ToLines(this IEnumerable<string> list, int maxlinelength)
         {
             return list.ToLines(maxlinelength, ", ");
+        }
+
+        public static string ToRelativeTime(this DateTime dateTime)
+        {
+            var span = DateTime.Now - dateTime;
+            if (span.TotalDays > 730)
+                return "{0} years ago".Fill((int)(span.TotalDays / 365));
+            if (span.TotalDays > 365)
+                return "one year ago";
+            if (span.TotalDays >= 2)
+                return "{0} days ago".Fill((int)(span.TotalDays));
+            if (span.TotalDays >= 1)
+                return "one day ago";
+            if (span.TotalHours >= 2)
+                return "{0} hours ago".Fill((int)(span.TotalHours));
+            if (span.TotalHours >= 1)
+                return "one hour ago";
+            if (span.TotalMinutes >= 2)
+                return "{0} minutes ago".Fill((int)(span.TotalMinutes));
+            if (span.TotalMinutes >= 1)
+                return "one minute ago";
+            if (span.TotalSeconds >= 2)
+                return "{0} seconds ago".Fill((int)(span.TotalSeconds));
+            if (span.TotalSeconds >= 1)
+                return "one second ago";
+            if (span.TotalSeconds > -300)
+                return "moments ago".Fill(span.TotalDays);
+            return "from the future";
         }
 
 
@@ -142,31 +170,6 @@ namespace Huffelpuff.Utils
         {
             return time.ToString("HH:mm K", new CultureInfo("DE-ch", true));
         }
-
-
-        public static string Ago(this DateTime time)
-        {
-            return (DateTime.Now - time).Ago();
-        }
-
-
-        public static string Ago(this TimeSpan ago)
-        {
-            if (ago.Days > 0)
-            {
-                return ago.Days + ((ago.Days == 1) ? " day" : " days") + " ago";
-            }
-            if (ago.Hours > 0)
-            {
-                return ago.Hours + ((ago.Days == 1) ? " hour" : " hours") + " ago";
-            }
-            if (ago.Minutes > 0)
-            {
-                return ago.Minutes + ((ago.Days == 1) ? " minute" : " minutes") + " ago";
-            }
-            return ago.Seconds + ((ago.Days == 1) ? " second" : " seconds") + " ago";
-        }
-
 
         private static readonly Regex WhiteSpaceMatch = new Regex(@"\s+");
 

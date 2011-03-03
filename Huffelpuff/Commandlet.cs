@@ -46,7 +46,7 @@ namespace Huffelpuff
 
         public string HelpText { get; private set; }
 
-        public IrcEventHandler Handler { get; private set; }
+        public EventHandler<IrcEventArgs> Handler { get; private set; }
 
         public string HandlerName { get; private set; }
 
@@ -76,7 +76,7 @@ namespace Huffelpuff
         /// <param name="scope">Should the event be fired by Channelmessages or Privatemessages or Both</param>
         /// <param name="accessString">globally unique string which identifies a restricted function, something like: plugin_function, can be done manually too, via bot.acl.*</param>
         /// <param name="channelList">Only usefull if the Scope is Public! The Handler will only be called if the request was made in a certain channel. No restriction == null</param>
-        public Commandlet(string command, string helptext, IrcEventHandler handler, object owner, CommandScope scope = CommandScope.Both, string accessString = null, List<string> channelList = null)
+        public Commandlet(string command, string helptext, EventHandler<IrcEventArgs> handler, object owner, CommandScope scope = CommandScope.Both, string accessString = null, List<string> channelList = null)
         {
             Command = command;
             HelpText = helptext;

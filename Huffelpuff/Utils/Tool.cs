@@ -22,6 +22,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Windows.Forms;
 
 namespace Huffelpuff.Utils
 {
@@ -161,6 +162,12 @@ namespace Huffelpuff.Utils
                 }
             }
             return false;
+        }
+
+        public static void Configure()
+        {
+            Application.EnableVisualStyles();
+            Application.Run(new ConfigForm());
         }
     }
 }

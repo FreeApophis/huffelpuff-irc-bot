@@ -60,46 +60,39 @@
   
 ;***** Installer Sections *****
 InstType "Full"
+InstType "Standard"
 InstType "Minimal"
 
 
 SectionGroup /e "!Huffelpuff Service"
 Section "-Huffelpuff" mainHuffelpuffSec
-  SectionIn 1 2 RO
+  SectionIn 1 2 3 RO
   SetOutPath "$INSTDIR"
  
   File "${BUILD_PATH}\${PROGRAM_EXE}"
+  File "${BUILD_PATH}\SmartIrc4Net.dll"
 
   SetOutPath "$APPDATA\Huffelpuff\"
-  ;File "DBHere"
+  
+  ;Settings  
+  File /oname="pmem.xml" "pmem.base"
   
   ;preparing the Add / Remove Program
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
-                 "DisplayName" "Huffelpuff - the IRC Bot"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
-                 "UninstallString" "$\"$INSTDIR\Uninstall.exe$\""
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
-                 "QuietUninstallString" "$\"$INSTDIR\Uninstall.exe$\" /S"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
-                 "InstallLocation" "$\"$INSTDIR$\""
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
-                 "Publisher" "apophis.ch"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
-                 "DisplayVersion" "${PROGRAM_VERSION}"
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
-                 "MajorVersion" "1"
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
-                 "MinorVersion" "0"				 
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
-                 "NoModify" "1"
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
-                 "NoRepair" "1"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "DisplayName" "Huffelpuff - the IRC Bot"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "UninstallString" "$\"$INSTDIR\Uninstall.exe$\""
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "QuietUninstallString" "$\"$INSTDIR\Uninstall.exe$\" /S"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "InstallLocation" "$\"$INSTDIR$\""
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "Publisher" "apophis.ch"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "DisplayVersion" "${PROGRAM_VERSION}"
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "MajorVersion" "1"
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "MinorVersion" "0"				 
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "NoModify" "1"
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "NoRepair" "1"
 				 
   Call GetInstalledSize
   Pop $0
 
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
-                 "EstimatedSize" "$0"
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "EstimatedSize" "$0"
 				 
   ;Store installation folder
   WriteRegStr HKCU "Software\Huffelpuff" "" $INSTDIR
@@ -119,48 +112,57 @@ Section "-Huffelpuff" mainHuffelpuffSec
 SectionEnd
 SectionGroupEnd
 
-SectionGroup /e "!Huffelpuff Plugins"
+SectionGroup /e "!Huffelpuff Common Plugins"
 Section "AIML"
-  SectionIn 1
+  SectionIn 1 2
   SetOutPath "$APPDATA\Huffelpuff\plugins\"
   File "${BUILD_PATH}\plugins\AIMLPlugin.dll"
 SectionEnd
 Section "Calculator"
-  SectionIn 1
-  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  SectionIn 1 2
+  SetOutPath "$INSTDIR\plugins\"
   File "${BUILD_PATH}\plugins\CalculatorPlugin.dll"
 SectionEnd
 Section "Factoid"
-  SectionIn 1
-  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  SectionIn 1 2
+  SetOutPath "$INSTDIR\plugins\"
   File "${BUILD_PATH}\plugins\FactoidPlugin.dll"
 SectionEnd
 Section "RSS"
-  SectionIn 1
-  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  SectionIn 1 2
+  SetOutPath "$INSTDIR\plugins\"
   File "${BUILD_PATH}\plugins\RSSPlugin.dll"
 SectionEnd
 Section "Seen"
   SectionIn 1
-  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  SetOutPath "$INSTDIR\plugins\"
   File "${BUILD_PATH}\plugins\SeenPlugin.dll"
 SectionEnd
 Section "Twitter"
-  SectionIn 1
-  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  SectionIn 1 2
+  SetOutPath "$INSTDIR\plugins\"
   File "${BUILD_PATH}\plugins\TwitterPlugin.dll"
 SectionEnd
 Section "UrlToTitle"
-  SectionIn 1
-  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  SectionIn 1 2
+  SetOutPath "$INSTDIR\plugins\"
   File "${BUILD_PATH}\plugins\UrlToTitlePlugin.dll"
 SectionEnd
 Section "Wikipedia"
-  SectionIn 1
-  SetOutPath "$APPDATA\Huffelpuff\plugins\"
+  SectionIn 1 2
+  SetOutPath "$INSTDIR\plugins\"
   File "${BUILD_PATH}\plugins\WikipediaPlugin.dll"
 SectionEnd
 SectionGroupEnd
+
+SectionGroup /e "!Huffelpuff Special Plugins"
+Section "PiVote"
+  SectionIn 1 2
+  SetOutPath "$INSTDIR\plugins\"
+  File "${BUILD_PATH}\plugins\WikipediaPlugin.dll"
+SectionEnd
+SectionGroupEnd
+
 
 ;***** Descriptions *****
 
@@ -193,8 +195,8 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\$StartMenuFolder\Uninstall ${PROGRAM_NAME}.lnk"
   RMDir "$SMPROGRAMS\$StartMenuFolder"
 
-  Delete "$APPDATA\Huffelpuff\plugins\*"
-  RMDir "$APPDATA\Huffelpuff\plugins"
+  Delete "$INSTDIR\plugins\*"
+  RMDir "$INSTDIR\plugins"
 
 SectionEnd
 

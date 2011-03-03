@@ -511,14 +511,11 @@ namespace Huffelpuff
             if (PersistentMemory.Instance.GetValue("ProxyServer") != null)
             {
                 Log.Instance.Log("Using Proxy Server: " + PersistentMemory.Instance.GetValue("ProxyServer"), Level.Trace);
-                ProxyType = Org.Mentalis.Network.ProxySocket.ProxyTypes.Socks5;
-                var ip = IPAddress.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new[] { ':' })[0]);
-                if (ip != null)
-                {
-                    ProxyEndPoint = new IPEndPoint(ip, int.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new[] { ':' })[1]));
-                }
-                ProxyUser = PersistentMemory.Instance.GetValue("ProxyUser");
-                ProxyPass = PersistentMemory.Instance.GetValue("ProxyPass");
+                ProxyType = ProxyType.Socks5;
+                ProxyHost = PersistentMemory.Instance.GetValue("ProxyServer").Split(new[] { ':' })[0];
+                ProxyPort = int.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new[] { ':' })[1]);
+                ProxyUsername = PersistentMemory.Instance.GetValue("ProxyUser");
+                ProxyPassword = PersistentMemory.Instance.GetValue("ProxyPass");
             }
 
             // the server we want to connect to

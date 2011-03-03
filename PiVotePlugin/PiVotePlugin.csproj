@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -58,6 +58,10 @@
       <Project>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</Project>
       <Name>Huffelpuff</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SmartIrc4Net\src\SmartIrc4Net.csproj">
+      <Project>{BFB6AD56-7EE1-4F29-BEE1-50BC09137178}</Project>
+      <Name>SmartIrc4Net</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -65,7 +69,9 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy .\PiVotePlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
+    <PostBuildEvent>xcopy .\PiVotePlugin.* ..\..\Huffelpuff\bin\plugins /y
+xcopy ..\libs\*.dll ..\..\Huffelpuff\bin /y
+xcopy ..\certs\*.pi-cert ..\..\Huffelpuff\bin /y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

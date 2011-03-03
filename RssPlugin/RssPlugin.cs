@@ -86,7 +86,7 @@ namespace Plugin
                     "%DESCRIPTION%", StripHtml(rssItem.Desc),
                     "%LINK%", rssItem.Link,
                     "%DATE%", rssItem.Published.ToString(),
-                    "%AGO%", rssItem.Published.Ago()
+                    "%AGO%", rssItem.Published.ToRelativeTime()
                 ));
         }
 

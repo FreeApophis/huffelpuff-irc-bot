@@ -68,6 +68,7 @@ namespace Huffelpuff.Plugins
             AddReference("System.Web.Services.dll");
             AddReference("System.Windows.Forms.Dll");
             AddReference("System.XML.dll");
+            AddReference("SmartIrc4Net.dll");
 
         }
 
