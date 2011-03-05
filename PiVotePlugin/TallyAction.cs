@@ -77,6 +77,7 @@ namespace PiVotePlugin
       else
       {
         BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: " + exception.Message);
+        BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: " + exception.StackTrace);
       }
     }
 
@@ -98,6 +99,7 @@ namespace PiVotePlugin
           {
             BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: Tallying voting " + voting.Title.Text + ".");
 
+            Client.ActivateVoter();
             Client.GetResult(voting.Id, new List<Signed<VoteReceipt>>(), GetResultComplete);
           }
           else
@@ -110,8 +112,6 @@ namespace PiVotePlugin
       {
         BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: " + exception.Message);
       }
-
-      OnCompleted();
     }
 
     private void GetResultComplete(VotingResult result, IDictionary<Guid, VoteReceiptStatus> voteReceiptsStatus, Exception exception)
@@ -144,13 +144,21 @@ namespace PiVotePlugin
       {
         BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: " + exception.Message);
       }
+
+      OnCompleted();
     }
 
     public override string StatusMessage
     {
       get
       {
-        return "Tallying : " + (this.Client.CurrentOperation == null ? "Unknown status." : this.Client.CurrentOperation.Text) + ".";
+        return "Tallying : " + 
+          (this.Client.CurrentOperation == null ?
+          "Unknown status." :
+          this.Client.CurrentOperation.Text) + 
+          (Client.CurrentOperation.SubText.IsNullOrEmpty() ? 
+          string.Empty : " " + 
+          Client.CurrentOperation.SubText);
       }
     }
   }
