@@ -59,34 +59,27 @@ namespace Plugin
         {
             if (!BotMethods.IsConnected)
                 return;
-            try
+            foreach (var twitteraccount in twitterAccounts)
             {
-                foreach (var twitteraccount in twitterAccounts)
+                foreach (var mention in twitteraccount.Value.GetNewMentions())
                 {
-                    foreach (var mention in twitteraccount.Value.GetNewMentions())
+                    foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
                     {
-                        foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
-                        {
-                            SendFormattedItem(twitteraccount.Value, mention, channel);
-                        }
-                    }
-
-                }
-
-                foreach (var tag in PersistentMemory.Instance.GetValues("twitter_search_tag"))
-                {
-                    foreach (var tagStatus in TwitterWrapper.SearchNewTag(tag))
-                    {
-                        foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
-                        {
-                            BotMethods.SendMessage(SendType.Message, channel, "Tag: {0} (by {1})".Fill(tagStatus.Text, tagStatus.FromUserScreenName));
-                        }
+                        SendFormattedItem(twitteraccount.Value, mention, channel);
                     }
                 }
+
             }
-            catch (Exception exception)
+
+            foreach (var tag in PersistentMemory.Instance.GetValues("twitter_search_tag"))
             {
-                Log.Instance.Log(exception);
+                foreach (var tagStatus in TwitterWrapper.SearchNewTag(tag))
+                {
+                    foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+                    {
+                        BotMethods.SendMessage(SendType.Message, channel, "Tag: {0} (by {1})".Fill(tagStatus.Text, tagStatus.FromUserScreenName));
+                    }
+                }
             }
         }
 
@@ -454,7 +447,7 @@ namespace Plugin
                     "%ID%", mention.Id.ToString(),
                     "%SCREENNAME%", mention.User.ScreenName,
                     "%AUTHOR%", mention.User.Name,
-                    "%LOCATION%", mention.Location.ToString(),
+                    "%LOCATION%", mention.Location != null ? mention.Location.ToString() : "nowhere",
                     "%DATE%", mention.CreatedDate.ToString(),
                     "%AGO%", mention.CreatedDate.ToRelativeTime(),
                     "%#FOLLOW%", mention.User.FollowersCount.ToString(),

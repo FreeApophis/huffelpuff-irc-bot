@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using Huffelpuff;
 using Huffelpuff.Plugins;
@@ -56,24 +57,36 @@ namespace Plugin
 
         public override void OnTick()
         {
-            if (!BotMethods.IsConnected)
-                return;
+            if (!BotMethods.IsConnected) { return; }
+
+
             foreach (var rssFeed in rssFeeds.Values)
             {
-                foreach (var newItem in rssFeed.NewItems())
+                try
+                {
+                    foreach (var newItem in rssFeed.NewItems())
+                    {
+                        foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+                        {
+                            SendFormattedItem(rssFeed, newItem, channel);
+                        }
+                    }
+                }
+                catch (WebException exception)
                 {
                     foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
                     {
-                        SendFormattedItem(rssFeed, newItem, channel);
+                        BotMethods.SendMessage(SendType.Message, channel, "Feed '{0}' has a problem! [{2}] Check Url: {1}".Fill(rssFeed.FriendlyName, rssFeed.Url, exception.Message));
                     }
                 }
+
             }
             PersistentMemory.Instance.Flush();
         }
 
         private void SendFormattedItem(RssWrapper rssFeed, RssItem rssItem, string sendto)
         {
-            if (rssFeed == null || rssItem == null) return;
+            if (rssFeed == null || rssItem == null) { return; }
 
             BotMethods.SendMessage(SendType.Message, sendto,
                 MessageFormat.FillKeyword(
@@ -102,8 +115,7 @@ namespace Plugin
 
         private static string StripHtml(string str)
         {
-            if (string.IsNullOrEmpty(str))
-                return string.Empty;
+            if (string.IsNullOrEmpty(str)) { return string.Empty; }
 
             str = Regex.Replace(str, "<[^<]*>", string.Empty);
             str = Regex.Replace(str, "&nbsp;", " ");

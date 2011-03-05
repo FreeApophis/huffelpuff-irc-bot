@@ -342,7 +342,7 @@ namespace Huffelpuff
             foreach (var channel in e.Data.MessageArray.Skip(1).Where(channel => !channel.IsNullOrEmpty()))
             {
                 RfcJoin(channel);
-                PersistentMemory.Instance.ReplaceValue("channel", channel);
+                PersistentMemory.Instance.SetValue("channel", channel);
             }
 
             PersistentMemory.Instance.Flush();
