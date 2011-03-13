@@ -315,7 +315,7 @@ namespace Huffelpuff
                                              select command).ToList())
                     {
                         commands.Remove(command);
-                        Log.Instance.Log("BUG in Plugin: Forefully deactivated Command '{0}' in Plugin {1}.".Fill(command, plugin.FullName), Level.Warning);
+                        Log.Instance.Log("BUG in Plugin: Forcefully deactivated Command '{0}' in Plugin {1}.".Fill(command, plugin.FullName), Level.Warning);
                     }
 
 
@@ -486,25 +486,12 @@ namespace Huffelpuff
                 SendMessage(SendType.Message, sendto, "Your Helptopic was not found");
         }
 
-        public void Exit()
+        public bool Start()
         {
-            //TODO: Safe exit
-            PersistentMemory.Instance.Flush();
-
-            // we are done, lets exit...
-            Log.Instance.Log("Exiting...");
-#if DEBUG
-            Thread.Sleep(60000);
-#endif
-
-            Environment.Exit(0);
-        }
-
-
-
-        public void Start()
-        {
-            Thread.CurrentThread.Name = "Main";
+            if (Thread.CurrentThread.Name == null)
+            {
+                Thread.CurrentThread.Name = "Main";
+            }
 
             SetupOnce();
 
@@ -531,7 +518,8 @@ namespace Huffelpuff
             {
                 // something went wrong, the reason will be shown
                 Log.Instance.Log(exception);
-                Exit();
+
+                return true;
             }
 
             try
@@ -550,14 +538,16 @@ namespace Huffelpuff
             }
             catch (ConnectionException)
             {
-                Exit();
+                return true;
             }
             catch (Exception exception)
             {
                 // this should not happen by just in case we handle it nicely
                 Log.Instance.Log(exception);
-                Exit();
+                return true;
+
             }
+            return true;
         }
     }
 }

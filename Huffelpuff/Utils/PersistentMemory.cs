@@ -73,6 +73,12 @@ namespace Huffelpuff.Utils
             }
         }
 
+        public override object InitializeLifetimeService()
+        {
+            //Prevent "Object '/x.rem' has been disconnected or does not exist at the server'
+            return null;
+        }
+
         private static DataSet memory;
         private const string Filename = "pmem.xml";
         private const string BaseTable = "baseTBL";
@@ -248,7 +254,7 @@ namespace Huffelpuff.Utils
         {
             var rows = memory.Tables[BaseTable].Select(BaseGroup + " = '" + group + "' AND " + BaseKey + " = '" + key + "'");
 
-            return rows.Select(dr => (string)dr[BaseValue]).ToList();
+            return rows.Select(dr => dr[BaseValue] as string).ToList();
         }
 
         /// <summary>
