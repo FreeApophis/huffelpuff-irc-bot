@@ -20,7 +20,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Threading;
 using Huffelpuff.AccessControl;
@@ -545,7 +544,6 @@ namespace Huffelpuff
                 // this should not happen by just in case we handle it nicely
                 Log.Instance.Log(exception);
                 return true;
-
             }
             return true;
         }

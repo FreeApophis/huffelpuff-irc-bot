@@ -43,6 +43,9 @@ namespace Huffelpuff
                     case "--uninstall":
                         ManagedInstallerClass.InstallHelper(new[] { "/u", Assembly.GetExecutingAssembly().Location });
                         return;
+                    case "--simulator":
+
+                        break;
                     case "--config":
                         Tool.Configure();
                         return;
