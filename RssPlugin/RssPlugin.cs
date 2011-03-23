@@ -57,28 +57,31 @@ namespace Plugin
 
         public override void OnTick()
         {
-            if (!BotMethods.IsConnected) { return; }
-
-
-            foreach (var rssFeed in rssFeeds.Values)
+            try
             {
-                try
+                foreach (var rssFeed in rssFeeds.Values)
                 {
-                    foreach (var newItem in rssFeed.NewItems())
+                    try
                     {
-                        foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+                        foreach (var newItem in rssFeed.NewItems())
                         {
-                            SendFormattedItem(rssFeed, newItem, channel);
+                            foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+                            {
+                                SendFormattedItem(rssFeed, newItem, channel);
+                            }
                         }
                     }
-                }
-                catch (WebException exception)
-                {
-                    Log.Instance.Log(exception);
-                }
+                    catch (WebException exception)
+                    {
+                        Log.Instance.Log(exception);
+                    }
 
+                }
             }
-            PersistentMemory.Instance.Flush();
+            finally
+            {
+                PersistentMemory.Instance.Flush();
+            }
         }
 
         private void SendFormattedItem(RssWrapper rssFeed, RssItem rssItem, string sendto)

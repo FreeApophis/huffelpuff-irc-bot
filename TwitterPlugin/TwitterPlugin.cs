@@ -58,29 +58,34 @@ namespace Plugin
 
         public override void OnTick()
         {
-            if (!BotMethods.IsConnected)
-                return;
-            foreach (var twitteraccount in twitterAccounts)
+            try
             {
-                foreach (var mention in twitteraccount.Value.GetNewMentions())
+                foreach (var twitteraccount in twitterAccounts)
                 {
-                    foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+                    foreach (var mention in twitteraccount.Value.GetNewMentions())
                     {
-                        SendFormattedItem(twitteraccount.Value, mention, channel);
+                        foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+                        {
+                            SendFormattedItem(twitteraccount.Value, mention, channel);
+                        }
                     }
+
                 }
 
+                foreach (var tag in PersistentMemory.Instance.GetValues("twitter_search_tag"))
+                {
+                    foreach (var tagStatus in TwitterWrapper.SearchNewTag(tag))
+                    {
+                        foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+                        {
+                            BotMethods.SendMessage(SendType.Message, channel, "Tag: {0} (by {1})".Fill(tagStatus.Text, tagStatus.FromUserScreenName));
+                        }
+                    }
+                }
             }
-
-            foreach (var tag in PersistentMemory.Instance.GetValues("twitter_search_tag"))
+            finally
             {
-                foreach (var tagStatus in TwitterWrapper.SearchNewTag(tag))
-                {
-                    foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
-                    {
-                        BotMethods.SendMessage(SendType.Message, channel, "Tag: {0} (by {1})".Fill(tagStatus.Text, tagStatus.FromUserScreenName));
-                    }
-                }
+                PersistentMemory.Instance.Flush();
             }
         }
 
