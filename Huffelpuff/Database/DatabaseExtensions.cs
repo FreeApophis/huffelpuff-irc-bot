@@ -19,53 +19,53 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Huffelpuff.Utils;
 
 namespace Huffelpuff.Database
 {
-	/// <summary>
-	/// Description of DatabaseExtensions.
-	/// </summary>
-	public static class DatabaseExtensions
-	{
-		public static string GetKey(this IEnumerable<Setting> settings, string key)
-		{
-			var setting = settings.Where(s => s.Key == key).SingleOrDefault();
-			return setting == null ? null : setting.Value;
-		}
+    /// <summary>
+    /// Description of DatabaseExtensions.
+    /// </summary>
+    public static class DatabaseExtensions
+    {
+        public static string GetKey(this IEnumerable<Setting> settings, string key)
+        {
+            var setting = settings.Where(s => s.Key == key).SingleOrDefault();
+            return setting.SafeGet(s => s.Value);
+        }
 
-		public static bool SetKey(this IEnumerable<Setting> settings, string key, string value)
-		{
-			var setting = settings.Where(s => s.Key == key).SingleOrDefault();
-			var result = setting != null;
-			
-			if (result)
-			{
-				setting.Key = key;
-				setting.Value = value;
-			} 
-			else
-			{
-				setting = new Setting();
-				setting.Key = key;
-				setting.Value = value;
-				DatabaseCommon.Db.Settings.InsertOnSubmit(setting);
-			}
-			
-			DatabaseCommon.Db.SubmitChanges();
-			return result;
-		}
-		
-		public static bool RemoveKey(this IEnumerable<Setting> settings, string key)
-		{
-			var setting = settings.Where(s => s.Key == key).SingleOrDefault();
-			var result = setting != null;
-			if (result)
-			{
-				DatabaseCommon.Db.Settings.DeleteOnSubmit(setting);
-				DatabaseCommon.Db.SubmitChanges();
-			}
-			return result;
-		}
-		
-	}
+        public static bool SetKey(this IEnumerable<Setting> settings, string key, string value)
+        {
+            var setting = settings.Where(s => s.Key == key).SingleOrDefault();
+            var result = setting != null;
+
+            if (result)
+            {
+                setting.Key = key;
+                setting.Value = value;
+            }
+            else
+            {
+                setting = new Setting { Key = key, Value = value };
+
+                DatabaseCommon.Db.Settings.InsertOnSubmit(setting);
+            }
+
+            DatabaseCommon.Db.SubmitChanges();
+            return result;
+        }
+
+        public static bool RemoveKey(this IEnumerable<Setting> settings, string key)
+        {
+            var setting = settings.Where(s => s.Key == key).SingleOrDefault();
+            var result = setting != null;
+            if (result)
+            {
+                DatabaseCommon.Db.Settings.DeleteOnSubmit(setting);
+                DatabaseCommon.Db.SubmitChanges();
+            }
+            return result;
+        }
+
+    }
 }

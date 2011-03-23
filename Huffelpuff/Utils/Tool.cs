@@ -39,6 +39,7 @@ namespace Huffelpuff.Utils
             else
                 Log.Instance.Log("Runtime: (unkown) MS.NET? v" + Environment.Version, Level.Info);
 
+
             Log.Instance.Log("OS     : " + Environment.OSVersion.VersionString, Level.Info);
             Log.Instance.Log("CWD    : " + Environment.CurrentDirectory, Level.Info);
             Log.Instance.Log("Machine: " + Environment.MachineName, Level.Info);

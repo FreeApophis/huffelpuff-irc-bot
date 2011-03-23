@@ -29,29 +29,6 @@ namespace Plugin
 {
     public class PokerPlugin : AbstractPlugin
     {
-        private readonly Dictionary<char, char> suits = new Dictionary<char, char> { { 's', '♠' }, { 'c', '♣' }, { 'h', '♥' }, { 'd', '♦' } };
-
-        private readonly RandomDeck deck = new RandomDeck();
-
-        private string ToIrcCard(string card)
-        {
-
-            if (card.Length == 2)
-            {
-                string value = card[0] == 'T' ? "10" : card[0].ToString();
-
-                if (card[1] == 's' || card[1] == 'c')
-                {
-                    return IrcConstants.IrcColor + ((int)IrcColors.Black).ToString("00") + value + suits[card[1]] + IrcConstants.IrcNormal;
-                }
-                if (card[1] == 'h' || card[1] == 'd')
-                {
-                    return IrcConstants.IrcColor + ((int)IrcColors.LightRed).ToString("00") + value + suits[card[1]] + IrcConstants.IrcNormal;
-                }
-            }
-            return null;
-        }
-
         public PokerPlugin(IrcBot botInstance)
             : base(botInstance)
         {
@@ -59,64 +36,88 @@ namespace Plugin
         }
 
 
-        Dictionary<string, PokerGame> games = new Dictionary<string, PokerGame>();
+        readonly Dictionary<string, PokerGame> games = new Dictionary<string, PokerGame>();
         public override void Activate()
         {
-            BotMethods.AddCommand(new Commandlet("!joinpoker", "Join the Pokertable and participate in the game the next round.", JoinGame, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!partpoker", "Stand up and leave the table, this also happens when you Part the Channel or Quit.", JoinGame, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!bet", "!bet <money> will bet that amount money.", EvaluateHand, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!fold", "With !fold you make an unconditional fold of your cards.", EvaluateHand, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!check", "With !check you are checking the current round.", EvaluateHand, this, CommandScope.Both));
+            BotMethods.AddCommand(new Commandlet("!poker-join", "Join the Pokertable and participate in the game the next round.", JoinGame, this, CommandScope.Public));
+            BotMethods.AddCommand(new Commandlet("!poker-leave", "Stand up and leave the table, this also happens when you Part the Channel or Quit.", PartGame, this, CommandScope.Public));
+            BotMethods.AddCommand(new Commandlet("!bet", "!bet <money> will bet that amount money.", EvaluateHand, this, CommandScope.Public));
+            BotMethods.AddCommand(new Commandlet("!fold", "With !fold you make an unconditional fold of your cards.", EvaluateHand, this, CommandScope.Public));
+            BotMethods.AddCommand(new Commandlet("!check", "With !check you are checking the current round.", EvaluateHand, this, CommandScope.Public));
 
             foreach (var channel in BotMethods.GetChannels())
             {
-                games.Add(channel, new PokerGame());
+                games.Add(channel, new PokerGame(BotMethods, channel));
             }
 
+            BotEvents.OnJoin += OnJoin;
+            BotEvents.OnPart += OnPart;
             base.Activate();
         }
-
 
         public override void Deactivate()
         {
             games.Clear();
 
-            BotMethods.RemoveCommand("!joinpoker");
-            BotMethods.RemoveCommand("!partpoker");
+            BotMethods.RemoveCommand("!poker-join");
+            BotMethods.RemoveCommand("!poker-leave");
             BotMethods.RemoveCommand("!bet");
             BotMethods.RemoveCommand("!fold");
             BotMethods.RemoveCommand("!check");
 
+            BotEvents.OnJoin -= OnJoin;
+            BotEvents.OnPart -= OnPart;
             base.Deactivate();
         }
 
-        private static void JoinGame(object sender, IrcEventArgs e)
+        void OnJoin(object sender, JoinEventArgs e)
         {
+            if (e.Who == BotMethods.Nickname)
+            {
+                games.Add(e.Channel, new PokerGame(BotMethods, e.Channel));
+            }
+        }
 
+        void OnPart(object sender, PartEventArgs e)
+        {
+            if (e.Who == BotMethods.Nickname)
+            {
+                games.Remove(e.Channel);
+            }
+        }
+
+        private void JoinGame(object sender, IrcEventArgs e)
+        {
+            games[e.Data.Channel].AddPlayer(e.Data.Nick);
+        }
+
+        private void PartGame(object sender, IrcEventArgs e)
+        {
+            games[e.Data.Channel].RemovePlayer(e.Data.Nick);
         }
 
         private void EvaluateHand(object sender, IrcEventArgs e)
         {
-            var destination = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-            if (e.Data.MessageArray.Length > 1)
-            {
-                //BotMethods.SendMessage(SendType.Message, destination, Hand.MaskToDescription(Hand.ParseHand(e.Data.MessageArray[1])));
-                BotMethods.SendMessage(SendType.Message, destination, Hand.DescriptionFromHand(e.Data.MessageArray[1]));
-            }
-            else
-            {
-                var hand = new StringBuilder();
-                var mask = new StringBuilder();
-                foreach (var cards in Enumerable.Range(0, 5))
-                {
-                    deck.NextCard();
-                    hand.Append(ToIrcCard(deck.CurrentCard));
-                    mask.Append(deck.CurrentCard);
-                }
+            //var destination = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+            //if (e.Data.MessageArray.Length > 1)
+            //{
+            //    //BotMethods.SendMessage(SendType.Message, destination, Hand.MaskToDescription(Hand.ParseHand(e.Data.MessageArray[1])));
+            //    BotMethods.SendMessage(SendType.Message, destination, Hand.DescriptionFromHand(e.Data.MessageArray[1]));
+            //}
+            //else
+            //{
+            //    var hand = new StringBuilder();
+            //    var mask = new StringBuilder();
+            //    foreach (var cards in Enumerable.Range(0, 5))
+            //    {
+            //        deck.NextCard();
+            //        hand.Append(ToIrcCard(deck.CurrentCard));
+            //        mask.Append(deck.CurrentCard);
+            //    }
 
 
-                BotMethods.SendMessage(SendType.Message, destination, hand + " is " + Hand.DescriptionFromHand(mask.ToString()));
-            }
+            //    BotMethods.SendMessage(SendType.Message, destination, hand + " is " + Hand.DescriptionFromHand(mask.ToString()));
+            //}
         }
 
 

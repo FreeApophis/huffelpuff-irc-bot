@@ -231,7 +231,7 @@ namespace Huffelpuff.Utils
         {
             var rows = memory.Tables[BaseTable].Select(BaseGroup + " = '" + group + "' AND " + BaseKey + " = '" + key + "'");
 
-            return rows.Select(dr => (string)dr[BaseValue]).ToList();
+            return rows.Select(dr => dr[BaseValue] as string).ToList();
         }
 
         /// <summary>
