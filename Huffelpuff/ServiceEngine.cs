@@ -21,7 +21,6 @@
 using System.Diagnostics;
 using System.ServiceProcess;
 using System.Threading;
-using Huffelpuff.Utils;
 using Meebey.SmartIrc4net;
 
 namespace Huffelpuff
@@ -43,10 +42,15 @@ namespace Huffelpuff
             CanStop = true;
         }
 
+        private void StartService()
+        {
+            Bot.Start();
+        }
+
         protected override void OnStart(string[] args)
         {
 
-            botThread = new Thread(Bot.Start) { IsBackground = true };
+            botThread = new Thread(StartService) { IsBackground = true };
             botThread.Start();
 
             base.OnStart(args);

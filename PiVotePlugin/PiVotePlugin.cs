@@ -77,6 +77,8 @@ namespace PiVotePlugin
         public override void Deactivate()
         {
             BotMethods.RemoveCommand(CommandListVotings);
+            BotMethods.RemoveCommand(CommandTally);
+            BotMethods.RemoveCommand(CommandStatus);
 
             base.Deactivate();
         }

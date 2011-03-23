@@ -19,66 +19,58 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml;
 using Huffelpuff;
-using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
-using Pirate.PiVote;
 using Pirate.PiVote.Crypto;
 using Pirate.PiVote.Rpc;
 
 namespace PiVotePlugin
 {
-  public abstract class PiVoteAction
-  {
-    public event EventHandler Completed;
-
-    protected VotingClient Client { get; private set; }
-
-    protected IrcBot BotMethods { get; private set; }
-
-    protected CertificateStorage CertificateStorage { get; private set; }
-
-    protected IrcEventArgs EventArgs { get; set; }
-
-    public string Channel
+    public abstract class PiVoteAction
     {
-      get { return EventArgs.Data.Channel; }
+        public event EventHandler Completed;
+
+        protected VotingClient Client { get; private set; }
+
+        protected IrcBot BotMethods { get; private set; }
+
+        protected CertificateStorage CertificateStorage { get; private set; }
+
+        protected IrcEventArgs EventArgs { get; set; }
+
+        public string Channel
+        {
+            get { return EventArgs.Data.Channel; }
+        }
+
+        protected PiVoteAction(IrcBot botMethods, VotingClient client, CertificateStorage certificateStorage, IrcEventArgs eventArgs)
+        {
+            BotMethods = botMethods;
+            Client = client;
+            CertificateStorage = certificateStorage;
+            EventArgs = eventArgs;
+        }
+
+        public abstract void Begin();
+
+        public abstract string StatusMessage { get; }
+
+        protected void OnCompleted()
+        {
+            if (Completed != null)
+            {
+                Completed(this, new EventArgs());
+            }
+        }
+
+        protected void OutTable(StringTable table)
+        {
+            string[] lines = table.Render().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+
+            foreach (string line in lines)
+            {
+                BotMethods.SendMessage(SendType.Message, Channel, line);
+            }
+        }
     }
-
-    public PiVoteAction(IrcBot botMethods, VotingClient client, CertificateStorage certificateStorage, IrcEventArgs eventArgs)
-    {
-      BotMethods = botMethods;
-      Client = client;
-      CertificateStorage = certificateStorage;
-      EventArgs = eventArgs;
-    }
-
-    public abstract void Begin();
-
-    public abstract string StatusMessage { get; }
-
-    protected void OnCompleted()
-    {
-      if (Completed != null)
-      {
-        Completed(this, new EventArgs());
-      }
-    }
-
-    protected void OutTable(StringTable table)
-    {
-      string[] lines = table.Render().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-
-      foreach (string line in lines)
-      {
-        BotMethods.SendMessage(SendType.Message, Channel, line);
-      }
-    }
-  }
 }

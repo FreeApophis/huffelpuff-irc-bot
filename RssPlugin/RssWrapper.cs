@@ -103,6 +103,10 @@ namespace Plugin
             }
         }
 
+        public int ErrorCount { get; private set; }
+        public int CallCount { get; private set; }
+
+
         private List<RssItem> cachedItems = new List<RssItem>();
 
         public RssWrapper(string name)
@@ -152,14 +156,23 @@ namespace Plugin
         /// <returns></returns>
         public IEnumerable<RssItem> NewItems()
         {
-            cachedItems = GetRss();
-            var newItems = cachedItems.Where(item => item.Published > last).OrderBy(item => item.Published).ToList();
-            if (newItems.Count() > 0)
+            CallCount++;
+            try
             {
-                last = newItems.OrderByDescending(item => item.Published).Take(1).Single().Published;
-                PersistentMemory.Instance.ReplaceValue(NameSpace, LastConst, last.ToString());
+                cachedItems = GetRss();
+                var newItems = cachedItems.Where(item => item.Published > last).OrderBy(item => item.Published).ToList();
+                if (newItems.Count() > 0)
+                {
+                    last = newItems.OrderByDescending(item => item.Published).Take(1).Single().Published;
+                    PersistentMemory.Instance.ReplaceValue(NameSpace, LastConst, last.ToString());
+                }
+                return newItems;
             }
-            return newItems;
+            catch (Exception)
+            {
+                ErrorCount++;
+                throw;
+            }
         }
 
 

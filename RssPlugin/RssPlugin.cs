@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using Huffelpuff;
 using Huffelpuff.Plugins;
@@ -56,24 +57,33 @@ namespace Plugin
 
         public override void OnTick()
         {
-            if (!BotMethods.IsConnected)
-                return;
+            if (!BotMethods.IsConnected) { return; }
+
+
             foreach (var rssFeed in rssFeeds.Values)
             {
-                foreach (var newItem in rssFeed.NewItems())
+                try
                 {
-                    foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+                    foreach (var newItem in rssFeed.NewItems())
                     {
-                        SendFormattedItem(rssFeed, newItem, channel);
+                        foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+                        {
+                            SendFormattedItem(rssFeed, newItem, channel);
+                        }
                     }
                 }
+                catch (WebException exception)
+                {
+                    Log.Instance.Log(exception);
+                }
+
             }
             PersistentMemory.Instance.Flush();
         }
 
         private void SendFormattedItem(RssWrapper rssFeed, RssItem rssItem, string sendto)
         {
-            if (rssFeed == null || rssItem == null) return;
+            if (rssFeed == null || rssItem == null) { return; }
 
             BotMethods.SendMessage(SendType.Message, sendto,
                 MessageFormat.FillKeyword(
@@ -102,8 +112,7 @@ namespace Plugin
 
         private static string StripHtml(string str)
         {
-            if (string.IsNullOrEmpty(str))
-                return string.Empty;
+            if (string.IsNullOrEmpty(str)) { return string.Empty; }
 
             str = Regex.Replace(str, "<[^<]*>", string.Empty);
             str = Regex.Replace(str, "&nbsp;", " ");
@@ -117,6 +126,7 @@ namespace Plugin
             BotMethods.AddCommand(new Commandlet("!rssformat", "With the command !rssfromat <formatstring> you can customize your RSS messages. [Vars: %FEEDTITLE% %FEEDURL% %TITLE% %AUTHOR% %CATEGORY% %CONTENT% %DESCRIPTION% %LINK% %DATE% %AGO%.]. You can reset to the initial setting with: !rssformat RESET", SetFormat, this, CommandScope.Both, "rss_admin"));
             BotMethods.AddCommand(new Commandlet("!+rss", "With the command !+rss <friendlyname> <url> [username:password] you can add an rss feeds even with a basic authentication.", AdminRss, this, CommandScope.Both, "rss_admin"));
             BotMethods.AddCommand(new Commandlet("!-rss", "With the command !-rss <friendlyname>  you can remove an rss feeds.", AdminRss, this, CommandScope.Both, "rss_admin"));
+            BotMethods.AddCommand(new Commandlet("!rss-status", "With the command !rss-status you can check if there are feeds with problems.", RssStatus, this));
 
             base.Activate();
         }
@@ -127,6 +137,7 @@ namespace Plugin
             BotMethods.RemoveCommand("!rssformat");
             BotMethods.RemoveCommand("!-rss");
             BotMethods.RemoveCommand("!+rss");
+            BotMethods.RemoveCommand("!rss-status");
 
             base.Deactivate();
         }
@@ -165,14 +176,31 @@ namespace Plugin
             }
         }
 
+
+
+        private void RssStatus(object sender, IrcEventArgs e)
+        {
+            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+
+            var lines = rssFeeds
+                .Where(k => k.Value.ErrorCount > 0)
+                .Select(r => "{0}: {1}%".Fill(r.Value.FriendlyName, 100 * r.Value.ErrorCount / r.Value.CallCount))
+                .ToLines(300, ", ", "Rss-Feeds with problems: ", " END.");
+
+            foreach (var line in lines)
+            {
+                BotMethods.SendMessage(SendType.Message, sendto, line);
+            }
+        }
+
         private void ShowRss(object sender, IrcEventArgs e)
         {
             var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length < 2)
             {
-                foreach (string lines in rssFeeds.Select(item => item.Value.FriendlyName).ToLines(350, ", ", "Currently checked feeds: ", "."))
+                foreach (string line in rssFeeds.Select(item => item.Value.FriendlyName).ToLines(350, ", ", "Currently checked feeds: ", "."))
                 {
-                    BotMethods.SendMessage(SendType.Message, sendto, lines);
+                    BotMethods.SendMessage(SendType.Message, sendto, line);
                 }
                 return;
             }
