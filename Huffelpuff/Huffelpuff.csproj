@@ -211,6 +211,7 @@
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\NullLogger.cs" />
     <Compile Include="Utils\PersistentMemory.cs" />
+    <Compile Include="Utils\Dereferencer.cs" />
     <Compile Include="Utils\Tool.cs" />
     <Compile Include="Utils\UPnP.cs" />
     <Compile Include="Utils\WildCard.cs" />
