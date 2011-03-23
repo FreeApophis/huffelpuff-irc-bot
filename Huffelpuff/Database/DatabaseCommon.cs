@@ -21,7 +21,9 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.IO;
 using System.Threading;
+using Huffelpuff.Utils;
 
 namespace Huffelpuff.Database
 {
@@ -31,6 +33,7 @@ namespace Huffelpuff.Database
     public class DatabaseCommon
     {
         private static readonly object O = new object();
+        private static readonly FileInfo DbPath = new FileInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Huffelpuff", "Huffelpuff.db"));
         public static Main Db
         {
             get
@@ -48,7 +51,7 @@ namespace Huffelpuff.Database
                     Main main;
                     if (!mainObjects.TryGetValue(Thread.CurrentContext.ContextID, out main))
                     {
-                        main = new Main(new SQLiteConnection("Data Source=huffelpuff.db;FailIfMissing=true;"));
+                        main = new Main(new SQLiteConnection("Data Source={0};FailIfMissing=true;".Fill(DbPath.FullName)));
                         mainObjects.Add(Thread.CurrentContext.ContextID, main);
                     }
                     return main;

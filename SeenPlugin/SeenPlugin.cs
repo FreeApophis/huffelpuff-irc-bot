@@ -45,7 +45,7 @@ namespace Plugin
         {
             // Seen: Nick, LastSeenTime, LastAction, LastMessage
 
-            var fi = new FileInfo(Filename);
+            var fi = new FileInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Huffelpuff", Filename));
             var xdoc = new XmlDataDocument();
 
             if (fi.Exists)

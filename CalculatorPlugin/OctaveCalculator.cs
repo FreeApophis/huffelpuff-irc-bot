@@ -29,7 +29,7 @@ namespace Plugin
 {
     class OctaveCalculator : WebCalculator
     {
-        private const string URLBase = "http://hara.mimuw.edu.pl/weboctave/web/index.php";
+        private const string URLBase = "http://weboctave.mimuw.edu.pl/weboctave/web/index.php";
         private readonly Regex resultMatch = new Regex("(?<=gt;</span>).*(?=</pre><p class=\"msg\">)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
         private readonly Regex whiteSpaceMatch = new Regex(@"\s+");
         public override CalculationResult Calculate(string equation)

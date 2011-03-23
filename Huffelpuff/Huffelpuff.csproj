@@ -204,6 +204,7 @@
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utils\ConsoleLogger.cs" />
+    <Compile Include="Utils\Dereferencer.cs" />
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Utils\Level.cs" />
     <Compile Include="Utils\LinuxDeamonLogger.cs" />
@@ -211,7 +212,6 @@
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\NullLogger.cs" />
     <Compile Include="Utils\PersistentMemory.cs" />
-    <Compile Include="Utils\Dereferencer.cs" />
     <Compile Include="Utils\Tool.cs" />
     <Compile Include="Utils\UPnP.cs" />
     <Compile Include="Utils\WildCard.cs" />
