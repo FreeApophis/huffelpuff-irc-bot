@@ -37,7 +37,8 @@ namespace Plugin
 
         public override void Init()
         {
-            TickInterval = 60;
+            BotMethods.AddCommand(new Commandlet("!todo", "HELP", TodoHandler, this));
+            BotMethods.AddCommand(new Commandlet("!done", "HELP", DoneHandler, this));
 
             base.Init();
         }
@@ -58,6 +59,16 @@ namespace Plugin
         }
 
         public override void OnTick()
+        {
+
+        }
+
+        private void TodoHandler(object sender, IrcEventArgs e)
+        {
+
+        }
+
+        private void DoneHandler(object sender, IrcEventArgs e)
         {
 
         }

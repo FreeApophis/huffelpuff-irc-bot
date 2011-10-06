@@ -80,7 +80,8 @@ namespace Huffelpuff.AccessControl
             bot.AddCommand(new Commandlet("!-access", "!-access <id or" + GroupPrefix + "group> <access_string> removes the privilge to use <access_string> from user <nick>.", AccessHandler, this, CommandScope.Both, "acl_remove"));
             bot.AddCommand(new Commandlet("!access", "!access lists all access_strings, which can be used to access restricted functions, they are not the same as commands. !access <id|nick|group> lists all access strings he owns by himself or inherited through a group", ListRestricted, this, CommandScope.Both));
 
-            bot.AddCommand(new Commandlet("!groups", "!groups lists all currently active groups. !groups <" + GroupPrefix + "group> lists all user in the group.", ListGroups, this, CommandScope.Both));
+            bot.AddCommand(new Commandlet("!groups", "!groups lists all currently active groups.", ListGroups, this, CommandScope.Both));
+            bot.AddCommand(new Commandlet("!users", "!users <group> lists all currently active users in group <group>.", ListUsers, this, CommandScope.Both));
             bot.AddCommand(new Commandlet("!id", "!id shows all my current identifactions. !id <nick> shows their ids.", IDDelegate, this, CommandScope.Both));
 
             bot.AddCommand(new Commandlet("!+group", "!+group <group> adds the new empty group <group>.", GroupHandler, this, CommandScope.Both, "group_add"));
@@ -391,11 +392,20 @@ namespace Huffelpuff.AccessControl
         private void ListGroups(object sender, IrcEventArgs e)
         {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+            foreach (string line in groups.Keys.ToLines(350, ", ", "Groups: ", " (Special Groups: #@, #%, #+, #*) END."))
+            {
+                bot.SendMessage(SendType.Message, sendto, line);
+            }
+        }
+
+        private void ListUsers(object sender, IrcEventArgs e)
+        {
+            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length > 1)
             {
                 if (groups.ContainsKey(EnsureGroupPrefix(e.Data.MessageArray[1])))
                 {
-                    foreach (string line in groups[EnsureGroupPrefix(e.Data.MessageArray[1])].ToLines(350, ", ", "User in Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "': ", " END."))
+                    foreach (string line in groups[EnsureGroupPrefix(e.Data.MessageArray[1])].ToLines(350, ", ", "Users in Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "': ", " END."))
                     {
                         bot.SendMessage(SendType.Message, sendto, line);
                     }
@@ -407,10 +417,7 @@ namespace Huffelpuff.AccessControl
             }
             else
             {
-                foreach (string line in groups.Keys.ToLines(350, ", ", "Groups: ", " (Special Groups: #@, #%, #+, #*) END."))
-                {
-                    bot.SendMessage(SendType.Message, sendto, line);
-                }
+                bot.SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
             }
         }
 

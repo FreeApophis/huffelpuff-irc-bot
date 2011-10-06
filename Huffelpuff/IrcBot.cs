@@ -472,6 +472,11 @@ namespace Huffelpuff
 
         private void SendCommandList(string sendto, string nick, IEnumerable<Commandlet> commandList)
         {
+            if (!commandList.Any())
+            {
+                SendMessage(SendType.Message, sendto, "This plugin has no commands registered.");
+            }
+
             var commandStrings = new List<string>();
             foreach (var commandlet in commandList)
             {
