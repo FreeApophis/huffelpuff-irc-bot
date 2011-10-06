@@ -52,6 +52,8 @@ namespace Huffelpuff
 
         public object Owner { get; private set; }
 
+        public string SourcePlugin { get; private set; }
+
         public CommandScope Scope { get; private set; }
 
         public string AccessString { get; private set; }
@@ -83,14 +85,17 @@ namespace Huffelpuff
 
             if (owner is AbstractPlugin)
             {
+                AbstractPlugin plugin = owner as AbstractPlugin;
                 Handler = null;
                 HandlerName = handler.Method.Name;
-                Owner = owner.GetType().FullName;
+                Owner = plugin.FullName;
+                SourcePlugin = plugin.FullName;
             }
             else
             {
                 Handler = handler;
                 Owner = owner;
+                SourcePlugin = "Core";
             }
 
             Scope = scope;

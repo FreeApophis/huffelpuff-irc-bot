@@ -48,6 +48,14 @@ namespace Huffelpuff
 
         private bool isSetup;
 
+        private Dictionary<CommandScope, string> scopeColor = new Dictionary<CommandScope, string>()
+        { 
+            {CommandScope.Private, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.LightRed} ,
+            {CommandScope.Public, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Blue} ,
+            {CommandScope.Both, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Purple} 
+        };
+
+
         private void SetupOnce()
         {
             if (isSetup) return;
@@ -402,39 +410,13 @@ namespace Huffelpuff
 
         private void SendHelp(string topic, string sendto, string nick)
         {
-            var scopeColor = new Dictionary<CommandScope, string>();
-            scopeColor.Add(CommandScope.Private, ("" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.LightRed));
-            scopeColor.Add(CommandScope.Public, ("" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Blue));
-            scopeColor.Add(CommandScope.Both, ("" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Purple));
-
             topic = topic.ToLower();
             bool helped = false;
 
             // List all commands
             if (topic == "commands")
             {
-                var commandlist = new List<string>();
-                foreach (var commandlet in commands.Values)
-                {
-                    if (string.IsNullOrEmpty(commandlet.AccessString))
-                    {
-                        commandlist.Add(scopeColor[commandlet.Scope] + commandlet.Command + IrcConstants.IrcColor + IrcConstants.IrcBold);
-                    }
-                    else if (Acl.Access(nick, commandlet.AccessString, false))
-                    {
-                        commandlist.Add(scopeColor[commandlet.Scope] + "<" + commandlet.Command + ">" + IrcConstants.IrcColor + IrcConstants.IrcBold);
-                        //commandlist.Add("" + IrcConstants.IrcColor + (int)IrcColors.Green + "<" + scopeColor[cmd.Scope] + cmd.Command + IrcConstants.IrcColor + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Green +  ">" + IrcConstants.IrcColor);
-                    }
-                    //else
-                    //{
-                    //    commandlist.Add("<" + scopeColor[cmd.Scope] + cmd.Command + IrcConstants.IrcColor + IrcConstants.IrcBold + ">");
-                    //}
-                }
-
-                foreach (string com in commandlist.ToLines(350, ", ", "Active Commands (" + scopeColor[CommandScope.Public] + "public" + IrcConstants.IrcColor + IrcConstants.IrcBold + ", " + scopeColor[CommandScope.Private] + "private" + IrcConstants.IrcColor + IrcConstants.IrcBold + ") <restricted>: ", null))
-                {
-                    SendMessage(SendType.Message, sendto, com);
-                }
+                SendCommandList(sendto, nick, commands.Values);
                 helped = true;
             }
 
@@ -445,7 +427,7 @@ namespace Huffelpuff
                 {
                     var owner = (commandlet.Handler == null) ? (string)commandlet.Owner + "~" : commandlet.Owner.GetType().ToString();
 
-                    SendMessage(SendType.Message, sendto, "Command (Scope:" + commandlet.Scope + "):" + commandlet.Command + ", offered by " + owner + " and help provided: " + commandlet.HelpText + ((string.IsNullOrEmpty(commandlet.AccessString)) ? "" : " (accessString=" + commandlet.AccessString + ")"));
+                    SendMessage(SendType.Message, sendto, "Command (Scope:" + commandlet.Scope + "):" + commandlet.Command + ", offered by " + commandlet.SourcePlugin + "(" + owner + ")" + " and help provided: " + commandlet.HelpText + ((string.IsNullOrEmpty(commandlet.AccessString)) ? "" : " (accessString=" + commandlet.AccessString + ")"));
                 }
                 helped = true;
             }
@@ -476,13 +458,37 @@ namespace Huffelpuff
                 if (plugHelp)
                 {
                     SendMessage(SendType.Message, sendto, p.AboutHelp());
+                    SendCommandList(sendto, nick, commands.Where(c => c.Value.SourcePlugin == p.FullName).Select(c => c.Value));
                     helped = true;
                 }
             }
 
 
             if (!helped)
+            {
                 SendMessage(SendType.Message, sendto, "Your Helptopic was not found");
+            }
+        }
+
+        private void SendCommandList(string sendto, string nick, IEnumerable<Commandlet> commandList)
+        {
+            var commandStrings = new List<string>();
+            foreach (var commandlet in commandList)
+            {
+                if (string.IsNullOrEmpty(commandlet.AccessString))
+                {
+                    commandStrings.Add(scopeColor[commandlet.Scope] + commandlet.Command + IrcConstants.IrcColor + IrcConstants.IrcBold);
+                }
+                else if (Acl.Access(nick, commandlet.AccessString, false))
+                {
+                    commandStrings.Add(scopeColor[commandlet.Scope] + "<" + commandlet.Command + ">" + IrcConstants.IrcColor + IrcConstants.IrcBold);
+                }
+            }
+
+            foreach (string com in commandStrings.ToLines(350, ", ", "Active Commands (" + scopeColor[CommandScope.Public] + "public" + IrcConstants.IrcColor + IrcConstants.IrcBold + ", " + scopeColor[CommandScope.Private] + "private" + IrcConstants.IrcColor + IrcConstants.IrcBold + ") <restricted>: ", null))
+            {
+                SendMessage(SendType.Message, sendto, com);
+            }
         }
 
         public bool Start()
