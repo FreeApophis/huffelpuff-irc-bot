@@ -68,9 +68,8 @@ namespace Plugin
         }
 
         private static T Cast<T>(object obj, T t)
-        {    
+        {
             return (T)obj;
         }
-
     }
 }

@@ -20,6 +20,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -29,8 +30,8 @@ namespace Plugin
 {
     class OctaveCalculator : WebCalculator
     {
-        private const string URLBase = "http://hara.mimuw.edu.pl/weboctave/web/index.php";
-        private readonly Regex resultMatch = new Regex("(?<=gt;</span>).*(?=</pre><p class=\"msg\">)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        private const string URLBase = "http://weboctave.mimuw.edu.pl/weboctave/web/index.php";
+        private readonly Regex resultMatch = new Regex("ans.*(?=</pre><p class=\"msg\">)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
         private readonly Regex whiteSpaceMatch = new Regex(@"\s+");
         public override CalculationResult Calculate(string equation)
         {
@@ -58,31 +59,27 @@ namespace Plugin
 
                 var lines = match.Value.Split(new[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
-                if (lines.Length > 1)
+                if (lines.Length > 0)
                 {
-                    if (lines.Length > 2)
+                    if (lines.Length > 1)
                     {
                         var result = ""; int i = 0;
-                        if (!lines[1].StartsWith("ans"))
+                        foreach (var line in lines.Skip(1))
                         {
-                            result = lines[1] + " ";
-                        }
-                        foreach (var line in lines)
-                        {
-                            if (i > 2)
-                            {
-                                result += ",[" + whiteSpaceMatch.Replace(line.Trim(), ",") + "]";
-                            }
-                            else if (i > 1)
+                            if (i == 1)
                             {
                                 result += "[" + whiteSpaceMatch.Replace(line.Trim(), ",") + "]";
                             }
+                            else
+                            {
+                                result += ",[" + whiteSpaceMatch.Replace(line.Trim(), ",") + "]";
+                            }
                             i++;
                         }
-                        return new CalculationResult(result, lines[0] + " => " + result, true);
+                        return new CalculationResult(result, equation + " = " + result, true);
                     }
-                    var splitres = lines[1].Split(new[] { '=' });
-                    return new CalculationResult(splitres[1], lines[0] + " => " + RemoveAns(lines[1]), false);
+                    var splitres = lines[0].Split(new[] { '=' });
+                    return new CalculationResult(splitres[1], equation + " = " + RemoveAns(lines[0]), false);
                 }
                 return CalculationResult.NoResult();
             }

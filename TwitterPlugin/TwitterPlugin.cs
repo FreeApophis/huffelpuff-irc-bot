@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Web;
 using Huffelpuff;
 using Huffelpuff.Plugins;
@@ -57,8 +58,6 @@ namespace Plugin
 
         public override void OnTick()
         {
-            if (!BotMethods.IsConnected)
-                return;
             try
             {
                 foreach (var twitteraccount in twitterAccounts)
@@ -84,9 +83,9 @@ namespace Plugin
                     }
                 }
             }
-            catch (Exception exception)
+            finally
             {
-                Log.Instance.Log(exception);
+                PersistentMemory.Instance.Flush();
             }
         }
 
@@ -454,7 +453,7 @@ namespace Plugin
                     "%ID%", mention.Id.ToString(),
                     "%SCREENNAME%", mention.User.ScreenName,
                     "%AUTHOR%", mention.User.Name,
-                    "%LOCATION%", mention.Location.ToString(),
+                    "%LOCATION%", mention.Location != null ? mention.Location.ToString() : "nowhere",
                     "%DATE%", mention.CreatedDate.ToString(),
                     "%AGO%", mention.CreatedDate.ToRelativeTime(),
                     "%#FOLLOW%", mention.User.FollowersCount.ToString(),

@@ -18,6 +18,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Linq;
 using Huffelpuff;
 using Huffelpuff.Database;
@@ -64,29 +65,38 @@ namespace Plugin
 
         void BotEvents_OnQueryMessage(object sender, IrcEventArgs e)
         {
-            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-
-            if (e.Data.MessageArray.Length <= 0 || !e.Data.MessageArray[0].StartsWith("!")) return;
-
-            var factKey = DatabaseCommon.Db.FactKeys.Where(facts => facts.Key == e.Data.MessageArray[0].Substring(1)).SingleOrDefault();
-            if (factKey != null)
+            try
             {
-                factKey.HitCount++;
-                var factValue = DatabaseCommon.Db.FactValues.Where(facts => facts.FactKeyID == factKey.ID).SingleOrDefault();
-                if (factValue != null)
-                {
-                    var answer = factValue.Value;
-                    var count = 0;
-                    foreach (var parameter in e.Data.MessageArray.Skip(1))
-                    {
-                        count++;
-                        answer = answer.Replace("%" + count, parameter);
-                    }
-                    BotMethods.SendMessage(SendType.Message, sendto, answer);
+                string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
 
+                if (e.Data.MessageArray.Length <= 0 || !e.Data.MessageArray[0].StartsWith("!")) return;
+
+                var factKey = DatabaseCommon.Db.FactKeys.Where(facts => facts.Key == e.Data.MessageArray[0].Substring(1)).SingleOrDefault();
+
+                if (factKey != null)
+                {
+                    factKey.HitCount++;
+                    var factValue =
+                        DatabaseCommon.Db.FactValues.Where(facts => facts.FactKeyID == factKey.ID).SingleOrDefault();
+                    if (factValue != null)
+                    {
+                        var answer = factValue.Value;
+                        var count = 0;
+                        foreach (var parameter in e.Data.MessageArray.Skip(1))
+                        {
+                            count++;
+                            answer = answer.Replace("%" + count, parameter);
+                        }
+                        BotMethods.SendMessage(SendType.Message, sendto, answer);
+
+                    }
                 }
+                DatabaseCommon.Db.SubmitChanges();
             }
-            DatabaseCommon.Db.SubmitChanges();
+            catch (Exception exception)
+            {
+                Log.Instance.Log(exception);
+            }
         }
 
         private void ListFacts(object sender, IrcEventArgs e)

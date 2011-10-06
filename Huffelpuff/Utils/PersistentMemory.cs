@@ -45,6 +45,7 @@ namespace Huffelpuff.Utils
     {
         private static PersistentMemory instance;
 
+        private static readonly object O = new object();
         public static PersistentMemory Instance
         {
             get
@@ -52,8 +53,30 @@ namespace Huffelpuff.Utils
                 // try to pull out of the AppDomain data
                 // if it wasn't there, we're the first AppDomain
                 // so create the instance
-                return instance ?? (instance = AppDomain.CurrentDomain.GetData("PersistentMemoryInstance") as PersistentMemory ?? new PersistentMemory());
+                //return instance ?? (instance = AppDomain.CurrentDomain.GetData("PersistentMemoryInstance") as PersistentMemory ?? new PersistentMemory());
+
+                lock (O)
+                {
+                    if (instance == null)
+                    {
+                        instance = AppDomain.CurrentDomain.GetData("PersistentMemoryInstance") as PersistentMemory;
+
+                        if (instance == null)
+                        {
+                            instance = new PersistentMemory();
+                            AppDomain.CurrentDomain.SetData("PersistentMemoryInstance", instance);
+                        }
+                    }
+
+                    return instance;
+                }
             }
+        }
+
+        public override object InitializeLifetimeService()
+        {
+            //Prevent "Object '/x.rem' has been disconnected or does not exist at the server'
+            return null;
         }
 
         private static DataSet memory;
@@ -231,7 +254,7 @@ namespace Huffelpuff.Utils
         {
             var rows = memory.Tables[BaseTable].Select(BaseGroup + " = '" + group + "' AND " + BaseKey + " = '" + key + "'");
 
-            return rows.Select(dr => (string)dr[BaseValue]).ToList();
+            return rows.Select(dr => dr[BaseValue] as string).ToList();
         }
 
         /// <summary>

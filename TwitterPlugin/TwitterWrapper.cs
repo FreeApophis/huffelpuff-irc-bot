@@ -249,7 +249,10 @@ namespace Plugin
         {
             var mentions = GetMentions();
             if (mentions == null)
-                return new List<TwitterStatus>();
+            {
+                return Enumerable.Empty<TwitterStatus>();
+            }
+
             var newMentions = mentions.Where(item => item.CreatedDate > last).OrderBy(item => item.CreatedDate).ToList();
             if (newMentions.Count() > 0)
             {

@@ -68,7 +68,13 @@ namespace Huffelpuff.Utils
 
         public static string ToRelativeTime(this DateTime dateTime)
         {
+            if (dateTime.Kind == DateTimeKind.Utc)
+            {
+                dateTime = dateTime.ToLocalTime();
+            }
+
             var span = DateTime.Now - dateTime;
+ 
             if (span.TotalDays > 730)
                 return "{0} years ago".Fill((int)(span.TotalDays / 365));
             if (span.TotalDays > 365)

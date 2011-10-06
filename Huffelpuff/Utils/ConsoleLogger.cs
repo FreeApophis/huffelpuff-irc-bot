@@ -54,10 +54,10 @@ namespace Huffelpuff.Utils
             var lastColor = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("{0}: {1}", Level.Error, exception.Message);
+            Console.ForegroundColor = lastColor;
 
             if (Verbose)
             {
-                Console.ForegroundColor = lastColor;
                 Console.WriteLine("{0}: {1}", Level.Info, exception.StackTrace);
             }
         }

@@ -22,19 +22,19 @@ using System;
 using System.Configuration.Install;
 using System.Reflection;
 using System.ServiceProcess;
-using System.Windows.Forms;
 using Huffelpuff.Utils;
 
 namespace Huffelpuff
 {
     class Engine
     {
-
         public static void Main(string[] args)
         {
             if (Environment.UserInteractive)
             {
+                IrcBot bot;
                 var parameter = string.Concat(args);
+
                 switch (parameter)
                 {
                     case "--install":
@@ -43,16 +43,30 @@ namespace Huffelpuff
                     case "--uninstall":
                         ManagedInstallerClass.InstallHelper(new[] { "/u", Assembly.GetExecutingAssembly().Location });
                         return;
+                    case "--simulator":
+
+                        break;
                     case "--config":
                         Tool.Configure();
+                        return;
+                    case "--help":
                         return;
                 }
 
                 Tool.RunOnMono();
-                var bot = GetBot();
 
-                /* blocking */
-                bot.Start();
+                do
+                {
+                    bot = GetBot();
+
+                    if (bot == null)
+                    {
+                        break;
+                    }
+
+                } while (bot.Start());
+
+                PersistentMemory.Instance.Flush();
             }
             else
             {
@@ -84,7 +98,7 @@ namespace Huffelpuff
             {
                 PersistentMemory.Instance.Flush();
                 Log.Instance.Log("Edit your config file: there are some TODOs left.", Level.Fatal);
-                bot.Exit();
+                return null;
             }
             return bot;
         }

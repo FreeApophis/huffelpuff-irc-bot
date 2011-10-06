@@ -67,6 +67,9 @@ namespace Huffelpuff.Plugins
         private int timeUntilTick;
         public bool ShallITick(int secs)
         {
+            if (!BotMethods.IsConnected)
+                return false;
+
             if (tickInterval == 0)
                 return false;
 
