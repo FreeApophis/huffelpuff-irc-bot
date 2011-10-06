@@ -8,7 +8,7 @@
     <ProjectGuid>{93248004-F9DD-4A0F-99F9-6762E096FE3F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PiVotePlugin</RootNamespace>
+    <RootNamespace>Plugin</RootNamespace>
     <AssemblyName>PiVotePlugin</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

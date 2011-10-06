@@ -66,7 +66,7 @@ namespace Plugin
                         var result = ""; int i = 0;
                         foreach (var line in lines.Skip(1))
                         {
-                            if (i == 1)
+                            if (i == 0)
                             {
                                 result += "[" + whiteSpaceMatch.Replace(line.Trim(), ",") + "]";
                             }

@@ -28,8 +28,8 @@ namespace Huffelpuff
     /// </summary>
     public class SettingCommands
     {
-        private IrcBot bot;
-        
+        private readonly IrcBot bot;
+
         public SettingCommands(IrcBot bot)
         {
             this.bot = bot;
@@ -37,26 +37,31 @@ namespace Huffelpuff
             this.bot.AddCommand(new Commandlet("!get", "the command !get can read bot settings", ConfigGet, this, CommandScope.Both, "config_get_access"));
             this.bot.AddCommand(new Commandlet("!set", "the command !set can change bot settings", ConfigSet, this, CommandScope.Both, "config_set_access"));
         }
-        
-        private bool isValidNick(string nick) {
+
+        private bool isValidNick(string nick)
+        {
             // TODO: Check if its a valid nick
             return true;
         }
-        
-        private void ChangeNick(object sender, IrcEventArgs e) {
-            if (e.Data.MessageArray.Length > 1){
-                if (isValidNick(e.Data.MessageArray[1])) {
+
+        private void ChangeNick(object sender, IrcEventArgs e)
+        {
+            if (e.Data.MessageArray.Length > 1)
+            {
+                if (isValidNick(e.Data.MessageArray[1]))
+                {
                     this.bot.RfcNick(e.Data.MessageArray[1]);
                     PersistentMemory.Instance.ReplaceValue("nick", e.Data.MessageArray[1]);
                 }
             }
         }
-        
-        private void ConfigGet(object sender, IrcEventArgs e) {
+
+        private void ConfigGet(object sender, IrcEventArgs e)
+        {
             string sendto = e.Data.Channel.IsNullOrEmpty() ? e.Data.Nick : e.Data.Channel;
-            if(e.Data.MessageArray.Length<2)
+            if (e.Data.MessageArray.Length < 2)
             {
-                foreach(var line in bot.Properties.GetType().GetProperties().Where(property => property.CanRead).Select(property => property.Name).ToLines(350))
+                foreach (var line in bot.Properties.GetType().GetProperties().Where(property => property.CanRead).Select(property => property.Name).ToLines(350))
                 {
                     bot.SendMessage(SendType.Message, sendto, line);
                 }
@@ -70,13 +75,14 @@ namespace Huffelpuff
                     bot.SendMessage(SendType.Message, sendto, "Dont know that property");
             }
         }
-        
-        
-        private void ConfigSet(object sender, IrcEventArgs e) {
+
+
+        private void ConfigSet(object sender, IrcEventArgs e)
+        {
             string sendto = e.Data.Channel.IsNullOrEmpty() ? e.Data.Nick : e.Data.Channel;
-            if(e.Data.MessageArray.Length<3)
+            if (e.Data.MessageArray.Length < 3)
             {
-                foreach(var line in bot.GetType().GetProperties().Where(property => property.CanWrite).Select(property => property.Name).ToLines(350))
+                foreach (var line in bot.GetType().GetProperties().Where(property => property.CanWrite).Select(property => property.Name).ToLines(350))
                 {
                     bot.SendMessage(SendType.Message, sendto, line);
                 }
@@ -90,7 +96,7 @@ namespace Huffelpuff
                         propertyInfos.SetValue(bot, int.Parse(e.Data.MessageArray[2]), null);
                     if (propertyInfos.PropertyType == typeof(string))
                         propertyInfos.SetValue(bot, e.Data.MessageArray[2], null);
-                    
+
                     bot.SendMessage(SendType.Message, sendto, "Value set (if string or int)");
                 }
                 else

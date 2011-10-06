@@ -48,8 +48,8 @@ namespace Huffelpuff
 
         private bool isSetup;
 
-        private Dictionary<CommandScope, string> scopeColor = new Dictionary<CommandScope, string>()
-        { 
+        private readonly Dictionary<CommandScope, string> scopeColor = new Dictionary<CommandScope, string>
+                                                                           { 
             {CommandScope.Private, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.LightRed} ,
             {CommandScope.Public, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Blue} ,
             {CommandScope.Both, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Purple} 
@@ -458,8 +458,13 @@ namespace Huffelpuff
                 if (plugHelp)
                 {
                     SendMessage(SendType.Message, sendto, p.AboutHelp());
-                    SendCommandList(sendto, nick, commands.Where(c => c.Value.SourcePlugin == p.FullName).Select(c => c.Value));
+                    var pluginCommands = commands.Where(c => c.Value.SourcePlugin == p.FullName).Select(c => c.Value);
+                    SendCommandList(sendto, nick, pluginCommands);
                     helped = true;
+                    if (!pluginCommands.Any())
+                    {
+                        SendMessage(SendType.Message, sendto, p.Active ? "This plugin has no !commands registered." : "This plugin is currently deactivated.");
+                    }
                 }
             }
 
@@ -472,10 +477,7 @@ namespace Huffelpuff
 
         private void SendCommandList(string sendto, string nick, IEnumerable<Commandlet> commandList)
         {
-            if (!commandList.Any())
-            {
-                SendMessage(SendType.Message, sendto, "This plugin has no commands registered.");
-            }
+            if (!commandList.Any()) return;
 
             var commandStrings = new List<string>();
             foreach (var commandlet in commandList)

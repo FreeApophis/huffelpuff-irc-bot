@@ -18,6 +18,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Linq;
+using System.Net;
+using System.Web;
+using System.Xml.Linq;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
@@ -27,39 +31,46 @@ namespace Plugin
     public class WolframAlphaPlugin : AbstractPlugin
     {
 
+        private const string AppID = "U9E8AG-Q6R9G343K3";
+        private const string RequestBase = "http://api.wolframalpha.com/v2/query?";
+        private const string InputQuery = "input=";
+        private const string AppIDQuery = "appid=" + AppID;
+        private const string AmpersAnd = "&";
+
         public WolframAlphaPlugin(IrcBot botInstance) :
             base(botInstance) { }
+
         public override string AboutHelp()
         {
             return "This is the help about the whole CommentedExamplePlugin";
         }
 
 
-        public override void Init()
-        {
-            TickInterval = 60;
-
-            base.Init();
-        }
-
         public override void Activate()
         {
+            BotMethods.AddCommand(new Commandlet("!alpha", "Wolfram Alpha", HandleAlpha, this));
+
             base.Activate();
         }
 
         public override void Deactivate()
         {
+            BotMethods.RemoveCommand("!alpha");
+
             base.Deactivate();
         }
 
-        public override void DeInit()
+        public void HandleAlpha(object sender, IrcEventArgs e)
         {
-            base.DeInit();
-        }
+            var document = new XDocument();
+            var request = WebRequest.Create(RequestBase + InputQuery + HttpUtility.UrlEncode(string.Join(" ", e.Data.Message.Skip(1))) + AmpersAnd + AppIDQuery) as HttpWebRequest;
+            if (request == null) return;
 
-        public override void OnTick()
-        {
+            request.UserAgent = "Mozilla/5.0 (Huffelpuff)";
+            document = XDocument.Load(request.GetResponse().GetResponseStream());
 
+
+            System.Console.WriteLine(document.ToString());
         }
     }
 }

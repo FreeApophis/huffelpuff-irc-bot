@@ -21,82 +21,76 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml;
 using Huffelpuff;
-using Huffelpuff.Plugins;
 using Meebey.SmartIrc4net;
-using Pirate.PiVote;
 using Pirate.PiVote.Crypto;
 using Pirate.PiVote.Rpc;
 
-namespace PiVotePlugin
+namespace Plugin
 {
-  public class ListVotingsAction : PiVoteAction
-  {
-    public ListVotingsAction(IrcBot botMethods, VotingClient client, CertificateStorage certificateStorage, IrcEventArgs eventArgs)
-      : base(botMethods, client, certificateStorage, eventArgs)
+    public class ListVotingsAction : PiVoteAction
     {
-    }
-
-    public override void Begin()
-    {
-      BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: Getting voting list.");
-      Client.GetCertificateStorage(CertificateStorage, GetCertificateStorageComplete);
-    }
-
-    private void GetCertificateStorageComplete(Certificate serverCertificate, Exception exception)
-    {
-      if (exception == null)
-      {
-        Client.GetVotingList(CertificateStorage, Environment.CurrentDirectory, GetVotingListCompleted);
-      }
-      else
-      {
-        BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: " + exception.Message);
-      }
-    }
-
-    private void GetVotingListCompleted(IEnumerable<VotingDescriptor> votings, Exception exception)
-    {
-      if (exception == null)
-      {
-        StringTable table = new StringTable();
-
-        table.AddColumn("No");
-        table.AddColumn("Title");
-        table.AddColumn("From");
-        table.AddColumn("Until");
-        table.AddColumn("Status");
-        table.AddColumn("Votes");
-
-        int number = 0;
-
-        foreach (VotingDescriptor voting in votings.OrderBy(v => v.VoteFrom))
+        public ListVotingsAction(IrcBot botMethods, VotingClient client, CertificateStorage certificateStorage, IrcEventArgs eventArgs)
+            : base(botMethods, client, certificateStorage, eventArgs)
         {
-          table.AddRow(number.ToString(), voting.Title.Text, voting.VoteFrom.ToShortDateString(), voting.VoteUntil.ToShortDateString(), voting.Status.Text(), voting.EnvelopeCount.ToString());
-          number++;
         }
 
-        BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: Voting list:");
-        OutTable(table);
-      }
-      else
-      {
-        BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: " + exception.Message);
-      }
+        public override void Begin()
+        {
+            BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: Getting voting list.");
+            Client.GetCertificateStorage(CertificateStorage, GetCertificateStorageComplete);
+        }
 
-      OnCompleted();
-    }
+        private void GetCertificateStorageComplete(Certificate serverCertificate, Exception exception)
+        {
+            if (exception == null)
+            {
+                Client.GetVotingList(CertificateStorage, Environment.CurrentDirectory, GetVotingListCompleted);
+            }
+            else
+            {
+                BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: " + exception.Message);
+            }
+        }
 
-    public override string StatusMessage
-    {
-      get
-      {
-        return "Listing votes : " + (this.Client.CurrentOperation == null ? "Unknown status." : this.Client.CurrentOperation.Text) + ".";
-      }
+        private void GetVotingListCompleted(IEnumerable<VotingDescriptor> votings, Exception exception)
+        {
+            if (exception == null)
+            {
+                StringTable table = new StringTable();
+
+                table.AddColumn("No");
+                table.AddColumn("Title");
+                table.AddColumn("From");
+                table.AddColumn("Until");
+                table.AddColumn("Status");
+                table.AddColumn("Votes");
+
+                int number = 0;
+
+                foreach (VotingDescriptor voting in votings.OrderBy(v => v.VoteFrom))
+                {
+                    table.AddRow(number.ToString(), voting.Title.Text, voting.VoteFrom.ToShortDateString(), voting.VoteUntil.ToShortDateString(), voting.Status.Text(), voting.EnvelopeCount.ToString());
+                    number++;
+                }
+
+                BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: Voting list:");
+                OutTable(table);
+            }
+            else
+            {
+                BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: " + exception.Message);
+            }
+
+            OnCompleted();
+        }
+
+        public override string StatusMessage
+        {
+            get
+            {
+                return "Listing votes : " + (this.Client.CurrentOperation == null ? "Unknown status." : this.Client.CurrentOperation.Text) + ".";
+            }
+        }
     }
-  }
 }

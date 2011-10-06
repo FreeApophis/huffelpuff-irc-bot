@@ -26,7 +26,7 @@ using Meebey.SmartIrc4net;
 using Pirate.PiVote.Crypto;
 using Pirate.PiVote.Rpc;
 
-namespace PiVotePlugin
+namespace Plugin
 {
     public class TallyAction : PiVoteAction
     {
