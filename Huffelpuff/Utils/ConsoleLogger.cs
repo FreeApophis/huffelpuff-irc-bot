@@ -18,6 +18,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
  */
 using System;
+using System.Diagnostics;
 
 namespace Huffelpuff.Utils
 {
@@ -27,14 +28,17 @@ namespace Huffelpuff.Utils
         {
             if (!IsLogged(Level.Info)) return;
 
-            Console.WriteLine("{0}: {1}", Level.Info, message);
+
+
+            Console.WriteLine("{0}@{1}: {2}", Level.Info, location, message);
+
         }
 
         public override void Log(string message, Level level)
         {
             if (!IsLogged(level)) return;
 
-            Console.WriteLine("{0}: {1}", level, message);
+            Console.WriteLine("{0}@{1}: {2}", level, location, message);
         }
 
         public override void Log(string message, Level level, ConsoleColor color)
@@ -43,7 +47,8 @@ namespace Huffelpuff.Utils
 
             var lastColor = Console.ForegroundColor;
             Console.ForegroundColor = color;
-            Console.WriteLine("{0}: {1}", level, message);
+
+            Console.WriteLine("{0}@{1}: {2}", level, location, message);
             Console.ForegroundColor = lastColor;
         }
 
@@ -53,16 +58,26 @@ namespace Huffelpuff.Utils
 
             var lastColor = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("{0}: {1}", Level.Error, exception.Message);
+            Console.WriteLine("{0}@{1}: {2}", Level.Error, location, exception.Message);
             Console.ForegroundColor = lastColor;
 
             if (Verbose)
             {
-                Console.WriteLine("{0}: {1}", Level.Info, exception.StackTrace);
+                Console.WriteLine("{0}@{1}: {2}", Level.Info, location, exception.StackTrace);
             }
         }
 
         public override Level MinLogLevel { get; set; }
         public override bool Verbose { get; set; }
+
+        private string location
+        {
+            get
+            {
+                var stackTrace = new StackTrace();
+
+                return stackTrace.GetFrame(2).GetMethod().DeclaringType + "." + stackTrace.GetFrame(2).GetMethod().Name;
+            }
+        }
     }
 }
