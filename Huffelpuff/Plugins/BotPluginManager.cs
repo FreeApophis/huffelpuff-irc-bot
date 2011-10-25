@@ -173,7 +173,15 @@ namespace Huffelpuff.Plugins
 
             foreach (var plugin in PersistentMemory.Instance.GetValues("plugin").SelectMany(pluginname => plugins.Where(p => pluginname == p.FullName)))
             {
-                plugin.Activate();
+                try
+                {
+                    plugin.Activate();
+                }
+                catch (Exception exception)
+                {
+                    Log.Instance.Log(exception);
+                    continue;
+                } 
             }
         }
 

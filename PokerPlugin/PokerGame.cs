@@ -191,6 +191,11 @@ namespace Plugin
             }
         }
 
+        internal bool IsPlaying(string nick)
+        {
+            return players.Any(p => p.Nick == nick);
+        }
+
         private void BetRound()
         {
             throw new NotImplementedException();
