@@ -85,7 +85,7 @@ namespace Huffelpuff
 
             if (owner is AbstractPlugin)
             {
-                AbstractPlugin plugin = owner as AbstractPlugin;
+                var plugin = owner as AbstractPlugin;
                 Handler = null;
                 HandlerName = handler.Method.Name;
                 Owner = plugin.FullName;
