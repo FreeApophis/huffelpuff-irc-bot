@@ -41,9 +41,9 @@ namespace Plugin
         {
             BotMethods.AddCommand(new Commandlet("!poker-join", "Join the Pokertable and participate in the game the next round.", JoinGame, this, CommandScope.Public));
             BotMethods.AddCommand(new Commandlet("!poker-leave", "Stand up and leave the table, this also happens when you Part the Channel or Quit.", PartGame, this, CommandScope.Public));
-            BotMethods.AddCommand(new Commandlet("!bet", "!bet <money> will bet that amount money.", EvaluateHand, this, CommandScope.Public));
-            BotMethods.AddCommand(new Commandlet("!fold", "With !fold you make an unconditional fold of your cards.", EvaluateHand, this, CommandScope.Public));
-            BotMethods.AddCommand(new Commandlet("!check", "With !check you are checking the current round.", EvaluateHand, this, CommandScope.Public));
+            BotMethods.AddCommand(new Commandlet("!bet", "!bet <money> will bet that amount money.", BetHandler, this, CommandScope.Public));
+            BotMethods.AddCommand(new Commandlet("!fold", "With !fold you make an unconditional fold of your cards.", FoldHandler, this, CommandScope.Public));
+            BotMethods.AddCommand(new Commandlet("!check", "With !check you are checking the current round.", CheckHandler, this, CommandScope.Public));
 
             foreach (var channel in BotMethods.GetChannels())
             {
@@ -88,43 +88,44 @@ namespace Plugin
 
         private void JoinGame(object sender, IrcEventArgs e)
         {
-            games[e.Data.Channel].AddPlayer(e.Data.Nick);
+            if (games[e.Data.Channel].IsPlaying(e.Data.Nick))
+            {
+                BotMethods.SendMessage(SendType.Notice, e.Data.Nick, "Add Failed. You are already playing in '" + e.Data.Channel + "'");
+            }
+            else
+            {
+                games[e.Data.Channel].AddPlayer(e.Data.Nick);
+            }
         }
 
         private void PartGame(object sender, IrcEventArgs e)
         {
-            games[e.Data.Channel].RemovePlayer(e.Data.Nick);
+            if (games[e.Data.Channel].IsPlaying(e.Data.Nick))
+            {
+                games[e.Data.Channel].RemovePlayer(e.Data.Nick);
+            }
+            else
+            {
+                BotMethods.SendMessage(SendType.Notice, e.Data.Nick, "Remove Failed. You are not playing in '" + e.Data.Channel + "'");
+            }
         }
 
-        private void EvaluateHand(object sender, IrcEventArgs e)
+        private void BetHandler(object sender, IrcEventArgs e)
         {
-            //var destination = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-            //if (e.Data.MessageArray.Length > 1)
-            //{
-            //    //BotMethods.SendMessage(SendType.Message, destination, Hand.MaskToDescription(Hand.ParseHand(e.Data.MessageArray[1])));
-            //    BotMethods.SendMessage(SendType.Message, destination, Hand.DescriptionFromHand(e.Data.MessageArray[1]));
-            //}
-            //else
-            //{
-            //    var hand = new StringBuilder();
-            //    var mask = new StringBuilder();
-            //    foreach (var cards in Enumerable.Range(0, 5))
-            //    {
-            //        deck.NextCard();
-            //        hand.Append(ToIrcCard(deck.CurrentCard));
-            //        mask.Append(deck.CurrentCard);
-            //    }
-
-
-            //    BotMethods.SendMessage(SendType.Message, destination, hand + " is " + Hand.DescriptionFromHand(mask.ToString()));
-            //}
         }
 
+        private void FoldHandler(object sender, IrcEventArgs e)
+        {
+        }
+
+        private void CheckHandler(object sender, IrcEventArgs e)
+        {
+        }
 
 
         public override string AboutHelp()
         {
-            return "";
+            return "Texas Hold'em Poker Plugin";
         }
     }
 }

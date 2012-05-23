@@ -221,6 +221,11 @@ namespace Huffelpuff
             return false;
         }
 
+        public bool RemoveCommand(Commandlet cmd)
+        {
+            return RemoveCommand(cmd.Command);
+        }
+
         private void CommandDispatcher(object sender, IrcEventArgs e)
         {
             var pub = !string.IsNullOrEmpty(e.Data.Channel);
@@ -230,12 +235,12 @@ namespace Huffelpuff
 
             if (pub && (commands[e.Data.MessageArray[0]].Scope == CommandScope.Private))
             {
-                SendMessage(SendType.Message, e.Data.Nick, "This command can only be invoked privatly in a query.");
+                SendMessage(SendType.Message, e.Data.Nick, "This command (" + commands[e.Data.MessageArray[0]].Command + ") can only be invoked privatly in a query.");
                 return;
             }
             if ((!pub) && (commands[e.Data.MessageArray[0]].Scope == CommandScope.Public))
             {
-                SendMessage(SendType.Message, e.Data.Nick, "This command can only be invoked publicly in a channel.");
+                SendMessage(SendType.Message, e.Data.Nick, "This command (" + commands[e.Data.MessageArray[0]].Command + ") can only be invoked publicly in a channel.");
                 return;
             }
 

@@ -37,19 +37,23 @@ namespace Plugin
 
         public override void Init()
         {
-            BotMethods.AddCommand(new Commandlet("!todo", "HELP", TodoHandler, this));
-            BotMethods.AddCommand(new Commandlet("!done", "HELP", DoneHandler, this));
 
             base.Init();
         }
 
         public override void Activate()
         {
+            BotMethods.AddCommand(new Commandlet("!todo", "HELP", TodoHandler, this));
+            BotMethods.AddCommand(new Commandlet("!done", "HELP", DoneHandler, this));
+
             base.Activate();
         }
 
         public override void Deactivate()
         {
+            BotMethods.RemoveCommand("!todo");
+            BotMethods.RemoveCommand("!done");
+
             base.Deactivate();
         }
 
