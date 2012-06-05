@@ -126,6 +126,9 @@ namespace Huffelpuff.Utils
         public void Flush()
         {
             var fi = new FileInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Huffelpuff", Filename));
+
+            fi.Directory.CreateDirectory();
+
             memory.WriteXml(fi.FullName);
         }
 

@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace Huffelpuff.Utils
 {
@@ -182,6 +183,16 @@ namespace Huffelpuff.Utils
         public static string RemoveDuplicateWhiteSpace(this string str)
         {
             return WhiteSpaceMatch.Replace(str, " ");
+        }
+
+        /// <summary>
+        /// Recursively create directory
+        /// </summary>
+        /// <param name="dirInfo">Folder path to create.</param>
+        public static void CreateDirectory(this DirectoryInfo dirInfo)
+        {
+            if (dirInfo.Parent != null) CreateDirectory(dirInfo.Parent);
+            if (!dirInfo.Exists) dirInfo.Create();
         }
     }
 }

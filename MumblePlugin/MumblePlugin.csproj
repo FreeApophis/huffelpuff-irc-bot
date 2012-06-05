@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ProjectGuid>{BF492067-28D8-42AE-8BFB-53C30E681EF6}</ProjectGuid>
+    <ProjectGuid>{CE05C45F-6DEC-47D4-96B6-C47DF6378160}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
@@ -47,6 +47,9 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Reference Include="protobuf-net">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\protobuf-net\protobuf-net-VS9\protobuf-net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -57,7 +60,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MessageTypes.cs" />
+    <Compile Include="MumbleClient.cs" />
+    <Compile Include="MumbleConnection.cs" />
+    <Compile Include="Mumble.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Mumble.proto</DependentUpon>
+    </Compile>
+    <Compile Include="MumblePacketEventArgs.cs" />
     <Compile Include="MumblePlugin.cs" />
+    <Compile Include="MumbleProtocolFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <PropertyGroup>
@@ -83,5 +97,11 @@
       <Project>{BFB6AD56-7EE1-4F29-BEE1-50BC09137178}</Project>
       <Name>SmartIrc4Net</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Mumble.proto">
+      <Generator>ProtoBufTool</Generator>
+      <LastGenOutput>Mumble.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 </Project>
