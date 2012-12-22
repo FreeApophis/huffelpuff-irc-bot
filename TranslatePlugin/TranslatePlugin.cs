@@ -24,10 +24,11 @@ using System.Data;
 using System.Linq;
 using System.Net;
 using System.Web;
+using apophis.SharpIRC;
+using apophis.SharpIRC.IrcFeatures;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
-using Meebey.SmartIrc4net;
 
 namespace Plugin
 {

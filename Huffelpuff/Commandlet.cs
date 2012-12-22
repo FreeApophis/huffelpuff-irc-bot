@@ -21,8 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-
-using Meebey.SmartIrc4net;
+using apophis.SharpIRC;
 using Huffelpuff.Plugins;
 
 namespace Huffelpuff

@@ -18,7 +18,10 @@
  */
 
 using System;
-using Meebey.SmartIrc4net;
+using apophis.SharpIRC;
+using apophis.SharpIRC.IrcClient;
+using apophis.SharpIRC.IrcConnection;
+using apophis.SharpIRC.IrcFeatures;
 
 namespace Huffelpuff.Plugins
 {

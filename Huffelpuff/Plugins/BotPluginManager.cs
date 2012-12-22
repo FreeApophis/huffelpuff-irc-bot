@@ -17,15 +17,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Timers;
-using Huffelpuff.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
-using Meebey.SmartIrc4net;
+using System.Threading;
+using System.Timers;
+using apophis.SharpIRC;
+using Huffelpuff.Utils;
 using Timer = System.Timers.Timer;
 
 namespace Huffelpuff.Plugins

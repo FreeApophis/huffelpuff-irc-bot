@@ -228,12 +228,6 @@
     <Compile Include="Utils\WindowsServiceLogger.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SmartIrc4Net\src\SmartIrc4Net.csproj">
-      <Project>{BFB6AD56-7EE1-4F29-BEE1-50BC09137178}</Project>
-      <Name>SmartIrc4Net</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -270,6 +264,12 @@
     <EmbeddedResource Include="Utils\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SharpIRC\sharp-irc\SharpIRC.csproj">
+      <Project>{56D2D51C-27B4-4AE0-9D8A-CFFD02471487}</Project>
+      <Name>SharpIRC</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <PreBuildEvent>xcopy ..\huffelpuff.db . /y</PreBuildEvent>

@@ -450,7 +450,11 @@ namespace Huffelpuff.Utils
                 throw new NotImplementedException("this should not happen");
             }
 
+#if DEBUG
+            var fi = new FileInfo(Filename);
+#else
             var fi = new FileInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Huffelpuff", Filename));
+#endif
             var xdoc = new XmlDataDocument();
             if (fi.Exists)
             {

@@ -18,8 +18,8 @@
  */
 
 using System;
-using Meebey.SmartIrc4net;
 using System.Collections.Generic;
+using apophis.SharpIRC;
 
 namespace Huffelpuff.AccessControl
 {

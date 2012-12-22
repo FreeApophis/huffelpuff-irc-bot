@@ -22,10 +22,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using apophis.SharpIRC;
+using apophis.SharpIRC.IrcFeatures;
 using Huffelpuff.AccessControl;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
-using Meebey.SmartIrc4net;
 
 namespace Huffelpuff
 {
@@ -74,9 +75,9 @@ namespace Huffelpuff
             OnQueryMessage += CommandDispatcher;
             OnConnected += OnBotConnected;
 
-            CtcpVersion = VersionString + " (SmartIrc4Net " + Assembly.GetAssembly(typeof(IrcFeatures)).GetName(false).Version + ")";
-            CtcpUrl = "http://huffelpuff-irc-bot.origo.ethz.ch/";
-            CtcpSource = "https://svn.origo.ethz.ch/huffelpuff-irc-bot/";
+            CtcpVersion = VersionString + " (SharpIRC " + Assembly.GetAssembly(typeof(IrcFeatures)).GetName(false).Version + ")";
+            CtcpUrl = "https://github.com/FreeApophis/huffelpuff-irc-bot";
+            CtcpSource = "https://github.com/FreeApophis/huffelpuff-irc-bot";
 
             // DCC Setup
 
@@ -515,7 +516,7 @@ namespace Huffelpuff
             if (PersistentMemory.Instance.GetValue("ProxyServer") != null)
             {
                 Log.Instance.Log("Using Proxy Server: " + PersistentMemory.Instance.GetValue("ProxyServer"), Level.Trace);
-                ProxyType = ProxyType.Socks5;
+                ProxyType = apophis.SharpIRC.IrcConnection.ProxyType.Socks5;
                 ProxyHost = PersistentMemory.Instance.GetValue("ProxyServer").Split(new[] { ':' })[0];
                 ProxyPort = int.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new[] { ':' })[1]);
                 ProxyUsername = PersistentMemory.Instance.GetValue("ProxyUser");

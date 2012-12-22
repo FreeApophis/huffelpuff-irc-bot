@@ -18,12 +18,10 @@
  */
 
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using HoldemHand;
+using apophis.SharpIRC;
+using apophis.SharpIRC.IrcClient;
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Meebey.SmartIrc4net;
 
 namespace Plugin
 {

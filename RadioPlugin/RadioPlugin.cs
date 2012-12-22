@@ -24,10 +24,10 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Timers;
+using apophis.SharpIRC;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
-using Meebey.SmartIrc4net;
 using MySql.Data.MySqlClient;
 
 namespace Plugin

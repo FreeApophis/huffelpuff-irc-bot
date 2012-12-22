@@ -21,9 +21,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using apophis.SharpIRC;
+using apophis.SharpIRC.IrcFeatures;
 using Huffelpuff;
 using Huffelpuff.Utils;
-using Meebey.SmartIrc4net;
 
 namespace Plugin
 {

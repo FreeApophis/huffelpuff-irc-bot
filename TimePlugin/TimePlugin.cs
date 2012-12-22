@@ -1,4 +1,5 @@
 ﻿using System;
+using apophis.SharpIRC;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 /*
@@ -20,7 +21,6 @@ using Huffelpuff.Plugins;
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-using Meebey.SmartIrc4net;
 
 namespace Plugin
 {

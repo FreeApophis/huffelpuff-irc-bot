@@ -17,9 +17,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using apophis.SharpIRC;
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Meebey.SmartIrc4net;
 
 namespace Plugin
 {

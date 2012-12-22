@@ -22,9 +22,9 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Xml.Linq;
+using apophis.SharpIRC;
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Meebey.SmartIrc4net;
 
 namespace Plugin
 {

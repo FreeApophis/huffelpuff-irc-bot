@@ -19,8 +19,8 @@
 
 using System;
 using System.Reflection;
+using apophis.SharpIRC;
 using Huffelpuff.Utils;
-using Meebey.SmartIrc4net;
 
 namespace Huffelpuff.Plugins
 {

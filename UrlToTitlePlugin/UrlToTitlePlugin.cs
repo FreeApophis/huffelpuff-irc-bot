@@ -25,10 +25,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
+using apophis.SharpIRC;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
-using Meebey.SmartIrc4net;
 
 namespace Plugin
 {

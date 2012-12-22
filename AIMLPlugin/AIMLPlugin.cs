@@ -20,9 +20,9 @@
 
 using System.Collections.Generic;
 using AIMLbot;
+using apophis.SharpIRC;
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Meebey.SmartIrc4net;
 
 namespace Plugin
 {

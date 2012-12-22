@@ -1,3 +1,6 @@
 [submodule "SharpIRC"]
 	path = SharpIRC
 	url = git://github.com/FreeApophis/sharpIRC.git
+[submodule "MumbleNet"]
+	path = MumbleNet
+	url = git://github.com/FreeApophis/Mumble.net.git

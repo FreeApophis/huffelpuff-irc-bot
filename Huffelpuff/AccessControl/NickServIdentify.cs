@@ -20,8 +20,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Meebey.SmartIrc4net;
 using System.Threading;
+using apophis.SharpIRC.IrcClient;
 
 namespace Huffelpuff.AccessControl
 {

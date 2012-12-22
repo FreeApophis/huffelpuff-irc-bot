@@ -18,8 +18,8 @@
  */
 
 
-using Meebey.SmartIrc4net;
 using System;
+using apophis.SharpIRC;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 

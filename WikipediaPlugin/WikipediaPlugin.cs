@@ -23,9 +23,10 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using apophis.SharpIRC;
+using apophis.SharpIRC.IrcFeatures;
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Meebey.SmartIrc4net;
 
 namespace Plugin
 {

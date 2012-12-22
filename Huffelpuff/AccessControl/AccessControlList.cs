@@ -21,7 +21,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Meebey.SmartIrc4net;
+using apophis.SharpIRC;
+using apophis.SharpIRC.IrcClient;
 using Huffelpuff.Utils;
 
 namespace Huffelpuff.AccessControl

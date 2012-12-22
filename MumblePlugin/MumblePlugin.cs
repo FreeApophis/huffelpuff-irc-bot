@@ -18,24 +18,21 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-using System;
-using System.Collections.Generic;
 
 /* 
  * To write a Plugin you need to set a Reference to the Huffelpuff-project 
- * and also to the SmartIrc4Net Project.
+ * and also to the SharpIRC Project.
  * If you work with the source, make a new Project for your Plugin and add
  * project reference to the Project.
  * If you work with the executable directly, Add a reference to the
- * Huffelpuff.exe And SmartIrc4Net.dll
+ * Huffelpuff.exe And SharpIRC.dll
  * 
  * normally you need the following namesspaces from the project:
  */
+using apophis.SharpIRC;
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Meebey.SmartIrc4net;
-
-using MumbleProto;
+using Protocols.Mumble;
 
 
 namespace Plugin
@@ -56,7 +53,7 @@ namespace Plugin
         {
             TickInterval = 60;
 
-            client = new MumbleClient();
+            client = new MumbleClient("huffelpuff");
 
             base.Init();
         }

@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Meebey.SmartIrc4net;
+using apophis.SharpIRC;
 
 namespace Huffelpuff.AccessControl
 {
@@ -30,7 +30,6 @@ namespace Huffelpuff.AccessControl
             : base(bot)
         {
             bot.AddCommand(new Commandlet("!identify", "You can identify your nick with the !identify <pass> command", PassHandler, this, CommandScope.Both));
-
         }
 
         public void PassHandler(object sender, IrcEventArgs e)

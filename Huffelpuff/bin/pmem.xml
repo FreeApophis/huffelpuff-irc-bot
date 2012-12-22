@@ -3,31 +3,31 @@
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>botmaster</baseKey>
-    <baseValue>TODO</baseValue>
+    <baseValue>Apophis</baseValue>
   </baseTBL>
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>ServerHost</baseKey>
-    <baseValue>TODO</baseValue>
+    <baseValue>ch.pirateirc.net</baseValue>
   </baseTBL>
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>ServerPort</baseKey>
-    <baseValue>TODO</baseValue>
+    <baseValue>6667</baseValue>
   </baseTBL>
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>nick</baseKey>
-    <baseValue>TODO</baseValue>
+    <baseValue>Huffelpuff-Dev</baseValue>
   </baseTBL>
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>realname</baseKey>
-    <baseValue>TODO</baseValue>
+    <baseValue>Huffelpuff DEVL BOT</baseValue>
   </baseTBL>
   <baseTBL>
     <baseGroup>config</baseGroup>
     <baseKey>username</baseKey>
-    <baseValue>TODO</baseValue>
+    <baseValue>Huffelpuff</baseValue>
   </baseTBL>
 </NewDataSet>

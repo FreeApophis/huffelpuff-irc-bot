@@ -21,10 +21,11 @@ using System;
 using System.Data;
 using System.IO;
 using System.Xml;
+using apophis.SharpIRC;
+using apophis.SharpIRC.IrcClient;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
-using Meebey.SmartIrc4net;
 
 namespace Plugin
 {

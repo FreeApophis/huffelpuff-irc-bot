@@ -21,7 +21,7 @@
 using System.Diagnostics;
 using System.ServiceProcess;
 using System.Threading;
-using Meebey.SmartIrc4net;
+using apophis.SharpIRC;
 
 namespace Huffelpuff
 {

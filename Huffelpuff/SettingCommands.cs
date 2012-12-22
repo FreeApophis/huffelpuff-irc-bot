@@ -18,8 +18,8 @@
  */
 
 using System.Linq;
+using apophis.SharpIRC;
 using Huffelpuff.Utils;
-using Meebey.SmartIrc4net;
 
 namespace Huffelpuff
 {
@@ -46,14 +46,11 @@ namespace Huffelpuff
 
         private void ChangeNick(object sender, IrcEventArgs e)
         {
-            if (e.Data.MessageArray.Length > 1)
-            {
-                if (isValidNick(e.Data.MessageArray[1]))
-                {
-                    this.bot.RfcNick(e.Data.MessageArray[1]);
-                    PersistentMemory.Instance.ReplaceValue("nick", e.Data.MessageArray[1]);
-                }
-            }
+            if (e.Data.MessageArray.Length <= 1) { return; }            
+            if (!isValidNick(e.Data.MessageArray[1])) { return; }
+
+            bot.RfcNick(e.Data.MessageArray[1]);
+            PersistentMemory.Instance.ReplaceValue("nick", e.Data.MessageArray[1]);
         }
 
         private void ConfigGet(object sender, IrcEventArgs e)
@@ -70,7 +67,7 @@ namespace Huffelpuff
             {
                 var propertyInfos = bot.Properties.GetType().GetProperties().Where(property => property.CanRead && property.Name == e.Data.MessageArray[1]).SingleOrDefault();
                 if (propertyInfos != null)
-                    bot.SendMessage(SendType.Message, sendto, "Current Value: " + propertyInfos.GetValue(bot.Properties, null).ToString());
+                    bot.SendMessage(SendType.Message, sendto, "Current Value: " + propertyInfos.GetValue(bot.Properties, null));
                 else
                     bot.SendMessage(SendType.Message, sendto, "Dont know that property");
             }

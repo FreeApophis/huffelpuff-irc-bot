@@ -17,12 +17,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Linq;
-using Huffelpuff.Utils;
 using System;
+using System.Linq;
+using apophis.SharpIRC;
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Meebey.SmartIrc4net;
+using Huffelpuff.Utils;
 using Plugin.ServiceReference;
 
 namespace Plugin
@@ -87,8 +87,7 @@ namespace Plugin
         private void PlayerHandler(object sender, IrcEventArgs e)
         {
             var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-            if (e.Data.MessageArray.Length < 2)
-                return;
+            if (e.Data.MessageArray.Length < 2) { return; }
 
             RecordValue[][] values;
 

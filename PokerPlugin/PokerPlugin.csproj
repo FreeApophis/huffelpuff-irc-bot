@@ -58,9 +58,9 @@
       <Project>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</Project>
       <Name>Huffelpuff</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SmartIrc4Net\src\SmartIrc4Net.csproj">
-      <Project>{BFB6AD56-7EE1-4F29-BEE1-50BC09137178}</Project>
-      <Name>SmartIrc4Net</Name>
+    <ProjectReference Include="..\SharpIRC\sharp-irc\SharpIRC.csproj">
+      <Project>{56D2D51C-27B4-4AE0-9D8A-CFFD02471487}</Project>
+      <Name>SharpIRC</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

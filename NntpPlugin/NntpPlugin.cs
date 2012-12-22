@@ -18,17 +18,16 @@
  */
 
 using System;
-using System.Linq;
-using System.Timers;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Linq;
+using System.Timers;
+using apophis.SharpIRC;
+using apophis.SharpIRC.IrcFeatures;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
-
 using Nntp;
-using Meebey.SmartIrc4net;
 
 namespace Plugin
 {
