@@ -1,3 +1,3 @@
-[submodule "SmartIrc4Net"]
-	path = SmartIrc4Net
-	url = git://github.com/FreeApophis/smartirc4net_apophis.git
+[submodule "SharpIRC"]
+	path = SharpIRC
+	url = git://github.com/FreeApophis/sharpIRC.git
