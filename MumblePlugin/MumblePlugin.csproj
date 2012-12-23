@@ -64,7 +64,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>xcopy .\MumblePlugin.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
+    <PostBuildEvent>xcopy .\MumblePlugin.* ..\..\Huffelpuff\bin\plugins /y
+xcopy .\Mumble.net.lib.* ..\..\Huffelpuff\bin\plugins /y
+xcopy .\protobuf-net.* ..\..\Huffelpuff\bin\plugins /y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>

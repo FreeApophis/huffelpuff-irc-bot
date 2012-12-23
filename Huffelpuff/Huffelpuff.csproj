@@ -181,6 +181,7 @@
     <Compile Include="Plugins\PluginManager.cs" />
     <Compile Include="Plugins\PluginSourceEnum.cs" />
     <Compile Include="Plugins\RemoteLoader.cs" />
+    <Compile Include="Plugins\RemotePlugins.cs" />
     <Compile Include="Plugins\SharedClientSide.cs" />
     <Compile Include="Plugins\SharedServerSide.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -198,6 +199,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="SettingCommands.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="SocksProxy\AuthMethod.cs" />
     <Compile Include="SocksProxy\AuthNone.cs" />
     <Compile Include="SocksProxy\AuthUserPass.cs" />

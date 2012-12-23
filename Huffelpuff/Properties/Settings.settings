@@ -1,6 +1,12 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Huffelpuff.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="UpdateURL" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://update.apophis.ch/huffelpuff.xml</Value>
+    </Setting>
+    <Setting Name="PluginsURL" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://update.apophis.ch/huffelpuff-plugins.xml</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

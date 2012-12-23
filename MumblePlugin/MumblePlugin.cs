@@ -32,8 +32,8 @@
 using apophis.SharpIRC;
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Protocols.Mumble;
-
+using Huffelpuff.Utils;
+using Protocol.Mumble;
 
 namespace Plugin
 {
@@ -53,8 +53,7 @@ namespace Plugin
         {
             TickInterval = 60;
 
-            client = new MumbleClient("huffelpuff");
-
+            client = new MumbleClient("huffelpuff", "talk.piratenpartei.ch", PersistentMemory.Instance.GetValue("nick") + "@IRC");
             base.Init();
         }
 
@@ -62,12 +61,62 @@ namespace Plugin
         {
             BotMethods.AddCommand(new Commandlet("!mumble", "Testing", MumbleHandler, this, CommandScope.Both));
 
+            client.OnConnected += MumbleConnected;
+            client.OnTextMessage += MumbleText;
+            client.Connect();
+
+            BotEvents.OnChannelMessage += BotMethods_OnChannelMessage;
+
             base.Activate();
+        }
+
+        void MumbleConnected(object sender, MumblePacketEventArgs e)
+        {
+            var channelName = PersistentMemory.Instance.GetValue("mumble-plugin", "mumble-channel");
+
+            if (channelName == null) { return; }
+
+            var channel = client.FindChannel(channelName);
+            client.SwitchChannel(channel);
+        }
+
+        void MumbleText(object sender, MumblePacketEventArgs e)
+        {
+            foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+            {
+                var message = (TextMessage)e.Message;
+                var user = client.FindUser(message.actor);
+
+                BotMethods.SendMessage(SendType.Message, channel, user.Name + ": " + message.message);
+            }
+
+
+        }
+
+        void BotMethods_OnChannelMessage(object sender, IrcEventArgs e)
+        {
+            var channelName = PersistentMemory.Instance.GetValue("mumble-plugin", "mumble-channel");
+
+            if (channelName == null) { return; }
+
+            var channel = client.FindChannel(channelName);
+
+            if (channel == null) { return; }
+        
+            client.SendTextMessageToChannel("" + e.Data.Nick + ": " + e.Data.Message, channel, false);
+
         }
 
         public override void Deactivate()
         {
             BotMethods.RemoveCommand("!mumble");
+
+            client.OnConnected -= MumbleConnected;
+            client.OnTextMessage -= MumbleText;
+
+            client.Disconnect();
+
+            BotEvents.OnChannelMessage -= BotMethods_OnChannelMessage;
 
             base.Deactivate();
         }
@@ -85,9 +134,7 @@ namespace Plugin
         {
             string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
 
-            client.Connect();
 
-            BotMethods.SendMessage(SendType.Message, sendto, "Mumble Connect");
         }
     }
 }
