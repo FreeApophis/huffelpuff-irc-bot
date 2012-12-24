@@ -25,6 +25,7 @@ using System.Reflection;
 using System.Threading;
 using System.Timers;
 using apophis.SharpIRC;
+using Huffelpuff.Properties;
 using Huffelpuff.Utils;
 using Timer = System.Timers.Timer;
 
@@ -171,7 +172,8 @@ namespace Huffelpuff.Plugins
             }
 
 
-            foreach (var plugin in PersistentMemory.Instance.GetValues("plugin").SelectMany(pluginname => plugins.Where(p => pluginname == p.FullName)))
+
+            foreach (var plugin in Settings.Default.Plugins.Cast<string>().SelectMany(pluginname => plugins.Where(p => pluginname == p.FullName)))
             {
                 try
                 {
@@ -181,7 +183,7 @@ namespace Huffelpuff.Plugins
                 {
                     Log.Instance.Log(exception);
                     continue;
-                } 
+                }
             }
         }
 

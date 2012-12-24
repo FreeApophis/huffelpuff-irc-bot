@@ -23,6 +23,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Windows.Forms;
+using Huffelpuff.Properties;
 
 namespace Huffelpuff.Utils
 {
@@ -59,10 +60,10 @@ namespace Huffelpuff.Utils
 
         public static IPAddress TryGetExternalIP()
         {
-            if (PersistentMemory.Instance.GetValue("external_ip") != null)
+            if (!Settings.Default.ExternalIP.IsNullOrEmpty())
             {
                 // external IP in settings overides any self detection
-                return IPAddress.Parse(PersistentMemory.Instance.GetValue("external_ip"));
+                return IPAddress.Parse(Settings.Default.ExternalIP);
             }
 
             IPAddress currentBest = null;
@@ -167,8 +168,7 @@ namespace Huffelpuff.Utils
 
         public static void Configure()
         {
-            Application.EnableVisualStyles();
-            Application.Run(new ConfigForm());
+            throw new NotImplementedException();
         }
     }
 }

@@ -25,6 +25,7 @@ using apophis.SharpIRC;
 using apophis.SharpIRC.IrcClient;
 using Huffelpuff;
 using Huffelpuff.Plugins;
+using Huffelpuff.Properties;
 using Huffelpuff.Utils;
 
 namespace Plugin
@@ -93,7 +94,7 @@ namespace Plugin
                 dr["OnStatus"] = false;
             }
 
-            foreach (string channel in PersistentMemory.Instance.GetValues("channel"))
+            foreach (string channel in Settings.Default.Channels)
             {
                 BotMethods.RfcNames(channel);
             }

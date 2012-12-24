@@ -22,6 +22,7 @@ using System;
 using System.Configuration.Install;
 using System.Reflection;
 using System.ServiceProcess;
+using Huffelpuff.Properties;
 using Huffelpuff.Utils;
 
 namespace Huffelpuff
@@ -66,7 +67,7 @@ namespace Huffelpuff
 
                 } while (bot.Start());
 
-                PersistentMemory.Instance.Flush();
+                Settings.Default.Save();
             }
             else
             {
@@ -86,20 +87,6 @@ namespace Huffelpuff
         private static IrcBot GetBot()
         {
             var bot = new IrcBot();
-
-            // check for basic settings
-            PersistentMemory.Instance.GetValuesOrTodo("ServerHost");
-            PersistentMemory.Instance.GetValuesOrTodo("ServerPort");
-            PersistentMemory.Instance.GetValueOrTodo("nick");
-            PersistentMemory.Instance.GetValueOrTodo("realname");
-            PersistentMemory.Instance.GetValueOrTodo("username");
-
-            if (PersistentMemory.Todo)
-            {
-                PersistentMemory.Instance.Flush();
-                Log.Instance.Log("Edit your config file: there are some TODOs left.", Level.Fatal);
-                return null;
-            }
             return bot;
         }
     }

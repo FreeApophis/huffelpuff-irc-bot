@@ -19,6 +19,7 @@
 
 using System.Linq;
 using apophis.SharpIRC;
+using Huffelpuff.Properties;
 using Huffelpuff.Utils;
 
 namespace Huffelpuff
@@ -50,7 +51,8 @@ namespace Huffelpuff
             if (!isValidNick(e.Data.MessageArray[1])) { return; }
 
             bot.RfcNick(e.Data.MessageArray[1]);
-            PersistentMemory.Instance.ReplaceValue("nick", e.Data.MessageArray[1]);
+            Settings.Default.Nick = e.Data.MessageArray[1];
+            Settings.Default.Save();
         }
 
         private void ConfigGet(object sender, IrcEventArgs e)

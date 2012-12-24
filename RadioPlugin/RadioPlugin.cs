@@ -206,23 +206,24 @@ namespace Plugin
         private Dictionary<int, Track> Tracks;
 
 
+        static string mySqlConncetionString;
 
-        private MySqlConnection connection = new MySqlConnection(PersistentMemory.Instance.GetValue("MySQLConnection"));
+        private readonly MySqlConnection connection = new MySqlConnection(mySqlConncetionString);
 
         public override void Init()
         {
-            if (PersistentMemory.Instance.GetValue("MySQLConnection") == null)
+            if (mySqlConncetionString == null)
             {
                 return;
             }
 
             // *** Artists Table ***
             Artists = new Dictionary<int, Artist>();
-            MySqlCommand ArtistsCommand = new MySqlCommand("SELECT * FROM artists_new", connection);
-            MySqlDataAdapter ArtistsAdapter = new MySqlDataAdapter(ArtistsCommand);
-            DataTable ArtistsDatatable = new DataTable();
-            ArtistsAdapter.Fill(ArtistsDatatable);
-            foreach (DataRow dr in ArtistsDatatable.Rows)
+            var artistsCommand = new MySqlCommand("SELECT * FROM artists_new", connection);
+            var artistsAdapter = new MySqlDataAdapter(artistsCommand);
+            var artistsDatatable = new DataTable();
+            artistsAdapter.Fill(artistsDatatable);
+            foreach (DataRow dr in artistsDatatable.Rows)
             {
                 string mbgid = "";
                 if (!(dr["mbgid"] is DBNull))
@@ -245,11 +246,11 @@ namespace Plugin
 
             // *** Albums Table ***
             Albums = new Dictionary<int, Album>();
-            MySqlCommand AlbumsCommand = new MySqlCommand("SELECT * FROM albums_new", connection);
-            MySqlDataAdapter AlbumsAdapter = new MySqlDataAdapter(AlbumsCommand);
-            DataTable AlbumsDatatable = new DataTable();
-            AlbumsAdapter.Fill(AlbumsDatatable);
-            foreach (DataRow dr in AlbumsDatatable.Rows)
+            var albumsCommand = new MySqlCommand("SELECT * FROM albums_new", connection);
+            var albumsAdapter = new MySqlDataAdapter(albumsCommand);
+            var albumsDatatable = new DataTable();
+            albumsAdapter.Fill(albumsDatatable);
+            foreach (DataRow dr in albumsDatatable.Rows)
             {
                 string mbgid = "";
                 if (!(dr["mbgid"] is DBNull))
@@ -277,11 +278,11 @@ namespace Plugin
 
             // *** Tracks Table ***
             Tracks = new Dictionary<int, Track>();
-            MySqlCommand TracksCommand = new MySqlCommand("SELECT * FROM tracks_new", connection);
-            MySqlDataAdapter TracksAdapter = new MySqlDataAdapter(TracksCommand);
-            DataTable TracksDatatable = new DataTable();
-            TracksAdapter.Fill(TracksDatatable);
-            foreach (DataRow dr in TracksDatatable.Rows)
+            var tracksCommand = new MySqlCommand("SELECT * FROM tracks_new", connection);
+            var tracksAdapter = new MySqlDataAdapter(tracksCommand);
+            var tracksDatatable = new DataTable();
+            tracksAdapter.Fill(tracksDatatable);
+            foreach (DataRow dr in tracksDatatable.Rows)
             {
                 string mbgid = "";
                 if (!(dr["mbgid"] is DBNull))
@@ -307,11 +308,11 @@ namespace Plugin
             }
 
             // *** Add Tags ***
-            MySqlCommand TagsCommand = new MySqlCommand("SELECT * FROM tags_new", connection);
-            MySqlDataAdapter TagsAdapter = new MySqlDataAdapter(TagsCommand);
-            DataTable TagsDatatable = new DataTable();
-            TagsAdapter.Fill(TagsDatatable);
-            foreach (DataRow dr in TagsDatatable.Rows)
+            var tagsCommand = new MySqlCommand("SELECT * FROM tags_new", connection);
+            var tagsAdapter = new MySqlDataAdapter(tagsCommand);
+            var tagsDatatable = new DataTable();
+            tagsAdapter.Fill(tagsDatatable);
+            foreach (DataRow dr in tagsDatatable.Rows)
             {
                 new Tag(Tracks[(int)dr["trackID"]], (string)dr["tagIdstr"], (double)dr["weight"]);
             }
@@ -320,7 +321,7 @@ namespace Plugin
             Log.Instance.Log("Albums  : " + Albums.Count, Level.Trace);
             Log.Instance.Log("Tracks  : " + Tracks.Count, Level.Trace);
 
-            scheduler.Elapsed += new ElapsedEventHandler(mainScheduler);
+            scheduler.Elapsed += mainScheduler;
 
             base.Init();
         }
@@ -377,7 +378,7 @@ namespace Plugin
 
         private void mainScheduler(object sender, ElapsedEventArgs e)
         {
-            TcpClient telnet = new TcpClient();
+            var telnet = new TcpClient();
             telnet.Connect(liquidsoapServer);
 
             TextReader reader = new StreamReader(telnet.GetStream());
@@ -387,7 +388,7 @@ namespace Plugin
             writer.WriteLine("request.queue");
             string response = reader.ReadLine();
             while (reader.ReadLine() != "END") ;
-            if (response.Split(new char[] { ' ' }).Length < 5)
+            if (response.Split(new[] { ' ' }).Length < 5)
             {
                 // if there are less than 5 songs in the queue (current + 4)
                 // TODO: Alternatives to just random Songs
@@ -403,8 +404,8 @@ namespace Plugin
 
             writer.WriteLine("on_air");
             response = reader.ReadLine();
-            int currentSong = int.Parse(response.Split(new char[] { ' ' })[0]);
-            while (reader.ReadLine() != "END") ;
+            int currentSong = int.Parse(response.Split(new[] { ' ' })[0]);
+            while (reader.ReadLine() != "END") { }
 
             if (currentSong != lastLiqID)
             {

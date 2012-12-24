@@ -26,6 +26,7 @@ using apophis.SharpIRC;
 using apophis.SharpIRC.IrcFeatures;
 using Huffelpuff.AccessControl;
 using Huffelpuff.Plugins;
+using Huffelpuff.Properties;
 using Huffelpuff.Utils;
 
 namespace Huffelpuff
@@ -140,9 +141,9 @@ namespace Huffelpuff
 
         void OnBotConnected(object sender, EventArgs e)
         {
-            if (PersistentMemory.Instance.GetValue("nickserv") != null)
+            if (!Settings.Default.NickServPassword.IsNullOrEmpty())
             {
-                SendMessage(SendType.Message, "nickserv", "identify {0}".Fill(PersistentMemory.Instance.GetValue("nickserv")), Priority.Critical);
+                SendMessage(SendType.Message, "nickserv", "identify {0}".Fill(Settings.Default.NickServPassword), Priority.Critical);
             }
         }
 
@@ -291,8 +292,8 @@ namespace Huffelpuff
             {
                 if (!plugin.Active)
                 {
-                    PersistentMemory.Instance.SetValue("plugin", plugin.FullName);
-                    PersistentMemory.Instance.Flush();
+                    Settings.Default.Plugins.Add(plugin.FullName);
+                    Settings.Default.Save();
                     plugin.Activate();
                 }
                 calledPlugins.Add(plugin);
@@ -316,8 +317,8 @@ namespace Huffelpuff
             {
                 if (plugin.Active)
                 {
-                    PersistentMemory.Instance.RemoveValue("plugin", plugin.FullName);
-                    PersistentMemory.Instance.Flush();
+                    Settings.Default.Plugins.Remove(plugin.FullName);
+                    Settings.Default.Save();
                     plugin.Deactivate();
 
                     var plug = plugin;
@@ -355,17 +356,16 @@ namespace Huffelpuff
             foreach (var channel in e.Data.MessageArray.Skip(1).Where(channel => !channel.IsNullOrEmpty()))
             {
                 RfcJoin(channel);
-                PersistentMemory.Instance.SetValue("channel", channel);
+                Settings.Default.Channels.Add(channel);
             }
-
-            PersistentMemory.Instance.Flush();
+            Settings.Default.Save();
         }
 
         private void ListChannelCommand(object sender, IrcEventArgs e)
         {
             var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
 
-            foreach (var line in PersistentMemory.Instance.GetValues(Channelconst).ToLines(350, ", ", "I am in the following channels: ", " END."))
+            foreach (var line in Settings.Default.Channels.Cast<string>().ToLines(350, ", ", "I am in the following channels: ", " END."))
             {
                 SendMessage(SendType.Message, sendto, line);
             }
@@ -383,8 +383,11 @@ namespace Huffelpuff
 
             RfcPart(e.Data.Message.Substring(6));
 
-            PersistentMemory.Instance.RemoveValue("channel", e.Data.MessageArray[1]);
-            PersistentMemory.Instance.Flush();
+            if (Settings.Default.Channels.Contains(e.Data.MessageArray[1]))
+            {
+                Settings.Default.Channels.Remove(e.Data.MessageArray[1]);
+                Settings.Default.Save();
+            }
         }
 
         private void QuitCommand(object sender, IrcEventArgs e)
@@ -513,19 +516,19 @@ namespace Huffelpuff
 
             SetupOnce();
 
-            if (PersistentMemory.Instance.GetValue("ProxyServer") != null)
+            if (!Settings.Default.ProxyServer.IsNullOrEmpty())
             {
-                Log.Instance.Log("Using Proxy Server: " + PersistentMemory.Instance.GetValue("ProxyServer"), Level.Trace);
+                Log.Instance.Log("Using Proxy Server: " + Settings.Default.ProxyServer, Level.Trace);
                 ProxyType = apophis.SharpIRC.IrcConnection.ProxyType.Socks5;
-                ProxyHost = PersistentMemory.Instance.GetValue("ProxyServer").Split(new[] { ':' })[0];
-                ProxyPort = int.Parse(PersistentMemory.Instance.GetValue("ProxyServer").Split(new[] { ':' })[1]);
-                ProxyUsername = PersistentMemory.Instance.GetValue("ProxyUser");
-                ProxyPassword = PersistentMemory.Instance.GetValue("ProxyPass");
+                ProxyHost = Settings.Default.ProxyServer;
+                ProxyPort = Settings.Default.ProxyPort;
+                ProxyUsername = Settings.Default.ProxyUser;
+                ProxyPassword = Settings.Default.ProxyPass;
             }
 
             // the server we want to connect to
-            string[] serverlist = PersistentMemory.Instance.GetValuesOrTodo("ServerHost").ToArray();
-            int port = int.Parse(PersistentMemory.Instance.GetValueOrTodo("ServerPort"));
+            string[] serverlist = Settings.Default.Servers.Cast<string>().ToArray();
+            int port = Settings.Default.Port;
             try
             {
                 // here we try to connect to the server and exceptions get handled
@@ -543,10 +546,10 @@ namespace Huffelpuff
             try
             {
                 // here we logon and register our nickname and so on
-                Login(PersistentMemory.Instance.GetValueOrTodo("nick"), PersistentMemory.Instance.GetValueOrTodo("realname"), 4, PersistentMemory.Instance.GetValueOrTodo("username"), PersistentMemory.Instance.GetValue("serverpass"));
+                Login(Settings.Default.Nick, Settings.Default.Realname, 4, Settings.Default.Username, Settings.Default.ServerPass);
 
                 // join the channels
-                foreach (var channel in PersistentMemory.Instance.GetValues(Channelconst))
+                foreach (var channel in Settings.Default.Channels)
                 {
                     RfcJoin(channel);
                 }

@@ -26,7 +26,9 @@ using apophis.SharpIRC;
 using apophis.SharpIRC.IrcFeatures;
 using Huffelpuff;
 using Huffelpuff.Plugins;
+using Huffelpuff.Properties;
 using Huffelpuff.Utils;
+using Plugin.Properties;
 using TweetSharp;
 
 namespace Plugin
@@ -39,13 +41,11 @@ namespace Plugin
         public TwitterPlugin(IrcBot botInstance) : base(botInstance) { }
 
         private readonly Dictionary<string, TwitterWrapper> twitterAccounts = new Dictionary<string, TwitterWrapper>();
-        internal const string TwitterAccountConst = "twitter_account";
-        private const string TweetFormatConst = "twitter_format";
 
         public override void Init()
         {
 
-            foreach (var twitterInfo in PersistentMemory.Instance.GetValues(TwitterAccountConst).Select(a => new TwitterWrapper(a)).Where(twitterInfo => twitterInfo.FriendlyName != PersistentMemory.TodoValue))
+            foreach (var twitterInfo in TwitterSettings.Default.TwitterAccounts.Cast<string>().Select(a => new TwitterWrapper(a)))
             {
                 twitterAccounts.Add(twitterInfo.FriendlyName, twitterInfo);
                 tocolorize.Add(new ColorText { Text = twitterInfo.User, Color = (int)IrcColors.Blue });
@@ -64,7 +64,7 @@ namespace Plugin
                 {
                     foreach (var mention in twitteraccount.Value.GetNewMentions())
                     {
-                        foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+                        foreach (var channel in Settings.Default.Channels)
                         {
                             SendFormattedItem(twitteraccount.Value, mention, channel);
                         }
@@ -72,11 +72,11 @@ namespace Plugin
 
                 }
 
-                foreach (var tag in PersistentMemory.Instance.GetValues("twitter_search_tag"))
+                foreach (var tag in TwitterSettings.Default.TwitterSearchTags)
                 {
                     foreach (var tagStatus in TwitterWrapper.SearchNewTag(tag))
                     {
-                        foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+                        foreach (var channel in Settings.Default.Channels)
                         {
                             BotMethods.SendMessage(SendType.Message, channel, "Tag: {0} (by {1})".Fill(tagStatus.Text, tagStatus.FromUserScreenName));
                         }
@@ -85,7 +85,7 @@ namespace Plugin
             }
             finally
             {
-                PersistentMemory.Instance.Flush();
+                TwitterSettings.Default.Save();
             }
         }
 
@@ -179,17 +179,16 @@ namespace Plugin
             string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray[0].ToLower() == "!+tag")
             {
-                PersistentMemory.Instance.SetValue("twitter_search_tag", e.Data.MessageArray[1]);
+                TwitterSettings.Default.TwitterSearchTags.Add(e.Data.MessageArray[1]);
                 BotMethods.SendMessage(SendType.Message, sendto, "Automatic Search activated: " + "http://search.twitter.com/search?q=" + HttpUtility.UrlEncode(e.Data.MessageArray[1]));
             }
             if (e.Data.MessageArray[0].ToLower() == "!-tag")
             {
-                PersistentMemory.Instance.RemoveValue("twitter_search_tag", e.Data.MessageArray[1]);
-
+                TwitterSettings.Default.TwitterSearchTags.Remove(e.Data.MessageArray[1]);
             }
             if (e.Data.MessageArray[0].ToLower() == "!tags")
             {
-                foreach (string line in PersistentMemory.Instance.GetValues("twitter_search_tag").ToLines(350))
+                foreach (string line in TwitterSettings.Default.TwitterSearchTags.Cast<string>().ToLines(350))
                 {
                     BotMethods.SendMessage(SendType.Message, sendto, line);
                 }
@@ -361,7 +360,7 @@ namespace Plugin
                         BotMethods.SendMessage(SendType.Message, sendto, "Tweet '{0}' already exists.".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName));
                         break;
                     }
-                    PersistentMemory.Instance.SetValue(TwitterAccountConst, friendlyname);
+                    TwitterSettings.Default.TwitterAccounts.Add(friendlyname);
                     twitterAccounts.Add(friendlyname, new TwitterWrapper(friendlyname, e.Data.MessageArray[1], e.Data.MessageArray[2]));
                     BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully added. Please go to {1} validate account and activate account by !tweet-pin {0} <pin>".Fill(friendlyname, twitterAccounts[friendlyname].AuthenticationUrl));
                     break;
@@ -436,7 +435,11 @@ namespace Plugin
         {
             get
             {
-                messageFormat = messageFormat ?? PersistentMemory.Instance.GetValue(TweetFormatConst) ?? sourceMessageFormat;
+                messageFormat = messageFormat ?? TwitterSettings.Default.TweetFormat;
+                if (messageFormat.IsNullOrEmpty())
+                {
+                    messageFormat = sourceMessageFormat;
+                }
                 return messageFormat;
             }
         }
@@ -474,15 +477,7 @@ namespace Plugin
             }
             else
             {
-                messageFormat = null;
-                if (e.Data.MessageArray[1] == "RESET")
-                {
-                    PersistentMemory.Instance.RemoveKey(TweetFormatConst);
-                }
-                else
-                {
-                    PersistentMemory.Instance.ReplaceValue(TweetFormatConst, e.Data.Message.Substring(e.Data.MessageArray[0].Length + 1));
-                }
+                TwitterSettings.Default.TweetFormat = e.Data.MessageArray[1] == "RESET" ? null : e.Data.Message.Substring(e.Data.MessageArray[0].Length + 1);
             }
         }
     }

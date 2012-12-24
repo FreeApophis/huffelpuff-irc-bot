@@ -1,4 +1,5 @@
 ﻿using System;
+using Huffelpuff.Properties;
 
 namespace Huffelpuff.Utils
 {
@@ -21,7 +22,7 @@ namespace Huffelpuff.Utils
                 }
                 else
                 {
-                    switch (PersistentMemory.Instance.GetValue("logger"))
+                    switch (Settings.Default.Logger)
                     {
                         case "console":
                             instance = new ConsoleLogger();
@@ -34,17 +35,11 @@ namespace Huffelpuff.Utils
                             break;
                     }
                 }
+
                 Level logLevel;
-                instance.MinLogLevel = Enum.TryParse(PersistentMemory.Instance.GetValue("minloglevel"), out logLevel)
-                                           ? logLevel
-                                           : Level.Warning;
-                bool verbosity;
-                instance.Verbose = bool.TryParse(PersistentMemory.Instance.GetValue("verbosity"), out verbosity)
-                                           ? verbosity
-                                           : false;
-
+                instance.MinLogLevel = Enum.TryParse(Settings.Default.LogLevel, out logLevel) ? logLevel : Level.Warning;
+                instance.Verbose = Settings.Default.Verbosity;
                 return instance;
-
             }
         }
     }

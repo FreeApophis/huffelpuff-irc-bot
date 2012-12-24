@@ -68,6 +68,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\TwitterSettings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>TwitterSettings.settings</DependentUpon>
+    </Compile>
     <Compile Include="UrlShortener.cs" />
     <Compile Include="TwitterWrapper.cs" />
     <Compile Include="TwitterPlugin.cs" />
@@ -82,6 +87,13 @@
       <Project>{56D2D51C-27B4-4AE0-9D8A-CFFD02471487}</Project>
       <Name>SharpIRC</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\TwitterSettings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>TwitterSettings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy .\TwitterPlugin.* ..\..\Huffelpuff\bin\plugins /y

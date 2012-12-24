@@ -23,6 +23,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using apophis.SharpIRC;
 using apophis.SharpIRC.IrcClient;
+using Huffelpuff.Properties;
 using Huffelpuff.Utils;
 
 namespace Huffelpuff.AccessControl
@@ -73,7 +74,7 @@ namespace Huffelpuff.AccessControl
             this.bot = bot;
         }
 
-        private readonly string superUser = PersistentMemory.Instance.GetValueOrTodo("botmaster");
+        private readonly string superUser = Settings.Default.Botmaster;
 
         public void Init()
         {
@@ -91,7 +92,7 @@ namespace Huffelpuff.AccessControl
             bot.AddCommand(new Commandlet("!-user", "!-user <group> <user> removes the user <user> from the group <group>.", GroupHandler, this, CommandScope.Both, "group_remove_user"));
 
             // Get users and their accessstrings
-            foreach (var p in PersistentMemory.Instance.GetValues(AclNameSpace, "accesslist").Select(pair => pair.Split(new[] { ';' })))
+            foreach (var p in Settings.Default.AclEntries.Cast<string>().Select(pair => pair.Split(new[] { ';' })))
             {
                 if (!accessList.ContainsKey(p[0]))
                 {
@@ -101,7 +102,7 @@ namespace Huffelpuff.AccessControl
             }
 
             // Get Groups and Users
-            foreach (var p in PersistentMemory.Instance.GetValues(AclNameSpace, "group").Select(pair => pair.Split(new[] { ';' })))
+            foreach (var p in Settings.Default.AclGroups.Cast<string>().Select(pair => pair.Split(new[] { ';' })))
             {
                 if (!groups.ContainsKey(p[0]))
                 {
@@ -136,7 +137,7 @@ namespace Huffelpuff.AccessControl
                 }
             }
 
-            foreach (string channel in PersistentMemory.Instance.GetValues("channel"))
+            foreach (string channel in Settings.Default.Channels)
             {
                 var user = (NonRfcChannelUser)bot.GetChannelUser(channel, nick);
                 if (user == null) { continue; }
@@ -293,8 +294,13 @@ namespace Huffelpuff.AccessControl
             if (groups.ContainsKey(group))
             {
                 groups.Remove(group);
-                PersistentMemory.Instance.RemoveValueStartingWith(AclNameSpace, "group", group + ";");
-                PersistentMemory.Instance.Flush();
+
+                var toRemove = Settings.Default.AclGroups.Cast<string>().Where(s => s.StartsWith(group + ";")).ToArray();
+                foreach (var remove in toRemove)
+                {
+                    Settings.Default.AclGroups.Remove(remove);
+                }
+                Settings.Default.Save();
                 return true;
             }
             return false;
@@ -307,8 +313,8 @@ namespace Huffelpuff.AccessControl
                 if (!groups[group].Contains(id))
                 {
                     groups[group].Add(id);
-                    PersistentMemory.Instance.SetValue(AclNameSpace, "group", group + ";" + id);
-                    PersistentMemory.Instance.Flush();
+                    Settings.Default.AclGroups.Add(group + ";" + id);
+                    Settings.Default.Save();
                     return true;
                 }
             }
@@ -322,8 +328,7 @@ namespace Huffelpuff.AccessControl
                 if (groups[group].Contains(id))
                 {
                     groups[group].Remove(id);
-                    PersistentMemory.Instance.RemoveValue(AclNameSpace, "group", group + ";" + id);
-                    PersistentMemory.Instance.Flush();
+                    Settings.Default.AclGroups.Remove(group + ";" + id);
                     return true;
                 }
             }
@@ -452,8 +457,8 @@ namespace Huffelpuff.AccessControl
                     accessList.Add(identity, new List<string>());
                 }
                 accessList[identity].Add(accessString);
-                PersistentMemory.Instance.SetValue(AclNameSpace, "accesslist", identity + ";" + accessString);
-                PersistentMemory.Instance.Flush();
+                Settings.Default.AclEntries.Add(identity + ";" + accessString);
+                Settings.Default.Save();
                 return true;
             }
             return false;
@@ -464,8 +469,7 @@ namespace Huffelpuff.AccessControl
             if (accessList.ContainsKey(identity))
             {
                 accessList[identity].Remove(accessString);
-                PersistentMemory.Instance.RemoveValue(AclNameSpace, "accesslist", identity + ";" + accessString);
-                PersistentMemory.Instance.Flush();
+                Settings.Default.AclEntries.Remove(identity + ";" + accessString);
                 return true;
             }
             return false;

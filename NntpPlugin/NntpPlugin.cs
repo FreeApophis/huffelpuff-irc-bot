@@ -28,6 +28,7 @@ using Huffelpuff;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 using Nntp;
+using Plugin.Properties;
 
 namespace Plugin
 {
@@ -54,8 +55,8 @@ namespace Plugin
             interval = new Timer(30000);
             interval.Elapsed += IntervalElapsed;
 
-            filterGroups = PersistentMemory.Instance.GetValues("nntp", "GroupFilter");
-            filterWords = PersistentMemory.Instance.GetValues("nntp", "WordFilter");
+            filterGroups = NntpSettings.Default.FilteredGroups.Cast<string>().ToList();
+            filterWords = NntpSettings.Default.FilteredWords.Cast<string>().ToList();
             base.Init();
         }
 
@@ -69,7 +70,7 @@ namespace Plugin
             lockInterval = true;
             try
             {
-                nntp.ConnectServer(PersistentMemory.Instance.GetValueOrTodo("nntpServer"), int.Parse(PersistentMemory.Instance.GetValueOrTodo("nntpPort")));
+                nntp.ConnectServer(NntpSettings.Default.NntpServer, NntpSettings.Default.NntpPort);
                 var newMessages = new SortedDictionary<DateTime, KeyValuePair<Article, string>>();
 
                 foreach (Newsgroup ng in nntp.GetGroupList())
@@ -105,7 +106,7 @@ namespace Plugin
                     {
                         t = (DateTime.Now - kvp.Key);
                     }
-                    foreach (var channel in PersistentMemory.Instance.GetValues("nntpChannel"))
+                    foreach (var channel in NntpSettings.Default.NntpChannels)
                     {
                         BotMethods.SendMessage(SendType.Message, channel, "New FMS Posts will be reported: There are " + newMessages.Count + " Messages in the repository");
                         BotMethods.SendMessage(SendType.Message, channel, "Last Post on FMS was " + Math.Round(t.TotalMinutes) + " minutes ago.");
@@ -118,7 +119,7 @@ namespace Plugin
 
                 foreach (var m in newMessages)
                 {
-                    foreach (var channel in PersistentMemory.Instance.GetValues("nntpChannel"))
+                    foreach (var channel in NntpSettings.Default.NntpChannels)
                     {
                         var t = (DateTime.Now - m.Value.Key.Header.Date);
                         if (t >= new TimeSpan(4, 0, 0)) continue;

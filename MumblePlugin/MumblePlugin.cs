@@ -32,7 +32,8 @@
 using apophis.SharpIRC;
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Huffelpuff.Utils;
+using Huffelpuff.Properties;
+using Plugin.Properties;
 using Protocol.Mumble;
 
 namespace Plugin
@@ -53,7 +54,7 @@ namespace Plugin
         {
             TickInterval = 60;
 
-            client = new MumbleClient("huffelpuff", "talk.piratenpartei.ch", PersistentMemory.Instance.GetValue("nick") + "@IRC");
+            client = new MumbleClient("huffelpuff", "talk.piratenpartei.ch", Settings.Default.Nick + "@IRC");
             base.Init();
         }
 
@@ -72,7 +73,7 @@ namespace Plugin
 
         void MumbleConnected(object sender, MumblePacketEventArgs e)
         {
-            var channelName = PersistentMemory.Instance.GetValue("mumble-plugin", "mumble-channel");
+            var channelName = MumbleSettings.Default.MumbleChannel;
 
             if (channelName == null) { return; }
 
@@ -82,7 +83,7 @@ namespace Plugin
 
         void MumbleText(object sender, MumblePacketEventArgs e)
         {
-            foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
+            foreach (var channel in Settings.Default.Channels)
             {
                 var message = (TextMessage)e.Message;
                 var user = client.FindUser(message.actor);
@@ -95,14 +96,14 @@ namespace Plugin
 
         void BotMethods_OnChannelMessage(object sender, IrcEventArgs e)
         {
-            var channelName = PersistentMemory.Instance.GetValue("mumble-plugin", "mumble-channel");
+            var channelName = MumbleSettings.Default.MumbleChannel;
 
             if (channelName == null) { return; }
 
             var channel = client.FindChannel(channelName);
 
             if (channel == null) { return; }
-        
+
             client.SendTextMessageToChannel("" + e.Data.Nick + ": " + e.Data.Message, channel, false);
 
         }
