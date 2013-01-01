@@ -21,6 +21,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Huffelpuff.Utils;
+using Plugin.Database.Twitter;
+using Plugin.Properties;
 using TweetSharp;
 
 namespace Plugin
@@ -35,66 +37,52 @@ namespace Plugin
             ClientName = "Huffelpuff IRC Bot - Twitter Plugin",
             ClientUrl = "http://huffelpuff-irc-bot.origo.ethz.ch/",
             ClientVersion = "1.0",
-            ConsumerKey = "yRaZB2ljtZ1ldg84Uvu4Iw",
-            ConsumerSecret = "26SPIqzqcfQZPsgchKipqWLX3bCGu7vw0JaAUghuKs"
+            ConsumerKey = TwitterSettings.Default.TwitterConsumerKey,
+            ConsumerSecret = TwitterSettings.Default.TwitterConsumerSecret
         };
 
-        internal string Name { get; private set; }
-        private string NameSpace
-        {
-            get
-            {
-                return "twitteraccount_" + Name;
-            }
-        }
+        private TwitterAccount account;
 
-
-        private const string FriendlynameConst = "friendlyname";
-        private string friendlyName;
         internal string FriendlyName
         {
             get
             {
-                return friendlyName;
+                return account.FriendlyName;
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, FriendlynameConst, value);
-                friendlyName = value;
+                account.FriendlyName = value;
+                TwitterPlugin.TwitterData.SubmitChanges();
             }
         }
 
-        private const string UserConst = "user";
-        private string user;
         internal string User
         {
             get
             {
-                return user;
+                return account.UserName;
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, UserConst, value);
-                user = value;
+                account.FriendlyName = value;
+                TwitterPlugin.TwitterData.SubmitChanges();
             }
         }
 
-        private const string TokenConst = "token";
-        private string token;
         private string Token
         {
             get
             {
-                if (token == null)
+                if (account.Token == null)
                 {
                     CreateNewRequestToken();
                 }
-                return token;
+                return account.Token;
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, TokenConst, value);
-                token = value;
+                account.Token = value;
+                TwitterPlugin.TwitterData.SubmitChanges();
             }
         }
 
@@ -102,45 +90,41 @@ namespace Plugin
         {
             get
             {
-                if (tokenSecret == null)
+                if (account.TokenSecret == null)
                 {
                     CreateNewRequestToken();
                 }
-                return tokenSecret != null;
+                return account.TokenSecret != null;
             }
         }
 
-        private const string TokenSecretConst = "tokensecret";
-        private string tokenSecret;
         private string TokenSecret
         {
             get
             {
-                if (tokenSecret == null)
+                if (account.TokenSecret == null)
                 {
                     CreateNewRequestToken();
                 }
-                return tokenSecret;
+                return account.TokenSecret;
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, TokenSecretConst, value);
-                tokenSecret = value;
+                account.TokenSecret = value;
+                TwitterPlugin.TwitterData.SubmitChanges();
             }
         }
 
-        private const string Lastconst = "lastdate";
-        private DateTime last;
         internal DateTime Last
         {
             get
             {
-                return last;
+                return account.LastMessage.HasValue ? account.LastMessage.Value : DateTime.Now;
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, Lastconst, value.ToString());
-                last = value;
+                account.LastMessage = value;
+                TwitterPlugin.TwitterData.SubmitChanges();
             }
         }
 
@@ -148,28 +132,20 @@ namespace Plugin
 
         public static TwitterResponse LastResponse { get; private set; }
 
-        internal TwitterWrapper(string name)
+        internal TwitterWrapper(string friendlyName)
         {
-            Name = name;
-            friendlyName = PersistentMemory.Instance.GetValueOrTodo(NameSpace, FriendlynameConst);
-            user = PersistentMemory.Instance.GetValueOrTodo(NameSpace, UserConst);
-            token = PersistentMemory.Instance.GetValue(NameSpace, TokenConst);
-            tokenSecret = PersistentMemory.Instance.GetValue(NameSpace, TokenSecretConst);
-
-            string lastDateTimeString = PersistentMemory.Instance.GetValue(NameSpace, Lastconst);
-            last = (lastDateTimeString == null) ? DateTime.MinValue : DateTime.Parse(lastDateTimeString);
+            account = TwitterPlugin.TwitterData.TwitterAccounts.Where(a => a.FriendlyName == friendlyName).FirstOrDefault();
         }
 
-        internal TwitterWrapper(string name, string friendlyName, string user)
+        internal TwitterWrapper(string friendlyName, string user)
         {
-            this.friendlyName = friendlyName;
-            this.user = user;
-            last = DateTime.MinValue;
-            Name = name;
+            account = new TwitterAccount();
 
-            PersistentMemory.Instance.ReplaceValue(NameSpace, FriendlynameConst, friendlyName);
-            PersistentMemory.Instance.ReplaceValue(NameSpace, UserConst, user);
-            PersistentMemory.Instance.ReplaceValue(NameSpace, Lastconst, last.ToString());
+            TwitterPlugin.TwitterData.TwitterAccounts.InsertOnSubmit(account);
+
+            account.FriendlyName = friendlyName;
+            account.UserName = user;
+            account.LastMessage = DateTime.Now;
 
             CreateNewRequestToken();
         }
@@ -193,8 +169,6 @@ namespace Plugin
                 var accessToken = service.GetAccessToken(UnauthorizedToken, pin);
                 Token = accessToken.Token;
                 TokenSecret = accessToken.TokenSecret;
-
-                PersistentMemory.Instance.Flush();
 
                 return IsTweetAuthenticated;
             }
@@ -224,15 +198,15 @@ namespace Plugin
             TokenSecret = null;
             AuthenticationUrl = null;
             UnauthorizedToken = null;
-            PersistentMemory.Instance.Flush();
 
             CreateNewRequestToken();
         }
 
         internal void RemoveAccount()
         {
-            PersistentMemory.Instance.RemoveValue(TwitterPlugin.TwitterAccountConst, Name);
-            PersistentMemory.Instance.RemoveGroup(NameSpace);
+            TwitterPlugin.TwitterData.TwitterAccounts.DeleteOnSubmit(account);
+            TwitterPlugin.TwitterData.SubmitChanges();
+            account = null;
         }
 
 
@@ -253,11 +227,10 @@ namespace Plugin
                 return Enumerable.Empty<TwitterStatus>();
             }
 
-            var newMentions = mentions.Where(item => item.CreatedDate > last).OrderBy(item => item.CreatedDate).ToList();
+            var newMentions = mentions.Where(item => item.CreatedDate > Last).OrderBy(item => item.CreatedDate).ToList();
             if (newMentions.Count() > 0)
             {
-                last = newMentions.OrderByDescending(item => item.CreatedDate).Take(1).Single().CreatedDate;
-                PersistentMemory.Instance.ReplaceValue(NameSpace, Lastconst, last.ToString());
+                Last = newMentions.OrderByDescending(item => item.CreatedDate).Take(1).Single().CreatedDate;
             }
             return newMentions;
         }

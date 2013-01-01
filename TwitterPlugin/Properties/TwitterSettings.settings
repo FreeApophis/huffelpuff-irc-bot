@@ -2,14 +2,14 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Plugin.Properties" GeneratedClassName="TwitterSettings">
   <Profiles />
   <Settings>
-    <Setting Name="TwitterAccounts" Type="System.Collections.Specialized.StringCollection" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="TwitterSearchTags" Type="System.Collections.Specialized.StringCollection" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="TweetFormat" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TwitterConsumerKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">yRaZB2ljtZ1ldg84Uvu4Iw</Value>
+    </Setting>
+    <Setting Name="TwitterConsumerSecret" Type="System.String" Scope="User">
+      <Value Profile="(Default)">26SPIqzqcfQZPsgchKipqWLX3bCGu7vw0JaAUghuKs</Value>
     </Setting>
   </Settings>
 </SettingsFile>

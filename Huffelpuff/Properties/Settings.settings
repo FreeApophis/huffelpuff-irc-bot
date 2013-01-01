@@ -29,11 +29,8 @@
     <Setting Name="Realname" Type="System.String" Scope="User">
       <Value Profile="(Default)">IRC Bot</Value>
     </Setting>
-    <Setting Name="Servers" Type="System.Collections.Specialized.StringCollection" Scope="User">
-      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
-  &lt;string&gt;ch.pirateirc.net&lt;/string&gt;
-&lt;/ArrayOfString&gt;</Value>
+    <Setting Name="Server" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ch.pirateirc.net</Value>
     </Setting>
     <Setting Name="Port" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">6667</Value>
@@ -41,21 +38,8 @@
     <Setting Name="ServerPass" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Channels" Type="System.Collections.Specialized.StringCollection" Scope="User">
-      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
-  &lt;string&gt;#test&lt;/string&gt;
-  &lt;string&gt;#test2&lt;/string&gt;
-&lt;/ArrayOfString&gt;</Value>
-    </Setting>
-    <Setting Name="Plugins" Type="System.Collections.Specialized.StringCollection" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="Setting" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="Setting1" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+    <Setting Name="Channel" Type="System.String" Scope="User">
+      <Value Profile="(Default)">#test</Value>
     </Setting>
     <Setting Name="NickServPassword" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -73,12 +57,6 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ExternalIP" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="AclEntries" Type="System.Collections.Specialized.StringCollection" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="AclGroups" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

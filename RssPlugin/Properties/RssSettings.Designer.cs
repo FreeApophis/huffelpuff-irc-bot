@@ -13,11 +13,11 @@ namespace Plugin.Properties {
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "10.0.0.0")]
-    internal sealed partial class MumbleSettings : global::System.Configuration.ApplicationSettingsBase {
+    internal sealed partial class RssSettings : global::System.Configuration.ApplicationSettingsBase {
         
-        private static MumbleSettings defaultInstance = ((MumbleSettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new MumbleSettings())));
+        private static RssSettings defaultInstance = ((RssSettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new RssSettings())));
         
-        public static MumbleSettings Default {
+        public static RssSettings Default {
             get {
                 return defaultInstance;
             }
@@ -25,13 +25,13 @@ namespace Plugin.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("PPS Chat (Registered users may create channels in here)")]
-        public string MumbleChannel {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string RssFormat {
             get {
-                return ((string)(this["MumbleChannel"]));
+                return ((string)(this["RssFormat"]));
             }
             set {
-                this["MumbleChannel"] = value;
+                this["RssFormat"] = value;
             }
         }
     }

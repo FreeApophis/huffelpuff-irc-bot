@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="MumbleChannel" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">PPS Chat (Registered users may create channels in here)</Value>
     </Setting>
   </Settings>
 </SettingsFile>

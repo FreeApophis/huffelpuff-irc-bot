@@ -172,9 +172,12 @@ namespace Huffelpuff.Plugins
             }
 
 
-
-            foreach (var plugin in Settings.Default.Plugins.Cast<string>().SelectMany(pluginname => plugins.Where(p => pluginname == p.FullName)))
+            foreach (var pluginname in bot.MainBotData.Plugin.Select(pl => pl.PluginName))
             {
+                var plugin = plugins.Where(p => p.FullName == pluginname).FirstOrDefault();
+
+                if (plugin  != null)
+                {
                 try
                 {
                     plugin.Activate();
@@ -183,6 +186,7 @@ namespace Huffelpuff.Plugins
                 {
                     Log.Instance.Log(exception);
                     continue;
+                }
                 }
             }
         }

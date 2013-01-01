@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -26,7 +27,10 @@ using apophis.SharpIRC;
 using apophis.SharpIRC.IrcFeatures;
 using Huffelpuff;
 using Huffelpuff.Plugins;
+using Huffelpuff.Properties;
 using Huffelpuff.Utils;
+using Plugin.Database.Rss;
+using Plugin.Properties;
 
 
 namespace Plugin
@@ -41,15 +45,17 @@ namespace Plugin
 
         private readonly Dictionary<string, RssWrapper> rssFeeds = new Dictionary<string, RssWrapper>();
 
-        public const string RssFeedConst = "rss_feed";
-        const string RssFormatConst = "rss_format";
+        public static Main RssData { get; private set; }
+
 
         public override void Init()
         {
             // 90 seconds tick intervall
             TickInterval = 90;
 
-            foreach (var rssInfo in PersistentMemory.Instance.GetValues(RssFeedConst).Select(rss => new RssWrapper(rss)).Where(rssInfo => rssInfo.FriendlyName != PersistentMemory.TodoValue))
+            RssData = new Main(new SQLiteConnection("Data Source=Rss.s3db;FailIfMissing=true;"));
+
+            foreach (var rssInfo in RssData.RssAccounts.Select(rss => (new RssWrapper(rss.FriendlyName))))
             {
                 rssFeeds.Add(rssInfo.FriendlyName, rssInfo);
             }
@@ -58,30 +64,23 @@ namespace Plugin
 
         public override void OnTick()
         {
-            try
+            foreach (var rssFeed in rssFeeds.Values)
             {
-                foreach (var rssFeed in rssFeeds.Values)
+                try
                 {
-                    try
+                    foreach (var newItem in rssFeed.NewItems())
                     {
-                        foreach (var newItem in rssFeed.NewItems())
+                        foreach (var channel in BotMethods.JoinedChannels)
                         {
-                            foreach (var channel in PersistentMemory.Instance.GetValues(IrcBot.Channelconst))
-                            {
-                                SendFormattedItem(rssFeed, newItem, channel);
-                            }
+                            SendFormattedItem(rssFeed, newItem, channel);
                         }
                     }
-                    catch (WebException exception)
-                    {
-                        Log.Instance.Log(exception);
-                    }
-
                 }
-            }
-            finally
-            {
-                PersistentMemory.Instance.Flush();
+                catch (WebException exception)
+                {
+                    Log.Instance.Log(exception);
+                }
+
             }
         }
 
@@ -104,13 +103,11 @@ namespace Plugin
                 ));
         }
 
-        private string messageFormat;
         protected string MessageFormat
         {
             get
             {
-                messageFormat = messageFormat ?? PersistentMemory.Instance.GetValue(RssFormatConst) ?? sourceMessageFormat;
-                return messageFormat;
+                return RssSettings.Default.RssFormat.IsNullOrEmpty() ? sourceMessageFormat : RssSettings.Default.RssFormat;
             }
         }
 
@@ -168,14 +165,13 @@ namespace Plugin
             }
             else
             {
-                messageFormat = null;
                 if (e.Data.MessageArray[1] == "RESET")
                 {
-                    PersistentMemory.Instance.RemoveKey(RssFormatConst);
+                    RssSettings.Default.RssFormat = "";
                 }
                 else
                 {
-                    PersistentMemory.Instance.ReplaceValue(RssFormatConst, e.Data.Message.Substring(e.Data.MessageArray[0].Length + 1));
+                    RssSettings.Default.RssFormat = e.Data.Message.Substring(e.Data.MessageArray[0].Length + 1);
                 }
             }
         }
@@ -257,8 +253,7 @@ namespace Plugin
                     {
                         credentials = e.Data.MessageArray[3];
                     }
-                    PersistentMemory.Instance.SetValue(RssFeedConst, e.Data.MessageArray[1].ToLower());
-                    rssFeeds.Add(e.Data.MessageArray[1].ToLower(), new RssWrapper(e.Data.MessageArray[1].ToLower(), e.Data.MessageArray[1], e.Data.MessageArray[2], DateTime.Now, credentials));
+                    rssFeeds.Add(e.Data.MessageArray[1].ToLower(), new RssWrapper(e.Data.MessageArray[1].ToLower(), e.Data.MessageArray[2], DateTime.Now, credentials));
                     BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully added.".Fill(rssFeeds[e.Data.MessageArray[1].ToLower()].FriendlyName));
                     break;
                 case "!-rss":

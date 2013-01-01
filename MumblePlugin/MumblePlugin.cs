@@ -83,7 +83,7 @@ namespace Plugin
 
         void MumbleText(object sender, MumblePacketEventArgs e)
         {
-            foreach (var channel in Settings.Default.Channels)
+            foreach (var channel in BotMethods.JoinedChannels)
             {
                 var message = (TextMessage)e.Message;
                 var user = client.FindUser(message.actor);

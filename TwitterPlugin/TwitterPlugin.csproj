@@ -47,6 +47,12 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Reference Include="DbLinq">
+      <HintPath>..\Database\DbLinq.dll</HintPath>
+    </Reference>
+    <Reference Include="DbLinq.Sqlite">
+      <HintPath>..\Database\DbLinq.Sqlite.dll</HintPath>
+    </Reference>
     <Reference Include="Hammock.Mono">
       <HintPath>libs\Hammock.Mono.dll</HintPath>
     </Reference>
@@ -58,6 +64,10 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Data.SQLite">
+      <HintPath>..\Database\System.Data.SQLite.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq">
@@ -68,6 +78,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Database.cs">
+      <DependentUpon>Database.dbml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\TwitterSettings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -90,14 +103,31 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Build.bat" />
+    <None Include="Database.dbml">
+      <Generator>MSLinqToSQLGenerator</Generator>
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\TwitterSettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>TwitterSettings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="Twitter.s3db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Database.dbml.layout">
+      <DependentUpon>Database.dbml</DependentUpon>
+    </None>
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy .\TwitterPlugin.* ..\..\Huffelpuff\bin\plugins /y
-xcopy ..\libs\*.dll ..\..\Huffelpuff\bin /y</PostBuildEvent>
+xcopy ..\libs\*.dll ..\..\Huffelpuff\bin /y
+xcopy ..\*.s3db ..\..\Huffelpuff\bin /y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -109,5 +139,9 @@ xcopy ..\libs\*.dll ..\..\Huffelpuff\bin /y</PostBuildEvent>
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>cd $(ProjectDir)
+call Build.bat</PreBuildEvent>
   </PropertyGroup>
 </Project>

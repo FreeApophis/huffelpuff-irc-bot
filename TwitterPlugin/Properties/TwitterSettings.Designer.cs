@@ -25,28 +25,6 @@ namespace Plugin.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection TwitterAccounts {
-            get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["TwitterAccounts"]));
-            }
-            set {
-                this["TwitterAccounts"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection TwitterSearchTags {
-            get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["TwitterSearchTags"]));
-            }
-            set {
-                this["TwitterSearchTags"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string TweetFormat {
             get {
@@ -54,6 +32,30 @@ namespace Plugin.Properties {
             }
             set {
                 this["TweetFormat"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("yRaZB2ljtZ1ldg84Uvu4Iw")]
+        public string TwitterConsumerKey {
+            get {
+                return ((string)(this["TwitterConsumerKey"]));
+            }
+            set {
+                this["TwitterConsumerKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("26SPIqzqcfQZPsgchKipqWLX3bCGu7vw0JaAUghuKs")]
+        public string TwitterConsumerSecret {
+            get {
+                return ((string)(this["TwitterConsumerSecret"]));
+            }
+            set {
+                this["TwitterConsumerSecret"] = value;
             }
         }
     }

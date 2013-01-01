@@ -25,6 +25,7 @@ using apophis.SharpIRC;
 using apophis.SharpIRC.IrcClient;
 using Huffelpuff.Properties;
 using Huffelpuff.Utils;
+using Plugin.Database.Huffelpuff;
 
 namespace Huffelpuff.AccessControl
 {
@@ -42,7 +43,6 @@ namespace Huffelpuff.AccessControl
 
         // string should be invalid for nicknames, that way we can handle them in paralell without problems of group overtaking!
         private const string GroupPrefix = "#";
-        private const string AclNameSpace = "acl";
 
         /// <summary>
         /// For each Group it holds the list of users
@@ -92,28 +92,28 @@ namespace Huffelpuff.AccessControl
             bot.AddCommand(new Commandlet("!-user", "!-user <group> <user> removes the user <user> from the group <group>.", GroupHandler, this, CommandScope.Both, "group_remove_user"));
 
             // Get users and their accessstrings
-            foreach (var p in Settings.Default.AclEntries.Cast<string>().Select(pair => pair.Split(new[] { ';' })))
+
+            foreach (var entry in bot.MainBotData.AclEntries)
             {
-                if (!accessList.ContainsKey(p[0]))
+                if (!accessList.ContainsKey(entry.Identity))
                 {
-                    accessList.Add(p[0], new List<string>());
+                    accessList.Add(entry.Identity, new List<string>());
                 }
-                accessList[p[0]].Add(p[1]);
+                accessList[entry.Identity].Add(entry.AccessString);
             }
+
 
             // Get Groups and Users
-            foreach (var p in Settings.Default.AclGroups.Cast<string>().Select(pair => pair.Split(new[] { ';' })))
+            foreach (var aclGroup in bot.MainBotData.AclGroups)
             {
-                if (!groups.ContainsKey(p[0]))
+                if (!groups.ContainsKey(aclGroup.GroupName))
                 {
-                    groups.Add(p[0], new List<string>());
+                    groups.Add(aclGroup.GroupName, new List<string>());
                 }
-                groups[p[0]].Add(p[1]);
+                groups[aclGroup.GroupName].Add(aclGroup.GroupID);
             }
-
-
-
         }
+
 
         private IEnumerable<string> GetAllGroups(string nick)
         {
@@ -137,7 +137,7 @@ namespace Huffelpuff.AccessControl
                 }
             }
 
-            foreach (string channel in Settings.Default.Channels)
+            foreach (string channel in bot.MainBotData.Channels.Select(c => c.ChannelName))
             {
                 var user = (NonRfcChannelUser)bot.GetChannelUser(channel, nick);
                 if (user == null) { continue; }
@@ -295,12 +295,9 @@ namespace Huffelpuff.AccessControl
             {
                 groups.Remove(group);
 
-                var toRemove = Settings.Default.AclGroups.Cast<string>().Where(s => s.StartsWith(group + ";")).ToArray();
-                foreach (var remove in toRemove)
-                {
-                    Settings.Default.AclGroups.Remove(remove);
-                }
-                Settings.Default.Save();
+                var toRemove = bot.MainBotData.AclGroups.Where(g => g.GroupName == group).ToArray();
+                bot.MainBotData.AclGroups.DeleteAllOnSubmit(toRemove);
+                bot.MainBotData.SubmitChanges();
                 return true;
             }
             return false;
@@ -313,8 +310,11 @@ namespace Huffelpuff.AccessControl
                 if (!groups[group].Contains(id))
                 {
                     groups[group].Add(id);
-                    Settings.Default.AclGroups.Add(group + ";" + id);
-                    Settings.Default.Save();
+
+                    var aclGroup = new AclGroup { GroupID = id, GroupName = group };
+                    bot.MainBotData.AclGroups.InsertOnSubmit(aclGroup);
+                    bot.MainBotData.SubmitChanges();
+
                     return true;
                 }
             }
@@ -328,7 +328,11 @@ namespace Huffelpuff.AccessControl
                 if (groups[group].Contains(id))
                 {
                     groups[group].Remove(id);
-                    Settings.Default.AclGroups.Remove(group + ";" + id);
+
+                    var toRemove = bot.MainBotData.AclGroups.Where(g => g.GroupName == group && g.GroupID == id).ToArray();
+                    bot.MainBotData.AclGroups.DeleteAllOnSubmit(toRemove);
+                    bot.MainBotData.SubmitChanges();
+
                     return true;
                 }
             }
@@ -457,8 +461,11 @@ namespace Huffelpuff.AccessControl
                     accessList.Add(identity, new List<string>());
                 }
                 accessList[identity].Add(accessString);
-                Settings.Default.AclEntries.Add(identity + ";" + accessString);
-                Settings.Default.Save();
+
+                var aclEntry = new AclEntry { AccessString = accessString, Identity = identity };
+                bot.MainBotData.AclEntries.InsertOnSubmit(aclEntry);
+                bot.MainBotData.SubmitChanges();
+
                 return true;
             }
             return false;
@@ -469,7 +476,11 @@ namespace Huffelpuff.AccessControl
             if (accessList.ContainsKey(identity))
             {
                 accessList[identity].Remove(accessString);
-                Settings.Default.AclEntries.Remove(identity + ";" + accessString);
+
+                var toRemove = bot.MainBotData.AclEntries.Where(e => e.Identity == identity && e.AccessString == accessString).ToArray();
+                bot.MainBotData.AclEntries.DeleteAllOnSubmit(toRemove);
+                bot.MainBotData.SubmitChanges();
+
                 return true;
             }
             return false;

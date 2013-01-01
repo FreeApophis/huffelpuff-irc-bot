@@ -19,12 +19,13 @@
  */
 
 using System;
+using System.Data.SQLite;
 using System.Linq;
 using apophis.SharpIRC;
 using Huffelpuff;
-using Huffelpuff.Database;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
+using Plugin.Database.Factoid;
 
 namespace Plugin
 {
@@ -34,6 +35,15 @@ namespace Plugin
     public class FactoidPlugin : AbstractPlugin
     {
         public FactoidPlugin(IrcBot botInstance) : base(botInstance) { }
+
+        private Main factoidData;
+
+        public override void Init()
+        {
+            factoidData = new Main(new SQLiteConnection("Data Source=Factoid.s3db;FailIfMissing=true;"));
+
+            base.Init();
+        }
 
         public override void Activate()
         {
@@ -71,27 +81,22 @@ namespace Plugin
 
                 if (e.Data.MessageArray.Length <= 0 || !e.Data.MessageArray[0].StartsWith("!")) return;
 
-                var factKey = DatabaseCommon.Db.FactKeys.Where(facts => facts.Key == e.Data.MessageArray[0].Substring(1)).SingleOrDefault();
+                var fact = factoidData.Facts.Where(facts => facts.FactKey == e.Data.MessageArray[0].Substring(1)).SingleOrDefault();
 
-                if (factKey != null)
+                if (fact != null)
                 {
-                    factKey.HitCount++;
-                    var factValue =
-                        DatabaseCommon.Db.FactValues.Where(facts => facts.FactKeyID == factKey.ID).SingleOrDefault();
-                    if (factValue != null)
+                    fact.HitCount++;
+                    var answer = fact.FactValue;
+                    var count = 0;
+                    foreach (var parameter in e.Data.MessageArray.Skip(1))
                     {
-                        var answer = factValue.Value;
-                        var count = 0;
-                        foreach (var parameter in e.Data.MessageArray.Skip(1))
-                        {
-                            count++;
-                            answer = answer.Replace("%" + count, parameter);
-                        }
-                        BotMethods.SendMessage(SendType.Message, sendto, answer);
-
+                        count++;
+                        answer = answer.Replace("%" + count, parameter);
                     }
+                    BotMethods.SendMessage(SendType.Message, sendto, answer);
+
                 }
-                DatabaseCommon.Db.SubmitChanges();
+                factoidData.SubmitChanges();
             }
             catch (Exception exception)
             {
@@ -103,12 +108,12 @@ namespace Plugin
         {
             var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
 
-            if (DatabaseCommon.Db.FactKeys.Count() == 0)
+            if (factoidData.Facts.Count() == 0)
             {
                 BotMethods.SendMessage(SendType.Message, sendto, "There are no facts yet, add them with !+fact");
                 return;
             }
-            foreach (var line in DatabaseCommon.Db.FactKeys.Select(fact => fact.Key).ToLines(350, ", ", "All Facts: ", ""))
+            foreach (var line in factoidData.Facts.Select(fact => fact.FactKey).ToLines(350, ", ", "All Facts: ", ""))
             {
                 BotMethods.SendMessage(SendType.Message, sendto, line);
             }
@@ -124,19 +129,15 @@ namespace Plugin
                 return;
             }
 
-            if (DatabaseCommon.Db.FactKeys.Where(facts => facts.Key == e.Data.MessageArray[1]).SingleOrDefault() == null)
+            if (factoidData.Facts.Where(facts => facts.FactKey == e.Data.MessageArray[1]).SingleOrDefault() == null)
             {
-                var factKey = new FactKey { Key = e.Data.MessageArray[1] };
-                DatabaseCommon.Db.FactKeys.InsertOnSubmit(factKey);
-                DatabaseCommon.Db.SubmitChanges();
-
                 var message = e.Data.Message.Substring(e.Data.MessageArray[0].Length + e.Data.MessageArray[1].Length + 2);
-                var factValue = new FactValue { FactKeyID = factKey.ID, IrcUserID = 0, Value = message };
+                var fact = new Fact { FactKey = e.Data.MessageArray[1], FactValue = message };
 
-                DatabaseCommon.Db.FactValues.InsertOnSubmit(factValue);
-                DatabaseCommon.Db.SubmitChanges();
+                factoidData.Facts.InsertOnSubmit(fact);
+                factoidData.SubmitChanges();
 
-                BotMethods.SendMessage(SendType.Message, sendto, "New Fact '" + factKey.Key + "' learned. Activate it with !" + factKey.Key + ".");
+                BotMethods.SendMessage(SendType.Message, sendto, "New Fact '" + fact.FactKey + "' learned. Activate it with !" + fact.FactKey + ".");
             }
             else
             {
@@ -154,19 +155,14 @@ namespace Plugin
                 BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments for 'remove'! Try '!help !-fact'.");
                 return;
             }
-            var factKey = DatabaseCommon.Db.FactKeys.Where(facts => facts.Key == e.Data.MessageArray[1]).SingleOrDefault();
-            if (factKey != null)
+            var fact = factoidData.Facts.Where(f => f.FactKey == e.Data.MessageArray[1]).SingleOrDefault();
+            if (fact != null)
             {
-                var factValue = DatabaseCommon.Db.FactValues.Where(facts => facts.FactKeyID == factKey.ID).SingleOrDefault();
+                factoidData.Facts.DeleteOnSubmit(fact);
 
-                if (factValue != null)
-                {
-                    DatabaseCommon.Db.FactValues.DeleteOnSubmit(factValue);
-                }
+                BotMethods.SendMessage(SendType.Message, sendto, "I forgot Fact '" + fact.FactKey + "'.");
 
-                DatabaseCommon.Db.FactKeys.DeleteOnSubmit(factKey);
-                BotMethods.SendMessage(SendType.Message, sendto, "I forgot Fact '" + factKey.Key + "'.");
-                DatabaseCommon.Db.SubmitChanges();
+                factoidData.SubmitChanges();
             }
             else
             {

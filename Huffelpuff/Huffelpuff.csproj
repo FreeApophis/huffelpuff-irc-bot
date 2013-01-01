@@ -91,15 +91,12 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Reference Include="DbLinq">
-      <HintPath>lib\DbLinq.dll</HintPath>
+      <HintPath>..\Database\DbLinq.dll</HintPath>
     </Reference>
     <Reference Include="DbLinq.Sqlite">
-      <HintPath>lib\DbLinq.Sqlite.dll</HintPath>
+      <HintPath>..\Database\DbLinq.Sqlite.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.JScript" />
-    <Reference Include="Mono.Data.Sqlite">
-      <HintPath>lib\Mono.Data.Sqlite.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core">
@@ -109,11 +106,9 @@
     <Reference Include="System.Data.DataSetExtensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Data.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Data.SQLite">
-      <HintPath>lib\System.Data.SQLite.DLL</HintPath>
+      <HintPath>..\Database\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Security" />
@@ -134,44 +129,12 @@
     <Compile Include="AccessControl\NickServIdentifyRequest.cs" />
     <Compile Include="AccessControl\PasswordIdentify.cs" />
     <Compile Include="Commandlet.cs" />
-    <Compile Include="Database\Database.cs" />
-    <Compile Include="Database\DatabaseCommon.cs" />
-    <Compile Include="Database\DatabaseExtensions.cs" />
-    <Compile Include="Database\Setting.cs" />
+    <Compile Include="Database.cs">
+      <DependentUpon>Database.dbml</DependentUpon>
+    </Compile>
     <Compile Include="HuffelpuffServiceInstaller.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Mono.Nat\AbstractNatDevice.cs" />
-    <Compile Include="Mono.Nat\AsyncResults\AsyncResult.cs" />
-    <Compile Include="Mono.Nat\Enums\MapState.cs" />
-    <Compile Include="Mono.Nat\Enums\ProtocolType.cs" />
-    <Compile Include="Mono.Nat\EventArgs\DeviceEventArgs.cs" />
-    <Compile Include="Mono.Nat\Exceptions\MappingException.cs" />
-    <Compile Include="Mono.Nat\INatDevice.cs" />
-    <Compile Include="Mono.Nat\ISearcher.cs" />
-    <Compile Include="Mono.Nat\Mapping.cs" />
-    <Compile Include="Mono.Nat\NatUtility.cs" />
-    <Compile Include="Mono.Nat\PmpSearcher.cs" />
-    <Compile Include="Mono.Nat\Pmp\AsyncResults\PortMapAsyncResult.cs" />
-    <Compile Include="Mono.Nat\Pmp\PmpConstants.cs" />
-    <Compile Include="Mono.Nat\Pmp\PmpNatDevice.cs" />
-    <Compile Include="Mono.Nat\UpnpSearcher.cs" />
-    <Compile Include="Mono.Nat\Upnp\AsyncResults\GetAllMappingsAsyncResult.cs" />
-    <Compile Include="Mono.Nat\Upnp\AsyncResults\PortMapAsyncResult.cs" />
-    <Compile Include="Mono.Nat\Upnp\Messages\DiscoverDeviceMessage.cs" />
-    <Compile Include="Mono.Nat\Upnp\Messages\ErrorMessage.cs" />
-    <Compile Include="Mono.Nat\Upnp\Messages\GetServicesMessage.cs" />
-    <Compile Include="Mono.Nat\Upnp\Messages\Requests\CreatePortMappingMessage.cs" />
-    <Compile Include="Mono.Nat\Upnp\Messages\Requests\DeletePortMappingMessage.cs" />
-    <Compile Include="Mono.Nat\Upnp\Messages\Requests\GetExternalIPAddressMessage.cs" />
-    <Compile Include="Mono.Nat\Upnp\Messages\Requests\GetGenericPortMappingEntry.cs" />
-    <Compile Include="Mono.Nat\Upnp\Messages\Requests\GetSpecificPortMappingEntryMessage.cs" />
-    <Compile Include="Mono.Nat\Upnp\Messages\Responses\CreatePortMappingResponseMessage.cs" />
-    <Compile Include="Mono.Nat\Upnp\Messages\Responses\DeletePortMappingResponseMessage.cs" />
-    <Compile Include="Mono.Nat\Upnp\Messages\Responses\GetExternalIPAddressResponseMessage.cs" />
-    <Compile Include="Mono.Nat\Upnp\Messages\Responses\GetGenericPortMappingEntryResponseMessage.cs" />
-    <Compile Include="Mono.Nat\Upnp\Messages\UpnpMessage.cs" />
-    <Compile Include="Mono.Nat\Upnp\UpnpNatDevice.cs" />
     <Compile Include="Plugins\BotPluginManager.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="IrcBot.cs" />
@@ -200,15 +163,6 @@
     </Compile>
     <Compile Include="SettingCommands.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="SocksProxy\AuthMethod.cs" />
-    <Compile Include="SocksProxy\AuthNone.cs" />
-    <Compile Include="SocksProxy\AuthUserPass.cs" />
-    <Compile Include="SocksProxy\IAsyncProxyResult.cs" />
-    <Compile Include="SocksProxy\ProxyException.cs" />
-    <Compile Include="SocksProxy\ProxySocket.cs" />
-    <Compile Include="SocksProxy\Socks4Handler.cs" />
-    <Compile Include="SocksProxy\Socks5Handler.cs" />
-    <Compile Include="SocksProxy\SocksHandler.cs" />
     <Compile Include="Utils\ConsoleLogger.cs" />
     <Compile Include="Utils\Dereferencer.cs" />
     <Compile Include="Utils\Extensions.cs" />
@@ -224,10 +178,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Build.bat" />
+    <None Include="Database.dbml">
+      <Generator>MSLinqToSQLGenerator</Generator>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Huffelpuff.s3db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="InstallService.bat" />
     <None Include="Properties\Settings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="UninstallService.bat" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
@@ -252,6 +216,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Database.dbml.layout">
+      <DependentUpon>Database.dbml</DependentUpon>
+    </None>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -263,7 +230,16 @@
       <Name>SharpIRC</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
+  </ItemGroup>
   <PropertyGroup>
-    <PreBuildEvent>xcopy ..\huffelpuff.db . /y</PreBuildEvent>
+    <PreBuildEvent>cd $(ProjectDir)
+call Build.bat</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>xcopy ..\..\Database\sqlite3.dll . /y
+xcopy ..\..\Database\sqlite-3.6.22.so . /y
+</PostBuildEvent>
   </PropertyGroup>
 </Project>

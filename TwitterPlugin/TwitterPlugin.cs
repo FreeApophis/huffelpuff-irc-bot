@@ -18,6 +18,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -26,8 +27,8 @@ using apophis.SharpIRC;
 using apophis.SharpIRC.IrcFeatures;
 using Huffelpuff;
 using Huffelpuff.Plugins;
-using Huffelpuff.Properties;
 using Huffelpuff.Utils;
+using Plugin.Database.Twitter;
 using Plugin.Properties;
 using TweetSharp;
 
@@ -42,10 +43,13 @@ namespace Plugin
 
         private readonly Dictionary<string, TwitterWrapper> twitterAccounts = new Dictionary<string, TwitterWrapper>();
 
+        public static Main TwitterData { get; private set; }
+
         public override void Init()
         {
+            TwitterData = new Main(new SQLiteConnection("Data Source=Twitter.s3db;FailIfMissing=true;"));
 
-            foreach (var twitterInfo in TwitterSettings.Default.TwitterAccounts.Cast<string>().Select(a => new TwitterWrapper(a)))
+            foreach (var twitterInfo in TwitterData.TwitterAccounts.Select(acc => (new TwitterWrapper(acc.FriendlyName))))
             {
                 twitterAccounts.Add(twitterInfo.FriendlyName, twitterInfo);
                 tocolorize.Add(new ColorText { Text = twitterInfo.User, Color = (int)IrcColors.Blue });
@@ -64,7 +68,7 @@ namespace Plugin
                 {
                     foreach (var mention in twitteraccount.Value.GetNewMentions())
                     {
-                        foreach (var channel in Settings.Default.Channels)
+                        foreach (var channel in BotMethods.JoinedChannels)
                         {
                             SendFormattedItem(twitteraccount.Value, mention, channel);
                         }
@@ -72,11 +76,11 @@ namespace Plugin
 
                 }
 
-                foreach (var tag in TwitterSettings.Default.TwitterSearchTags)
+                foreach (var tag in TwitterData.TwitterTags.Select(t => t.Tag))
                 {
                     foreach (var tagStatus in TwitterWrapper.SearchNewTag(tag))
                     {
-                        foreach (var channel in Settings.Default.Channels)
+                        foreach (var channel in BotMethods.JoinedChannels)
                         {
                             BotMethods.SendMessage(SendType.Message, channel, "Tag: {0} (by {1})".Fill(tagStatus.Text, tagStatus.FromUserScreenName));
                         }
@@ -179,16 +183,26 @@ namespace Plugin
             string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray[0].ToLower() == "!+tag")
             {
-                TwitterSettings.Default.TwitterSearchTags.Add(e.Data.MessageArray[1]);
+                var tag = new TwitterTag { Tag = e.Data.MessageArray[1] };
+                TwitterData.TwitterTags.InsertOnSubmit(tag);
+                TwitterData.SubmitChanges();
+
                 BotMethods.SendMessage(SendType.Message, sendto, "Automatic Search activated: " + "http://search.twitter.com/search?q=" + HttpUtility.UrlEncode(e.Data.MessageArray[1]));
             }
             if (e.Data.MessageArray[0].ToLower() == "!-tag")
             {
-                TwitterSettings.Default.TwitterSearchTags.Remove(e.Data.MessageArray[1]);
+                var tag = TwitterData.TwitterTags.Where(t => t.Tag == e.Data.MessageArray[1]).FirstOrDefault();
+
+                if (tag != null)
+                {
+                    TwitterData.TwitterTags.DeleteOnSubmit(tag);
+                    TwitterData.SubmitChanges();
+                }
+
             }
             if (e.Data.MessageArray[0].ToLower() == "!tags")
             {
-                foreach (string line in TwitterSettings.Default.TwitterSearchTags.Cast<string>().ToLines(350))
+                foreach (string line in TwitterData.TwitterTags.Select(t => t.Tag).ToLines(350))
                 {
                     BotMethods.SendMessage(SendType.Message, sendto, line);
                 }
@@ -360,8 +374,8 @@ namespace Plugin
                         BotMethods.SendMessage(SendType.Message, sendto, "Tweet '{0}' already exists.".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName));
                         break;
                     }
-                    TwitterSettings.Default.TwitterAccounts.Add(friendlyname);
-                    twitterAccounts.Add(friendlyname, new TwitterWrapper(friendlyname, e.Data.MessageArray[1], e.Data.MessageArray[2]));
+                    twitterAccounts.Add(friendlyname, new TwitterWrapper(friendlyname, e.Data.MessageArray[2]));
+
                     BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully added. Please go to {1} validate account and activate account by !tweet-pin {0} <pin>".Fill(friendlyname, twitterAccounts[friendlyname].AuthenticationUrl));
                     break;
                 case "!-tweet":
@@ -451,7 +465,7 @@ namespace Plugin
             BotMethods.SendMessage(SendType.Message, sendto,
                 MessageFormat.FillKeyword(
                     "%FEEDNAME%", twitteraccount.FriendlyName,
-                    "%ACCOUNT%", twitteraccount.Name,
+                    "%ACCOUNT%", twitteraccount.User,
                     "%TWEET%", Colorize(mention.Text),
                     "%ID%", mention.Id.ToString(),
                     "%SCREENNAME%", mention.User.ScreenName,

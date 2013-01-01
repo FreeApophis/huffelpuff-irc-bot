@@ -35,7 +35,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentedExamplePlugin", "C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatorPlugin", "CalculatorPlugin\CalculatorPlugin.csproj", "{2782E763-3E1A-4C1B-9B65-5F611C1E487F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChannelModeratorPlugin", "ChannelModerator\ChannelModeratorPlugin.csproj", "{85EF9CDB-F9B0-4097-A264-8803B76CF348}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChannelModeratorPlugin", "ChannelModeratorPlugin\ChannelModeratorPlugin.csproj", "{85EF9CDB-F9B0-4097-A264-8803B76CF348}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokerPlugin", "PokerPlugin\PokerPlugin.csproj", "{0E20A888-7442-4A5A-BF4C-B60E08E4ECC8}"
 EndProject

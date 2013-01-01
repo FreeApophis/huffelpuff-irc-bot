@@ -127,15 +127,13 @@ namespace Huffelpuff.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<ArrayOfString xmlns:xsi=\"http://www.w3." +
-            "org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <s" +
-            "tring>ch.pirateirc.net</string>\r\n</ArrayOfString>")]
-        public global::System.Collections.Specialized.StringCollection Servers {
+        [global::System.Configuration.DefaultSettingValueAttribute("ch.pirateirc.net")]
+        public string Server {
             get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["Servers"]));
+                return ((string)(this["Server"]));
             }
             set {
-                this["Servers"] = value;
+                this["Server"] = value;
             }
         }
         
@@ -165,50 +163,13 @@ namespace Huffelpuff.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<ArrayOfString xmlns:xsi=\"http://www.w3." +
-            "org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <s" +
-            "tring>#test</string>\r\n  <string>#test2</string>\r\n</ArrayOfString>")]
-        public global::System.Collections.Specialized.StringCollection Channels {
+        [global::System.Configuration.DefaultSettingValueAttribute("#test")]
+        public string Channel {
             get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["Channels"]));
+                return ((string)(this["Channel"]));
             }
             set {
-                this["Channels"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection Plugins {
-            get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["Plugins"]));
-            }
-            set {
-                this["Plugins"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Setting {
-            get {
-                return ((string)(this["Setting"]));
-            }
-            set {
-                this["Setting"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int Setting1 {
-            get {
-                return ((int)(this["Setting1"]));
-            }
-            set {
-                this["Setting1"] = value;
+                this["Channel"] = value;
             }
         }
         
@@ -281,28 +242,6 @@ namespace Huffelpuff.Properties {
             }
             set {
                 this["ExternalIP"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection AclEntries {
-            get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["AclEntries"]));
-            }
-            set {
-                this["AclEntries"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection AclGroups {
-            get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["AclGroups"]));
-            }
-            set {
-                this["AclGroups"] = value;
             }
         }
     }

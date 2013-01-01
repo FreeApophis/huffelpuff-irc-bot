@@ -25,6 +25,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Huffelpuff.Utils;
+using Plugin.Database.Rss;
 
 namespace Plugin
 {
@@ -33,73 +34,58 @@ namespace Plugin
     /// </summary>
     public class RssWrapper
     {
-        public string Name { get; private set; }
-        public string NameSpace
-        {
-            get
-            {
-                return "rssfeed_" + Name;
-            }
-        }
+        private RssAccount feed;
 
-        private const string FriendlyNameConst = "friendlyname";
-        private string friendlyName;
         public string FriendlyName
         {
             get
             {
-                return friendlyName;
+                return feed.FriendlyName;
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, FriendlyNameConst, value);
-                friendlyName = value;
+                feed.FriendlyName = value;
+                RssPlugin.RssData.SubmitChanges();
             }
         }
 
-        private const string UrlConst = "url";
-        private string url;
         public string Url
         {
             get
             {
-                return url;
+                return feed.Url;
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, UrlConst, value);
-                url = value;
+                feed.Url = value;
+                RssPlugin.RssData.SubmitChanges();
             }
         }
 
-        private const string CredentialsConst = "credentials";
-        private string credentials;
         public string Credentials
         {
             get
             {
-                return credentials;
+                return feed.Credentials;
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, CredentialsConst, value);
-                credentials = value;
+                feed.Credentials = value;
+                RssPlugin.RssData.SubmitChanges();
             }
         }
 
 
-        private const string LastConst = "lastdate";
-        private DateTime last;
         public DateTime Last
         {
             get
             {
-                return last;
+                return feed.LastMessage.HasValue ? feed.LastMessage.Value : DateTime.Now;
             }
             set
             {
-                PersistentMemory.Instance.SetValue(NameSpace, LastConst, value.ToString());
-                last = value;
+                feed.LastMessage = value;
+                RssPlugin.RssData.SubmitChanges();
             }
         }
 
@@ -109,44 +95,29 @@ namespace Plugin
 
         private List<RssItem> cachedItems = new List<RssItem>();
 
-        public RssWrapper(string name)
+        public RssWrapper(string friendlyName)
         {
-            Name = name;
-            friendlyName = PersistentMemory.Instance.GetValueOrTodo(NameSpace, FriendlyNameConst);
-            url = PersistentMemory.Instance.GetValueOrTodo(NameSpace, UrlConst);
-            credentials = PersistentMemory.Instance.GetValue(NameSpace, CredentialsConst);
-
-            string lastDateTimeString = PersistentMemory.Instance.GetValue(NameSpace, LastConst);
-            last = (lastDateTimeString == null) ? DateTime.MinValue : DateTime.Parse(lastDateTimeString);
+            feed = RssPlugin.RssData.RssAccounts.Where(a => a.FriendlyName == friendlyName).FirstOrDefault();
         }
 
-        public RssWrapper(string name, string friendlyName, string url, DateTime last, string credentials)
+        public RssWrapper(string friendlyName, string url, DateTime last, string credentials)
         {
-            Name = name;
-            this.friendlyName = friendlyName;
-            this.url = url;
-            this.last = last;
-            this.credentials = credentials;
+            feed = new RssAccount();
+            RssPlugin.RssData.RssAccounts.InsertOnSubmit(feed);
 
-            PersistentMemory.Instance.ReplaceValue(NameSpace, FriendlyNameConst, friendlyName);
-            PersistentMemory.Instance.ReplaceValue(NameSpace, UrlConst, url);
-            PersistentMemory.Instance.ReplaceValue(NameSpace, LastConst, last.ToString());
-            if (credentials == null)
-            {
-                PersistentMemory.Instance.RemoveKey(NameSpace, CredentialsConst);
-            }
-            else
-            {
-                PersistentMemory.Instance.ReplaceValue(NameSpace, CredentialsConst, credentials);
-            }
-            PersistentMemory.Instance.Flush();
+            feed.FriendlyName = friendlyName;
+            feed.Url = url;
+            feed.LastMessage = last;
+            feed.Credentials = credentials;
+
+            RssPlugin.RssData.SubmitChanges();
         }
 
         public void RemoveFeed()
         {
-            PersistentMemory.Instance.RemoveValue(RssPlugin.RssFeedConst, Name);
-            PersistentMemory.Instance.RemoveGroup(NameSpace);
-            PersistentMemory.Instance.Flush();
+            RssPlugin.RssData.RssAccounts.DeleteOnSubmit(feed);
+            RssPlugin.RssData.SubmitChanges();
+            feed = null;
         }
 
 
@@ -160,11 +131,10 @@ namespace Plugin
             try
             {
                 cachedItems = GetRss();
-                var newItems = cachedItems.Where(item => item.Published > last).OrderBy(item => item.Published).ToList();
+                var newItems = cachedItems.Where(item => item.Published > Last).OrderBy(item => item.Published).ToList();
                 if (newItems.Count() > 0)
                 {
-                    last = newItems.OrderByDescending(item => item.Published).Take(1).Single().Published;
-                    PersistentMemory.Instance.ReplaceValue(NameSpace, LastConst, last.ToString());
+                    Last = newItems.OrderByDescending(item => item.Published).Take(1).Single().Published;
                 }
                 return newItems;
             }
@@ -202,11 +172,11 @@ namespace Plugin
 
         private List<RssItem> GetRss()
         {
-            var request = (HttpWebRequest)WebRequest.Create(url);
+            var request = (HttpWebRequest)WebRequest.Create(Url);
 
-            if (!string.IsNullOrEmpty(credentials))
+            if (!string.IsNullOrEmpty(Credentials))
             {
-                request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(credentials)));
+                request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(Credentials)));
             }
 
             var response = (HttpWebResponse)request.GetResponse();

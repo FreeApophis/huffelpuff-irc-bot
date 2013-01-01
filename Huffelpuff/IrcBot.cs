@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -28,6 +29,7 @@ using Huffelpuff.AccessControl;
 using Huffelpuff.Plugins;
 using Huffelpuff.Properties;
 using Huffelpuff.Utils;
+using Plugin.Database.Huffelpuff;
 
 namespace Huffelpuff
 {
@@ -44,10 +46,6 @@ namespace Huffelpuff
 
         private readonly Dictionary<string, Commandlet> commands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
 
-        //public bool UPNPSupport { get; private set; }
-
-        public const string Channelconst = "channel";
-
         private bool isSetup;
 
         private readonly Dictionary<CommandScope, string> scopeColor = new Dictionary<CommandScope, string>
@@ -57,11 +55,24 @@ namespace Huffelpuff
             {CommandScope.Both, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Purple} 
         };
 
+        public Main MainBotData { get; private set; }
 
         private void SetupOnce()
         {
             if (isSetup) return;
             isSetup = true;
+
+            MainBotData = new Main(new SQLiteConnection("Data Source=Huffelpuff.s3db;FailIfMissing=true;"));
+
+            if (MainBotData.Channels.Count() == 0 && !Settings.Default.Channel.IsNullOrEmpty())
+            {
+                foreach (var channelName in Settings.Default.Channel.Split(','))
+                {
+                    var channel = new Channel { ChannelName = channelName };
+                    MainBotData.Channels.InsertOnSubmit(channel);
+                }
+            }
+            MainBotData.SubmitChanges();
 
             Encoding = System.Text.Encoding.UTF8;
             SendDelay = 3000;
@@ -82,7 +93,7 @@ namespace Huffelpuff
 
             // DCC Setup
 
-            /* todo: find NAT / or our IP */
+            /* todo: find NAT / or our IP / sharp-IRC should be able to do that -> implement there */
 
             //Setting up Access Control
             Acl = new AccessControlList(this);
@@ -292,8 +303,10 @@ namespace Huffelpuff
             {
                 if (!plugin.Active)
                 {
-                    Settings.Default.Plugins.Add(plugin.FullName);
-                    Settings.Default.Save();
+                    var plug = new Plugin.Database.Huffelpuff.Plugin { PluginName = plugin.FullName };
+                    MainBotData.Plugin.InsertOnSubmit(plug);
+                    MainBotData.SubmitChanges();
+
                     plugin.Activate();
                 }
                 calledPlugins.Add(plugin);
@@ -317,8 +330,9 @@ namespace Huffelpuff
             {
                 if (plugin.Active)
                 {
-                    Settings.Default.Plugins.Remove(plugin.FullName);
-                    Settings.Default.Save();
+                    var plugs = MainBotData.Plugin.Where(p => p.PluginName == plugin.FullName).ToArray();
+                    MainBotData.Plugin.DeleteAllOnSubmit(plugs);
+
                     plugin.Deactivate();
 
                     var plug = plugin;
@@ -336,6 +350,7 @@ namespace Huffelpuff
                 }
                 calledPlugins.Add(plugin);
             }
+            MainBotData.SubmitChanges();
 
             foreach (var line in calledPlugins.Select(plugin => "" + plugin.FullName + " [" + ((plugin.Active ? IrcConstants.IrcColor + "" + (int)IrcColors.LightGreen + "ON" : IrcConstants.IrcColor + "" + (int)IrcColors.LightRed + "OFF")) + IrcConstants.IrcColor + "]").ToLines(350, ", ", "Plugins: ", " END."))
             {
@@ -356,7 +371,9 @@ namespace Huffelpuff
             foreach (var channel in e.Data.MessageArray.Skip(1).Where(channel => !channel.IsNullOrEmpty()))
             {
                 RfcJoin(channel);
-                Settings.Default.Channels.Add(channel);
+                var chan = new Channel { ChannelName = channel };
+                MainBotData.Channels.InsertOnSubmit(chan);
+                MainBotData.SubmitChanges();
             }
             Settings.Default.Save();
         }
@@ -365,7 +382,7 @@ namespace Huffelpuff
         {
             var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
 
-            foreach (var line in Settings.Default.Channels.Cast<string>().ToLines(350, ", ", "I am in the following channels: ", " END."))
+            foreach (var line in Settings.Default.Channel.Cast<string>().ToLines(350, ", ", "I am in the following channels: ", " END."))
             {
                 SendMessage(SendType.Message, sendto, line);
             }
@@ -383,10 +400,12 @@ namespace Huffelpuff
 
             RfcPart(e.Data.Message.Substring(6));
 
-            if (Settings.Default.Channels.Contains(e.Data.MessageArray[1]))
+
+            var channel = MainBotData.Channels.Where(c => c.ChannelName == e.Data.MessageArray[1]).FirstOrDefault();
+            if (channel != null)
             {
-                Settings.Default.Channels.Remove(e.Data.MessageArray[1]);
-                Settings.Default.Save();
+                MainBotData.Channels.DeleteOnSubmit(channel);
+                MainBotData.SubmitChanges();
             }
         }
 
@@ -527,7 +546,7 @@ namespace Huffelpuff
             }
 
             // the server we want to connect to
-            string[] serverlist = Settings.Default.Servers.Cast<string>().ToArray();
+            string[] serverlist = Settings.Default.Server.Split(',');
             int port = Settings.Default.Port;
             try
             {
@@ -549,7 +568,7 @@ namespace Huffelpuff
                 Login(Settings.Default.Nick, Settings.Default.Realname, 4, Settings.Default.Username, Settings.Default.ServerPass);
 
                 // join the channels
-                foreach (var channel in Settings.Default.Channels)
+                foreach (var channel in MainBotData.Channels.Select(c => c.ChannelName))
                 {
                     RfcJoin(channel);
                 }
