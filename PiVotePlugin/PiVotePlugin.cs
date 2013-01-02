@@ -56,7 +56,7 @@ namespace Plugin
             actionQueue = new Queue<PiVoteAction>();
             certificateStorage = new CertificateStorage();
 
-            if (!certificateStorage.TryLoadRoot())
+            if (!certificateStorage.TryLoadRoot("./root.pi-cert"))
             {
                 throw new Exception("Cannot find root certificate file.");
             }

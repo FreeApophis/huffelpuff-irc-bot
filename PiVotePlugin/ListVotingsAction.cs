@@ -68,7 +68,7 @@ namespace Plugin
 
                 int number = 0;
 
-                foreach (VotingDescriptor voting in votings.OrderBy(v => v.VoteFrom))
+                foreach (VotingDescriptor voting in votings.OrderBy(v => v.VoteFrom).Take(8))
                 {
                     table.AddRow(number.ToString(), voting.Title.Text, voting.VoteFrom.ToShortDateString(), voting.VoteUntil.ToShortDateString(), voting.Status.Text(), voting.EnvelopeCount.ToString());
                     number++;

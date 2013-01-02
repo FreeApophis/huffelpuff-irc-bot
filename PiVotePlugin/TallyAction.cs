@@ -94,7 +94,7 @@ namespace Plugin
                         BotMethods.SendMessage(SendType.Message, Channel, "Pi-Vote: Tallying voting " + voting.Title.Text + ".");
 
                         Client.ActivateVoter();
-                        Client.GetResult(voting.Id, new List<Signed<VoteReceipt>>(), GetResultComplete);
+                        Client.GetResult(voting.Id, new List<Signed<VoteReceipt>>(), 1, GetResultComplete);
                     }
                     else
                     {
