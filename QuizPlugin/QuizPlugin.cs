@@ -18,10 +18,13 @@
  */
 
 
+using System;
 using System.Data.SQLite;
 using System.IO;
+using apophis.SharpIRC;
 using Huffelpuff;
 using Huffelpuff.Plugins;
+using Huffelpuff.Utils;
 using Plugin.Database.Quiz;
 
 namespace Plugin
@@ -45,13 +48,20 @@ namespace Plugin
 
         public override void Init()
         {
-            quizData = new Main(new SQLiteConnection("Data Source=Quiz.s3db;FailIfMissing=true;"));
+            quizData = new Main(DatabaseConnection.Create("Quiz"));
+
+            BotMethods.AddExportedCommand(new Commandlet("import-kewlquiz", "Import Kewlquiz File", ImportHandler, this));
+
+            base.Init();
+        }
+
+        private void ImportHandler(object sender, IrcEventArgs e)
+        {
+            if (e != null) { return; }
 
             var importer = new KewlQuizImport();
 
             importer.ImportFile(new FileInfo("Z:\\Chats\\mirc\\kewlquiz\\Apophis.txt"), quizData);
-            
-            base.Init();
         }
 
         public override void Activate()

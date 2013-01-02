@@ -12,8 +12,9 @@ namespace Plugin
                 string s;
                 QuizQuestion question = null;
                 bool category = false;
-                while ((s = sr.ReadLine().Trim()) != null)
+                while ((s = sr.ReadLine()) != null)
                 {
+                    s = s.Trim();
                     if (s.StartsWith("#") || s.IsNullOrEmpty()) { continue; }
 
                     if (s.StartsWith("Category:"))

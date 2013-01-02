@@ -25,6 +25,7 @@ using apophis.SharpIRC;
 using apophis.SharpIRC.IrcClient;
 using Huffelpuff;
 using Huffelpuff.Plugins;
+using Huffelpuff.Utils;
 using Plugin.Database.Seen;
 
 namespace Plugin
@@ -40,7 +41,7 @@ namespace Plugin
 
         public override void Init()
         {
-            seenData = new Main(new SQLiteConnection("Data Source=Seen.s3db;FailIfMissing=true;"));
+            seenData = new Main(DatabaseConnection.Create("Seen"));
 
             base.Init();
         }

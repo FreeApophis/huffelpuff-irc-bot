@@ -16,8 +16,9 @@ namespace Plugin
                 string s;
                 var count = 0;
                 QuizQuestion question = null;
-                while ((s = sr.ReadLine().Trim()) != null)
+                while ((s = sr.ReadLine()) != null)
                 {
+                    s = s.Trim();
                     ++count;
 
                     // Skip Header

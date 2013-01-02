@@ -164,6 +164,7 @@
     <Compile Include="SettingCommands.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Utils\ConsoleLogger.cs" />
+    <Compile Include="Utils\DatabaseConnection.cs" />
     <Compile Include="Utils\Dereferencer.cs" />
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Utils\Level.cs" />

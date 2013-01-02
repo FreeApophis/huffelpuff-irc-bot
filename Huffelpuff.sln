@@ -53,7 +53,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpIRC", "SharpIRC\sharp-
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumble.net.lib", "MumbleNet\lib\Mumble.net.lib.csproj", "{EA577C26-45DD-4D8A-909C-65F8A6E81E12}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DAA59C15-FFA7-4646-BD56-05C5F7ECA894}"
+	ProjectSection(SolutionItems) = preProject
+		Huffelpuff.vsmdi = Huffelpuff.vsmdi
+		Local.testsettings = Local.testsettings
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
+EndProject
 Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = Huffelpuff.vsmdi
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -536,6 +548,24 @@ Global
 		{EA577C26-45DD-4D8A-909C-65F8A6E81E12}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{EA577C26-45DD-4D8A-909C-65F8A6E81E12}.Release|x64.ActiveCfg = Release|Any CPU
 		{EA577C26-45DD-4D8A-909C-65F8A6E81E12}.Release|x86.ActiveCfg = Release|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Local Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Local Debug|Any CPU.Build.0 = Debug|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Local Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Local Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Local Debug|x64.ActiveCfg = Debug|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Local Debug|x86.ActiveCfg = Debug|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Release|x64.ActiveCfg = Release|Any CPU
+		{600D15C7-69EC-4BB6-B31E-2EE89FE1232F}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

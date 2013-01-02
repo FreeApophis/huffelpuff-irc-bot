@@ -47,7 +47,7 @@ namespace Plugin
 
         public override void Init()
         {
-            TwitterData = new Main(new SQLiteConnection("Data Source=Twitter.s3db;FailIfMissing=true;"));
+            TwitterData = new Main(DatabaseConnection.Create("Twitter"));
 
             foreach (var twitterInfo in TwitterData.TwitterAccounts.Select(acc => (new TwitterWrapper(acc.FriendlyName))))
             {

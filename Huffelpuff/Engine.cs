@@ -22,6 +22,7 @@ using System;
 using System.Configuration.Install;
 using System.Reflection;
 using System.ServiceProcess;
+using Huffelpuff.Plugins;
 using Huffelpuff.Properties;
 using Huffelpuff.Utils;
 
@@ -51,6 +52,13 @@ namespace Huffelpuff
                         Tool.Configure();
                         return;
                     case "--help":
+                        return;
+                    case "--plugins":
+                        bot = new IrcBot();
+                        var manager = new BotPluginManager(bot, "plugins");
+                        manager.StartUp();
+                        bot.CallExportedCommand("import-kewlquiz", manager);
+                        manager.ShutDown();
                         return;
                 }
 

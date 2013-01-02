@@ -61,8 +61,6 @@ namespace Huffelpuff.Plugins
             pluginManager.PluginSources = PluginSourceEnum.Both;
 
             pluginManager.AddReference(Assembly.GetEntryAssembly().Location);
-
-            pluginManager.Start();
         }
 
         private void ReloadPlugins(object sender, IrcEventArgs e)
@@ -119,7 +117,7 @@ namespace Huffelpuff.Plugins
 
             foreach (var pluginName in pluginManager.GetSubclasses("Huffelpuff.Plugins.AbstractPlugin"))
             {
-                Log.Instance.Log("  [LOAD]  " + pluginName, Level.Info, ConsoleColor.Green);
+                Log.Instance.Log("Initialize Plugin " + pluginName, Level.Info);
                 var p = (AbstractPlugin)pluginManager.CreateInstance(pluginName, BindingFlags.CreateInstance, new object[] { bot });
                 try
                 {
@@ -172,22 +170,23 @@ namespace Huffelpuff.Plugins
                 oldPlugs.Add(assemblyParts.AssemblyName, assemblyParts.AssemblyVersion);
             }
 
+            if (bot.MainBotData == null) { return; }
 
             foreach (var pluginname in bot.MainBotData.Plugin.Select(pl => pl.PluginName))
             {
                 var plugin = plugins.Where(p => p.FullName == pluginname).FirstOrDefault();
 
-                if (plugin  != null)
+                if (plugin != null)
                 {
-                try
-                {
-                    plugin.Activate();
-                }
-                catch (Exception exception)
-                {
-                    Log.Instance.Log(exception);
-                    continue;
-                }
+                    try
+                    {
+                        plugin.Activate();
+                    }
+                    catch (Exception exception)
+                    {
+                        Log.Instance.Log(exception);
+                        continue;
+                    }
                 }
             }
         }
@@ -233,10 +232,16 @@ namespace Huffelpuff.Plugins
             }
         }
 
+        public void StartUp()
+        {
+            pluginManager.Start();
+        }
+
         public void ShutDown()
         {
             foreach (var p in plugins)
             {
+                Log.Instance.Log("Shutdown: " + p.FullName);
                 try
                 {
                     p.Deactivate();
@@ -247,6 +252,8 @@ namespace Huffelpuff.Plugins
                     Log.Instance.Log(exception.Message, Level.Info, ConsoleColor.Red);
                 }
             }
+
+            pluginManager.Stop();
         }
     }
 }

@@ -53,7 +53,7 @@ namespace Plugin
             // 90 seconds tick intervall
             TickInterval = 90;
 
-            RssData = new Main(new SQLiteConnection("Data Source=Rss.s3db;FailIfMissing=true;"));
+            RssData = new Main(DatabaseConnection.Create("Rss"));
 
             foreach (var rssInfo in RssData.RssAccounts.Select(rss => (new RssWrapper(rss.FriendlyName))))
             {

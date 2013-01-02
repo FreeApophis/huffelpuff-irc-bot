@@ -2,10 +2,12 @@
 *.user
 *.dbml.layout
 *.dbml
+*.testsettings
+*.vsmdi
+obj/
 _ReSharper.Huffelpuff
 Database.cs
 *Plugin/bin/*
-obj/
 Huffelpuff/bin/plugins/*
 Huffelpuff/bin/*.pdb
 Huffelpuff/bin/*.dll
@@ -17,3 +19,5 @@ Huffelpuff/bin/root.pi-cert
 Huffelpuff/bin/*.s3db
 Huffelpuff/bin/aiml/*
 Huffelpuff/bin/config/*
+UnitTests/bin/*
+

@@ -45,6 +45,7 @@ namespace Huffelpuff
         public AccessControlList Acl { get; private set; }
 
         private readonly Dictionary<string, Commandlet> commands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
+        private readonly Dictionary<string, Commandlet> exported = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
 
         private bool isSetup;
 
@@ -62,7 +63,7 @@ namespace Huffelpuff
             if (isSetup) return;
             isSetup = true;
 
-            MainBotData = new Main(new SQLiteConnection("Data Source=Huffelpuff.s3db;FailIfMissing=true;"));
+            MainBotData = new Main(DatabaseConnection.Create("Huffelpuff"));
 
             if (MainBotData.Channels.Count() == 0 && !Settings.Default.Channel.IsNullOrEmpty())
             {
@@ -108,6 +109,7 @@ namespace Huffelpuff
             // Plugin needs the Handlers from IRC we load the plugins after we set everything up
             PlugManager = new BotPluginManager(this, "plugins");
             PlugManager.PluginLoadEvent += PlugManagerPluginLoadEvent;
+            PlugManager.StartUp();
 
             //Basic Commands
             AddCommand(new Commandlet("!join", "The command !join <channel> lets the bot join Channel <channel>", JoinCommand, this, CommandScope.Both, "engine_join"));
@@ -192,6 +194,8 @@ namespace Huffelpuff
             {
                 commands.Remove(command);
             }
+
+            exported.Clear();
         }
 
         private static void RawMessageHandler(object sender, IrcEventArgs e)
@@ -207,7 +211,7 @@ namespace Huffelpuff
         /// <returns></returns>
         public bool AddCommand(Commandlet cmd)
         {
-            if (cmd.AccessString != null)
+            if (cmd.AccessString != null && Acl != null)
             {
                 Acl.AddAccessString(cmd.AccessString);
             }
@@ -217,6 +221,33 @@ namespace Huffelpuff
                 return true;
             }
             return false;
+        }
+
+        public void AddExportedCommand(Commandlet cmd)
+        {
+            exported.Add(cmd.Command, cmd);
+        }
+
+        public void CallExportedCommand(string command, BotPluginManager pluginManager = null, object sender = null, string parameters = null)
+        {
+            var botPluginManager = pluginManager ?? PlugManager;
+
+            if (!exported.ContainsKey(command)) { return; }
+
+            IrcEventArgs e = null;
+
+            if (exported[command].Handler != null)
+            {
+                exported[command].Handler.Invoke(sender, e);
+            }
+            else
+            {
+                foreach (var plug in botPluginManager.Plugins.Where(plug => plug.FullName == (string)exported[command].Owner))
+                {
+                    plug.InvokeHandler(exported[command].HandlerName, e);
+                    return;
+                }
+            }
         }
 
         /// <summary>

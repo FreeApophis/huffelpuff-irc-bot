@@ -40,7 +40,7 @@ namespace Plugin
 
         public override void Init()
         {
-            factoidData = new Main(new SQLiteConnection("Data Source=Factoid.s3db;FailIfMissing=true;"));
+            factoidData = new Main(DatabaseConnection.Create("Factoid"));
 
             base.Init();
         }
