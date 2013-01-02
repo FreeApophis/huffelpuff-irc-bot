@@ -25,6 +25,7 @@ using System.Reflection;
 using System.Threading;
 using System.Timers;
 using apophis.SharpIRC;
+using Huffelpuff.Commands;
 using Huffelpuff.Properties;
 using Huffelpuff.Utils;
 using Timer = System.Timers.Timer;

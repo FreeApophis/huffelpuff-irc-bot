@@ -128,7 +128,10 @@
     <Compile Include="AccessControl\NickServIdentify.cs" />
     <Compile Include="AccessControl\NickServIdentifyRequest.cs" />
     <Compile Include="AccessControl\PasswordIdentify.cs" />
-    <Compile Include="Commandlet.cs" />
+    <Compile Include="Commands\CommandEventArgs.cs" />
+    <Compile Include="Commands\Commandlet.cs" />
+    <Compile Include="Commands\CommandScope.cs" />
+    <Compile Include="Commands\PluginCommand.cs" />
     <Compile Include="Database.cs">
       <DependentUpon>Database.dbml</DependentUpon>
     </Compile>
@@ -161,8 +164,7 @@
     <Compile Include="ServiceEngine.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="SettingCommands.cs" />
-    <Compile Include="Settings.cs" />
+    <Compile Include="Commands\SettingCommands.cs" />
     <Compile Include="Utils\ConsoleLogger.cs" />
     <Compile Include="Utils\DatabaseConnection.cs" />
     <Compile Include="Utils\Dereferencer.cs" />

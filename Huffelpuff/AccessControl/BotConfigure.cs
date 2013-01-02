@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using apophis.SharpIRC;
+using Huffelpuff.Commands;
 
 namespace Huffelpuff.AccessControl
 {

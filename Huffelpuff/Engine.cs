@@ -20,6 +20,7 @@
 
 using System;
 using System.Configuration.Install;
+using System.Linq;
 using System.Reflection;
 using System.ServiceProcess;
 using Huffelpuff.Plugins;
@@ -35,33 +36,34 @@ namespace Huffelpuff
             if (Environment.UserInteractive)
             {
                 IrcBot bot;
-                var parameter = string.Concat(args);
 
-                switch (parameter)
+                if (args.Length > 0)
                 {
-                    case "--install":
-                        ManagedInstallerClass.InstallHelper(new[] { Assembly.GetExecutingAssembly().Location });
-                        return;
-                    case "--uninstall":
-                        ManagedInstallerClass.InstallHelper(new[] { "/u", Assembly.GetExecutingAssembly().Location });
-                        return;
-                    case "--simulator":
+                    switch (args[0])
+                    {
+                        case "--install":
+                            ManagedInstallerClass.InstallHelper(new[] { Assembly.GetExecutingAssembly().Location });
+                            return;
+                        case "--uninstall":
+                            ManagedInstallerClass.InstallHelper(new[] { "/u", Assembly.GetExecutingAssembly().Location });
+                            return;
+                        case "--simulator":
 
-                        break;
-                    case "--config":
-                        Tool.Configure();
-                        return;
-                    case "--help":
-                        return;
-                    case "--plugins":
-                        bot = new IrcBot();
-                        var manager = new BotPluginManager(bot, "plugins");
-                        manager.StartUp();
-                        bot.CallExportedCommand("import-kewlquiz", manager);
-                        manager.ShutDown();
-                        return;
+                            break;
+                        case "--config":
+                            Tool.Configure();
+                            return;
+                        case "--help":
+                            return;
+                        case "--plugin-command":
+                            bot = new IrcBot();
+                            var manager = new BotPluginManager(bot, "plugins");
+                            manager.StartUp();
+                            bot.CallExportedCommand(args[1], string.Concat(args.Skip(2)), manager);
+                            manager.ShutDown();
+                            return;
+                    }
                 }
-
                 Tool.RunOnMono();
 
                 do

@@ -23,6 +23,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using apophis.SharpIRC;
 using apophis.SharpIRC.IrcClient;
+using Huffelpuff.Commands;
 using Huffelpuff.Properties;
 using Huffelpuff.Utils;
 using Plugin.Database.Huffelpuff;

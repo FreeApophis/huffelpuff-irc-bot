@@ -26,6 +26,7 @@ using System.Threading;
 using apophis.SharpIRC;
 using apophis.SharpIRC.IrcFeatures;
 using Huffelpuff.AccessControl;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
 using Huffelpuff.Properties;
 using Huffelpuff.Utils;
@@ -45,7 +46,7 @@ namespace Huffelpuff
         public AccessControlList Acl { get; private set; }
 
         private readonly Dictionary<string, Commandlet> commands = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
-        private readonly Dictionary<string, Commandlet> exported = new Dictionary<string, Commandlet>(StringComparer.CurrentCultureIgnoreCase);
+        private readonly Dictionary<string, PluginCommand> exported = new Dictionary<string, PluginCommand>(StringComparer.CurrentCultureIgnoreCase);
 
         private bool isSetup;
 
@@ -223,30 +224,23 @@ namespace Huffelpuff
             return false;
         }
 
-        public void AddExportedCommand(Commandlet cmd)
+        public void AddExportedCommand(PluginCommand cmd)
         {
-            exported.Add(cmd.Command, cmd);
+            exported.Add(cmd.ExportedCommand, cmd);
         }
 
-        public void CallExportedCommand(string command, BotPluginManager pluginManager = null, object sender = null, string parameters = null)
+        public void CallExportedCommand(string command, string parameter = null, BotPluginManager pluginManager = null, object sender = null)
         {
             var botPluginManager = pluginManager ?? PlugManager;
 
             if (!exported.ContainsKey(command)) { return; }
 
-            IrcEventArgs e = null;
+            var e = new CommandEventArgs(parameter);
 
-            if (exported[command].Handler != null)
+            foreach (var plug in botPluginManager.Plugins.Where(plug => plug.FullName == (string)exported[command].Owner))
             {
-                exported[command].Handler.Invoke(sender, e);
-            }
-            else
-            {
-                foreach (var plug in botPluginManager.Plugins.Where(plug => plug.FullName == (string)exported[command].Owner))
-                {
-                    plug.InvokeHandler(exported[command].HandlerName, e);
-                    return;
-                }
+                plug.InvokeHandler(exported[command].HandlerName, e);
+                return;
             }
         }
 

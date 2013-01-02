@@ -119,7 +119,7 @@ namespace Huffelpuff.Plugins
 
         }
 
-        public void InvokeHandler(string handlerName, IrcEventArgs e)
+        public void InvokeHandler(string handlerName, EventArgs e)
         {
             var ircEventParameters = new object[] { this, e };
             Log.Instance.Log("InovkeHandler in " + GetType() + " calls " + handlerName);

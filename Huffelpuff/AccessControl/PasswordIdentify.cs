@@ -18,6 +18,7 @@
  */
 
 using apophis.SharpIRC;
+using Huffelpuff.Commands;
 
 namespace Huffelpuff.AccessControl
 {
