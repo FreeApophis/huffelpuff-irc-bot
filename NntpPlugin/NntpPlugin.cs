@@ -55,8 +55,8 @@ namespace Plugin
             interval = new Timer(30000);
             interval.Elapsed += IntervalElapsed;
 
-            filterGroups = NntpSettings.Default.FilteredGroups.Cast<string>().ToList();
-            filterWords = NntpSettings.Default.FilteredWords.Cast<string>().ToList();
+            filterGroups = NntpSettings.Default.FilteredGroups.Split(',').ToList();
+            filterWords = NntpSettings.Default.FilteredWords.Split(',').ToList();
             base.Init();
         }
 
@@ -106,7 +106,7 @@ namespace Plugin
                     {
                         t = (DateTime.Now - kvp.Key);
                     }
-                    foreach (var channel in NntpSettings.Default.NntpChannels)
+                    foreach (var channel in NntpSettings.Default.NntpChannels.Split(','))
                     {
                         BotMethods.SendMessage(SendType.Message, channel, "New FMS Posts will be reported: There are " + newMessages.Count + " Messages in the repository");
                         BotMethods.SendMessage(SendType.Message, channel, "Last Post on FMS was " + Math.Round(t.TotalMinutes) + " minutes ago.");
@@ -119,7 +119,7 @@ namespace Plugin
 
                 foreach (var m in newMessages)
                 {
-                    foreach (var channel in NntpSettings.Default.NntpChannels)
+                    foreach (var channel in NntpSettings.Default.NntpChannels.Split(','))
                     {
                         var t = (DateTime.Now - m.Value.Key.Header.Date);
                         if (t >= new TimeSpan(4, 0, 0)) continue;

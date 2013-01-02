@@ -49,9 +49,10 @@ namespace Plugin.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection FilteredGroups {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string FilteredGroups {
             get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["FilteredGroups"]));
+                return ((string)(this["FilteredGroups"]));
             }
             set {
                 this["FilteredGroups"] = value;
@@ -60,9 +61,10 @@ namespace Plugin.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection FilteredWords {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string FilteredWords {
             get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["FilteredWords"]));
+                return ((string)(this["FilteredWords"]));
             }
             set {
                 this["FilteredWords"] = value;
@@ -71,9 +73,10 @@ namespace Plugin.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection NntpChannels {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string NntpChannels {
             get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["NntpChannels"]));
+                return ((string)(this["NntpChannels"]));
             }
             set {
                 this["NntpChannels"] = value;

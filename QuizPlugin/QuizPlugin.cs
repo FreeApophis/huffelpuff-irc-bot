@@ -18,8 +18,11 @@
  */
 
 
+using System.Data.SQLite;
+using System.IO;
 using Huffelpuff;
 using Huffelpuff.Plugins;
+using Plugin.Database.Quiz;
 
 namespace Plugin
 {
@@ -38,13 +41,27 @@ namespace Plugin
                 return "Quiz Bot";
             }
         }
+        private Main quizData;
+
+        public override void Init()
+        {
+            quizData = new Main(new SQLiteConnection("Data Source=Quiz.s3db;FailIfMissing=true;"));
+
+            var importer = new KewlQuizImport();
+
+            importer.ImportFile(new FileInfo("Z:\\Chats\\mirc\\kewlquiz\\Apophis.txt"), quizData);
+            
+            base.Init();
+        }
 
         public override void Activate()
         {
+            base.Activate();
         }
 
         public override void Deactivate()
         {
+            base.Deactivate();
         }
 
         public override string AboutHelp()

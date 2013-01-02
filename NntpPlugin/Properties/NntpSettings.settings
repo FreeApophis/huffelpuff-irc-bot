@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Plugin.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Plugin.Properties" GeneratedClassName="NntpSettings">
   <Profiles />
   <Settings>
     <Setting Name="NntpServer" Type="System.String" Scope="User">
@@ -8,13 +8,13 @@
     <Setting Name="NntpPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="FilteredGroups" Type="System.Collections.Specialized.StringCollection" Scope="User">
+    <Setting Name="FilteredGroups" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="FilteredWords" Type="System.Collections.Specialized.StringCollection" Scope="User">
+    <Setting Name="FilteredWords" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="NntpChannels" Type="System.Collections.Specialized.StringCollection" Scope="User">
+    <Setting Name="NntpChannels" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

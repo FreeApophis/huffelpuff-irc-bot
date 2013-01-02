@@ -119,6 +119,7 @@ namespace Huffelpuff.Plugins
 
             foreach (var pluginName in pluginManager.GetSubclasses("Huffelpuff.Plugins.AbstractPlugin"))
             {
+                Log.Instance.Log("  [LOAD]  " + pluginName, Level.Info, ConsoleColor.Green);
                 var p = (AbstractPlugin)pluginManager.CreateInstance(pluginName, BindingFlags.CreateInstance, new object[] { bot });
                 try
                 {
