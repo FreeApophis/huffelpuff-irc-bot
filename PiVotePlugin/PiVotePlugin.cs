@@ -1,6 +1,6 @@
 ﻿/*
  *  <project description>
- * 
+ *
  *  Copyright (c) 2010 Stefan Thöni <stefan@savvy.ch>
  *  File created by exception at 03.07.2009 18:53
  *
@@ -22,8 +22,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using apophis.SharpIRC;
+using SharpIrc;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
 using Pirate.PiVote.Crypto;
 using Pirate.PiVote.Rpc;

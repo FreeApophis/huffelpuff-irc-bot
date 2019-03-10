@@ -24,7 +24,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Timers;
-using apophis.SharpIRC;
+using SharpIrc;
 using Huffelpuff.Commands;
 using Huffelpuff.Properties;
 using Huffelpuff.Utils;

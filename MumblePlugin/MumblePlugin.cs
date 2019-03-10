@@ -1,7 +1,7 @@
 ﻿/*
  *  Commented Example Plugin, as a help for Plugin developers
  *  ---------------------------------------------------------
- * 
+ *
  *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
  *  File created by apophis at 03.07.2009 18:54
  *
@@ -19,22 +19,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * To write a Plugin you need to set a Reference to the Huffelpuff-project 
+/*
+ * To write a Plugin you need to set a Reference to the Huffelpuff-project
  * and also to the SharpIRC Project.
  * If you work with the source, make a new Project for your Plugin and add
  * project reference to the Project.
  * If you work with the executable directly, Add a reference to the
  * Huffelpuff.exe And SharpIRC.dll
- * 
+ *
  * normally you need the following namesspaces from the project:
  */
-using apophis.SharpIRC;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
 using Huffelpuff.Properties;
 using Plugin.Properties;
 using Protocol.Mumble;
+using SharpIrc;
 
 namespace Plugin
 {
@@ -43,7 +44,8 @@ namespace Plugin
         private MumbleClient client;
 
         public MumblePlugin(IrcBot botInstance) :
-            base(botInstance) { }
+            base(botInstance)
+        { }
 
         public override string AboutHelp()
         {

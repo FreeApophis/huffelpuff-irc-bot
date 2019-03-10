@@ -1,6 +1,6 @@
 ﻿/*
  *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
- * 
+ *
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -23,10 +23,11 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
-using apophis.SharpIRC;
-using apophis.SharpIRC.IrcFeatures;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
+using SharpIrc;
+using SharpIrc.IrcFeatures;
 
 namespace Plugin
 {
@@ -42,7 +43,9 @@ namespace Plugin
         private const string RequestBaseIt = "http://it.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
 
         private readonly List<string> requestBases = new List<string> { RequestBaseDe, RequestBaseEn, RequestBaseFr, RequestBaseIt };
-        public WikipediaPlugin(IrcBot botInstance) : base(botInstance) { }
+        public WikipediaPlugin(IrcBot botInstance) : base(botInstance)
+        {
+        }
 
         public override void Activate()
         {
@@ -101,7 +104,7 @@ namespace Plugin
                         break;
                 }
             }
-            
+
             BotMethods.SendMessage(SendType.Message, sendto, NoEntry);
         }
 

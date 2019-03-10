@@ -1,6 +1,6 @@
 ﻿/*
  *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
- * 
+ *
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -18,10 +18,12 @@
  */
 
 using System;
-using apophis.SharpIRC;
-using apophis.SharpIRC.IrcClient;
-using apophis.SharpIRC.IrcConnection;
-using apophis.SharpIRC.IrcFeatures;
+using SharpIrc;
+using SharpIrc.IrcClient;
+using SharpIrc.IrcClient.EventArgs;
+using SharpIrc.IrcConnection;
+using SharpIrc.IrcFeatures;
+using SharpIrc.IrcFeatures.EventArgs;
 
 namespace Huffelpuff.Plugins
 {

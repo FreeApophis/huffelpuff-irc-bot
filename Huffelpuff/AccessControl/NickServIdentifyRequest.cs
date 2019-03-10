@@ -18,7 +18,7 @@
  */
 
 using System.Threading;
-using apophis.SharpIRC;
+using SharpIrc;
 using Huffelpuff.Utils;
 
 namespace Huffelpuff.AccessControl

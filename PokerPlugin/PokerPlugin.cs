@@ -1,6 +1,6 @@
 ﻿/*
  *  The Poker Plugin to deal some Poker games
- * 
+ *
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -14,14 +14,15 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 using System.Collections.Generic;
-using apophis.SharpIRC;
-using apophis.SharpIRC.IrcClient;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
+using SharpIrc;
+using SharpIrc.IrcClient.EventArgs;
 
 namespace Plugin
 {

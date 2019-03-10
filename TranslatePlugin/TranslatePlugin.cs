@@ -1,6 +1,6 @@
 ﻿/*
  *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
- * 
+ *
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -24,9 +24,10 @@ using System.Data;
 using System.Linq;
 using System.Net;
 using System.Web;
-using apophis.SharpIRC;
-using apophis.SharpIRC.IrcFeatures;
+using SharpIrc;
+using SharpIrc.IrcFeatures;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 
@@ -37,7 +38,9 @@ namespace Plugin
     /// </summary>
     public class TranslatePlugin : AbstractPlugin
     {
-        public TranslatePlugin(IrcBot botInstance) : base(botInstance) { }
+        public TranslatePlugin(IrcBot botInstance) : base(botInstance)
+        {
+        }
 
         private readonly Dictionary<string, string> languages = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase) {
             { "af", "Afrikaans" },

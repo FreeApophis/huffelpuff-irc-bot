@@ -1,7 +1,7 @@
 ﻿/*
  *  Wolfram Alpha Plugin
  *  ---------------------------------------------------------
- * 
+ *
  *  Copyright (c) 2011 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -22,9 +22,10 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Xml.Linq;
-using apophis.SharpIRC;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
+using SharpIrc;
 
 namespace Plugin
 {
@@ -38,7 +39,8 @@ namespace Plugin
         private const string AmpersAnd = "&";
 
         public WolframAlphaPlugin(IrcBot botInstance) :
-            base(botInstance) { }
+            base(botInstance)
+        { }
 
         public override string AboutHelp()
         {

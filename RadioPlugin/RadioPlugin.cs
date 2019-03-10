@@ -1,6 +1,6 @@
 ﻿/*
  *  The Radio Plugin controls a Radio Stream with the liquidsoap API
- * 
+ *
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -24,17 +24,20 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Timers;
-using apophis.SharpIRC;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 using MySql.Data.MySqlClient;
+using SharpIrc;
 
 namespace Plugin
 {
     class RadioPlugin : AbstractPlugin
     {
-        public RadioPlugin(IrcBot botInstance) : base(botInstance) { }
+        public RadioPlugin(IrcBot botInstance) : base(botInstance)
+        {
+        }
 
         private static string[] GenreArray = {
             "Blues", "Classic Rock", "Country", "Dance", "Disco", "Funk", "Grunge", "Hip-Hop", "Jazz", "Metal",
@@ -43,7 +46,7 @@ namespace Plugin
             "Fusion", "Trance", "Classical", "Instrumental", "Acid", "House", "Game", "Sound Clip", "Gospel", "Noise",
             "AlternRock", "Bass", "Soul", "Punk", "Space", "Meditative", "Instrumental Pop", "Instrumental Rock", "Ethnic", "Gothic",
             "Darkwave", "Techno-Industrial", "Electronic", "Pop-Folk", "Eurodance", "Dream", "Southern Rock",  "Comedy", "Cult", "Gangsta",
-            "Top 40", "Christian Rap", "Pop/Funk", "Jungle", "Native American", "Cabaret", "New Wave", "Psychadelic", "Rave", "Showtunes",         
+            "Top 40", "Christian Rap", "Pop/Funk", "Jungle", "Native American", "Cabaret", "New Wave", "Psychadelic", "Rave", "Showtunes",
             "Trailer", "Lo-Fi", "Tribal", "Acid Punk", "Acid Jazz", "Polka", "Retro", "Musical", "Rock & Roll", "Hard Rock",
             "Folk", "Folk-Rock", "National Folk", "Swing", "Fast Fusion", "Bebob", "Latin", "Revival", "Celtic", "Bluegrass",
             "Avantgarde", "Gothic Rock", "Progressive Rock", "Psychedelic Rock", "Symphonic Rock", "Slow Rock", "Big Band", "Chorus", "Easy Listening", "Acoustic",

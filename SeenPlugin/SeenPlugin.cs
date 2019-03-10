@@ -1,6 +1,6 @@
 ﻿/*
  *  The Seen Plugin tells you when a certain Nick was last used
- * 
+ *
  *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -21,12 +21,14 @@ using System;
 using System.Data;
 using System.Data.SQLite;
 using System.Linq;
-using apophis.SharpIRC;
-using apophis.SharpIRC.IrcClient;
+using SharpIrc;
+using SharpIrc.IrcClient;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 using Plugin.Database.Seen;
+using SharpIrc.IrcClient.EventArgs;
 
 namespace Plugin
 {
@@ -35,7 +37,9 @@ namespace Plugin
     /// </summary>
     public class SeenPlugin : AbstractPlugin
     {
-        public SeenPlugin(IrcBot botInstance) : base(botInstance) { }
+        public SeenPlugin(IrcBot botInstance) : base(botInstance)
+        {
+        }
 
         private Main seenData;
 
@@ -207,7 +211,7 @@ namespace Plugin
         {
             lock (seenData)
             {
-                foreach (string name in e.UserList)
+                foreach (string name in e.Users)
                 {
                     var result = seenData.SeenEntries.Where(s => s.Nick == name).FirstOrDefault();
 

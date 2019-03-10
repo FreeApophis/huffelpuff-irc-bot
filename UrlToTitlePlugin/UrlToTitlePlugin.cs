@@ -25,7 +25,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
-using apophis.SharpIRC;
+using SharpIrc;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;

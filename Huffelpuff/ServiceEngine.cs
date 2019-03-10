@@ -21,7 +21,7 @@
 using System.Diagnostics;
 using System.ServiceProcess;
 using System.Threading;
-using apophis.SharpIRC;
+using SharpIrc;
 
 namespace Huffelpuff
 {

@@ -1,6 +1,6 @@
 ﻿/*
  *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
- * 
+ *
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -18,14 +18,12 @@
  */
 
 
-using System;
-using System.Data.SQLite;
 using System.IO;
-using apophis.SharpIRC;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 using Plugin.Database.Quiz;
+using SharpIrc;
 
 namespace Plugin
 {
@@ -35,7 +33,8 @@ namespace Plugin
     public class QuizPlugin : AbstractPlugin
     {
         public QuizPlugin(IrcBot botInstance) :
-            base(botInstance) { }
+            base(botInstance)
+        { }
 
         public override string Name
         {
@@ -50,7 +49,7 @@ namespace Plugin
         {
             quizData = new Main(DatabaseConnection.Create("Quiz"));
 
-            BotMethods.AddExportedCommand(new Commandlet("import-kewlquiz", "Import Kewlquiz File", ImportHandler, this));
+            //BotMethods.AddExportedCommand(new Commandlet("import-kewlquiz", "Import Kewlquiz File", ImportHandler, this));
 
             base.Init();
         }

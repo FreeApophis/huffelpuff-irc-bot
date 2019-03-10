@@ -21,7 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using apophis.SharpIRC;
+using SharpIrc;
 using Huffelpuff.Plugins;
 
 namespace Huffelpuff.Commands

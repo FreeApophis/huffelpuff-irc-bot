@@ -19,7 +19,7 @@
  */
 
 using System;
-using apophis.SharpIRC;
+using SharpIrc;
 using Huffelpuff;
 using Pirate.PiVote.Crypto;
 using Pirate.PiVote.Rpc;

@@ -1,6 +1,6 @@
 ﻿/*
  *  The NNTP Plugin can provide information about postings to a Usenet Server
- * 
+ *
  *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 using System;
@@ -22,13 +22,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
-using apophis.SharpIRC;
-using apophis.SharpIRC.IrcFeatures;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 using Nntp;
 using Plugin.Properties;
+using SharpIrc;
+using SharpIrc.IrcFeatures;
 
 namespace Plugin
 {
@@ -37,7 +38,9 @@ namespace Plugin
     /// </summary>
     public class NntpPlugin : AbstractPlugin
     {
-        public NntpPlugin(IrcBot botInstance) : base(botInstance) { }
+        public NntpPlugin(IrcBot botInstance) : base(botInstance)
+        {
+        }
 
         private NntpConnection nntp;
         private Timer interval;

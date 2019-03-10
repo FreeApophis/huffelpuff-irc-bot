@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{85D3984F-6945-482D-BAF4-1B27E87A5BB1}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -7,7 +7,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Plugin</RootNamespace>
     <AssemblyName>UT3GlobalStatsPlugin</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <SourceAnalysisOverrideSettingsFile>C:\Users\apophis\AppData\Roaming\ICSharpCode/SharpDevelop3.0\Settings.SourceAnalysis</SourceAnalysisOverrideSettingsFile>
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
@@ -21,6 +21,7 @@
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <OutputPath>bin\</OutputPath>
@@ -47,6 +48,12 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Reference Include="SharpIrc, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpIrc.1.0.0\lib\netstandard2.0\SharpIrc.dll</HintPath>
+    </Reference>
+    <Reference Include="StarkSoftProxy, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\StarkSoftProxy.1.6.0\lib\netstandard2.0\StarkSoftProxy.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -70,6 +77,7 @@
     <Compile Include="UT3GlobalStatsPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="app.config" />
+    <None Include="packages.config" />
     <None Include="Service References\ServiceReference\Plugin.ServiceReference.RecordValue.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
@@ -82,10 +90,6 @@
     <ProjectReference Include="..\Huffelpuff\Huffelpuff.csproj">
       <Project>{57B9E0E8-D993-44C8-B9AF-496ABF0304A1}</Project>
       <Name>Huffelpuff</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SharpIRC\sharp-irc\SharpIRC.csproj">
-      <Project>{56D2D51C-27B4-4AE0-9D8A-CFFD02471487}</Project>
-      <Name>SharpIRC</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -117,10 +121,12 @@
     <Optimize>false</Optimize>
     <WarningLevel>4</WarningLevel>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
 </Project>

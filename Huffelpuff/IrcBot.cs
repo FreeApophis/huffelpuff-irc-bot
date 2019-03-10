@@ -1,6 +1,6 @@
 /*
  *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
- * 
+ *
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -23,8 +23,8 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using apophis.SharpIRC;
-using apophis.SharpIRC.IrcFeatures;
+using SharpIrc;
+using SharpIrc.IrcFeatures;
 using Huffelpuff.AccessControl;
 using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
@@ -51,10 +51,10 @@ namespace Huffelpuff
         private bool isSetup;
 
         private readonly Dictionary<CommandScope, string> scopeColor = new Dictionary<CommandScope, string>
-                                                                           { 
+                                                                           {
             {CommandScope.Private, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.LightRed} ,
             {CommandScope.Public, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Blue} ,
-            {CommandScope.Both, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Purple} 
+            {CommandScope.Both, "" + IrcConstants.IrcBold + IrcConstants.IrcColor + (int)IrcColors.Purple}
         };
 
         public Main MainBotData { get; private set; }
@@ -563,7 +563,7 @@ namespace Huffelpuff
             if (!Settings.Default.ProxyServer.IsNullOrEmpty())
             {
                 Log.Instance.Log("Using Proxy Server: " + Settings.Default.ProxyServer, Level.Trace);
-                ProxyType = apophis.SharpIRC.IrcConnection.ProxyType.Socks5;
+                ProxyType = Starksoft.Net.Proxy.ProxyType.Socks5;
                 ProxyHost = Settings.Default.ProxyServer;
                 ProxyPort = Settings.Default.ProxyPort;
                 ProxyUsername = Settings.Default.ProxyUser;

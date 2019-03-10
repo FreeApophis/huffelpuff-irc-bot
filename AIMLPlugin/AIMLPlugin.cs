@@ -20,7 +20,7 @@
 
 using System.Collections.Generic;
 using AIMLbot;
-using apophis.SharpIRC;
+using SharpIrc;
 using Huffelpuff;
 using Huffelpuff.Plugins;
 

@@ -1,7 +1,7 @@
 ﻿/*
  *  This is the Factoid Plugin, the usage is very similar to ubottu.
  *  You can generate arbitrary !commands to reply with prefabricated text.
- * 
+ *
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,10 +19,10 @@
  */
 
 using System;
-using System.Data.SQLite;
 using System.Linq;
-using apophis.SharpIRC;
+using SharpIrc;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 using Plugin.Database.Factoid;
@@ -34,7 +34,9 @@ namespace Plugin
     /// </summary>
     public class FactoidPlugin : AbstractPlugin
     {
-        public FactoidPlugin(IrcBot botInstance) : base(botInstance) { }
+        public FactoidPlugin(IrcBot botInstance) : base(botInstance)
+        {
+        }
 
         private Main factoidData;
 

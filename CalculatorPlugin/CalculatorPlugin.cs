@@ -1,6 +1,6 @@
 ﻿/*
  *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
- * 
+ *
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,9 +19,10 @@
 
 
 using System;
-using apophis.SharpIRC;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
+using SharpIrc;
 
 namespace Plugin
 {
@@ -30,7 +31,9 @@ namespace Plugin
     /// </summary>
     public class CalculatorPlugin : AbstractPlugin
     {
-        public CalculatorPlugin(IrcBot botInstance) : base(botInstance) { }
+        public CalculatorPlugin(IrcBot botInstance) : base(botInstance)
+        {
+        }
 
         private MagicCalculator magicCalculator;
 

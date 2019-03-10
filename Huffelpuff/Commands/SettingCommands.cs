@@ -18,7 +18,7 @@
  */
 
 using System.Linq;
-using apophis.SharpIRC;
+using SharpIrc;
 using Huffelpuff.Properties;
 using Huffelpuff.Utils;
 

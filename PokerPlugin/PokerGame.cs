@@ -21,8 +21,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using apophis.SharpIRC;
-using apophis.SharpIRC.IrcFeatures;
+using SharpIrc;
+using SharpIrc.IrcFeatures;
 using Huffelpuff;
 using Huffelpuff.Utils;
 

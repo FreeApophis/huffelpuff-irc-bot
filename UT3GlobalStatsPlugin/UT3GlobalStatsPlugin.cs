@@ -1,6 +1,6 @@
 ﻿/*
  *  UT3GlobalStatsPlugin, Access to the GameSpy Stats for UT3
- * 
+ *
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch> <http://www.apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,11 +19,12 @@
 
 using System;
 using System.Linq;
-using apophis.SharpIRC;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
 using Huffelpuff.Utils;
 using Plugin.ServiceReference;
+using SharpIrc;
 
 namespace Plugin
 {
@@ -32,7 +33,9 @@ namespace Plugin
     /// </summary>
     public class Ut3GlobalStatsPlugin : AbstractPlugin
     {
-        public Ut3GlobalStatsPlugin(IrcBot botInstance) : base(botInstance) { }
+        public Ut3GlobalStatsPlugin(IrcBot botInstance) : base(botInstance)
+        {
+        }
 
         private GameSpyClient gsClient;
         private StorageServerSoap gsStorage;

@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using apophis.SharpIRC;
+using SharpIrc;
 using Huffelpuff.Commands;
 
 namespace Huffelpuff.AccessControl

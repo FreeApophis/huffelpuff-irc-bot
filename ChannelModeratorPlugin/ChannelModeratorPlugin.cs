@@ -1,6 +1,6 @@
 /*
  *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
- * 
+ *
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,8 +19,9 @@
 
 
 using System;
-using apophis.SharpIRC;
+using SharpIrc;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
 
 namespace Plugin
@@ -31,7 +32,8 @@ namespace Plugin
     public class ChannelModeratorPlugin : AbstractPlugin
     {
         public ChannelModeratorPlugin(IrcBot botInstance) :
-            base(botInstance) { }
+            base(botInstance)
+        { }
 
         public override void Activate()
         {

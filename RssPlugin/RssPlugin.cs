@@ -1,6 +1,6 @@
 ﻿/*
  *  The Huffelpuff Irc Bot, versatile pluggable bot for IRC chats
- * 
+ *
  *  Copyright (c) 2008-2010 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -23,9 +23,10 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using apophis.SharpIRC;
-using apophis.SharpIRC.IrcFeatures;
+using SharpIrc;
+using SharpIrc.IrcFeatures;
 using Huffelpuff;
+using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
 using Huffelpuff.Properties;
 using Huffelpuff.Utils;
@@ -41,7 +42,8 @@ namespace Plugin
     public class RssPlugin : AbstractPlugin
     {
         public RssPlugin(IrcBot botInstance) :
-            base(botInstance) { }
+            base(botInstance)
+        { }
 
         private readonly Dictionary<string, RssWrapper> rssFeeds = new Dictionary<string, RssWrapper>();
 
