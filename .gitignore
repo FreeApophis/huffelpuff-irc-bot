@@ -20,4 +20,5 @@ Huffelpuff/bin/*.s3db
 Huffelpuff/bin/aiml/*
 Huffelpuff/bin/config/*
 UnitTests/bin/*
+/.vs/
 
