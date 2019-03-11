@@ -26,6 +26,7 @@ using System.Xml;
 using Huffelpuff;
 using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
+using Huffelpuff.Utils;
 using SharpIrc;
 using SharpIrc.IrcFeatures;
 
@@ -42,7 +43,7 @@ namespace Plugin
         private const string RequestBaseFr = "http://fr.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
         private const string RequestBaseIt = "http://it.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
 
-        private readonly List<string> requestBases = new List<string> { RequestBaseDe, RequestBaseEn, RequestBaseFr, RequestBaseIt };
+        private readonly List<string> _requestBases = new List<string> { RequestBaseDe, RequestBaseEn, RequestBaseFr, RequestBaseIt };
         public WikipediaPlugin(IrcBot botInstance) : base(botInstance)
         {
         }
@@ -72,8 +73,6 @@ namespace Plugin
 
         private void WikiHandler(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-
             var word = new StringBuilder();
             var first = true;
             foreach (var c in e.Data.Message)
@@ -87,12 +86,12 @@ namespace Plugin
                     word.Append(c);
                 }
             }
-            foreach (var requestBase in requestBases)
+            foreach (var requestBase in _requestBases)
             {
                 while (true)
                 {
                     var msg = GetWikiArticle(word, requestBase);
-                    BotMethods.SendMessage(SendType.Message, sendto, msg);
+                    BotMethods.SendMessage(SendType.Message, e.SendBackTo(), msg);
 
                     if (msg == null || !msg.StartsWith(Redirect)) return;
 
@@ -105,23 +104,28 @@ namespace Plugin
                 }
             }
 
-            BotMethods.SendMessage(SendType.Message, sendto, NoEntry);
+            BotMethods.SendMessage(SendType.Message, e.SendBackTo(), NoEntry);
         }
 
         private static string GetWikiArticle(StringBuilder word, string requestBase)
         {
             var document = new XmlDocument();
-            var request = WebRequest.Create(requestBase + word.ToString().Replace(' ', '_')) as HttpWebRequest;
 
-            if (request == null) return null;
+            if (WebRequest.Create(requestBase + word.ToString().Replace(' ', '_')) is HttpWebRequest request)
+            {
+                request.UserAgent = "Mozilla/5.0 (Huffelpuff)";
+                document.Load(request.GetResponse().GetResponseStream());
 
-            request.UserAgent = "Mozilla/5.0 (Huffelpuff)";
-            document.Load(request.GetResponse().GetResponseStream());
+                if (document.DocumentElement == null)
+                {
+                    return null;
+                }
 
-            if (document.DocumentElement == null) return null;
+                var text = document.DocumentElement.InnerText;
+                return FilterText(text);
+            }
 
-            var text = document.DocumentElement.InnerText;
-            return FilterText(text);
+            return null;
         }
 
         private static string FilterText(string text)

@@ -34,9 +34,9 @@ namespace Huffelpuff.AccessControl
             OptionType = optionPtr.GetType();
         }
 
-        public string OptionName { get; private set; }
-        public object OptionPtr { get; private set; }
-        public Type OptionType { get; private set; }
+        public string OptionName { get; }
+        public object OptionPtr { get; }
+        public Type OptionType { get; }
     }
 
     /// <summary>
@@ -44,19 +44,19 @@ namespace Huffelpuff.AccessControl
     /// </summary>
     public class BotConfigure
     {
-        private IrcBot bot;
+        private Dictionary<string, BotOption> _options;
 
-        private Dictionary<string, BotOption> options;
+        public IrcBot Bot { get; set; }
 
         public BotConfigure(IrcBot botInstance)
         {
-            bot = botInstance;
+            Bot = botInstance;
 
-            bot.AddCommand(new Commandlet("!options", "The command !options lists all options you can set in the bot", this.GetList, this, CommandScope.Both, "engine_list_option"));
-            bot.AddCommand(new Commandlet("!set", "The command !set <option> <value> sets the different options in the bot", this.SetOption, this, CommandScope.Both, "engine_set_option"));
-            bot.AddCommand(new Commandlet("!get", "The command !get <option> shows the set value in the bot", this.GetOption, this, CommandScope.Both, "engine_get_option"));
+            Bot.AddCommand(new Commandlet("!options", "The command !options lists all options you can set in the bot", GetList, this, CommandScope.Both, "engine_list_option"));
+            Bot.AddCommand(new Commandlet("!set", "The command !set <option> <value> sets the different options in the bot", SetOption, this, CommandScope.Both, "engine_set_option"));
+            Bot.AddCommand(new Commandlet("!get", "The command !get <option> shows the set value in the bot", GetOption, this, CommandScope.Both, "engine_get_option"));
 
-            options = new Dictionary<string, BotOption>();
+            _options = new Dictionary<string, BotOption>();
         }
 
         private void GetList(object sender, IrcEventArgs e)

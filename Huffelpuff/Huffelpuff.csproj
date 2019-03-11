@@ -157,7 +157,6 @@
     <Compile Include="Plugins\PluginManager.cs" />
     <Compile Include="Plugins\PluginSourceEnum.cs" />
     <Compile Include="Plugins\RemoteLoader.cs" />
-    <Compile Include="Plugins\RemotePlugins.cs" />
     <Compile Include="Plugins\SharedClientSide.cs" />
     <Compile Include="Plugins\SharedServerSide.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -184,6 +183,7 @@
     <Compile Include="Utils\Log.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\NullLogger.cs" />
+    <Compile Include="Utils\SendBackToExtension.cs" />
     <Compile Include="Utils\Tool.cs" />
     <Compile Include="Utils\UPnP.cs" />
     <Compile Include="Utils\WildCard.cs" />

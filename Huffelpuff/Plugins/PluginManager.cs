@@ -15,11 +15,9 @@ namespace Huffelpuff.Plugins
     /// </summary>
     public class PluginManager
     {
-        private bool started;
-        private bool autoReload = true;
-        private IList compilerErrors;
-        private bool ignoreErrors = true;
-        private PluginSourceEnum pluginSources = PluginSourceEnum.Both;
+        private bool _started;
+        private bool _autoReload = true;
+        private IList _compilerErrors;
         protected string PluginDirectory;
         protected FileSystemWatcher FileWatcher;
         protected DateTime ChangeTime = new DateTime(0);
@@ -40,7 +38,7 @@ namespace Huffelpuff.Plugins
         /// <param name="autoReload">Should auto reload on file changes</param>
         public PluginManager(string pluginRelativePath = "plugins", bool autoReload = true)
         {
-            this.autoReload = autoReload;
+            this._autoReload = autoReload;
 
             PluginDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             PluginDirectory = Path.Combine(PluginDirectory, pluginRelativePath);
@@ -101,7 +99,7 @@ namespace Huffelpuff.Plugins
         /// </summary>
         protected void ReloadThreadLoop()
         {
-            if (!started)
+            if (!_started)
             {
                 throw new InvalidOperationException("PluginManager has not been started.");
             }
@@ -122,8 +120,8 @@ namespace Huffelpuff.Plugins
         /// </summary>
         public void Start()
         {
-            started = true;
-            if (autoReload)
+            _started = true;
+            if (_autoReload)
             {
                 var dir = new DirectoryInfo(PluginDirectory);
                 if (!dir.Exists) { dir.Create(); }
@@ -144,7 +142,7 @@ namespace Huffelpuff.Plugins
         /// </summary>
         public void ReloadPlugins()
         {
-            if (!started)
+            if (!_started)
             {
                 throw new InvalidOperationException("PluginManager has not been started.");
             }
@@ -162,10 +160,7 @@ namespace Huffelpuff.Plugins
                 }
 
                 ChangeTime = new DateTime(0);
-                if (PluginsReloaded != null)
-                {
-                    PluginsReloaded(this, new EventArgs());
-                }
+                PluginsReloaded?.Invoke(this, new EventArgs());
             }
         }
 
@@ -174,14 +169,14 @@ namespace Huffelpuff.Plugins
         /// </summary>
         protected void LoadUserAssemblies()
         {
-            if (!started)
+            if (!_started)
             {
                 throw new InvalidOperationException("PluginManager has not been started.");
             }
-            compilerErrors = new ArrayList();
+            _compilerErrors = new ArrayList();
             var directory = new DirectoryInfo(PluginDirectory);
-            if (pluginSources == PluginSourceEnum.DynamicAssemblies ||
-                pluginSources == PluginSourceEnum.Both)
+            if (PluginSources == PluginSourceEnum.DynamicAssemblies ||
+                PluginSources == PluginSourceEnum.Both)
             {
                 foreach (var file in directory.GetFiles("*.dll"))
                 {
@@ -195,7 +190,7 @@ namespace Huffelpuff.Plugins
                     }
                 }
             }
-            if (pluginSources != PluginSourceEnum.DynamicCompilation && pluginSources != PluginSourceEnum.Both) return;
+            if (PluginSources != PluginSourceEnum.DynamicCompilation && PluginSources != PluginSourceEnum.Both) return;
 
             // Load all C# scripts
             {
@@ -231,19 +226,19 @@ namespace Huffelpuff.Plugins
         /// <summary>
         /// Batch loads a set of scripts of the same language
         /// </summary>
-        /// <param name="filenames">The list of script filenames to load</param>
-        private void LoadScriptBatch(string[] filenames)
+        /// <param name="fileNames">The list of script fileNames to load</param>
+        private void LoadScriptBatch(string[] fileNames)
         {
-            if (filenames.Length <= 0) return;
-            var errors = LocalLoader.LoadScripts(filenames, References);
+            if (fileNames.Length <= 0) return;
+            var errors = LocalLoader.LoadScripts(fileNames, References);
             if (errors.Count <= 0) return;
 
             // If there are compiler errors record them and the file they occurred in
             foreach (string error in errors)
             {
-                compilerErrors.Add(error);
+                _compilerErrors.Add(error);
             }
-            if (!ignoreErrors)
+            if (!IgnoreErrors)
             {
                 var aggregateErrorText = new StringBuilder();
                 foreach (string error in errors)
@@ -273,7 +268,7 @@ namespace Huffelpuff.Plugins
         {
             try
             {
-                started = false;
+                _started = false;
                 LocalLoader.Unload();
                 BeginShutdown = true;
                 while (Active)
@@ -293,16 +288,13 @@ namespace Huffelpuff.Plugins
         /// </summary>
         public bool AutoReload
         {
-            get
-            {
-                return autoReload;
-            }
+            get => _autoReload;
             set
             {
-                if (autoReload == value) return;
+                if (_autoReload == value) return;
 
-                autoReload = value;
-                if (!autoReload)
+                _autoReload = value;
+                if (!_autoReload)
                 {
                     FileWatcher.EnableRaisingEvents = false;
                     Stop();
@@ -325,32 +317,12 @@ namespace Huffelpuff.Plugins
         /// <summary>
         /// Determines whether an exception will be thrown if a compiler error occurs in a script file
         /// </summary>
-        public bool IgnoreErrors
-        {
-            get
-            {
-                return ignoreErrors;
-            }
-            set
-            {
-                ignoreErrors = value;
-            }
-        }
+        public bool IgnoreErrors { get; set; } = true;
 
         /// <summary>
         /// The type of plugin sources that will be managed by the plugin manager
         /// </summary>
-        public PluginSourceEnum PluginSources
-        {
-            get
-            {
-                return pluginSources;
-            }
-            set
-            {
-                pluginSources = value;
-            }
-        }
+        public PluginSourceEnum PluginSources { get; set; } = PluginSourceEnum.Both;
 
         /// <summary>
         /// The list of all compiler errors for all scripts.
@@ -360,11 +332,11 @@ namespace Huffelpuff.Plugins
         {
             get
             {
-                if (!started)
+                if (!_started)
                 {
                     throw new InvalidOperationException("PluginManager has not been started.");
                 }
-                return compilerErrors;
+                return _compilerErrors;
             }
         }
 
@@ -375,7 +347,7 @@ namespace Huffelpuff.Plugins
         {
             get
             {
-                if (!started)
+                if (!_started)
                 {
                     throw new InvalidOperationException("PluginManager has not been started.");
                 }
@@ -390,7 +362,7 @@ namespace Huffelpuff.Plugins
         {
             get
             {
-                if (!started)
+                if (!_started)
                 {
                     throw new InvalidOperationException("PluginManager has not been started.");
                 }
@@ -402,10 +374,10 @@ namespace Huffelpuff.Plugins
         /// Retrieves the type objects for all subclasses of the given type within the loaded plugins.
         /// </summary>
         /// <param name="baseClass">The base class</param>
-        /// <returns>All subclases</returns>
+        /// <returns>All sub classes</returns>
         public string[] GetSubclasses(string baseClass)
         {
-            if (!started)
+            if (!_started)
             {
                 throw new InvalidOperationException("PluginManager has not been started.");
             }
@@ -419,7 +391,7 @@ namespace Huffelpuff.Plugins
         /// <returns>True if this PluginManager handles the type</returns>
         public bool ManagesType(string typeName)
         {
-            if (!started)
+            if (!_started)
             {
                 throw new InvalidOperationException("PluginManager has not been started.");
             }
@@ -434,7 +406,7 @@ namespace Huffelpuff.Plugins
         /// <returns>The value of the static property</returns>
         public object GetStaticPropertyValue(string typeName, string propertyName)
         {
-            if (!started)
+            if (!_started)
             {
                 throw new InvalidOperationException("PluginManager has not been started.");
             }
@@ -450,7 +422,7 @@ namespace Huffelpuff.Plugins
         /// <returns>The return value of the method</returns>
         public object CallStaticMethod(string typeName, string methodName, object[] methodParams)
         {
-            if (!started)
+            if (!_started)
             {
                 throw new InvalidOperationException("PluginManager has not been started.");
             }
@@ -467,7 +439,7 @@ namespace Huffelpuff.Plugins
         public MarshalByRefObject CreateInstance(string typeName, BindingFlags bindingFlags,
             object[] constructorParams)
         {
-            if (!started)
+            if (!_started)
             {
                 throw new InvalidOperationException("PluginManager has not been started.");
             }

@@ -30,18 +30,15 @@ namespace Plugin
     {
         public event EventHandler Completed;
 
-        protected VotingClient Client { get; private set; }
+        protected VotingClient Client { get; }
 
-        protected IrcBot BotMethods { get; private set; }
+        protected IrcBot BotMethods { get; }
 
-        protected CertificateStorage CertificateStorage { get; private set; }
+        protected CertificateStorage CertificateStorage { get; }
 
         protected IrcEventArgs EventArgs { get; set; }
 
-        public string Channel
-        {
-            get { return EventArgs.Data.Channel; }
-        }
+        public string Channel => EventArgs.Data.Channel;
 
         protected PiVoteAction(IrcBot botMethods, VotingClient client, CertificateStorage certificateStorage, IrcEventArgs eventArgs)
         {
@@ -57,10 +54,7 @@ namespace Plugin
 
         protected void OnCompleted()
         {
-            if (Completed != null)
-            {
-                Completed(this, new EventArgs());
-            }
+            Completed?.Invoke(this, new EventArgs());
         }
 
         protected void OutTable(StringTable table)

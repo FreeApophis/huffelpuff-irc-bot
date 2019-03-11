@@ -86,11 +86,11 @@ namespace Plugin
             }
         }
 
-        private void SendFormattedItem(RssWrapper rssFeed, RssItem rssItem, string sendto)
+        private void SendFormattedItem(RssWrapper rssFeed, RssItem rssItem, string sendTo)
         {
             if (rssFeed == null || rssItem == null) { return; }
 
-            BotMethods.SendMessage(SendType.Message, sendto,
+            BotMethods.SendMessage(SendType.Message, sendTo,
                 MessageFormat.FillKeyword(
                     "%FEEDTITLE%", rssFeed.FriendlyName,
                     "%FEEDURL%", rssFeed.Url,
@@ -160,10 +160,9 @@ namespace Plugin
 
         private void SetFormat(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length < 2)
             {
-                BotMethods.SendMessage(SendType.Message, sendto, MessageFormat);
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), MessageFormat);
             }
             else
             {
@@ -182,8 +181,6 @@ namespace Plugin
 
         private void RssStatus(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-
             var lines = rssFeeds
                 .Where(k => k.Value.ErrorCount > 0)
                 .Select(r => "{0}: {1}%".Fill(r.Value.FriendlyName, 100 * r.Value.ErrorCount / r.Value.CallCount))
@@ -191,18 +188,17 @@ namespace Plugin
 
             foreach (var line in lines)
             {
-                BotMethods.SendMessage(SendType.Message, sendto, line);
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), line);
             }
         }
 
         private void ShowRss(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length < 2)
             {
                 foreach (string line in rssFeeds.Select(item => item.Value.FriendlyName).ToLines(350, ", ", "Currently checked feeds: ", "."))
                 {
-                    BotMethods.SendMessage(SendType.Message, sendto, line);
+                    BotMethods.SendMessage(SendType.Message, e.SendBackTo(), line);
                 }
                 return;
             }
@@ -211,11 +207,11 @@ namespace Plugin
                 if (rssFeeds.ContainsKey(e.Data.MessageArray[1].ToLower()))
                 {
                     var rssFeed = rssFeeds[e.Data.MessageArray[1].ToLower()];
-                    BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' has {1} Elements, last post was on: {2}.".Fill(rssFeed.FriendlyName, rssFeed.Count, rssFeed.Last));
+                    BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Feed '{0}' has {1} Elements, last post was on: {2}.".Fill(rssFeed.FriendlyName, rssFeed.Count, rssFeed.Last));
                 }
                 else
                 {
-                    BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
+                    BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
                 }
                 return;
             }
@@ -225,30 +221,29 @@ namespace Plugin
                 int index;
                 if (int.TryParse(e.Data.MessageArray[2], out index))
                 {
-                    SendFormattedItem(rssFeed, rssFeed[index], sendto);
+                    SendFormattedItem(rssFeed, rssFeed[index], e.SendBackTo());
                 }
             }
             else
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
             }
         }
 
         private void AdminRss(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             switch (e.Data.MessageArray[0].ToLower())
             {
                 case "!+rss":
                     string credentials = null;
                     if (e.Data.MessageArray.Length < 3)
                     {
-                        BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments! Try '!help !+rss'.");
+                        BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Too few arguments! Try '!help !+rss'.");
                         return;
                     }
                     if (rssFeeds.ContainsKey(e.Data.MessageArray[1].ToLower()))
                     {
-                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' already exists.".Fill(rssFeeds[e.Data.MessageArray[1].ToLower()].FriendlyName));
+                        BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Feed '{0}' already exists.".Fill(rssFeeds[e.Data.MessageArray[1].ToLower()].FriendlyName));
                         break;
                     }
                     if (e.Data.MessageArray.Length > 3)
@@ -256,23 +251,23 @@ namespace Plugin
                         credentials = e.Data.MessageArray[3];
                     }
                     rssFeeds.Add(e.Data.MessageArray[1].ToLower(), new RssWrapper(e.Data.MessageArray[1].ToLower(), e.Data.MessageArray[2], DateTime.Now, credentials));
-                    BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully added.".Fill(rssFeeds[e.Data.MessageArray[1].ToLower()].FriendlyName));
+                    BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Feed '{0}' successfully added.".Fill(rssFeeds[e.Data.MessageArray[1].ToLower()].FriendlyName));
                     break;
                 case "!-rss":
                     if (e.Data.MessageArray.Length < 2)
                     {
-                        BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments! Try '!help !-rss'.");
+                        BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Too few arguments! Try '!help !-rss'.");
                         return;
                     }
                     if (rssFeeds.ContainsKey(e.Data.MessageArray[1].ToLower()))
                     {
                         rssFeeds[e.Data.MessageArray[1].ToLower()].RemoveFeed();
                         rssFeeds.Remove(e.Data.MessageArray[1].ToLower());
-                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully removed.".Fill(e.Data.MessageArray[1].ToLower()));
+                        BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Feed '{0}' successfully removed.".Fill(e.Data.MessageArray[1].ToLower()));
                     }
                     else
                     {
-                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
+                        BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Feed '{0}' does not exists! Try '!rss'.".Fill(e.Data.MessageArray[1].ToLower()));
                     }
                     break;
                 default:

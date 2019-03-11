@@ -30,19 +30,13 @@ namespace Plugin
 {
     internal class PokerGame
     {
-        private readonly IrcBot bot;
-        private readonly string channel;
-        private bool run;
+        private readonly IrcBot _bot;
+        private readonly string _channel;
+        private bool _run;
 
-        internal string Channel
-        {
-            get
-            {
-                return channel;
-            }
-        }
+        internal string Channel => _channel;
 
-        private readonly Dictionary<char, char> suits = new Dictionary<char, char> { { 's', '♠' }, { 'c', '♣' }, { 'h', '♥' }, { 'd', '♦' } };
+        private readonly Dictionary<char, char> _suits = new Dictionary<char, char> { { 's', '♠' }, { 'c', '♣' }, { 'h', '♥' }, { 'd', '♦' } };
 
         private string ToIrcCard(string card)
         {
@@ -53,11 +47,11 @@ namespace Plugin
 
                 if (card[1] == 's' || card[1] == 'c')
                 {
-                    return IrcConstants.IrcColor + ((int)IrcColors.Black).ToString("00") + value + suits[card[1]] + IrcConstants.IrcNormal;
+                    return IrcConstants.IrcColor + ((int)IrcColors.Black).ToString("00") + value + _suits[card[1]] + IrcConstants.IrcNormal;
                 }
                 if (card[1] == 'h' || card[1] == 'd')
                 {
-                    return IrcConstants.IrcColor + ((int)IrcColors.LightRed).ToString("00") + value + suits[card[1]] + IrcConstants.IrcNormal;
+                    return IrcConstants.IrcColor + ((int)IrcColors.LightRed).ToString("00") + value + _suits[card[1]] + IrcConstants.IrcNormal;
                 }
             }
             return null;
@@ -66,29 +60,29 @@ namespace Plugin
 
         internal PokerGame(IrcBot bot, string channel)
         {
-            players = new Queue<PokerPlayer>();
+            _players = new Queue<PokerPlayer>();
             State = GameState.CleanBoard;
-            deck = new RandomDeck();
-            run = false;
+            _deck = new RandomDeck();
+            _run = false;
 
-            this.bot = bot;
-            this.channel = channel;
+            _bot = bot;
+            _channel = channel;
         }
 
         private void ResetGame()
         {
             State = GameState.CleanBoard;
-            deck.InitDeck();
-            run = false;
+            _deck.InitDeck();
+            _run = false;
         }
 
         private const int MaxPlayers = 10;
 
         private void Run()
         {
-            run = true;
+            _run = true;
 
-            while (run)
+            while (_run)
             {
                 Next();
             }
@@ -129,27 +123,27 @@ namespace Plugin
 
         private void Start()
         {
-            deck.InitDeck();
+            _deck.InitDeck();
 
-            foreach (var player in players.Where(player => player.State == PlayerState.NotYetPlaying))
+            foreach (var player in _players.Where(player => player.State == PlayerState.NotYetPlaying))
             {
                 player.State = PlayerState.Playing;
             }
 
-            foreach (var line in players.Where(p => p.State == PlayerState.Playing).Select(p => "%1 (%2, %3)".Fill(p.Nick, p.ChipStack, p.State)).ToLines(350, ", ", "{0}New Round{0}: Playing: ".Fill(IrcConstants.IrcBold), ""))
+            foreach (var line in _players.Where(p => p.State == PlayerState.Playing).Select(p => "%1 (%2, %3)".Fill(p.Nick, p.ChipStack, p.State)).ToLines(350, ", ", "{0}New Round{0}: Playing: ".Fill(IrcConstants.IrcBold), ""))
             {
-                bot.SendMessage(SendType.Notice, channel, line);
+                _bot.SendMessage(SendType.Notice, _channel, line);
             }
 
-            foreach (var player in players)
+            foreach (var player in _players)
             {
-                deck.NextCard();
-                player.PocketCards.Card1 = deck.CurrentCard;
+                _deck.NextCard();
+                player.PocketCards.Card1 = _deck.CurrentCard;
 
-                deck.NextCard();
-                player.PocketCards.Card2 = deck.CurrentCard;
+                _deck.NextCard();
+                player.PocketCards.Card2 = _deck.CurrentCard;
 
-                bot.SendMessage(SendType.Message, player.Nick, "{0}New Round{0}: Your Chips: {3} - Your Hole Cards: {1} {2}"
+                _bot.SendMessage(SendType.Message, player.Nick, "{0}New Round{0}: Your Chips: {3} - Your Hole Cards: {1} {2}"
                     .Fill(IrcConstants.IrcBold, ToIrcCard(player.PocketCards.Card1), ToIrcCard(player.PocketCards.Card2), player.ChipStack));
             }
         }
@@ -157,20 +151,20 @@ namespace Plugin
         internal bool AddPlayer(string nick)
         {
             bool result = false;
-            var before = players.Where(p => p.State != PlayerState.PausedPlaying).Count();
+            var before = _players.Count(p => p.State != PlayerState.PausedPlaying);
 
-            if (players.Count < MaxPlayers && !players.Any(p => p.Nick == nick))
+            if (_players.Count < MaxPlayers && _players.All(p => p.Nick != nick))
             {
-                players.Enqueue(new PokerPlayer(nick));
+                _players.Enqueue(new PokerPlayer(nick));
                 result = true;
             }
 
-            var after = players.Where(p => p.State != PlayerState.PausedPlaying).Count();
+            var after = _players.Count(p => p.State != PlayerState.PausedPlaying);
 
             if (before == 1 && after == 2)
             {
                 //We have two players and can start the game now
-                bot.SendMessage(SendType.Message, channel, "The poker table in channel '{0}' has started! To participate join the table with !poker-join, to leave the table use !poker-leave".Fill(channel));
+                _bot.SendMessage(SendType.Message, _channel, "The poker table in channel '{0}' has started! To participate join the table with !poker-join, to leave the table use !poker-leave".Fill(_channel));
                 Run();
             }
 
@@ -179,11 +173,11 @@ namespace Plugin
 
         internal void RemovePlayer(string nick)
         {
-            var before = players.Where(p => p.State != PlayerState.PausedPlaying).Count();
+            var before = _players.Count(p => p.State != PlayerState.PausedPlaying);
 
-            players = new Queue<PokerPlayer>(players.Where(p => p.Nick != nick));
+            _players = new Queue<PokerPlayer>(_players.Where(p => p.Nick != nick));
 
-            var after = players.Where(p => p.State != PlayerState.PausedPlaying).Count();
+            var after = _players.Count(p => p.State != PlayerState.PausedPlaying);
 
             if (before == 2 && after == 1)
             {
@@ -194,7 +188,7 @@ namespace Plugin
 
         internal bool IsPlaying(string nick)
         {
-            return players.Any(p => p.Nick == nick);
+            return _players.Any(p => p.Nick == nick);
         }
 
         private void BetRound()
@@ -207,21 +201,15 @@ namespace Plugin
             throw new NotImplementedException();
         }
 
-        private readonly RandomDeck deck;
+        private readonly RandomDeck _deck;
 
         internal GameState State { get; private set; }
 
-        private Queue<PokerPlayer> players;
+        private Queue<PokerPlayer> _players;
 
-        internal ReadOnlyCollection<PokerPlayer> Players
-        {
-            get { return new ReadOnlyCollection<PokerPlayer>(players.ToList()); }
-        }
+        internal ReadOnlyCollection<PokerPlayer> Players => new ReadOnlyCollection<PokerPlayer>(_players.ToList());
 
-        internal void NextDealer()
-        {
-            players.Enqueue(players.Dequeue());
-        }
+        internal void NextDealer() => _players.Enqueue(_players.Dequeue());
 
         internal enum GameState
         {

@@ -35,118 +35,107 @@ namespace Huffelpuff.AccessControl
     /// </summary>
     public class AccessControlList : MarshalByRefObject
     {
-        private readonly List<IdentifyUser> identifyPlugins = new List<IdentifyUser>();
+        public List<IdentifyUser> IdentifyPlugins { get; } = new List<IdentifyUser>();
 
-        public List<IdentifyUser> IdentifyPlugins
-        {
-            get { return identifyPlugins; }
-        }
-
-        // string should be invalid for nicknames, that way we can handle them in paralell without problems of group overtaking!
+        // string should be invalid for nicknames, that way we can handle them in parallel without problems of group overtaking!
         private const string GroupPrefix = "#";
 
         /// <summary>
         /// For each Group it holds the list of users
         /// </summary>
-        private readonly Dictionary<string, List<string>> groups = new Dictionary<string, List<string>>();
+        private readonly Dictionary<string, List<string>> _groups = new Dictionary<string, List<string>>();
 
         /// <summary>
         /// For each User it holds a list of all accessStrings
         /// </summary>
-        private readonly Dictionary<string, List<string>> accessList = new Dictionary<string, List<string>>();
+        private readonly Dictionary<string, List<string>> _accessList = new Dictionary<string, List<string>>();
 
         /// <summary>
         /// Possible access Strings
         /// </summary>
-        private readonly List<string> possibleAccessStrings = new List<string>();
+        private readonly List<string> _possibleAccessStrings = new List<string>();
 
-        public ReadOnlyCollection<string> PossibleAccessStrings
-        {
-            get
-            {
-                return new ReadOnlyCollection<string>(possibleAccessStrings);
-            }
-        }
+        public ReadOnlyCollection<string> PossibleAccessStrings => new ReadOnlyCollection<string>(_possibleAccessStrings);
 
-        private readonly IrcBot bot;
+        private readonly IrcBot _bot;
 
         public AccessControlList(IrcBot bot)
         {
-            this.bot = bot;
+            _bot = bot;
         }
 
-        private readonly string superUser = Settings.Default.Botmaster;
+        private readonly string _superUser = Settings.Default.Botmaster;
 
         public void Init()
         {
-            bot.AddCommand(new Commandlet("!+access", "!+access <id or" + GroupPrefix + "group> <access_string> adds the privilge to use <access_string> to user <nick>.", AccessHandler, this, CommandScope.Both, "acl_add"));
-            bot.AddCommand(new Commandlet("!-access", "!-access <id or" + GroupPrefix + "group> <access_string> removes the privilge to use <access_string> from user <nick>.", AccessHandler, this, CommandScope.Both, "acl_remove"));
-            bot.AddCommand(new Commandlet("!access", "!access lists all access_strings, which can be used to access restricted functions, they are not the same as commands. !access <id|nick|group> lists all access strings he owns by himself or inherited through a group", ListRestricted, this, CommandScope.Both));
+            _bot.AddCommand(new Commandlet("!+access", "!+access <id or" + GroupPrefix + "group> <access_string> adds the privilege to use <access_string> to user <nick>.", AccessHandler, this, CommandScope.Both, "acl_add"));
+            _bot.AddCommand(new Commandlet("!-access", "!-access <id or" + GroupPrefix + "group> <access_string> removes the privilege to use <access_string> from user <nick>.", AccessHandler, this, CommandScope.Both, "acl_remove"));
+            _bot.AddCommand(new Commandlet("!access", "!access lists all access_strings, which can be used to access restricted functions, they are not the same as commands. !access <id|nick|group> lists all access strings he owns by himself or inherited through a group", ListRestricted, this));
 
-            bot.AddCommand(new Commandlet("!groups", "!groups lists all currently active groups.", ListGroups, this, CommandScope.Both));
-            bot.AddCommand(new Commandlet("!users", "!users <group> lists all currently active users in group <group>.", ListUsers, this, CommandScope.Both));
-            bot.AddCommand(new Commandlet("!id", "!id shows all my current identifactions. !id <nick> shows their ids.", IDDelegate, this, CommandScope.Both));
+            _bot.AddCommand(new Commandlet("!groups", "!groups lists all currently active groups.", ListGroups, this));
+            _bot.AddCommand(new Commandlet("!users", "!users <group> lists all currently active users in group <group>.", ListUsers, this));
+            _bot.AddCommand(new Commandlet("!id", "!id shows all my current identifications. !id <nick> shows their ids.", IDDelegate, this));
 
-            bot.AddCommand(new Commandlet("!+group", "!+group <group> adds the new empty group <group>.", GroupHandler, this, CommandScope.Both, "group_add"));
-            bot.AddCommand(new Commandlet("!-group", "!-group <group> drops the group, all members will be lost.", GroupHandler, this, CommandScope.Both, "group_remove"));
-            bot.AddCommand(new Commandlet("!+user", "!+user <group> <user> adds the user <user> to the group <group>.", GroupHandler, this, CommandScope.Both, "group_add_user"));
-            bot.AddCommand(new Commandlet("!-user", "!-user <group> <user> removes the user <user> from the group <group>.", GroupHandler, this, CommandScope.Both, "group_remove_user"));
+            _bot.AddCommand(new Commandlet("!+group", "!+group <group> adds the new empty group <group>.", GroupHandler, this, CommandScope.Both, "group_add"));
+            _bot.AddCommand(new Commandlet("!-group", "!-group <group> drops the group, all members will be lost.", GroupHandler, this, CommandScope.Both, "group_remove"));
+            _bot.AddCommand(new Commandlet("!+user", "!+user <group> <user> adds the user <user> to the group <group>.", GroupHandler, this, CommandScope.Both, "group_add_user"));
+            _bot.AddCommand(new Commandlet("!-user", "!-user <group> <user> removes the user <user> from the group <group>.", GroupHandler, this, CommandScope.Both, "group_remove_user"));
 
-            // Get users and their accessstrings
+            // Get users and their access strings
 
-            foreach (var entry in bot.MainBotData.AclEntries)
+            foreach (var entry in _bot.MainBotData.AclEntries)
             {
-                if (!accessList.ContainsKey(entry.Identity))
+                if (!_accessList.ContainsKey(entry.Identity))
                 {
-                    accessList.Add(entry.Identity, new List<string>());
+                    _accessList.Add(entry.Identity, new List<string>());
                 }
-                accessList[entry.Identity].Add(entry.AccessString);
+                _accessList[entry.Identity].Add(entry.AccessString);
             }
 
 
             // Get Groups and Users
-            foreach (var aclGroup in bot.MainBotData.AclGroups)
+            foreach (var aclGroup in _bot.MainBotData.AclGroups)
             {
-                if (!groups.ContainsKey(aclGroup.GroupName))
+                if (!_groups.ContainsKey(aclGroup.GroupName))
                 {
-                    groups.Add(aclGroup.GroupName, new List<string>());
+                    _groups.Add(aclGroup.GroupName, new List<string>());
                 }
-                groups[aclGroup.GroupName].Add(aclGroup.GroupID);
+                _groups[aclGroup.GroupName].Add(aclGroup.GroupID);
             }
         }
 
 
         private IEnumerable<string> GetAllGroups(string nick)
         {
-            var allgroups = new List<string>();
+            var allGroups = new List<string>();
             foreach (var id in Identified(nick))
             {
-                allgroups.AddRange(GetGroups(id));
+                allGroups.AddRange(GetGroups(id));
             }
-            return allgroups;
+            return allGroups;
         }
 
         private IEnumerable<string> GetGroups(string nick)
         {
             var temp = new List<string>();
 
-            foreach (var group in groups.Keys)
+            foreach (var group in _groups.Keys)
             {
-                if (groups[group].Contains(nick))
+                if (_groups[group].Contains(nick))
                 {
                     temp.Add(group);
                 }
             }
 
-            foreach (string channel in bot.MainBotData.Channels.Select(c => c.ChannelName))
+            foreach (string channel in _bot.MainBotData.Channels.Select(c => c.ChannelName))
             {
-                var user = (NonRfcChannelUser)bot.GetChannelUser(channel, nick);
+                var user = (NonRfcChannelUser)_bot.GetChannelUser(channel, nick);
                 if (user == null) { continue; }
                 if (user.IsVoice)
                 {
                     temp.Add("#+" + channel);
                 }
-                if (bot.SupportNonRfc && user.IsHalfop)
+                if (_bot.SupportNonRfc && user.IsHalfop)
                 {
                     temp.Add("#%" + channel);
                     temp.Add("#+" + channel);
@@ -154,7 +143,7 @@ namespace Huffelpuff.AccessControl
                 if (user.IsOp)
                 {
                     temp.Add("#@" + channel);
-                    if (bot.SupportNonRfc)
+                    if (_bot.SupportNonRfc)
                     {
                         temp.Add("#%" + channel);
                     }
@@ -168,20 +157,19 @@ namespace Huffelpuff.AccessControl
 
         private void IDDelegate(object sender, IrcEventArgs e)
         {
-            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-            string nicktToID = e.Data.Nick;
+            string nickToId = e.Data.Nick;
             if (e.Data.MessageArray.Length > 1)
             {
-                nicktToID = e.Data.MessageArray[1];
+                nickToId = e.Data.MessageArray[1];
             }
 
-            foreach (string line in Identified(nicktToID).ToLines(350, ", ", "IDs of the Nick '" + nicktToID + "': ", " END."))
+            foreach (string line in Identified(nickToId).ToLines(350, ", ", "IDs of the Nick '" + nickToId + "': ", " END."))
             {
-                bot.SendMessage(SendType.Message, sendto, line);
+                _bot.SendMessage(SendType.Message, e.SendBackTo(), line);
             }
-            foreach (string line in GetAllGroups(nicktToID).ToLines(350, ", ", "Nick is in Groups: ", " END."))
+            foreach (string line in GetAllGroups(nickToId).ToLines(350, ", ", "Nick is in Groups: ", " END."))
             {
-                bot.SendMessage(SendType.Message, sendto, line);
+                _bot.SendMessage(SendType.Message, e.SendBackTo(), line);
             }
         }
 
@@ -189,18 +177,17 @@ namespace Huffelpuff.AccessControl
 
         private void AccessHandler(object sender, IrcEventArgs e)
         {
-            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length > 2)
             {
                 if (e.Data.MessageArray[0] == "!+access")
                 {
                     if (AddAccessRight(e.Data.MessageArray[1], e.Data.MessageArray[2]))
                     {
-                        bot.SendMessage(SendType.Message, sendto, "Accessright '" + e.Data.MessageArray[2] + "' added to '" + e.Data.MessageArray[1] + "'!");
+                        _bot.SendMessage(SendType.Message, e.SendBackTo(), "Access right '" + e.Data.MessageArray[2] + "' added to '" + e.Data.MessageArray[1] + "'!");
                     }
                     else
                     {
-                        bot.SendMessage(SendType.Message, sendto, "Failed to add Accessright '" + e.Data.MessageArray[2] + "' to '" + e.Data.MessageArray[1] + "'! (Try !access for a list of access strings)");
+                        _bot.SendMessage(SendType.Message, e.SendBackTo(), "Failed to add access right '" + e.Data.MessageArray[2] + "' to '" + e.Data.MessageArray[1] + "'! (Try !access for a list of access strings)");
                     }
                     return;
                 }
@@ -208,32 +195,31 @@ namespace Huffelpuff.AccessControl
                 {
                     if (RemoveAccessRight(e.Data.MessageArray[1], e.Data.MessageArray[2]))
                     {
-                        bot.SendMessage(SendType.Message, sendto, "Accessright '" + e.Data.MessageArray[2] + "' removed from '" + e.Data.MessageArray[1] + "'!");
+                        _bot.SendMessage(SendType.Message, e.SendBackTo(), "Access right '" + e.Data.MessageArray[2] + "' removed from '" + e.Data.MessageArray[1] + "'!");
                     }
                     else
                     {
-                        bot.SendMessage(SendType.Message, sendto, "Failed to remove Accessright '" + e.Data.MessageArray[2] + "' from '" + e.Data.MessageArray[1] + "'!");
+                        _bot.SendMessage(SendType.Message, e.SendBackTo(), "Failed to remove Access right '" + e.Data.MessageArray[2] + "' from '" + e.Data.MessageArray[1] + "'!");
                     }
                 }
                 return;
             }
-            bot.SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
+            _bot.SendMessage(SendType.Message, e.SendBackTo(), "Too few arguments! Try !help.");
         }
 
         private void GroupHandler(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length > 1)
             {
                 if (e.Data.MessageArray[0] == "!+group")
                 {
                     if (AddGroup(EnsureGroupPrefix(e.Data.MessageArray[1])))
                     {
-                        bot.SendMessage(SendType.Message, sendto, "Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "' added!");
+                        _bot.SendMessage(SendType.Message, e.SendBackTo(), "Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "' added!");
                     }
                     else
                     {
-                        bot.SendMessage(SendType.Message, sendto, "Failed to add group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
+                        _bot.SendMessage(SendType.Message, e.SendBackTo(), "Failed to add group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                     }
 
                     return;
@@ -242,11 +228,11 @@ namespace Huffelpuff.AccessControl
                 {
                     if (RemoveGroup(EnsureGroupPrefix(e.Data.MessageArray[1])))
                     {
-                        bot.SendMessage(SendType.Message, sendto, "Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "' removed!");
+                        _bot.SendMessage(SendType.Message, e.SendBackTo(), "Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "' removed!");
                     }
                     else
                     {
-                        bot.SendMessage(SendType.Message, sendto, "Failed to remove group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
+                        _bot.SendMessage(SendType.Message, e.SendBackTo(), "Failed to remove group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                     }
                     return;
                 }
@@ -258,33 +244,33 @@ namespace Huffelpuff.AccessControl
                     case "!+user":
                         if (AddUser(EnsureGroupPrefix(e.Data.MessageArray[1]), e.Data.MessageArray[2]))
                         {
-                            bot.SendMessage(SendType.Message, sendto, "User '" + e.Data.MessageArray[2] + "' added to group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
+                            _bot.SendMessage(SendType.Message, e.SendBackTo(), "User '" + e.Data.MessageArray[2] + "' added to group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                         }
                         else
                         {
-                            bot.SendMessage(SendType.Message, sendto, "Failed to add user '" + e.Data.MessageArray[2] + "' to group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
+                            _bot.SendMessage(SendType.Message, e.SendBackTo(), "Failed to add user '" + e.Data.MessageArray[2] + "' to group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                         }
                         return;
                     case "!-user":
                         if (RemoveUser(EnsureGroupPrefix(e.Data.MessageArray[1]), e.Data.MessageArray[2]))
                         {
-                            bot.SendMessage(SendType.Message, sendto, "User '" + e.Data.MessageArray[2] + "' removed from group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
+                            _bot.SendMessage(SendType.Message, e.SendBackTo(), "User '" + e.Data.MessageArray[2] + "' removed from group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                         }
                         else
                         {
-                            bot.SendMessage(SendType.Message, sendto, "Failed to remove user '" + e.Data.MessageArray[2] + "' from group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
+                            _bot.SendMessage(SendType.Message, e.SendBackTo(), "Failed to remove user '" + e.Data.MessageArray[2] + "' from group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "'!");
                         }
                         return;
                 }
             }
-            bot.SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
+            _bot.SendMessage(SendType.Message, e.SendBackTo(), "Too few arguments! Try !help.");
         }
 
         private bool AddGroup(string group)
         {
-            if (!groups.ContainsKey(group))
+            if (!_groups.ContainsKey(group))
             {
-                groups.Add(group, new List<string>());
+                _groups.Add(group, new List<string>());
                 return true;
             }
             return false;
@@ -292,13 +278,13 @@ namespace Huffelpuff.AccessControl
 
         private bool RemoveGroup(string group)
         {
-            if (groups.ContainsKey(group))
+            if (_groups.ContainsKey(group))
             {
-                groups.Remove(group);
+                _groups.Remove(group);
 
-                var toRemove = bot.MainBotData.AclGroups.Where(g => g.GroupName == group).ToArray();
-                bot.MainBotData.AclGroups.DeleteAllOnSubmit(toRemove);
-                bot.MainBotData.SubmitChanges();
+                var toRemove = _bot.MainBotData.AclGroups.Where(g => g.GroupName == group).ToArray();
+                _bot.MainBotData.AclGroups.DeleteAllOnSubmit(toRemove);
+                _bot.MainBotData.SubmitChanges();
                 return true;
             }
             return false;
@@ -306,15 +292,15 @@ namespace Huffelpuff.AccessControl
 
         private bool AddUser(string group, string id)
         {
-            if (groups.ContainsKey(group))
+            if (_groups.ContainsKey(group))
             {
-                if (!groups[group].Contains(id))
+                if (!_groups[group].Contains(id))
                 {
-                    groups[group].Add(id);
+                    _groups[group].Add(id);
 
                     var aclGroup = new AclGroup { GroupID = id, GroupName = group };
-                    bot.MainBotData.AclGroups.InsertOnSubmit(aclGroup);
-                    bot.MainBotData.SubmitChanges();
+                    _bot.MainBotData.AclGroups.InsertOnSubmit(aclGroup);
+                    _bot.MainBotData.SubmitChanges();
 
                     return true;
                 }
@@ -324,15 +310,15 @@ namespace Huffelpuff.AccessControl
 
         private bool RemoveUser(string group, string id)
         {
-            if (groups.ContainsKey(group))
+            if (_groups.ContainsKey(group))
             {
-                if (groups[group].Contains(id))
+                if (_groups[group].Contains(id))
                 {
-                    groups[group].Remove(id);
+                    _groups[group].Remove(id);
 
-                    var toRemove = bot.MainBotData.AclGroups.Where(g => g.GroupName == group && g.GroupID == id).ToArray();
-                    bot.MainBotData.AclGroups.DeleteAllOnSubmit(toRemove);
-                    bot.MainBotData.SubmitChanges();
+                    var toRemove = _bot.MainBotData.AclGroups.Where(g => g.GroupName == group && g.GroupID == id).ToArray();
+                    _bot.MainBotData.AclGroups.DeleteAllOnSubmit(toRemove);
+                    _bot.MainBotData.SubmitChanges();
 
                     return true;
                 }
@@ -342,47 +328,45 @@ namespace Huffelpuff.AccessControl
 
         private void ListRestricted(object sender, IrcEventArgs e)
         {
-            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-
             if (e.Data.MessageArray.Length > 1)
             {
                 string id = e.Data.MessageArray[1];
-                ListAccessrights(sendto, id);
+                ListAccessRights(e.SendBackTo(), id);
             }
             else
             {
-                foreach (string line in possibleAccessStrings.ToLines(350))
+                foreach (string line in _possibleAccessStrings.ToLines(350))
                 {
-                    bot.SendMessage(SendType.Message, sendto, line);
+                    _bot.SendMessage(SendType.Message, e.SendBackTo(), line);
                 }
             }
         }
 
 
-        void ListAccessrights(string sendto, string name)
+        void ListAccessRights(string sendTo, string name)
         {
             var message = new List<string>();
-            if (name.StartsWith(GroupPrefix) && accessList.ContainsKey(name))
+            if (name.StartsWith(GroupPrefix) && _accessList.ContainsKey(name))
             {
-                message.AddRange(accessList[name].ToLines(350, ", ", "Group Rights: ", ""));
+                message.AddRange(_accessList[name].ToLines(350, ", ", "Group Rights: ", ""));
             }
             else
             {
                 foreach (string id in Identified(name))
                 {
-                    if (id == superUser)
+                    if (id == _superUser)
                     {
-                        message.Add("User Rights from '{0}': This user is botmaster".Fill(id));
+                        message.Add("User Rights from '{0}': This user is bot master".Fill(id));
                     }
-                    else if (accessList.ContainsKey(id))
+                    else if (_accessList.ContainsKey(id))
                     {
-                        message.AddRange(accessList[id].ToLines(350, ", ", "User Rights from '{0}': ".Fill(id), ""));
+                        message.AddRange(_accessList[id].ToLines(350, ", ", "User Rights from '{0}': ".Fill(id), ""));
                     }
-                    foreach (string @group in GetGroups(id))
+                    foreach (string group in GetGroups(id))
                     {
-                        if (accessList.ContainsKey(@group))
+                        if (_accessList.ContainsKey(group))
                         {
-                            message.AddRange(accessList[@group].ToLines(350, ", ", "inherited rights from group '{0}': ".Fill(@group), ""));
+                            message.AddRange(_accessList[group].ToLines(350, ", ", "inherited rights from group '{0}': ".Fill(group), ""));
                         }
                     }
                 }
@@ -396,52 +380,50 @@ namespace Huffelpuff.AccessControl
             }
             foreach (var line in message.ToLines(350, " / "))
             {
-                bot.SendMessage(SendType.Message, sendto, line);
+                _bot.SendMessage(SendType.Message, sendTo, line);
             }
         }
 
         private void ListGroups(object sender, IrcEventArgs e)
         {
-            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-            foreach (string line in groups.Keys.ToLines(350, ", ", "Groups: ", " (Special Groups: #@, #%, #+, #*) END."))
+            foreach (string line in _groups.Keys.ToLines(350, ", ", "Groups: ", " (Special Groups: #@, #%, #+, #*) END."))
             {
-                bot.SendMessage(SendType.Message, sendto, line);
+                _bot.SendMessage(SendType.Message, e.SendBackTo(), line);
             }
         }
 
         private void ListUsers(object sender, IrcEventArgs e)
         {
-            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length > 1)
             {
-                if (groups.ContainsKey(EnsureGroupPrefix(e.Data.MessageArray[1])))
+                if (_groups.ContainsKey(EnsureGroupPrefix(e.Data.MessageArray[1])))
                 {
-                    foreach (string line in groups[EnsureGroupPrefix(e.Data.MessageArray[1])].ToLines(350, ", ", "Users in Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "': ", " END."))
+                    foreach (string line in _groups[EnsureGroupPrefix(e.Data.MessageArray[1])].ToLines(350, ", ", "Users in Group '" + EnsureGroupPrefix(e.Data.MessageArray[1]) + "': ", " END."))
                     {
-                        bot.SendMessage(SendType.Message, sendto, line);
+                        _bot.SendMessage(SendType.Message, e.SendBackTo(), line);
                     }
                 }
                 else
                 {
-                    bot.SendMessage(SendType.Message, sendto, "No such group.");
+                    _bot.SendMessage(SendType.Message, e.SendBackTo(), "No such group.");
                 }
             }
             else
             {
-                bot.SendMessage(SendType.Message, sendto, "Too few arguments! Try !help.");
+                _bot.SendMessage(SendType.Message, e.SendBackTo(), "Too few arguments! Try !help.");
             }
         }
 
         public void AddAccessString(string accessString)
         {
-            if (!possibleAccessStrings.Contains(accessString))
-                possibleAccessStrings.Add(accessString);
+            if (!_possibleAccessStrings.Contains(accessString))
+                _possibleAccessStrings.Add(accessString);
         }
 
         public List<string> NoAccessList()
         {
-            var temp = new List<string>(possibleAccessStrings);
-            foreach (var acc in from sublist in accessList.Values from acc in sublist where temp.Contains(acc) select acc)
+            var temp = new List<string>(_possibleAccessStrings);
+            foreach (var acc in from sublist in _accessList.Values from acc in sublist where temp.Contains(acc) select acc)
             {
                 temp.Remove(acc);
             }
@@ -450,22 +432,22 @@ namespace Huffelpuff.AccessControl
 
         public void AddIdentifyPlugin(IdentifyUser identify)
         {
-            identifyPlugins.Add(identify);
+            IdentifyPlugins.Add(identify);
         }
 
         public bool AddAccessRight(string identity, string accessString)
         {
-            if (possibleAccessStrings.Contains(accessString))
+            if (_possibleAccessStrings.Contains(accessString))
             {
-                if (!accessList.ContainsKey(identity))
+                if (!_accessList.ContainsKey(identity))
                 {
-                    accessList.Add(identity, new List<string>());
+                    _accessList.Add(identity, new List<string>());
                 }
-                accessList[identity].Add(accessString);
+                _accessList[identity].Add(accessString);
 
                 var aclEntry = new AclEntry { AccessString = accessString, Identity = identity };
-                bot.MainBotData.AclEntries.InsertOnSubmit(aclEntry);
-                bot.MainBotData.SubmitChanges();
+                _bot.MainBotData.AclEntries.InsertOnSubmit(aclEntry);
+                _bot.MainBotData.SubmitChanges();
 
                 return true;
             }
@@ -474,13 +456,13 @@ namespace Huffelpuff.AccessControl
 
         public bool RemoveAccessRight(string identity, string accessString)
         {
-            if (accessList.ContainsKey(identity))
+            if (_accessList.ContainsKey(identity))
             {
-                accessList[identity].Remove(accessString);
+                _accessList[identity].Remove(accessString);
 
-                var toRemove = bot.MainBotData.AclEntries.Where(e => e.Identity == identity && e.AccessString == accessString).ToArray();
-                bot.MainBotData.AclEntries.DeleteAllOnSubmit(toRemove);
-                bot.MainBotData.SubmitChanges();
+                var toRemove = _bot.MainBotData.AclEntries.Where(e => e.Identity == identity && e.AccessString == accessString).ToArray();
+                _bot.MainBotData.AclEntries.DeleteAllOnSubmit(toRemove);
+                _bot.MainBotData.SubmitChanges();
 
                 return true;
             }
@@ -489,22 +471,22 @@ namespace Huffelpuff.AccessControl
 
         public bool Access(string nick, string command, bool warn)
         {
-            if (Identified(nick).Any(id => (id == superUser) || (TryAccess(id, command))))
+            if (Identified(nick).Any(id => (id == _superUser) || (TryAccess(id, command))))
             {
                 return true;
             }
             if (warn)
             {
-                bot.SendMessage(SendType.Message, nick, "you tried to access function: '" + command + "' but you don't have the required privileges");
+                _bot.SendMessage(SendType.Message, nick, "you tried to access function: '" + command + "' but you don't have the required privileges");
             }
             return false;
         }
 
         private bool TryAccess(string id, string command)
         {
-            if (accessList.ContainsKey(id))
+            if (_accessList.ContainsKey(id))
             {
-                if (accessList[id].Any(accessString => command == accessString))
+                if (_accessList[id].Any(accessString => command == accessString))
                 {
                     return true;
                 }
@@ -512,9 +494,9 @@ namespace Huffelpuff.AccessControl
 
             foreach (string group in GetGroups(id))
             {
-                if (accessList.ContainsKey(group))
+                if (_accessList.ContainsKey(group))
                 {
-                    if (accessList[group].Any(accessString => command == accessString))
+                    if (_accessList[group].Any(accessString => command == accessString))
                     {
                         return true;
                     }
@@ -534,7 +516,7 @@ namespace Huffelpuff.AccessControl
                 return ids;
             }
 
-            ids.AddRange(identifyPlugins.Select(id => id.Identified(nick)).Where(idstring => idstring != null));
+            ids.AddRange(IdentifyPlugins.Select(id => id.Identified(nick)).Where(id => id != null));
 
             return ids;
         }

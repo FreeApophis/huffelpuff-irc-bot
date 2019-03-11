@@ -85,12 +85,6 @@ namespace Plugin
             OnCompleted();
         }
 
-        public override string StatusMessage
-        {
-            get
-            {
-                return "Listing votes : " + (this.Client.CurrentOperation == null ? "Unknown status." : this.Client.CurrentOperation.Text) + ".";
-            }
-        }
+        public override string StatusMessage => "Listing votes : " + (this.Client.CurrentOperation == null ? "Unknown status." : this.Client.CurrentOperation.Text) + ".";
     }
 }

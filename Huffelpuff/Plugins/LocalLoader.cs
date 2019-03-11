@@ -11,8 +11,8 @@ namespace Huffelpuff.Plugins
     /// </summary>
     public class LocalLoader : MarshalByRefObject
     {
-        AppDomain appDomain;
-        readonly RemoteLoader remoteLoader;
+        AppDomain _appDomain;
+        readonly RemoteLoader _remoteLoader;
 
         /// <summary>
         /// Creates the local loader class
@@ -30,16 +30,16 @@ namespace Huffelpuff.Plugins
                 ShadowCopyDirectories = pluginDirectory
             };
 
-            appDomain = AppDomain.CreateDomain("Plugins", null, setup);
+            _appDomain = AppDomain.CreateDomain("Plugins", null, setup);
 
             // Used for a Cross AppDomain Singleton
             //appDomain.SetData("PersistentMemoryInstance", PersistentMemory.Instance);
-            appDomain.AssemblyResolve += AppDomainAssemblyResolve;
+            _appDomain.AssemblyResolve += AppDomainAssemblyResolve;
 
-            appDomain.UnhandledException += AppDomainUnhandledException;
-            appDomain.InitializeLifetimeService();
+            _appDomain.UnhandledException += AppDomainUnhandledException;
+            _appDomain.InitializeLifetimeService();
 
-            remoteLoader = (RemoteLoader)appDomain.CreateInstanceAndUnwrap("Huffelpuff", "Huffelpuff.Plugins.RemoteLoader");
+            _remoteLoader = (RemoteLoader)_appDomain.CreateInstanceAndUnwrap("Huffelpuff", "Huffelpuff.Plugins.RemoteLoader");
         }
 
         static Assembly AppDomainAssemblyResolve(object sender, ResolveEventArgs args)
@@ -61,7 +61,7 @@ namespace Huffelpuff.Plugins
         /// <param name="filename">The filename of the assembly to load</param>
         public void LoadAssembly(string filename)
         {
-            remoteLoader.LoadAssembly(filename);
+            _remoteLoader.LoadAssembly(filename);
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Huffelpuff.Plugins
         /// <returns>A list of compiler errors if any</returns>
         public IList LoadScript(string filename, IList references)
         {
-            return remoteLoader.LoadScript(filename, references);
+            return _remoteLoader.LoadScript(filename, references);
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace Huffelpuff.Plugins
         /// <returns>A list of compiler errors if any</returns>
         public IList LoadScripts(IList filenames, IList references)
         {
-            return remoteLoader.LoadScripts(filenames, references);
+            return _remoteLoader.LoadScripts(filenames, references);
         }
 
         /// <summary>
@@ -111,8 +111,8 @@ namespace Huffelpuff.Plugins
         /// </summary>
         public void Unload()
         {
-            AppDomain.Unload(appDomain);
-            appDomain = null;
+            AppDomain.Unload(_appDomain);
+            _appDomain = null;
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Huffelpuff.Plugins
         {
             get
             {
-                return remoteLoader.GetAssemblies();
+                return _remoteLoader.GetAssemblies();
             }
         }
 
@@ -133,7 +133,7 @@ namespace Huffelpuff.Plugins
         {
             get
             {
-                return remoteLoader.GetTypes();
+                return _remoteLoader.GetTypes();
             }
         }
 
@@ -144,7 +144,7 @@ namespace Huffelpuff.Plugins
         /// <returns>All subclases</returns>
         public string[] GetSubclasses(string baseClass)
         {
-            return remoteLoader.GetSubclasses(baseClass);
+            return _remoteLoader.GetSubclasses(baseClass);
         }
 
         /// <summary>
@@ -154,7 +154,7 @@ namespace Huffelpuff.Plugins
         /// <returns>True if this PluginManager handles the type</returns>
         public bool ManagesType(string typeName)
         {
-            return remoteLoader.ManagesType(typeName);
+            return _remoteLoader.ManagesType(typeName);
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace Huffelpuff.Plugins
         /// <returns>The value of the static property</returns>
         public object GetStaticPropertyValue(string typeName, string propertyName)
         {
-            return remoteLoader.GetStaticPropertyValue(typeName, propertyName);
+            return _remoteLoader.GetStaticPropertyValue(typeName, propertyName);
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace Huffelpuff.Plugins
         /// <returns>The return value of the method</returns>
         public object CallStaticMethod(string typeName, string methodName, object[] methodParams)
         {
-            return remoteLoader.CallStaticMethod(typeName, methodName, methodParams);
+            return _remoteLoader.CallStaticMethod(typeName, methodName, methodParams);
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace Huffelpuff.Plugins
         /// <returns>The constructed object</returns>
         public MarshalByRefObject CreateInstance(string typeName, BindingFlags bindingFlags, object[] constructorParams)
         {
-            return remoteLoader.CreateInstance(typeName, bindingFlags, constructorParams);
+            return _remoteLoader.CreateInstance(typeName, bindingFlags, constructorParams);
         }
     }
 }

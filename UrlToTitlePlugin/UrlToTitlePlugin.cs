@@ -59,12 +59,12 @@ namespace Plugin
             base.Deactivate();
         }
 
-        private readonly Regex titleMatch = new Regex("(?<=<title>)[^<]*(?=</title>)", RegexOptions.IgnoreCase);
-        private readonly Regex fMatch = new Regex("(?<=f=)[0-9]*");
-        private readonly Regex tMatch = new Regex("(?<=t=)[0-9]*");
+        private readonly Regex _titleMatch = new Regex("(?<=<title>)[^<]*(?=</title>)", RegexOptions.IgnoreCase);
+        private readonly Regex _fMatch = new Regex("(?<=f=)[0-9]*");
+        private readonly Regex _tMatch = new Regex("(?<=t=)[0-9]*");
         private readonly Regex charsetMatch = new Regex("(?<=charset=)[^(;\" )]*", RegexOptions.IgnoreCase);
 
-        private readonly Regex whiteSpaceMatch = new Regex(@"\s+");
+        private readonly Regex _whiteSpaceMatch = new Regex(@"\s+");
 
         private void BotEventsOnChannelMessage(object sender, IrcEventArgs e)
         {
@@ -77,8 +77,8 @@ namespace Plugin
                 {
                     if (e.Data.Message.StartsWith("http://forum.piratenpartei.ch/viewtopic.php?f="))
                     {
-                        var f = fMatch.Match(e.Data.Message).Value;
-                        var t = tMatch.Match(e.Data.Message).Value;
+                        var f = _fMatch.Match(e.Data.Message).Value;
+                        var t = _tMatch.Match(e.Data.Message).Value;
                         var item = GetTopic("http://forum.piratenpartei.ch/rss.php?f=" + f + "&t=" + t + "&start=last", lang, false);
                         if (lang == "fr")
                         {
@@ -95,7 +95,7 @@ namespace Plugin
 
                         string page = client.DownloadString(e.Data.Message);
                         string charset = charsetMatch.Match(page).Value;
-                        string title = whiteSpaceMatch.Replace(titleMatch.Match(page).Value, " ");
+                        string title = _whiteSpaceMatch.Replace(_titleMatch.Match(page).Value, " ");
 
                         if (charset.ToLower() != "")
                         {
@@ -104,7 +104,7 @@ namespace Plugin
                             var utfBytes = Encoding.Convert(enc, new UTF8Encoding(), encBytes);
                             var utfChars = Encoding.UTF8.GetChars(utfBytes);
 
-                            title = new String(utfChars);
+                            title = new string(utfChars);
                         }
 
                         title = RemoveNewLine(title);
@@ -159,11 +159,11 @@ namespace Plugin
             return item;
         }
 
-        private readonly Regex hackMatch = new Regex("(?<=Antworten )[0-9]*", RegexOptions.IgnoreCase);
+        private readonly Regex _hackMatch = new Regex("(?<=Antworten )[0-9]*", RegexOptions.IgnoreCase);
 
         private string GetHack(string s)
         {
-            return hackMatch.Match(s).Value;
+            return _hackMatch.Match(s).Value;
         }
 
         private static ForumItem GetItem(XmlReader feed)

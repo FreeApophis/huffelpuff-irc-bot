@@ -37,8 +37,8 @@ namespace Plugin
 
         public override void Activate()
         {
-            BotMethods.AddCommand(new Commandlet("!kick", "kicks an annyoing user", KickUser, this));
-            BotMethods.AddCommand(new Commandlet("!ban", "ban an annyoing user", BanUser, this));
+            BotMethods.AddCommand(new Commandlet("!kick", "kicks an annoying user", KickUser, this));
+            BotMethods.AddCommand(new Commandlet("!ban", "ban an annoying user", BanUser, this));
 
             base.Activate();
         }

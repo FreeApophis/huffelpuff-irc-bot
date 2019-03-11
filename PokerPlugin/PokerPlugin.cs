@@ -38,7 +38,7 @@ namespace Plugin
         readonly Dictionary<string, PokerGame> games = new Dictionary<string, PokerGame>();
         public override void Activate()
         {
-            BotMethods.AddCommand(new Commandlet("!poker-join", "Join the Pokertable and participate in the game the next round.", JoinGame, this, CommandScope.Public));
+            BotMethods.AddCommand(new Commandlet("!poker-join", "Join the poker table and participate in the game the next round.", JoinGame, this, CommandScope.Public));
             BotMethods.AddCommand(new Commandlet("!poker-leave", "Stand up and leave the table, this also happens when you Part the Channel or Quit.", PartGame, this, CommandScope.Public));
             BotMethods.AddCommand(new Commandlet("!bet", "!bet <money> will bet that amount money.", BetHandler, this, CommandScope.Public));
             BotMethods.AddCommand(new Commandlet("!fold", "With !fold you make an unconditional fold of your cards.", FoldHandler, this, CommandScope.Public));

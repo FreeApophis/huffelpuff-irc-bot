@@ -169,11 +169,9 @@ namespace Plugin
 
         private void Utf8Handler(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-
             if (e.Data.MessageArray.Length > 1)
             {
-                BotMethods.SendMessage(SendType.Message, sendto,
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(),
                                        e.Data.MessageArray[1] == "äöü"
                                            ? "Yes your text is in UTF-8"
                                            : "Sorry thats either not UTF-8 or you havent typed !utf8 äöü");
@@ -183,14 +181,13 @@ namespace Plugin
 
         private void TagHandler(object sender, IrcEventArgs e)
         {
-            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray[0].ToLower() == "!+tag")
             {
                 var tag = new TwitterTag { Tag = e.Data.MessageArray[1] };
                 TwitterData.TwitterTags.InsertOnSubmit(tag);
                 TwitterData.SubmitChanges();
 
-                BotMethods.SendMessage(SendType.Message, sendto, "Automatic Search activated: " + "http://search.twitter.com/search?q=" + HttpUtility.UrlEncode(e.Data.MessageArray[1]));
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Automatic Search activated: " + "http://search.twitter.com/search?q=" + HttpUtility.UrlEncode(e.Data.MessageArray[1]));
             }
             if (e.Data.MessageArray[0].ToLower() == "!-tag")
             {
@@ -207,63 +204,58 @@ namespace Plugin
             {
                 foreach (string line in TwitterData.TwitterTags.Select(t => t.Tag).ToLines(350))
                 {
-                    BotMethods.SendMessage(SendType.Message, sendto, line);
+                    BotMethods.SendMessage(SendType.Message, e.SendBackTo(), line);
                 }
             }
         }
 
         private void TweetStatsHandler(object sender, IrcEventArgs e)
         {
-            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length < 2)
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments for 'add'! Try '!help !tweet-stats'.");
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Too few arguments for 'add'! Try '!help !tweet-stats'.");
                 return;
             }
 
             if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower()))
             {
                 var user = twitterAccounts[e.Data.MessageArray[1].ToLower()].GetStats();
-                BotMethods.SendMessage(SendType.Message, sendto, "Followers: {0}, Friends: {1}, Statuses: {2}, -> {3}"
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Followers: {0}, Friends: {1}, Statuses: {2}, -> {3}"
                                        .Fill(user.FollowersCount, user.FriendsCount, user.StatusesCount, user.Url));
             }
             else
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "I dont know a tweet with the name: {0}.".Fill(e.Data.MessageArray[1].ToLower()));
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "I don't know a tweet with the name: {0}.".Fill(e.Data.MessageArray[1].ToLower()));
             }
         }
 
         private void TweetTrendsHandler(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-
             var trends = TwitterWrapper.GetTrends();
             if (trends != null)
             {
                 foreach (var line in trends.Trends.Select(trend => trend.Name).ToLines(350, ", ", "Current trends: ", ""))
                 {
-                    BotMethods.SendMessage(SendType.Message, sendto, line);
+                    BotMethods.SendMessage(SendType.Message, e.SendBackTo(), line);
                 }
-                return;
             }
         }
 
         private void TweetHandler(object sender, IrcEventArgs e)
         {
-            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             bool retweet = (e.Data.MessageArray[0] == "!retweet");
 
             if (e.Data.MessageArray.Length < 2)
             {
                 foreach (string line in twitterAccounts.Select(item => item.Value.FriendlyName).ToLines(350, ", ", "Tweet accounts loaded: ", "."))
                 {
-                    BotMethods.SendMessage(SendType.Message, sendto, line);
+                    BotMethods.SendMessage(SendType.Message, e.SendBackTo(), line);
                 }
                 return;
             }
             if (e.Data.MessageArray.Length < 3 && twitterAccounts.Count > 1)
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "Nothing to say? I don't tweet empty messages! try !help !tweet.");
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Nothing to say? I don't tweet empty messages! try !help !tweet.");
                 return;
             }
             if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower()))
@@ -274,17 +266,17 @@ namespace Plugin
                     status = Shorten(status);
                     if (status.Length > 140)
                     {
-                        BotMethods.SendMessage(SendType.Message, sendto, "Error on feed '{0}': Message longer than 140 characters(140+{1}), try rewriting and tweet again, nothing was tweeted.".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName, status.Length - 140));
+                        BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Error on feed '{0}': Message longer than 140 characters(140+{1}), try rewriting and tweet again, nothing was tweeted.".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName, status.Length - 140));
                         return;
                     }
                     var returnFromTwitter = twitterAccounts[e.Data.MessageArray[1].ToLower()].SendStatus(status, retweet);
 
 
-                    if (IsFail(Enumerable.Repeat(returnFromTwitter, 1), sendto, twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName))
+                    if (IsFail(Enumerable.Repeat(returnFromTwitter, 1), e.SendBackTo(), twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName))
                     {
                         if (!twitterAccounts[e.Data.MessageArray[1].ToLower()].IsAuthenticated)
                         {
-                            BotMethods.SendMessage(SendType.Message, sendto, "Error on feed '{0}': not authorized yet. New token generated: Please go to {1} validate account and activate account by !tweet-pin {0} <pin>".Fill(e.Data.MessageArray[1].ToLower(), twitterAccounts[e.Data.MessageArray[1].ToLower()].AuthenticationUrl));
+                            BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Error on feed '{0}': not authorized yet. New token generated: Please go to {1} validate account and activate account by !tweet-pin {0} <pin>".Fill(e.Data.MessageArray[1].ToLower(), twitterAccounts[e.Data.MessageArray[1].ToLower()].AuthenticationUrl));
                         }
 
                     }
@@ -292,7 +284,7 @@ namespace Plugin
                     {
                         string statusUrl = "http://twitter.com/{0}/status/{1}".Fill(returnFromTwitter.Author.ScreenName, returnFromTwitter.Id);
 
-                        BotMethods.SendMessage(SendType.Message, sendto, "successfully tweeted on feed '{0}', Link to Status: {1}".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName, statusUrl));
+                        BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "successfully tweeted on feed '{0}', Link to Status: {1}".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName, statusUrl));
                         return;
                     }
                     return;
@@ -308,94 +300,90 @@ namespace Plugin
             }
             else
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "I dont know a tweet with the name: {0}.".Fill(e.Data.MessageArray[1].ToLower()));
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "I don't know a tweet with the name: {0}.".Fill(e.Data.MessageArray[1].ToLower()));
                 return;
             }
         }
 
         private void PinHandler(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length < 3)
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments: use !tweet-pin <feed> <pin>");
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Too few arguments: use !tweet-pin <feed> <pin>");
                 return;
             }
-            var friendlyname = e.Data.MessageArray[1];
-            if (!twitterAccounts.ContainsKey(friendlyname))
+            var friendlyName = e.Data.MessageArray[1];
+            if (!twitterAccounts.ContainsKey(friendlyName))
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "Unknown feed: use !tweet-pin <feed> <pin>");
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Unknown feed: use !tweet-pin <feed> <pin>");
                 return;
             }
             var pin = e.Data.MessageArray[2];
 
-            if (twitterAccounts[friendlyname].AuthenticateToken(pin))
+            if (twitterAccounts[friendlyName].AuthenticateToken(pin))
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' is authorized, you can tweet now!".Fill(friendlyname));
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Feed '{0}' is authorized, you can tweet now!".Fill(friendlyName));
             }
             else
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' authorization failed. Please go to {1} validate account and activate account by !tweet-pin {0} <pin>".Fill(friendlyname, twitterAccounts[friendlyname].AuthenticationUrl));
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Feed '{0}' authorization failed. Please go to {1} validate account and activate account by !tweet-pin {0} <pin>".Fill(friendlyName, twitterAccounts[friendlyName].AuthenticationUrl));
             }
         }
 
         private void ResetHandler(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length < 2)
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments! Try '!help !tweet-reset'.");
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Too few arguments! Try '!help !tweet-reset'.");
             }
 
             TwitterWrapper account;
             if (twitterAccounts.TryGetValue(e.Data.MessageArray[1].ToLower(), out account))
             {
                 account.ResetToken();
-                BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully reset. Please go to {1} validate account and activate account by !tweet-pin {0} <pin>".Fill(account.FriendlyName, account.AuthenticationUrl));
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Feed '{0}' successfully reset. Please go to {1} validate account and activate account by !tweet-pin {0} <pin>".Fill(account.FriendlyName, account.AuthenticationUrl));
             }
             else
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "No account with name '{0}'.".Fill(e.Data.MessageArray[1].ToLower()));
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "No account with name '{0}'.".Fill(e.Data.MessageArray[1].ToLower()));
             }
         }
 
         private void AdminTweet(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-
             switch (e.Data.MessageArray[0].ToLower())
             {
                 case "!+tweet":
                     if (e.Data.MessageArray.Length < 3)
                     {
-                        BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments for 'add'! Try '!help !+tweet'.");
+                        BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Too few arguments for 'add'! Try '!help !+tweet'.");
                         return;
                     }
                     var friendlyname = e.Data.MessageArray[1].ToLower();
                     if (twitterAccounts.ContainsKey(friendlyname))
                     {
-                        BotMethods.SendMessage(SendType.Message, sendto, "Tweet '{0}' already exists.".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName));
+                        BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Tweet '{0}' already exists.".Fill(twitterAccounts[e.Data.MessageArray[1].ToLower()].FriendlyName));
                         break;
                     }
                     twitterAccounts.Add(friendlyname, new TwitterWrapper(friendlyname, e.Data.MessageArray[2]));
 
-                    BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully added. Please go to {1} validate account and activate account by !tweet-pin {0} <pin>".Fill(friendlyname, twitterAccounts[friendlyname].AuthenticationUrl));
+                    BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Feed '{0}' successfully added. Please go to {1} validate account and activate account by !tweet-pin {0} <pin>".Fill(friendlyname, twitterAccounts[friendlyname].AuthenticationUrl));
                     break;
                 case "!-tweet":
                     if (e.Data.MessageArray.Length < 2)
                     {
-                        BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments for 'remove'! Try '!help !-tweet'.");
+                        BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Too few arguments for 'remove'! Try '!help !-tweet'.");
                         return;
                     }
                     if (twitterAccounts.ContainsKey(e.Data.MessageArray[1].ToLower()))
                     {
                         twitterAccounts[e.Data.MessageArray[1].ToLower()].RemoveAccount();
                         twitterAccounts.Remove(e.Data.MessageArray[1].ToLower());
-                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' successfully removed.".Fill(e.Data.MessageArray[1].ToLower()));
+                        BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Feed '{0}' successfully removed.".Fill(e.Data.MessageArray[1].ToLower()));
                     }
                     else
                     {
-                        BotMethods.SendMessage(SendType.Message, sendto, "Feed '{0}' does not exists! Try '!tweet'.".Fill(e.Data.MessageArray[1].ToLower()));
+                        BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Feed '{0}' does not exists! Try '!tweet'.".Fill(e.Data.MessageArray[1].ToLower()));
                     }
                     break;
                 default:
@@ -403,7 +391,7 @@ namespace Plugin
             }
         }
 
-        bool IsFail(IEnumerable<TwitterStatus> statuses, string sendto, string feedname = "none")
+        bool IsFail(IEnumerable<TwitterStatus> statuses, string sendTo, string feedName = "none")
         {
             var service = new TwitterService();
             bool result = false;
@@ -421,7 +409,7 @@ namespace Plugin
                     TwitterStatus mention = statuses.First();
                     if (mention.Id == 0)
                     {
-                        errorMessage = "Unsuccessfull deserialization";
+                        errorMessage = "Unsuccessful deserialization";
                         result = true;
                     }
 
@@ -437,7 +425,7 @@ namespace Plugin
 
             if (result)
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "Error on feed '{0}': {1}".Fill(feedname, errorMessage));
+                BotMethods.SendMessage(SendType.Message, sendTo, "Error on feed '{0}': {1}".Fill(feedName, errorMessage));
             }
 
             return result;
@@ -461,14 +449,14 @@ namespace Plugin
             }
         }
 
-        private void SendFormattedItem(TwitterWrapper twitteraccount, TwitterStatus mention, string sendto)
+        private void SendFormattedItem(TwitterWrapper twitterAccount, TwitterStatus mention, string sendTo)
         {
-            if (twitteraccount == null || mention == null) return;
+            if (twitterAccount == null || mention == null) return;
 
-            BotMethods.SendMessage(SendType.Message, sendto,
+            BotMethods.SendMessage(SendType.Message, sendTo,
                 MessageFormat.FillKeyword(
-                    "%FEEDNAME%", twitteraccount.FriendlyName,
-                    "%ACCOUNT%", twitteraccount.User,
+                    "%FEEDNAME%", twitterAccount.FriendlyName,
+                    "%ACCOUNT%", twitterAccount.User,
                     "%TWEET%", Colorize(mention.Text),
                     "%ID%", mention.Id.ToString(),
                     "%SCREENNAME%", mention.User.ScreenName,
@@ -487,10 +475,9 @@ namespace Plugin
 
         private void SetFormat(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length < 2)
             {
-                BotMethods.SendMessage(SendType.Message, sendto, MessageFormat);
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), MessageFormat);
             }
             else
             {

@@ -22,6 +22,7 @@ using System;
 using Huffelpuff;
 using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
+using Huffelpuff.Utils;
 using SharpIrc;
 
 namespace Plugin
@@ -35,7 +36,7 @@ namespace Plugin
         {
         }
 
-        private MagicCalculator magicCalculator;
+        private MagicCalculator _magicCalculator;
 
         public override string AboutHelp()
         {
@@ -44,7 +45,7 @@ namespace Plugin
 
         public override void Init()
         {
-            magicCalculator = new MagicCalculator();
+            _magicCalculator = new MagicCalculator();
             base.Init();
         }
 
@@ -66,34 +67,32 @@ namespace Plugin
 
         private void CalculateHandler(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             try
             {
-                var result = magicCalculator.Calculate(e.Data.Message.Substring(6));
+                var result = _magicCalculator.Calculate(e.Data.Message.Substring(6));
                 if (result.HasResult)
                 {
-                    BotMethods.SendMessage(SendType.Message, sendto, "[" + result.ResultProvider.ToString()[0] + "] Result: " + result.Result);
+                    BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "[" + result.ResultProvider.ToString()[0] + "] Result: " + result.Result);
                     return;
                 }
             }
             catch (Exception) { }
-            BotMethods.SendMessage(SendType.Message, sendto, "no result!");
+            BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "no result!");
         }
 
         private void EvaluateHandler(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             try
             {
-                var result = magicCalculator.Calculate(e.Data.Message.Substring(6));
+                var result = _magicCalculator.Calculate(e.Data.Message.Substring(6));
                 if (result.HasResult)
                 {
-                    BotMethods.SendMessage(SendType.Message, sendto, "[" + result.ResultProvider.ToString()[0] + "] Result: " + result.CompleteEquation);
+                    BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "[" + result.ResultProvider.ToString()[0] + "] Result: " + result.CompleteEquation);
                     return;
                 }
             }
             catch (Exception) { }
-            BotMethods.SendMessage(SendType.Message, sendto, "no result!");
+            BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "no result!");
         }
 
     }

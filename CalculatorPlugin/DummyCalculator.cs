@@ -22,9 +22,9 @@ using System;
 
 namespace Plugin
 {
-    internal class DummyCalculator : WebCalculator
+    internal class DummyCalculator : ICalculator
     {
-        public override CalculationResult Calculate(string equation)
+        public CalculationResult Calculate(string equation)
         {
             throw new NotImplementedException();
         }

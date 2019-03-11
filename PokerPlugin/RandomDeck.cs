@@ -25,33 +25,33 @@ namespace Plugin
 {
     internal class RandomDeck
     {
-        private List<string> cards;
-        private readonly Random random;
+        private List<string> _cards;
+        private readonly Random _random;
 
         public string CurrentCard { get; private set; }
 
         internal RandomDeck()
         {
-            cards = new List<string>(Hand.CardTable);
-            random = new Random();
+            _cards = new List<string>(Hand.CardTable);
+            _random = new Random();
         }
 
         public void InitDeck()
         {
-            cards = new List<string>(Hand.CardTable);
+            _cards = new List<string>(Hand.CardTable);
             CurrentCard = null;
         }
 
         public void NextCard()
         {
-            if (cards.Count == 0)
+            if (_cards.Count == 0)
             {
                 CurrentCard = null;
             }
             else
             {
-                CurrentCard = cards[random.Next(cards.Count)];
-                cards.Remove(CurrentCard);
+                CurrentCard = _cards[_random.Next(_cards.Count)];
+                _cards.Remove(CurrentCard);
             }
         }
     }

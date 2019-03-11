@@ -30,7 +30,7 @@ namespace Huffelpuff.AccessControl
         public PasswordIdentify(IrcBot bot)
             : base(bot)
         {
-            bot.AddCommand(new Commandlet("!identify", "You can identify your nick with the !identify <pass> command", PassHandler, this, CommandScope.Both));
+            bot.AddCommand(new Commandlet("!identify", "You can identify your nick with the !identify <pass> command", PassHandler, this));
         }
 
         public void PassHandler(object sender, IrcEventArgs e)

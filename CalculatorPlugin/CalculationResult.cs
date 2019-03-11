@@ -32,11 +32,11 @@ namespace Plugin
 
     public class CalculationResult
     {
-        public bool HasResult { get; private set; }
-        public bool IsComplex { get; private set; }
+        public bool HasResult { get; }
+        public bool IsComplex { get; }
 
-        public string Result { get; private set; }
-        public string CompleteEquation { get; private set; }
+        public string Result { get; }
+        public string CompleteEquation { get; }
 
         public ResultProvider ResultProvider { get; private set; }
 
@@ -49,11 +49,11 @@ namespace Plugin
             IsComplex = false;
         }
 
-        public CalculationResult(string resultonly, string complete, bool isComplex)
+        public CalculationResult(string resultOnly, string complete, bool isComplex)
         {
             SetResultProvider();
 
-            Result = resultonly.Trim();
+            Result = resultOnly.Trim();
             CompleteEquation = complete.Trim();
 
             HasResult = true;
@@ -64,6 +64,7 @@ namespace Plugin
         {
             var trace = new StackTrace();
             var t = trace.GetFrame(2).GetMethod().DeclaringType;
+
             if (t == typeof(GoogleCalculator))
             {
                 ResultProvider = ResultProvider.Google;

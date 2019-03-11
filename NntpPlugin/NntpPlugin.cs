@@ -309,21 +309,21 @@ namespace Plugin
         }
 
 
-        private void Stats(IrcEventArgs e, TimeSpan timeframe)
+        private void Stats(IrcEventArgs e, TimeSpan timeFrame)
         {
             var posts = 0;
             var groups = new Dictionary<string, int>();
             var posters = new Dictionary<string, int>();
-            foreach (var @group in nntpCache)
+            foreach (var group in nntpCache)
             {
-                foreach (var article in @group.Value.Where(article => article.Value.Header.Date > (DateTime.Now - timeframe)))
+                foreach (var article in group.Value.Where(article => article.Value.Header.Date > (DateTime.Now - timeFrame)))
                 {
                     posts++;
-                    if (!groups.ContainsKey(@group.Key))
+                    if (!groups.ContainsKey(group.Key))
                     {
-                        groups.Add(@group.Key, 0);
+                        groups.Add(group.Key, 0);
                     }
-                    groups[@group.Key]++;
+                    groups[group.Key]++;
                     if (!posters.ContainsKey(article.Value.Header.From))
                     {
                         posters.Add(article.Value.Header.From, 0);

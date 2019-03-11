@@ -41,9 +41,9 @@ namespace Huffelpuff.Plugins
         /// <param name="fullname">The full filename of the assembly to load</param>
         public void LoadAssembly(string fullname)
         {
-            string filename = Path.GetFileNameWithoutExtension(fullname);
+            string fileName = Path.GetFileNameWithoutExtension(fullname);
 
-            Assembly assembly = Assembly.Load(filename);
+            Assembly assembly = Assembly.Load(fileName);
             AssemblyList.Add(assembly);
             foreach (Type loadedType in assembly.GetTypes())
             {
@@ -86,15 +86,15 @@ namespace Huffelpuff.Plugins
         /// <summary>
         /// Loads the scripts into the remote domain
         /// </summary>
-        /// <param name="filenames">The filenames of the scripts to load</param>
+        /// <param name="fileNames">The file names of the scripts to load</param>
         /// <param name="references">The dll references to compile with</param>
         /// <returns>A list of compiler errors if any</returns>
-        public IList LoadScripts(IList filenames, IList references)
+        public IList LoadScripts(IList fileNames, IList references)
         {
             var assemblyFactory = new AssemblyFactory();
             try
             {
-                Assembly scriptAssembly = assemblyFactory.CreateAssembly(filenames, references);
+                Assembly scriptAssembly = assemblyFactory.CreateAssembly(fileNames, references);
                 AssemblyList.Add(scriptAssembly);
                 foreach (Type loadedType in scriptAssembly.GetTypes())
                 {
@@ -145,7 +145,7 @@ namespace Huffelpuff.Plugins
         /// Retrieves the type objects for all subclasses of the given type within the loaded plugins.
         /// </summary>
         /// <param name="baseClass">The base class</param>
-        /// <returns>All subclases</returns>
+        /// <returns>All sub classes</returns>
         public string[] GetSubclasses(string baseClass)
         {
             Type baseClassType = Type.GetType(baseClass) ?? GetTypeByName(baseClass);

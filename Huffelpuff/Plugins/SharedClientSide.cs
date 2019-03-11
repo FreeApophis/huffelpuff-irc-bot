@@ -17,13 +17,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
 using SharpIrc;
-using SharpIrc.IrcClient;
 using SharpIrc.IrcClient.EventArgs;
 using SharpIrc.IrcConnection;
-using SharpIrc.IrcFeatures;
 using SharpIrc.IrcFeatures.EventArgs;
+using System;
 
 namespace Huffelpuff.Plugins
 {
@@ -32,77 +30,77 @@ namespace Huffelpuff.Plugins
     /// </summary>
     public class SharedClientSide : MarshalByRefObject
     {
-        private readonly SharedServerSide serverSide;
+        private readonly SharedServerSide _serverSide;
 
         public SharedClientSide(IrcBot botInstance)
         {
-            serverSide = new SharedServerSide(botInstance);
+            _serverSide = new SharedServerSide(botInstance);
 
-            serverSide.OnAdmin += HandleOnAdmin;
-            serverSide.OnAutoConnectError += HandleOnAutoConnectError;
-            serverSide.OnAway += HandleOnAway;
-            serverSide.OnBan += HandleOnBan;
-            serverSide.OnChannelAction += HandleOnChannelAction;
-            serverSide.OnChannelActiveSynced += HandleOnChannelActiveSynced;
-            serverSide.OnChannelMessage += HandleOnChannelMessage;
-            serverSide.OnChannelModeChange += HandleOnChannelModeChange;
-            serverSide.OnChannelNotice += HandleOnChannelNotice;
-            serverSide.OnChannelPassiveSynced += HandleOnChannelPassiveSynced;
-            serverSide.OnConnected += HandleOnConnected;
-            serverSide.OnConnecting += HandleOnConnecting;
-            serverSide.OnConnectionError += HandleOnConnectionError;
-            serverSide.OnCtcpReply += HandleOnCtcpReply;
-            serverSide.OnCtcpRequest += HandleOnCtcpRequest;
-            serverSide.OnDccChatReceiveLineEvent += HandleOnDccChatReceiveLineEvent;
-            serverSide.OnDccChatRequestEvent += HandleOnDccChatRequestEvent;
-            serverSide.OnDccChatSentLineEvent += HandleOnDccChatSentLineEvent;
-            serverSide.OnDccChatStartEvent += HandleOnDccChatStartEvent;
-            serverSide.OnDccChatStopEvent += HandleOnDccChatStopEvent;
-            serverSide.OnDccSendReceiveBlockEvent += HandleOnDccSendReceiveBlockEvent;
-            serverSide.OnDccSendRequestEvent += HandleOnDccSendRequestEvent;
-            serverSide.OnDccSendSentBlockEvent += HandleOnDccSendSentBlockEvent;
-            serverSide.OnDccSendStartEvent += HandleOnDccSendStartEvent;
-            serverSide.OnDccSendStopEvent += HandleOnDccSendStopEvent;
-            serverSide.OnDeadmin += HandleOnDeadmin;
-            serverSide.OnDehalfop += HandleOnDehalfop;
-            serverSide.OnDeop += HandleOnDeop;
-            serverSide.OnDeowner += HandleOnDeowner;
-            serverSide.OnDevoice += HandleOnDevoice;
-            serverSide.OnDisconnected += HandleOnDisconnected;
-            serverSide.OnDisconnecting += HandleOnDisconnecting;
-            serverSide.OnError += HandleOnError;
-            serverSide.OnErrorMessage += HandleOnErrorMessage;
-            serverSide.OnHalfop += HandleOnHalfop;
-            serverSide.OnInvite += HandleOnInvite;
-            serverSide.OnJoin += HandleOnJoin;
-            serverSide.OnKick += HandleOnKick;
-            serverSide.OnList += HandleOnList;
-            serverSide.OnModeChange += HandleOnModeChange;
-            serverSide.OnMotd += HandleOnMotd;
-            serverSide.OnNames += HandleOnNames;
-            serverSide.OnNickChange += HandleOnNickChange;
-            serverSide.OnNowAway += HandleOnNowAway;
-            serverSide.OnOp += HandleOnOp;
-            serverSide.OnOwner += HandleOnOwner;
-            serverSide.OnPart += HandleOnPart;
-            serverSide.OnPing += HandleOnPing;
-            serverSide.OnPong += HandleOnPong;
-            serverSide.OnQueryAction += HandleOnQueryAction;
-            serverSide.OnQueryMessage += HandleOnQueryMessage;
-            serverSide.OnQueryNotice += HandleOnQueryNotice;
-            serverSide.OnQuit += HandleOnQuit;
-            serverSide.OnRawMessage += HandleOnRawMessage;
-            serverSide.OnReadLine += HandleOnReadLine;
-            serverSide.OnRegistered += HandleOnRegistered;
-            serverSide.OnTopic += HandleOnTopic;
-            serverSide.OnTopicChange += HandleOnTopicChange;
-            serverSide.OnUnAway += HandleOnUnAway;
-            serverSide.OnUnban += HandleOnUnban;
-            serverSide.OnUserModeChange += HandleOnUserModeChange;
-            serverSide.OnVoice += HandleOnVoice;
-            serverSide.OnWho += HandleOnWho;
-            serverSide.OnWriteLine += HandleOnWriteLine;
-            serverSide.SupportNonRfcChanged += HandleSupportNonRfcChanged;
+            _serverSide.OnAdmin += HandleOnAdmin;
+            _serverSide.OnAutoConnectError += HandleOnAutoConnectError;
+            _serverSide.OnAway += HandleOnAway;
+            _serverSide.OnBan += HandleOnBan;
+            _serverSide.OnChannelAction += HandleOnChannelAction;
+            _serverSide.OnChannelActiveSynced += HandleOnChannelActiveSynced;
+            _serverSide.OnChannelMessage += HandleOnChannelMessage;
+            _serverSide.OnChannelModeChange += HandleOnChannelModeChange;
+            _serverSide.OnChannelNotice += HandleOnChannelNotice;
+            _serverSide.OnChannelPassiveSynced += HandleOnChannelPassiveSynced;
+            _serverSide.OnConnected += HandleOnConnected;
+            _serverSide.OnConnecting += HandleOnConnecting;
+            _serverSide.OnConnectionError += HandleOnConnectionError;
+            _serverSide.OnCtcpReply += HandleOnCtcpReply;
+            _serverSide.OnCtcpRequest += HandleOnCtcpRequest;
+            _serverSide.OnDccChatReceiveLineEvent += HandleOnDccChatReceiveLineEvent;
+            _serverSide.OnDccChatRequestEvent += HandleOnDccChatRequestEvent;
+            _serverSide.OnDccChatSentLineEvent += HandleOnDccChatSentLineEvent;
+            _serverSide.OnDccChatStartEvent += HandleOnDccChatStartEvent;
+            _serverSide.OnDccChatStopEvent += HandleOnDccChatStopEvent;
+            _serverSide.OnDccSendReceiveBlockEvent += HandleOnDccSendReceiveBlockEvent;
+            _serverSide.OnDccSendRequestEvent += HandleOnDccSendRequestEvent;
+            _serverSide.OnDccSendSentBlockEvent += HandleOnDccSendSentBlockEvent;
+            _serverSide.OnDccSendStartEvent += HandleOnDccSendStartEvent;
+            _serverSide.OnDccSendStopEvent += HandleOnDccSendStopEvent;
+            _serverSide.OnDeadmin += HandleOnDeadmin;
+            _serverSide.OnDehalfop += HandleOnDehalfop;
+            _serverSide.OnDeop += HandleOnDeop;
+            _serverSide.OnDeowner += HandleOnDeowner;
+            _serverSide.OnDevoice += HandleOnDevoice;
+            _serverSide.OnDisconnected += HandleOnDisconnected;
+            _serverSide.OnDisconnecting += HandleOnDisconnecting;
+            _serverSide.OnError += HandleOnError;
+            _serverSide.OnErrorMessage += HandleOnErrorMessage;
+            _serverSide.OnHalfop += HandleOnHalfop;
+            _serverSide.OnInvite += HandleOnInvite;
+            _serverSide.OnJoin += HandleOnJoin;
+            _serverSide.OnKick += HandleOnKick;
+            _serverSide.OnList += HandleOnList;
+            _serverSide.OnModeChange += HandleOnModeChange;
+            _serverSide.OnMotd += HandleOnMotd;
+            _serverSide.OnNames += HandleOnNames;
+            _serverSide.OnNickChange += HandleOnNickChange;
+            _serverSide.OnNowAway += HandleOnNowAway;
+            _serverSide.OnOp += HandleOnOp;
+            _serverSide.OnOwner += HandleOnOwner;
+            _serverSide.OnPart += HandleOnPart;
+            _serverSide.OnPing += HandleOnPing;
+            _serverSide.OnPong += HandleOnPong;
+            _serverSide.OnQueryAction += HandleOnQueryAction;
+            _serverSide.OnQueryMessage += HandleOnQueryMessage;
+            _serverSide.OnQueryNotice += HandleOnQueryNotice;
+            _serverSide.OnQuit += HandleOnQuit;
+            _serverSide.OnRawMessage += HandleOnRawMessage;
+            _serverSide.OnReadLine += HandleOnReadLine;
+            _serverSide.OnRegistered += HandleOnRegistered;
+            _serverSide.OnTopic += HandleOnTopic;
+            _serverSide.OnTopicChange += HandleOnTopicChange;
+            _serverSide.OnUnAway += HandleOnUnAway;
+            _serverSide.OnUnban += HandleOnUnban;
+            _serverSide.OnUserModeChange += HandleOnUserModeChange;
+            _serverSide.OnVoice += HandleOnVoice;
+            _serverSide.OnWho += HandleOnWho;
+            _serverSide.OnWriteLine += HandleOnWriteLine;
+            _serverSide.SupportNonRfcChanged += HandleSupportNonRfcChanged;
         }
 
         public override object InitializeLifetimeService()
@@ -112,73 +110,73 @@ namespace Huffelpuff.Plugins
 
         public void Unload()
         {
-            serverSide.Unload();
+            _serverSide.Unload();
 
-            serverSide.OnAdmin -= HandleOnAdmin;
-            serverSide.OnAutoConnectError -= HandleOnAutoConnectError;
-            serverSide.OnAway -= HandleOnAway;
-            serverSide.OnBan -= HandleOnBan;
-            serverSide.OnChannelAction -= HandleOnChannelAction;
-            serverSide.OnChannelActiveSynced -= HandleOnChannelActiveSynced;
-            serverSide.OnChannelMessage -= HandleOnChannelMessage;
-            serverSide.OnChannelModeChange -= HandleOnChannelModeChange;
-            serverSide.OnChannelNotice -= HandleOnChannelNotice;
-            serverSide.OnChannelPassiveSynced -= HandleOnChannelPassiveSynced;
-            serverSide.OnConnected -= HandleOnConnected;
-            serverSide.OnConnecting -= HandleOnConnecting;
-            serverSide.OnConnectionError -= HandleOnConnectionError;
-            serverSide.OnCtcpReply -= HandleOnCtcpReply;
-            serverSide.OnCtcpRequest -= HandleOnCtcpRequest;
-            serverSide.OnDccChatReceiveLineEvent -= HandleOnDccChatReceiveLineEvent;
-            serverSide.OnDccChatRequestEvent -= HandleOnDccChatRequestEvent;
-            serverSide.OnDccChatSentLineEvent -= HandleOnDccChatSentLineEvent;
-            serverSide.OnDccChatStartEvent -= HandleOnDccChatStartEvent;
-            serverSide.OnDccChatStopEvent -= HandleOnDccChatStopEvent;
-            serverSide.OnDccSendReceiveBlockEvent -= HandleOnDccSendReceiveBlockEvent;
-            serverSide.OnDccSendRequestEvent -= HandleOnDccSendRequestEvent;
-            serverSide.OnDccSendSentBlockEvent -= HandleOnDccSendSentBlockEvent;
-            serverSide.OnDccSendStartEvent -= HandleOnDccSendStartEvent;
-            serverSide.OnDccSendStopEvent -= HandleOnDccSendStopEvent;
-            serverSide.OnDeadmin -= HandleOnDeadmin;
-            serverSide.OnDehalfop -= HandleOnDehalfop;
-            serverSide.OnDeop -= HandleOnDeop;
-            serverSide.OnDeowner -= HandleOnDeowner;
-            serverSide.OnDevoice -= HandleOnDevoice;
-            serverSide.OnDisconnected -= HandleOnDisconnected;
-            serverSide.OnDisconnecting -= HandleOnDisconnecting;
-            serverSide.OnError -= HandleOnError;
-            serverSide.OnErrorMessage -= HandleOnErrorMessage;
-            serverSide.OnHalfop -= HandleOnHalfop;
-            serverSide.OnInvite -= HandleOnInvite;
-            serverSide.OnJoin -= HandleOnJoin;
-            serverSide.OnKick -= HandleOnKick;
-            serverSide.OnList -= HandleOnList;
-            serverSide.OnModeChange -= HandleOnModeChange;
-            serverSide.OnMotd -= HandleOnMotd;
-            serverSide.OnNames -= HandleOnNames;
-            serverSide.OnNickChange -= HandleOnNickChange;
-            serverSide.OnNowAway -= HandleOnNowAway;
-            serverSide.OnOp -= HandleOnOp;
-            serverSide.OnOwner -= HandleOnOwner;
-            serverSide.OnPart -= HandleOnPart;
-            serverSide.OnPing -= HandleOnPing;
-            serverSide.OnPong -= HandleOnPong;
-            serverSide.OnQueryAction -= HandleOnQueryAction;
-            serverSide.OnQueryMessage -= HandleOnQueryMessage;
-            serverSide.OnQueryNotice -= HandleOnQueryNotice;
-            serverSide.OnQuit -= HandleOnQuit;
-            serverSide.OnRawMessage -= HandleOnRawMessage;
-            serverSide.OnReadLine -= HandleOnReadLine;
-            serverSide.OnRegistered -= HandleOnRegistered;
-            serverSide.OnTopic -= HandleOnTopic;
-            serverSide.OnTopicChange -= HandleOnTopicChange;
-            serverSide.OnUnAway -= HandleOnUnAway;
-            serverSide.OnUnban -= HandleOnUnban;
-            serverSide.OnUserModeChange -= HandleOnUserModeChange;
-            serverSide.OnVoice -= HandleOnVoice;
-            serverSide.OnWho -= HandleOnWho;
-            serverSide.OnWriteLine -= HandleOnWriteLine;
-            serverSide.SupportNonRfcChanged -= HandleSupportNonRfcChanged;
+            _serverSide.OnAdmin -= HandleOnAdmin;
+            _serverSide.OnAutoConnectError -= HandleOnAutoConnectError;
+            _serverSide.OnAway -= HandleOnAway;
+            _serverSide.OnBan -= HandleOnBan;
+            _serverSide.OnChannelAction -= HandleOnChannelAction;
+            _serverSide.OnChannelActiveSynced -= HandleOnChannelActiveSynced;
+            _serverSide.OnChannelMessage -= HandleOnChannelMessage;
+            _serverSide.OnChannelModeChange -= HandleOnChannelModeChange;
+            _serverSide.OnChannelNotice -= HandleOnChannelNotice;
+            _serverSide.OnChannelPassiveSynced -= HandleOnChannelPassiveSynced;
+            _serverSide.OnConnected -= HandleOnConnected;
+            _serverSide.OnConnecting -= HandleOnConnecting;
+            _serverSide.OnConnectionError -= HandleOnConnectionError;
+            _serverSide.OnCtcpReply -= HandleOnCtcpReply;
+            _serverSide.OnCtcpRequest -= HandleOnCtcpRequest;
+            _serverSide.OnDccChatReceiveLineEvent -= HandleOnDccChatReceiveLineEvent;
+            _serverSide.OnDccChatRequestEvent -= HandleOnDccChatRequestEvent;
+            _serverSide.OnDccChatSentLineEvent -= HandleOnDccChatSentLineEvent;
+            _serverSide.OnDccChatStartEvent -= HandleOnDccChatStartEvent;
+            _serverSide.OnDccChatStopEvent -= HandleOnDccChatStopEvent;
+            _serverSide.OnDccSendReceiveBlockEvent -= HandleOnDccSendReceiveBlockEvent;
+            _serverSide.OnDccSendRequestEvent -= HandleOnDccSendRequestEvent;
+            _serverSide.OnDccSendSentBlockEvent -= HandleOnDccSendSentBlockEvent;
+            _serverSide.OnDccSendStartEvent -= HandleOnDccSendStartEvent;
+            _serverSide.OnDccSendStopEvent -= HandleOnDccSendStopEvent;
+            _serverSide.OnDeadmin -= HandleOnDeadmin;
+            _serverSide.OnDehalfop -= HandleOnDehalfop;
+            _serverSide.OnDeop -= HandleOnDeop;
+            _serverSide.OnDeowner -= HandleOnDeowner;
+            _serverSide.OnDevoice -= HandleOnDevoice;
+            _serverSide.OnDisconnected -= HandleOnDisconnected;
+            _serverSide.OnDisconnecting -= HandleOnDisconnecting;
+            _serverSide.OnError -= HandleOnError;
+            _serverSide.OnErrorMessage -= HandleOnErrorMessage;
+            _serverSide.OnHalfop -= HandleOnHalfop;
+            _serverSide.OnInvite -= HandleOnInvite;
+            _serverSide.OnJoin -= HandleOnJoin;
+            _serverSide.OnKick -= HandleOnKick;
+            _serverSide.OnList -= HandleOnList;
+            _serverSide.OnModeChange -= HandleOnModeChange;
+            _serverSide.OnMotd -= HandleOnMotd;
+            _serverSide.OnNames -= HandleOnNames;
+            _serverSide.OnNickChange -= HandleOnNickChange;
+            _serverSide.OnNowAway -= HandleOnNowAway;
+            _serverSide.OnOp -= HandleOnOp;
+            _serverSide.OnOwner -= HandleOnOwner;
+            _serverSide.OnPart -= HandleOnPart;
+            _serverSide.OnPing -= HandleOnPing;
+            _serverSide.OnPong -= HandleOnPong;
+            _serverSide.OnQueryAction -= HandleOnQueryAction;
+            _serverSide.OnQueryMessage -= HandleOnQueryMessage;
+            _serverSide.OnQueryNotice -= HandleOnQueryNotice;
+            _serverSide.OnQuit -= HandleOnQuit;
+            _serverSide.OnRawMessage -= HandleOnRawMessage;
+            _serverSide.OnReadLine -= HandleOnReadLine;
+            _serverSide.OnRegistered -= HandleOnRegistered;
+            _serverSide.OnTopic -= HandleOnTopic;
+            _serverSide.OnTopicChange -= HandleOnTopicChange;
+            _serverSide.OnUnAway -= HandleOnUnAway;
+            _serverSide.OnUnban -= HandleOnUnban;
+            _serverSide.OnUserModeChange -= HandleOnUserModeChange;
+            _serverSide.OnVoice -= HandleOnVoice;
+            _serverSide.OnWho -= HandleOnWho;
+            _serverSide.OnWriteLine -= HandleOnWriteLine;
+            _serverSide.SupportNonRfcChanged -= HandleSupportNonRfcChanged;
         }
 
         public event EventHandler<AdminEventArgs> OnAdmin;
@@ -249,392 +247,327 @@ namespace Huffelpuff.Plugins
 
         internal void HandleOnAdmin(object sender, AdminEventArgs e)
         {
-            if (OnAdmin != null)
-                OnAdmin(this, e);
+            OnAdmin?.Invoke(this, e);
         }
 
         internal void HandleOnAutoConnectError(object sender, AutoConnectErrorEventArgs e)
         {
-            if (OnAutoConnectError != null)
-                OnAutoConnectError(this, e);
+            OnAutoConnectError?.Invoke(this, e);
         }
 
         internal void HandleOnAway(object sender, AwayEventArgs e)
         {
-            if (OnAway != null)
-                OnAway(this, e);
+            OnAway?.Invoke(this, e);
         }
 
         internal void HandleOnBan(object sender, BanEventArgs e)
         {
-            if (OnBan != null)
-                OnBan(this, e);
+            OnBan?.Invoke(this, e);
         }
 
         internal void HandleOnChannelAction(object sender, ActionEventArgs e)
         {
-            if (OnChannelAction != null)
-                OnChannelAction(this, e);
+            OnChannelAction?.Invoke(this, e);
         }
 
         internal void HandleOnChannelActiveSynced(object sender, IrcEventArgs e)
         {
-            if (OnChannelActiveSynced != null)
-                OnChannelActiveSynced(this, e);
+            OnChannelActiveSynced?.Invoke(this, e);
         }
 
         internal void HandleOnChannelMessage(object sender, IrcEventArgs e)
         {
-            if (OnChannelMessage != null)
-                OnChannelMessage(this, e);
+            OnChannelMessage?.Invoke(this, e);
         }
 
         internal void HandleOnChannelModeChange(object sender, IrcEventArgs e)
         {
-            if (OnChannelModeChange != null)
-                OnChannelModeChange(this, e);
+            OnChannelModeChange?.Invoke(this, e);
         }
 
         internal void HandleOnChannelNotice(object sender, IrcEventArgs e)
         {
-            if (OnChannelNotice != null)
-                OnChannelNotice(this, e);
+            OnChannelNotice?.Invoke(this, e);
         }
 
         internal void HandleOnChannelPassiveSynced(object sender, IrcEventArgs e)
         {
-            if (OnChannelPassiveSynced != null)
-                OnChannelPassiveSynced(this, e);
+            OnChannelPassiveSynced?.Invoke(this, e);
         }
 
         internal void HandleOnConnected(object sender, EventArgs e)
         {
-            if (OnConnected != null)
-                OnConnected(this, e);
+            OnConnected?.Invoke(this, e);
         }
 
         internal void HandleOnConnecting(object sender, EventArgs e)
         {
-            if (OnConnecting != null)
-                OnConnecting(this, e);
+            OnConnecting?.Invoke(this, e);
         }
 
         internal void HandleOnConnectionError(object sender, EventArgs e)
         {
-            if (OnConnectionError != null)
-                OnConnectionError(this, e);
+            OnConnectionError?.Invoke(this, e);
         }
 
         internal void HandleOnCtcpReply(object sender, CtcpEventArgs e)
         {
-            if (OnCtcpReply != null)
-                OnCtcpReply(this, e);
+            OnCtcpReply?.Invoke(this, e);
         }
 
         internal void HandleOnCtcpRequest(object sender, CtcpEventArgs e)
         {
-            if (OnCtcpRequest != null)
-                OnCtcpRequest(this, e);
+            OnCtcpRequest?.Invoke(this, e);
         }
 
         internal void HandleOnDccChatReceiveLineEvent(object sender, DccChatEventArgs e)
         {
-            if (OnDccChatReceiveLineEvent != null)
-                OnDccChatReceiveLineEvent(this, e);
+            OnDccChatReceiveLineEvent?.Invoke(this, e);
         }
 
         internal void HandleOnDccChatRequestEvent(object sender, DccEventArgs e)
         {
-            if (OnDccChatRequestEvent != null)
-                OnDccChatRequestEvent(this, e);
+            OnDccChatRequestEvent?.Invoke(this, e);
         }
 
         internal void HandleOnDccChatSentLineEvent(object sender, DccChatEventArgs e)
         {
-            if (OnDccChatSentLineEvent != null)
-                OnDccChatSentLineEvent(this, e);
+            OnDccChatSentLineEvent?.Invoke(this, e);
         }
 
         internal void HandleOnDccChatStartEvent(object sender, DccEventArgs e)
         {
-            if (OnDccChatStartEvent != null)
-                OnDccChatStartEvent(this, e);
+            OnDccChatStartEvent?.Invoke(this, e);
         }
 
         internal void HandleOnDccChatStopEvent(object sender, DccEventArgs e)
         {
-            if (OnDccChatStopEvent != null)
-                OnDccChatStopEvent(this, e);
+            OnDccChatStopEvent?.Invoke(this, e);
         }
 
         internal void HandleOnDccSendReceiveBlockEvent(object sender, DccSendEventArgs e)
         {
-            if (OnDccSendReceiveBlockEvent != null)
-                OnDccSendReceiveBlockEvent(this, e);
+            OnDccSendReceiveBlockEvent?.Invoke(this, e);
         }
 
         internal void HandleOnDccSendRequestEvent(object sender, DccSendRequestEventArgs e)
         {
-            if (OnDccSendRequestEvent != null)
-                OnDccSendRequestEvent(this, e);
+            OnDccSendRequestEvent?.Invoke(this, e);
         }
 
         internal void HandleOnDccSendSentBlockEvent(object sender, DccSendEventArgs e)
         {
-            if (OnDccSendSentBlockEvent != null)
-                OnDccSendSentBlockEvent(this, e);
+            OnDccSendSentBlockEvent?.Invoke(this, e);
         }
 
         internal void HandleOnDccSendStartEvent(object sender, DccEventArgs e)
         {
-            if (OnDccSendStartEvent != null)
-                OnDccSendStartEvent(this, e);
+            OnDccSendStartEvent?.Invoke(this, e);
         }
 
         internal void HandleOnDccSendStopEvent(object sender, DccEventArgs e)
         {
-            if (OnDccSendStopEvent != null)
-                OnDccSendStopEvent(this, e);
+            OnDccSendStopEvent?.Invoke(this, e);
         }
 
         internal void HandleOnDeadmin(object sender, DeadminEventArgs e)
         {
-            if (OnDeadmin != null)
-                OnDeadmin(this, e);
+            OnDeadmin?.Invoke(this, e);
         }
 
         internal void HandleOnDehalfop(object sender, DehalfopEventArgs e)
         {
-            if (OnDehalfop != null)
-                OnDehalfop(this, e);
+            OnDehalfop?.Invoke(this, e);
         }
 
         internal void HandleOnDeop(object sender, DeopEventArgs e)
         {
-            if (OnDeop != null)
-                OnDeop(this, e);
+            OnDeop?.Invoke(this, e);
         }
 
         internal void HandleOnDeowner(object sender, DeownerEventArgs e)
         {
-            if (OnDeowner != null)
-                OnDeowner(this, e);
+            OnDeowner?.Invoke(this, e);
         }
 
         internal void HandleOnDevoice(object sender, DevoiceEventArgs e)
         {
-            if (OnDevoice != null)
-                OnDevoice(this, e);
+            OnDevoice?.Invoke(this, e);
         }
 
         internal void HandleOnDisconnected(object sender, EventArgs e)
         {
-            if (OnDisconnected != null)
-                OnDisconnected(this, e);
+            OnDisconnected?.Invoke(this, e);
         }
 
         internal void HandleOnDisconnecting(object sender, EventArgs e)
         {
-            if (OnDisconnecting != null)
-                OnDisconnecting(this, e);
+            OnDisconnecting?.Invoke(this, e);
         }
 
         internal void HandleOnError(object sender, ErrorEventArgs e)
         {
-            if (OnError != null)
-                OnError(this, e);
+            OnError?.Invoke(this, e);
         }
 
         internal void HandleOnErrorMessage(object sender, IrcEventArgs e)
         {
-            if (OnErrorMessage != null)
-                OnErrorMessage(this, e);
+            OnErrorMessage?.Invoke(this, e);
         }
 
         internal void HandleOnHalfop(object sender, HalfopEventArgs e)
         {
-            if (OnHalfop != null)
-                OnHalfop(this, e);
+            OnHalfop?.Invoke(this, e);
         }
 
         internal void HandleOnInvite(object sender, InviteEventArgs e)
         {
-            if (OnInvite != null)
-                OnInvite(this, e);
+            OnInvite?.Invoke(this, e);
         }
 
         internal void HandleOnJoin(object sender, JoinEventArgs e)
         {
-            if (OnJoin != null)
-                OnJoin(this, e);
+            OnJoin?.Invoke(this, e);
         }
 
         internal void HandleOnKick(object sender, KickEventArgs e)
         {
-            if (OnKick != null)
-                OnKick(this, e);
+            OnKick?.Invoke(this, e);
         }
 
         internal void HandleOnList(object sender, ListEventArgs e)
         {
-            if (OnList != null)
-                OnList(this, e);
+            OnList?.Invoke(this, e);
         }
 
         internal void HandleOnModeChange(object sender, IrcEventArgs e)
         {
-            if (OnModeChange != null)
-                OnModeChange(this, e);
+            OnModeChange?.Invoke(this, e);
         }
 
         internal void HandleOnMotd(object sender, MotdEventArgs e)
         {
-            if (OnMotd != null)
-                OnMotd(this, e);
+            OnMotd?.Invoke(this, e);
         }
 
         internal void HandleOnNames(object sender, NamesEventArgs e)
         {
-            if (OnNames != null)
-                OnNames(this, e);
+            OnNames?.Invoke(this, e);
         }
 
         internal void HandleOnNickChange(object sender, NickChangeEventArgs e)
         {
-            if (OnNickChange != null)
-                OnNickChange(this, e);
+            OnNickChange?.Invoke(this, e);
         }
 
         internal void HandleOnNowAway(object sender, IrcEventArgs e)
         {
-            if (OnNowAway != null)
-                OnNowAway(this, e);
+            OnNowAway?.Invoke(this, e);
         }
 
         internal void HandleOnOp(object sender, OpEventArgs e)
         {
-            if (OnOp != null)
-                OnOp(this, e);
+            OnOp?.Invoke(this, e);
         }
 
         internal void HandleOnOwner(object sender, OwnerEventArgs e)
         {
-            if (OnOwner != null)
-                OnOwner(this, e);
+            OnOwner?.Invoke(this, e);
         }
 
         internal void HandleOnPart(object sender, PartEventArgs e)
         {
-            if (OnPart != null)
-                OnPart(this, e);
+            OnPart?.Invoke(this, e);
         }
 
         internal void HandleOnPing(object sender, PingEventArgs e)
         {
-            if (OnPing != null)
-                OnPing(this, e);
+            OnPing?.Invoke(this, e);
         }
 
         internal void HandleOnPong(object sender, PongEventArgs e)
         {
-            if (OnPong != null)
-                OnPong(this, e);
+            OnPong?.Invoke(this, e);
         }
 
         internal void HandleOnQueryAction(object sender, ActionEventArgs e)
         {
-            if (OnQueryAction != null)
-                OnQueryAction(this, e);
+            OnQueryAction?.Invoke(this, e);
         }
 
         internal void HandleOnQueryMessage(object sender, IrcEventArgs e)
         {
-            if (OnQueryMessage != null)
-                OnQueryMessage(this, e);
+            OnQueryMessage?.Invoke(this, e);
         }
 
         internal void HandleOnQueryNotice(object sender, IrcEventArgs e)
         {
-            if (OnQueryNotice != null)
-                OnQueryNotice(this, e);
+            OnQueryNotice?.Invoke(this, e);
         }
 
         internal void HandleOnQuit(object sender, QuitEventArgs e)
         {
-            if (OnQuit != null)
-                OnQuit(this, e);
+            OnQuit?.Invoke(this, e);
         }
 
         internal void HandleOnRawMessage(object sender, IrcEventArgs e)
         {
-            if (OnRawMessage != null)
-                OnRawMessage(this, e);
+            OnRawMessage?.Invoke(this, e);
         }
 
         internal void HandleOnReadLine(object sender, ReadLineEventArgs e)
         {
-            if (OnReadLine != null)
-                OnReadLine(this, e);
+            OnReadLine?.Invoke(this, e);
         }
 
         internal void HandleOnRegistered(object sender, EventArgs e)
         {
-            if (OnRegistered != null)
-                OnRegistered(this, e);
+            OnRegistered?.Invoke(this, e);
         }
 
         internal void HandleOnTopic(object sender, TopicEventArgs e)
         {
-            if (OnTopic != null)
-                OnTopic(this, e);
+            OnTopic?.Invoke(this, e);
         }
 
         internal void HandleOnTopicChange(object sender, TopicChangeEventArgs e)
         {
-            if (OnTopicChange != null)
-                OnTopicChange(this, e);
+            OnTopicChange?.Invoke(this, e);
         }
 
         internal void HandleOnUnAway(object sender, IrcEventArgs e)
         {
-            if (OnUnAway != null)
-                OnUnAway(this, e);
+            OnUnAway?.Invoke(this, e);
         }
 
         internal void HandleOnUnban(object sender, UnbanEventArgs e)
         {
-            if (OnUnban != null)
-                OnUnban(this, e);
+            OnUnban?.Invoke(this, e);
         }
 
         internal void HandleOnUserModeChange(object sender, IrcEventArgs e)
         {
-            if (OnUserModeChange != null)
-                OnUserModeChange(this, e);
+            OnUserModeChange?.Invoke(this, e);
         }
 
         internal void HandleOnVoice(object sender, VoiceEventArgs e)
         {
-            if (OnVoice != null)
-                OnVoice(this, e);
+            OnVoice?.Invoke(this, e);
         }
 
         internal void HandleOnWho(object sender, WhoEventArgs e)
         {
-            if (OnWho != null)
-                OnWho(this, e);
+            OnWho?.Invoke(this, e);
         }
 
         internal void HandleOnWriteLine(object sender, WriteLineEventArgs e)
         {
-            if (OnWriteLine != null)
-                OnWriteLine(this, e);
+            OnWriteLine?.Invoke(this, e);
         }
 
         internal void HandleSupportNonRfcChanged(object sender, EventArgs e)
         {
-            if (SupportNonRfcChanged != null)
-                SupportNonRfcChanged(this, e);
+            SupportNonRfcChanged?.Invoke(this, e);
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Plugin
 {
     public class MumblePlugin : AbstractPlugin
     {
-        private MumbleClient client;
+        private MumbleClient _client;
 
         public MumblePlugin(IrcBot botInstance) :
             base(botInstance)
@@ -56,7 +56,7 @@ namespace Plugin
         {
             TickInterval = 60;
 
-            client = new MumbleClient("huffelpuff", "talk.piratenpartei.ch", Settings.Default.Nick + "@IRC");
+            _client = new MumbleClient("huffelpuff", "talk.piratenpartei.ch", Settings.Default.Nick + "@IRC");
             base.Init();
         }
 
@@ -64,9 +64,9 @@ namespace Plugin
         {
             BotMethods.AddCommand(new Commandlet("!mumble", "Testing", MumbleHandler, this, CommandScope.Both));
 
-            client.OnConnected += MumbleConnected;
-            client.OnTextMessage += MumbleText;
-            client.Connect();
+            _client.OnConnected += MumbleConnected;
+            _client.OnTextMessage += MumbleText;
+            _client.Connect();
 
             BotEvents.OnChannelMessage += BotMethods_OnChannelMessage;
 
@@ -79,8 +79,8 @@ namespace Plugin
 
             if (channelName == null) { return; }
 
-            var channel = client.FindChannel(channelName);
-            client.SwitchChannel(channel);
+            var channel = _client.FindChannel(channelName);
+            _client.SwitchChannel(channel);
         }
 
         void MumbleText(object sender, MumblePacketEventArgs e)
@@ -88,7 +88,7 @@ namespace Plugin
             foreach (var channel in BotMethods.JoinedChannels)
             {
                 var message = (TextMessage)e.Message;
-                var user = client.FindUser(message.actor);
+                var user = _client.FindUser(message.actor);
 
                 BotMethods.SendMessage(SendType.Message, channel, user.Name + ": " + message.message);
             }
@@ -102,11 +102,11 @@ namespace Plugin
 
             if (channelName == null) { return; }
 
-            var channel = client.FindChannel(channelName);
+            var channel = _client.FindChannel(channelName);
 
             if (channel == null) { return; }
 
-            client.SendTextMessageToChannel("" + e.Data.Nick + ": " + e.Data.Message, channel, false);
+            _client.SendTextMessageToChannel("" + e.Data.Nick + ": " + e.Data.Message, channel, false);
 
         }
 
@@ -114,10 +114,10 @@ namespace Plugin
         {
             BotMethods.RemoveCommand("!mumble");
 
-            client.OnConnected -= MumbleConnected;
-            client.OnTextMessage -= MumbleText;
+            _client.OnConnected -= MumbleConnected;
+            _client.OnTextMessage -= MumbleText;
 
-            client.Disconnect();
+            _client.Disconnect();
 
             BotEvents.OnChannelMessage -= BotMethods_OnChannelMessage;
 
@@ -135,9 +135,6 @@ namespace Plugin
 
         private void MumbleHandler(object sender, IrcEventArgs e)
         {
-            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-
-
         }
     }
 }

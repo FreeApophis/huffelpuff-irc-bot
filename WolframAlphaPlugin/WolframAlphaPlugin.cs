@@ -25,6 +25,7 @@ using System.Xml.Linq;
 using Huffelpuff;
 using Huffelpuff.Commands;
 using Huffelpuff.Plugins;
+using Huffelpuff.Utils;
 using SharpIrc;
 
 namespace Plugin
@@ -64,26 +65,28 @@ namespace Plugin
 
         public void HandleAlpha(object sender, IrcEventArgs e)
         {
-            string target = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
+            if (!(WebRequest.Create(RequestBase + InputQuery +
+                                    HttpUtility.UrlEncode(string.Join(" ", e.Data.MessageArray.Skip(1))) + AmpersAnd +
+                                    AppIDQuery) is HttpWebRequest request))
+            {
+                return;
 
-            var document = new XDocument();
-            var request = WebRequest.Create(RequestBase + InputQuery + HttpUtility.UrlEncode(string.Join(" ", e.Data.MessageArray.Skip(1))) + AmpersAnd + AppIDQuery) as HttpWebRequest;
-            if (request == null) return;
+            }
 
             request.UserAgent = "Mozilla/5.0 (Huffelpuff)";
-            document = XDocument.Load(request.GetResponse().GetResponseStream());
+            var document = XDocument.Load(request.GetResponse().GetResponseStream());
 
             foreach (var pod in document.Descendants("pod"))
             {
-                string id = pod.Attribute("id").Value;
-                string title = pod.Attribute("title").Value;
+                string id = pod.Attribute("id")?.Value;
+                string title = pod.Attribute("title")?.Value;
 
                 foreach (var subpod in pod.Descendants("subpod"))
                 {
                     string plaintext = subpod.Descendants("plaintext").First().Value.Replace("\n", " ");
                     if (!string.IsNullOrWhiteSpace(plaintext))
                     {
-                        BotMethods.SendMessage(SendType.Message, target, title + ": " + plaintext);
+                        BotMethods.SendMessage(SendType.Message, e.SendBackTo(), title + ": " + plaintext);
                     }
                 }
             }

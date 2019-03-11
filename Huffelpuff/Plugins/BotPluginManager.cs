@@ -39,22 +39,16 @@ namespace Huffelpuff.Plugins
     {
         private readonly PluginManager pluginManager;
         private readonly IrcBot bot;
-        private readonly List<AbstractPlugin> plugins = new List<AbstractPlugin>();
-        public List<AbstractPlugin> Plugins
-        {
-            get
-            {
-                return plugins;
-            }
-        }
+        private readonly List<AbstractPlugin> _plugins = new List<AbstractPlugin>();
+        public List<AbstractPlugin> Plugins => _plugins;
 
         public BotPluginManager(IrcBot bot, string relPluginPath)
         {
             this.bot = bot;
             this.bot.AddCommand(new Commandlet("!reload", "!reload unloads and reloads all the plugins", ReloadPlugins, this, CommandScope.Both, "pluginmanager_reload"));
 
-            eventTimer = new Timer { Enabled = true, Interval = AbstractPlugin.MinTickIntervall * 1000 };
-            eventTimer.Elapsed += EventTick;
+            _eventTimer = new Timer { Enabled = true, Interval = AbstractPlugin.MinTickInterval * 1000 };
+            _eventTimer.Elapsed += EventTick;
 
             pluginManager = new PluginManager(relPluginPath);
             pluginManager.PluginsReloaded += PluginsPluginsReloaded;
@@ -76,7 +70,7 @@ namespace Huffelpuff.Plugins
             Thread.CurrentThread.Abort();
         }
 
-        private readonly Dictionary<string, string> oldPlugs = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _oldPlugs = new Dictionary<string, string>();
 
         public enum PluginLoadEventType
         {
@@ -96,9 +90,9 @@ namespace Huffelpuff.Plugins
                 Plugin = plugin;
             }
 
-            public string PluginName { get; private set; }
-            public PluginLoadEventType EventType { get; private set; }
-            public AbstractPlugin Plugin { get; private set; }
+            public string PluginName { get; }
+            public PluginLoadEventType EventType { get; }
+            public AbstractPlugin Plugin { get; }
         }
 
         public delegate void PluginEventHandler(object sender, PluginLoadEventArgs e);
@@ -107,13 +101,12 @@ namespace Huffelpuff.Plugins
 
         private void OnPluginLoadEvent(PluginLoadEventArgs e)
         {
-            if (PluginLoadEvent != null)
-                PluginLoadEvent(this, e);
+            PluginLoadEvent?.Invoke(this, e);
         }
 
         private void PluginsPluginsReloaded(object sender, EventArgs e)
         {
-            plugins.Clear();
+            _plugins.Clear();
             bot.CleanPlugins();
 
             foreach (var pluginName in pluginManager.GetSubclasses("Huffelpuff.Plugins.AbstractPlugin"))
@@ -132,7 +125,7 @@ namespace Huffelpuff.Plugins
 
                 if (p.Ready)
                 {
-                    plugins.Add(p);
+                    _plugins.Add(p);
                 }
                 else
                 {
@@ -140,18 +133,17 @@ namespace Huffelpuff.Plugins
                 }
             }
 
-            foreach (var plugin in plugins)
+            foreach (var plugin in _plugins)
             {
                 var assemblyParts = GetAssemblyParts(plugin.AssemblyName);
                 string assemblyVersion = assemblyParts.AssemblyVersion;
                 string assemblyName = assemblyParts.AssemblyName;
 
-                string newAssemblyVersion;
                 PluginLoadEventType loadType;
-                if (oldPlugs.TryGetValue(assemblyName, out newAssemblyVersion))
+                if (_oldPlugs.TryGetValue(assemblyName, out var newAssemblyVersion))
                 {
                     loadType = assemblyVersion != newAssemblyVersion ? PluginLoadEventType.Update : PluginLoadEventType.Reload;
-                    oldPlugs.Remove(assemblyName);
+                    _oldPlugs.Remove(assemblyName);
                 }
                 else
                 {
@@ -160,22 +152,22 @@ namespace Huffelpuff.Plugins
                 OnPluginLoadEvent(new PluginLoadEventArgs(plugin.FullName, loadType, plugin));
             }
 
-            foreach (var s in oldPlugs)
+            foreach (var s in _oldPlugs)
             {
                 OnPluginLoadEvent(new PluginLoadEventArgs(s.Key, PluginLoadEventType.Remove, null));
             }
 
-            oldPlugs.Clear();
-            foreach (var assemblyParts in plugins.Select(plugin => GetAssemblyParts(plugin.AssemblyName)))
+            _oldPlugs.Clear();
+            foreach (var assemblyParts in _plugins.Select(plugin => GetAssemblyParts(plugin.AssemblyName)))
             {
-                oldPlugs.Add(assemblyParts.AssemblyName, assemblyParts.AssemblyVersion);
+                _oldPlugs.Add(assemblyParts.AssemblyName, assemblyParts.AssemblyVersion);
             }
 
             if (bot.MainBotData == null) { return; }
 
-            foreach (var pluginname in bot.MainBotData.Plugin.Select(pl => pl.PluginName))
+            foreach (var pluginName in bot.MainBotData.Plugin.Select(pl => pl.PluginName))
             {
-                var plugin = plugins.Where(p => p.FullName == pluginname).FirstOrDefault();
+                var plugin = _plugins.FirstOrDefault(p => p.FullName == pluginName);
 
                 if (plugin != null)
                 {
@@ -186,7 +178,6 @@ namespace Huffelpuff.Plugins
                     catch (Exception exception)
                     {
                         Log.Instance.Log(exception);
-                        continue;
                     }
                 }
             }
@@ -206,8 +197,8 @@ namespace Huffelpuff.Plugins
 
             return new AssemblyParts { AssemblyName = assemblyName, AssemblyVersion = assemblyVersion };
         }
-        private readonly Timer eventTimer;
-        private readonly Stopwatch stopwatch = new Stopwatch();
+        private readonly Timer _eventTimer;
+        private readonly Stopwatch _stopwatch = new Stopwatch();
 
         private void EventTick(object sender, ElapsedEventArgs args)
         {
@@ -218,11 +209,11 @@ namespace Huffelpuff.Plugins
             {
                 try
                 {
-                    if (plugin.Active && plugin.ShallITick(AbstractPlugin.MinTickIntervall))
+                    if (plugin.Active && plugin.ShallITick(AbstractPlugin.MinTickInterval))
                     {
-                        stopwatch.Restart();
+                        _stopwatch.Restart();
                         plugin.OnTick();
-                        Log.Instance.Log("Tick: " + plugin.FullName + " took " + stopwatch.ElapsedMilliseconds + "ms");
+                        Log.Instance.Log("Tick: " + plugin.FullName + " took " + _stopwatch.ElapsedMilliseconds + "ms");
                     }
                 }
                 catch (Exception exception)
@@ -240,7 +231,7 @@ namespace Huffelpuff.Plugins
 
         public void ShutDown()
         {
-            foreach (var p in plugins)
+            foreach (var p in _plugins)
             {
                 Log.Instance.Log("Shutdown: " + p.FullName);
                 try

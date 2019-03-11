@@ -33,24 +33,18 @@ namespace Plugin
     {
         public AIMLPlugin(IrcBot botInstance) : base(botInstance) { }
 
-        public override string Name
-        {
-            get
-            {
-                return "Artificial Intelligence Markup Language Plugin";
-            }
-        }
+        public override string Name => "Artificial Intelligence Markup Language Plugin";
 
-        Bot myAimlBot;
-        readonly Dictionary<string, User> myUsers = new Dictionary<string, User>();
+        Bot _myAimlBot;
+        readonly Dictionary<string, User> _myUsers = new Dictionary<string, User>();
 
         public override void Init()
         {
-            myAimlBot = new Bot();
-            myAimlBot.loadSettings();
-            myAimlBot.isAcceptingUserInput = false;
-            myAimlBot.loadAIMLFromFiles();
-            myAimlBot.isAcceptingUserInput = true;
+            _myAimlBot = new Bot();
+            _myAimlBot.loadSettings();
+            _myAimlBot.isAcceptingUserInput = false;
+            _myAimlBot.loadAIMLFromFiles();
+            _myAimlBot.isAcceptingUserInput = true;
 
             base.Init();
         }
@@ -82,19 +76,19 @@ namespace Plugin
                              ? e.Data.Message.Trim().Substring(BotMethods.Nickname.Length + 1)
                              : e.Data.Message.Trim();
             User myUser;
-            if (myUsers.ContainsKey(e.Data.Nick))
+            if (_myUsers.ContainsKey(e.Data.Nick))
             {
-                myUser = myUsers[e.Data.Nick];
+                myUser = _myUsers[e.Data.Nick];
             }
             else
             {
-                myUser = new User(e.Data.Nick, myAimlBot);
+                myUser = new User(e.Data.Nick, _myAimlBot);
                 myUser.Predicates.addSetting("name", e.Data.Nick);
 
-                myUsers.Add(e.Data.Nick, myUser);
+                _myUsers.Add(e.Data.Nick, myUser);
             }
-            var r = new Request(msg, myUser, myAimlBot);
-            var res = myAimlBot.Chat(r);
+            var r = new Request(msg, myUser, _myAimlBot);
+            var res = _myAimlBot.Chat(r);
             BotMethods.SendMessage(SendType.Message, e.Data.Channel, res.Output);
         }
     }

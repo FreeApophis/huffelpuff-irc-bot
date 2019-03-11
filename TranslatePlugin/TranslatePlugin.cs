@@ -245,7 +245,6 @@ namespace Plugin
 
         private void DetectTrigger(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length > 1)
             {
                 var lang = DetectLanguage(e.Data.Message.Substring(8));
@@ -260,21 +259,20 @@ namespace Plugin
                     {
                         natlang = "";
                     }
-                    BotMethods.SendMessage(SendType.Message, sendto, "This Text was in " + languages[lang] + " - " + natlang);
+                    BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "This Text was in " + languages[lang] + " - " + natlang);
                 }
             }
             else
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "Usage to detect the language is !detect <some foreign text>");
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Usage to detect the language is !detect <some foreign text>");
             }
         }
 
         private void LanguageTrigger(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             foreach (var line in languages.Values.ToLines(400, ", ", "Languages: ", ""))
             {
-                BotMethods.SendMessage(SendType.Message, sendto, line);
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), line);
             }
         }
 

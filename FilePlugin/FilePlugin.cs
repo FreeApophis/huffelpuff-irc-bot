@@ -36,7 +36,7 @@ namespace Plugin
 
         public override void Activate()
         {
-            BotMethods.AddCommand(new Commandlet("!download", "Starts a DCC Filetransfer to you", SendFile, this));
+            BotMethods.AddCommand(new Commandlet("!download", "Starts a DCC file transfer to you", SendFile, this));
             base.Activate();
         }
 

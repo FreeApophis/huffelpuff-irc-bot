@@ -25,27 +25,27 @@ using System.Web;
 
 namespace Plugin
 {
-    class BingCalculator : WebCalculator
+    class BingCalculator : ICalculator
     {
-        private const string URLBase = "http://www.bing.com/search?q=";
-        private readonly Regex resultMatch = new Regex("(?<=<div><div><span class=\"sc_bigLine\">).*(?=</span></div></div></div>)", RegexOptions.IgnoreCase);
+        private const string UrlBase = "http://www.bing.com/search?q=";
+        private readonly Regex _resultMatch = new Regex("(?<=<div><div><span class=\"sc_bigLine\">).*(?=</span></div></div></div>)", RegexOptions.IgnoreCase);
 
-        public override CalculationResult Calculate(string equation)
+        public CalculationResult Calculate(string equation)
         {
             try
             {
                 var client = new WebClient();
                 var eq = HttpUtility.UrlEncode(equation);
-                var query = client.DownloadString(URLBase + eq);
-                var match = resultMatch.Match(query);
+                var query = client.DownloadString(UrlBase + eq);
+                var match = _resultMatch.Match(query);
 
                 if (match.Success)
                 {
                     string result = match.Value;
                     result = ParseSpecial(result);
-                    string[] complexSplit = result.Split(new[] { ':' });
+                    string[] complexSplit = result.Split(':');
 
-                    return complexSplit.Length == 1 ? new CalculationResult(result.Split(new[] { '=' })[1], result, false) : new CalculationResult(complexSplit[1], result, true);
+                    return complexSplit.Length == 1 ? new CalculationResult(result.Split('=')[1], result, false) : new CalculationResult(complexSplit[1], result, true);
                 }
                 return new CalculationResult();
             }

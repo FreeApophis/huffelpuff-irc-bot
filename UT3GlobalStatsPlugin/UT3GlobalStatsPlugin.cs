@@ -89,7 +89,6 @@ namespace Plugin
 
         private void PlayerHandler(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             if (e.Data.MessageArray.Length < 2) { return; }
 
             RecordValue[][] values;
@@ -130,13 +129,12 @@ namespace Plugin
 
             foreach (string msg in values.Select(perPlayerValues => RecordValueToString(perPlayerValues[0]) + ". " + RecordValueToString(perPlayerValues[1]) + " ELO: " + RecordValueToString(perPlayerValues[2]) + " Kills: " + RecordValueToString(perPlayerValues[3]) + " Deaths: " + RecordValueToString(perPlayerValues[4])))
             {
-                BotMethods.SendMessage(SendType.Notice, sendto, msg);
+                BotMethods.SendMessage(SendType.Notice, e.SendBackTo(), msg);
             }
         }
 
         private void TopTenHandler(object sender, IrcEventArgs e)
         {
-            string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
             RecordValue[][] values;
 
             // *** hard coded query ***
@@ -173,7 +171,7 @@ namespace Plugin
             }
             foreach (var msg in values.Select(perPlayerValues => RecordValueToString(perPlayerValues[0]) + ". " + RecordValueToString(perPlayerValues[1]) + " ELO: " + RecordValueToString(perPlayerValues[2]) + " Kills: " + RecordValueToString(perPlayerValues[3]) + " Deaths: " + RecordValueToString(perPlayerValues[4])))
             {
-                BotMethods.SendMessage(SendType.Notice, sendto, msg);
+                BotMethods.SendMessage(SendType.Notice, e.SendBackTo(), msg);
             }
         }
 

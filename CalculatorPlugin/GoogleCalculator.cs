@@ -26,26 +26,26 @@ using System.Web;
 
 namespace Plugin
 {
-    class GoogleCalculator : WebCalculator
+    class GoogleCalculator : ICalculator
     {
-        private const string URLBase = "http://www.google.ch/search?num=1&q=";
-        private readonly Regex resultMatch = new Regex("(?<=<h2 class=r style=\"font-size:138%\"><b>).*(?=</b></h2>)", RegexOptions.IgnoreCase);
+        private const string UrlBase = "http://www.google.ch/search?num=1&q=";
+        private readonly Regex _resultMatch = new Regex("(?<=<h2 class=r style=\"font-size:138%\"><b>).*(?=</b></h2>)", RegexOptions.IgnoreCase);
 
-        public override CalculationResult Calculate(string equation)
+        public CalculationResult Calculate(string equation)
         {
             try
             {
                 var client = new WebClient();
                 var eq = HttpUtility.UrlEncode(equation);
-                var query = client.DownloadString(URLBase + eq);
-                var match = resultMatch.Match(query);
+                var query = client.DownloadString(UrlBase + eq);
+                var match = _resultMatch.Match(query);
 
                 if (match.Success)
                 {
                     var result = match.Value;
                     result = ParseSpecial(result);
-                    var splitres = result.Split(new[] { '=' });
-                    return new CalculationResult(splitres[1], result, false);
+                    var parts = result.Split('=');
+                    return new CalculationResult(parts[1], result, false);
                 }
                 return new CalculationResult();
             }

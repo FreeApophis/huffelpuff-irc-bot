@@ -12,7 +12,7 @@ namespace Huffelpuff.Plugins
     /// </summary>
     public class AssemblyFactory
     {
-        private CompilerErrorCollection compilerErrors;
+        private CompilerErrorCollection _compilerErrors;
 
         /// <summary>
         /// Generates an Assembly from a script filename
@@ -33,7 +33,7 @@ namespace Huffelpuff.Plugins
         public Assembly CreateAssembly(string filename, IList references)
         {
             // ensure that compilerErrors is null
-            compilerErrors = null;
+            _compilerErrors = null;
 
             string extension = Path.GetExtension(filename);
 
@@ -74,7 +74,7 @@ namespace Huffelpuff.Plugins
             //Do we have any compiler errors
             if (results.Errors.Count > 0)
             {
-                compilerErrors = results.Errors;
+                _compilerErrors = results.Errors;
                 throw new Exception(
                     "Compiler error(s) encountered and saved to AssemblyFactory.CompilerErrors");
             }
@@ -84,25 +84,25 @@ namespace Huffelpuff.Plugins
         }
 
         /// <summary>
-        /// Generates an Assembly from a list of script filenames
+        /// Generates an Assembly from a list of script fileNames
         /// </summary>
-        /// <param name="filenames">The filenames of the scripts</param>
+        /// <param name="fileNames">The fileNames of the scripts</param>
         /// <returns>The generated assembly</returns>
-        public Assembly CreateAssembly(IList filenames)
+        public Assembly CreateAssembly(IList fileNames)
         {
-            return CreateAssembly(filenames, new ArrayList());
+            return CreateAssembly(fileNames, new ArrayList());
         }
 
         /// <summary>
-        /// Generates an Assembly from a list of script filenames
+        /// Generates an Assembly from a list of script fileNames
         /// </summary>
-        /// <param name="filenames">The filenames of the scripts</param>
+        /// <param name="fileNames">The fileNames of the scripts</param>
         /// <param name="references">Assembly references for the script</param>
         /// <returns>The generated assembly</returns>C
-        public Assembly CreateAssembly(IList filenames, IList references)
+        public Assembly CreateAssembly(IList fileNames, IList references)
         {
             string fileType = null;
-            foreach (var extension in filenames.Cast<string>().Select(Path.GetExtension))
+            foreach (var extension in fileNames.Cast<string>().Select(Path.GetExtension))
             {
                 if (fileType == null)
                 {
@@ -115,7 +115,7 @@ namespace Huffelpuff.Plugins
             }
 
             // ensure that compilerErrors is null
-            compilerErrors = null;
+            _compilerErrors = null;
 
             // Select the correct CodeDomProvider based on script file extension
             CodeDomProvider codeProvider;
@@ -147,12 +147,12 @@ namespace Huffelpuff.Plugins
             }
 
             // Do the compilation
-            CompilerResults results = codeProvider.CompileAssemblyFromFile(compilerParams, (string[])ArrayList.Adapter(filenames).ToArray(typeof(string)));
+            CompilerResults results = codeProvider.CompileAssemblyFromFile(compilerParams, (string[])ArrayList.Adapter(fileNames).ToArray(typeof(string)));
 
             // Do we have any compiler errors
             if (results.Errors.Count > 0)
             {
-                compilerErrors = results.Errors;
+                _compilerErrors = results.Errors;
                 throw new Exception(
                     "Compiler error(s) encountered and saved to AssemblyFactory.CompilerErrors");
             }
@@ -168,7 +168,7 @@ namespace Huffelpuff.Plugins
         {
             get
             {
-                return compilerErrors;
+                return _compilerErrors;
             }
         }
     }

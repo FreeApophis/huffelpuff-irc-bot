@@ -5,7 +5,7 @@ namespace Huffelpuff.Commands
     [Serializable]
     public class CommandEventArgs : EventArgs
     {
-        public string Parameter { get; private set; }
+        public string Parameter { get; }
 
         public CommandEventArgs()
         {

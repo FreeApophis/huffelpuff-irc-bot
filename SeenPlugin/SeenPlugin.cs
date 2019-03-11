@@ -41,11 +41,11 @@ namespace Plugin
         {
         }
 
-        private Main seenData;
+        private Main _seenData;
 
         public override void Init()
         {
-            seenData = new Main(DatabaseConnection.Create("Seen"));
+            _seenData = new Main(DatabaseConnection.Create("Seen"));
 
             base.Init();
         }
@@ -61,7 +61,7 @@ namespace Plugin
             BotEvents.OnQuit += QuitHandler;
             BotEvents.OnKick += KickHandler;
 
-            foreach (var entry in seenData.SeenEntries)
+            foreach (var entry in _seenData.SeenEntries)
             {
                 entry.OnStatus = false;
             }
@@ -84,7 +84,7 @@ namespace Plugin
             BotEvents.OnQuit -= QuitHandler;
             BotEvents.OnKick -= KickHandler;
 
-            foreach (var entry in seenData.SeenEntries)
+            foreach (var entry in _seenData.SeenEntries)
             {
                 entry.OnStatus = false;
             }
@@ -99,13 +99,13 @@ namespace Plugin
 
         private void SeenCommand(object sender, IrcEventArgs e)
         {
-            lock (seenData)
+            lock (_seenData)
             {
                 string destination = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
 
                 if (e.Data.MessageArray.Length > 1)
                 {
-                    var result = seenData.SeenEntries.Where(s => s.Nick == e.Data.MessageArray[1]).FirstOrDefault();
+                    var result = _seenData.SeenEntries.FirstOrDefault(s => s.Nick == e.Data.MessageArray[1]);
                     if (result != null)
                     {
                         if (result.OnStatus)
@@ -125,7 +125,7 @@ namespace Plugin
                 }
                 else
                 {
-                    BotMethods.SendMessage(SendType.Message, destination, "Seen " + seenData.SeenEntries.Count() + " unique nicknames. Use !seen <nick> for query.");
+                    BotMethods.SendMessage(SendType.Message, destination, "Seen " + _seenData.SeenEntries.Count() + " unique nicknames. Use !seen <nick> for query.");
                 }
 
                 SaveDb();
@@ -135,9 +135,9 @@ namespace Plugin
 
         private void NickChangeHandler(object sender, NickChangeEventArgs e)
         {
-            lock (seenData)
+            lock (_seenData)
             {
-                var seenResult = seenData.SeenEntries.Where(s => s.Nick == e.OldNickname).FirstOrDefault();
+                var seenResult = _seenData.SeenEntries.FirstOrDefault(s => s.Nick == e.OldNickname);
 
                 if (seenResult != null)
                 {
@@ -146,7 +146,7 @@ namespace Plugin
                     seenResult.OnStatus = false;
                 }
 
-                seenResult = seenData.SeenEntries.Where(s => s.Nick == e.NewNickname).FirstOrDefault();
+                seenResult = _seenData.SeenEntries.FirstOrDefault(s => s.Nick == e.NewNickname);
                 if (seenResult != null)
                 {
                     seenResult.LastSeenTime = DateTime.Now;
@@ -156,7 +156,7 @@ namespace Plugin
                 else
                 {
                     var seenEntry = new SeenEntry();
-                    seenData.SeenEntries.InsertOnSubmit(seenEntry);
+                    _seenData.SeenEntries.InsertOnSubmit(seenEntry);
 
                     seenEntry.Nick = e.NewNickname;
                     seenEntry.LastSeenTime = DateTime.Now;
@@ -167,22 +167,22 @@ namespace Plugin
 
                 }
 
-                var aliasResult = seenData.AliasEntries.Where(a => a.Nick == e.OldNickname && a.Alias == e.NewNickname).FirstOrDefault();
+                var aliasResult = _seenData.AliasEntries.FirstOrDefault(a => a.Nick == e.OldNickname && a.Alias == e.NewNickname);
 
                 if (aliasResult == null)
                 {
                     var aliasEntry = new AliasEntry();
-                    seenData.AliasEntries.InsertOnSubmit(aliasEntry);
+                    _seenData.AliasEntries.InsertOnSubmit(aliasEntry);
 
                     aliasEntry.Nick = e.OldNickname;
                     aliasEntry.Alias = e.NewNickname;
                 }
 
-                aliasResult = seenData.AliasEntries.Where(a => a.Nick == e.NewNickname && a.Alias == e.OldNickname).FirstOrDefault();
+                aliasResult = _seenData.AliasEntries.FirstOrDefault(a => a.Nick == e.NewNickname && a.Alias == e.OldNickname);
                 if (aliasResult == null)
                 {
                     var aliasEntry = new AliasEntry();
-                    seenData.AliasEntries.InsertOnSubmit(aliasEntry);
+                    _seenData.AliasEntries.InsertOnSubmit(aliasEntry);
 
                     aliasEntry.Nick = e.NewNickname;
                     aliasEntry.Alias = e.OldNickname;
@@ -194,9 +194,9 @@ namespace Plugin
 
         private void MessageHandler(object sender, IrcEventArgs e)
         {
-            lock (seenData)
+            lock (_seenData)
             {
-                var result = seenData.SeenEntries.Where(s => s.Nick == e.Data.Nick).FirstOrDefault();
+                var result = _seenData.SeenEntries.FirstOrDefault(s => s.Nick == e.Data.Nick);
 
                 if (result != null)
                 {
@@ -209,11 +209,11 @@ namespace Plugin
 
         private void NamesHandler(object sender, NamesEventArgs e)
         {
-            lock (seenData)
+            lock (_seenData)
             {
                 foreach (string name in e.Users)
                 {
-                    var result = seenData.SeenEntries.Where(s => s.Nick == name).FirstOrDefault();
+                    var result = _seenData.SeenEntries.FirstOrDefault(s => s.Nick == name);
 
                     if (result != null)
                     {
@@ -224,7 +224,7 @@ namespace Plugin
                     else
                     {
                         var seenEntry = new SeenEntry();
-                        seenData.SeenEntries.InsertOnSubmit(seenEntry);
+                        _seenData.SeenEntries.InsertOnSubmit(seenEntry);
 
                         seenEntry.Nick = name;
                         seenEntry.LastSeenTime = DateTime.Now;
@@ -240,10 +240,10 @@ namespace Plugin
 
         private void JoinHandler(object sender, JoinEventArgs e)
         {
-            lock (seenData)
+            lock (_seenData)
             {
 
-                var result = seenData.SeenEntries.Where(s => s.Nick == e.Who).FirstOrDefault();
+                var result = _seenData.SeenEntries.FirstOrDefault(s => s.Nick == e.Who);
 
                 if (result != null)
                 {
@@ -254,7 +254,7 @@ namespace Plugin
                 else
                 {
                     var seenEntry = new SeenEntry();
-                    seenData.SeenEntries.InsertOnSubmit(seenEntry);
+                    _seenData.SeenEntries.InsertOnSubmit(seenEntry);
 
                     seenEntry.Nick = e.Who;
                     seenEntry.LastSeenTime = DateTime.Now;
@@ -269,9 +269,9 @@ namespace Plugin
 
         private void PartHandler(object sender, PartEventArgs e)
         {
-            lock (seenData)
+            lock (_seenData)
             {
-                var result = seenData.SeenEntries.Where(s => s.Nick == e.Who).FirstOrDefault();
+                var result = _seenData.SeenEntries.FirstOrDefault(s => s.Nick == e.Who);
                 if (result != null)
                 {
                     result.LastSeenTime = DateTime.Now;
@@ -284,9 +284,9 @@ namespace Plugin
 
         private void QuitHandler(object sender, QuitEventArgs e)
         {
-            lock (seenData)
+            lock (_seenData)
             {
-                var result = seenData.SeenEntries.Where(s => s.Nick == e.Who).FirstOrDefault();
+                var result = _seenData.SeenEntries.FirstOrDefault(s => s.Nick == e.Who);
                 if (result != null)
                 {
                     result.LastSeenTime = DateTime.Now;
@@ -299,9 +299,9 @@ namespace Plugin
 
         private void KickHandler(object sender, KickEventArgs e)
         {
-            lock (seenData)
+            lock (_seenData)
             {
-                var result = seenData.SeenEntries.Where(s => s.Nick == e.Who).FirstOrDefault();
+                var result = _seenData.SeenEntries.FirstOrDefault(s => s.Nick == e.Who);
                 if (result != null)
                 {
                     result.LastSeenTime = DateTime.Now;
@@ -314,7 +314,7 @@ namespace Plugin
 
         private void SaveDb()
         {
-            seenData.SubmitChanges();
+            _seenData.SubmitChanges();
         }
     }
 }

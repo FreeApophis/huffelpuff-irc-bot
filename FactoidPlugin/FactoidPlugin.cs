@@ -38,19 +38,19 @@ namespace Plugin
         {
         }
 
-        private Main factoidData;
+        private Main _factoidData;
 
         public override void Init()
         {
-            factoidData = new Main(DatabaseConnection.Create("Factoid"));
+            _factoidData = new Main(DatabaseConnection.Create("Factoid"));
 
             base.Init();
         }
 
         public override void Activate()
         {
-            BotMethods.AddCommand(new Commandlet("!facts", "Lists all the facts.", ListFacts, this, CommandScope.Both));
-            BotMethods.AddCommand(new Commandlet("!+fact", "With the command !+fact <fact> <descriptive text> you can add a fact with its description, or you can link a new fact to the same description with !+fact <newfact> <oldfact>. You can add dynamic paramters with %n (where n = 1,2...).", AddFact, this, CommandScope.Both, "fact_admin"));
+            BotMethods.AddCommand(new Commandlet("!facts", "Lists all the facts.", ListFacts, this));
+            BotMethods.AddCommand(new Commandlet("!+fact", "With the command !+fact <fact> <descriptive text> you can add a fact with its description, or you can link a new fact to the same description with !+fact <new fact> <old fact>. You can add dynamic parameters with %n (where n = 1,2...).", AddFact, this, CommandScope.Both, "fact_admin"));
             BotMethods.AddCommand(new Commandlet("!-fact", "With the command !-fact <fact> you can remove a fact.", RemoveFact, this, CommandScope.Both, "fact_admin"));
             BotEvents.OnQueryMessage += BotEvents_OnQueryMessage;
             BotEvents.OnChannelMessage += BotEvents_OnQueryMessage;
@@ -79,11 +79,10 @@ namespace Plugin
         {
             try
             {
-                string sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
 
                 if (e.Data.MessageArray.Length <= 0 || !e.Data.MessageArray[0].StartsWith("!")) return;
 
-                var fact = factoidData.Facts.Where(facts => facts.FactKey == e.Data.MessageArray[0].Substring(1)).SingleOrDefault();
+                var fact = _factoidData.Facts.SingleOrDefault(facts => facts.FactKey == e.Data.MessageArray[0].Substring(1));
 
                 if (fact != null)
                 {
@@ -95,10 +94,10 @@ namespace Plugin
                         count++;
                         answer = answer.Replace("%" + count, parameter);
                     }
-                    BotMethods.SendMessage(SendType.Message, sendto, answer);
+                    BotMethods.SendMessage(SendType.Message, e.SendBackTo(), answer);
 
                 }
-                factoidData.SubmitChanges();
+                _factoidData.SubmitChanges();
             }
             catch (Exception exception)
             {
@@ -108,67 +107,61 @@ namespace Plugin
 
         private void ListFacts(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-
-            if (factoidData.Facts.Count() == 0)
+            if (!_factoidData.Facts.Any())
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "There are no facts yet, add them with !+fact");
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "There are no facts yet, add them with !+fact");
                 return;
             }
-            foreach (var line in factoidData.Facts.Select(fact => fact.FactKey).ToLines(350, ", ", "All Facts: ", ""))
+            foreach (var line in _factoidData.Facts.Select(fact => fact.FactKey).ToLines(350, ", ", "All Facts: ", ""))
             {
-                BotMethods.SendMessage(SendType.Message, sendto, line);
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), line);
             }
         }
 
         private void AddFact(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-
             if (e.Data.MessageArray.Length < 3)
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments for 'add'! Try '!help !+fact'.");
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Too few arguments for 'add'! Try '!help !+fact'.");
                 return;
             }
 
-            if (factoidData.Facts.Where(facts => facts.FactKey == e.Data.MessageArray[1]).SingleOrDefault() == null)
+            if (_factoidData.Facts.SingleOrDefault(facts => facts.FactKey == e.Data.MessageArray[1]) == null)
             {
                 var message = e.Data.Message.Substring(e.Data.MessageArray[0].Length + e.Data.MessageArray[1].Length + 2);
                 var fact = new Fact { FactKey = e.Data.MessageArray[1], FactValue = message };
 
-                factoidData.Facts.InsertOnSubmit(fact);
-                factoidData.SubmitChanges();
+                _factoidData.Facts.InsertOnSubmit(fact);
+                _factoidData.SubmitChanges();
 
-                BotMethods.SendMessage(SendType.Message, sendto, "New Fact '" + fact.FactKey + "' learned. Activate it with !" + fact.FactKey + ".");
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "New Fact '" + fact.FactKey + "' learned. Activate it with !" + fact.FactKey + ".");
             }
             else
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "Sorry, I know that fact already.");
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Sorry, I know that fact already.");
             }
 
         }
 
         private void RemoveFact(object sender, IrcEventArgs e)
         {
-            var sendto = (string.IsNullOrEmpty(e.Data.Channel)) ? e.Data.Nick : e.Data.Channel;
-
             if (e.Data.MessageArray.Length < 2)
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "Too few arguments for 'remove'! Try '!help !-fact'.");
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "Too few arguments for 'remove'! Try '!help !-fact'.");
                 return;
             }
-            var fact = factoidData.Facts.Where(f => f.FactKey == e.Data.MessageArray[1]).SingleOrDefault();
+            var fact = _factoidData.Facts.SingleOrDefault(f => f.FactKey == e.Data.MessageArray[1]);
             if (fact != null)
             {
-                factoidData.Facts.DeleteOnSubmit(fact);
+                _factoidData.Facts.DeleteOnSubmit(fact);
 
-                BotMethods.SendMessage(SendType.Message, sendto, "I forgot Fact '" + fact.FactKey + "'.");
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "I forgot Fact '" + fact.FactKey + "'.");
 
-                factoidData.SubmitChanges();
+                _factoidData.SubmitChanges();
             }
             else
             {
-                BotMethods.SendMessage(SendType.Message, sendto, "I don't know fact '" + e.Data.MessageArray[1] + "'.");
+                BotMethods.SendMessage(SendType.Message, e.SendBackTo(), "I don't know fact '" + e.Data.MessageArray[1] + "'.");
             }
         }
     }

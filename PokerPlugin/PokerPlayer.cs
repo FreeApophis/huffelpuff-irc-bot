@@ -28,7 +28,7 @@ namespace Plugin
             Nick = nick;
         }
 
-        internal string Nick { get; private set; }
+        internal string Nick { get; }
         internal string Channel { get; set; }
         internal int ChipStack { get; set; }
         internal PocketCards PocketCards { get; set; }

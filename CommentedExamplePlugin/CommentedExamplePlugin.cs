@@ -2,8 +2,7 @@
  *  Commented Example Plugin, as a help for Plugin developers
  *  ---------------------------------------------------------
  * 
- *  Copyright (c) 2008-2009 Thomas Bruderer <apophis@apophis.ch>
- *  File created by apophis at 03.07.2009 18:54
+ *  Copyright (c) 2008-2019 Thomas Bruderer <apophis@apophis.ch>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,7 +26,7 @@
  * If you work with the executable directly, Add a reference to the
  * Huffelpuff.exe And SharpIRC.dll
  * 
- * normally you need the following namesspaces from the project:
+ * normally you need the following namespaces from the project:
  */
 using Huffelpuff;
 using Huffelpuff.Plugins;
@@ -37,14 +36,14 @@ namespace Plugin
 {
     /*
      * This Plugin should be an example to anyone who wants to write a plugin.
-     * It should describe all the main stepts to write your own plugin, and describes
-     * the intentions behinde several design decisions.
+     * It should describe all the main steps to write your own plugin, and describes
+     * the intentions behind several design decisions.
      * 
-     * 1.) A Plugin will run in another Appdomain thant the mainbot, that was done
+     * 1.) A Plugin will run in another Appdomain thant the main bot, that was done
      * to make it possible to load, unload and reload Plugins on runtime. This makes
      * several things a bit difficult. But the Infrastructure is Abstracting that
-     * away from you. The Plugin infrastrucutre is very simple, but has a very 
-     * powerfull access to the IRC bot Infrastructure.
+     * away from you. The Plugin infrastructure is very simple, but has a very 
+     * powerful access to the IRC bot Infrastructure.
      * 
      */
     public class CommentedExamplePlugin : AbstractPlugin
@@ -55,7 +54,7 @@ namespace Plugin
          * sets up most part of the infrastructure to use the Bot from a plugin.
          * It will setup the BotMethods and BotEvents Fields which are the most
          * important parts for the Plugins.
-         * You dont need to do anything else in the constructor. Whatever you want
+         * You don't need to do anything else in the constructor. Whatever you want
          * to initialize, use Init() for it!
          */
         public CommentedExamplePlugin(IrcBot botInstance) :
@@ -74,15 +73,15 @@ namespace Plugin
         }
 
         /*
-         * Anything you want to do during initialisation, or what your normally
+         * Anything you want to do during initialization, or what your normally
          * want to do in a constructor, you do it here!
          * 
-         * This method is only called once during the lifecylce of the object.
+         * This method is only called once during the life-cycle of the object.
          * Either when the bot loads the plugins initially, or when all the
          * plugins get reloaded.
          * 
          * TIPS:
-         * * You dont have to override this method for a working Plugin.
+         * * You don't have to override this method for a working Plugin.
          * NEEDED:
          * * Call base.Activate() at the end of the Method.
          * 
@@ -97,7 +96,7 @@ namespace Plugin
 
         /* 
          * TIPS:
-         * * You dont have to override this method for a working Plugin.
+         * * You don't have to override this method for a working Plugin.
          * NEEDED:
          * * Call base.Activate() at the end of the Method.
          * 
@@ -109,7 +108,7 @@ namespace Plugin
 
         /* 
          * TIPS:
-         * * You dont have to override this method for a working Plugin.
+         * * You don't have to override this method for a working Plugin.
          * NEEDED:
          * * Call base.Activate() at the end of the Method.
          * 
@@ -121,7 +120,7 @@ namespace Plugin
 
         /* 
          * TIPS:
-         * * You dont have to override this method for a working Plugin.
+         * * You don't have to override this method for a working Plugin.
          * NEEDED:
          * * Call base.Activate() at the end of the Method.
          * 
@@ -133,9 +132,9 @@ namespace Plugin
 
         /*
          * Often your Plugin needs to perform certain tasks, for that we can
-         * offer you the OnTick Event which can be called in intervalls of
+         * offer you the OnTick Event which can be called in intervals of
          * multiples of 30 seconds. We set in Init() the
-         * TickInterval to 60 seconds. this method will therfore be called 
+         * TickInterval to 60 seconds. this method will therefore be called 
          * every 60 seconds (if the Plugins is activated)
          * 
          * TIPS:

@@ -26,35 +26,35 @@ namespace Plugin
 {
     public class StringTable
     {
-        private readonly List<int> columns;
-        private readonly List<List<string>> data;
-        private bool hasHeader = true;
+        private readonly List<int> _columns;
+        private readonly List<List<string>> _data;
+        private bool _hasHeader = true;
 
         public StringTable()
         {
-            columns = new List<int>();
-            data = new List<List<string>> { new List<string>() };
+            _columns = new List<int>();
+            _data = new List<List<string>> { new List<string>() };
         }
 
         public void SetColumnCount(int count)
         {
-            hasHeader = false;
-            count.Times(() => columns.Add(1));
+            _hasHeader = false;
+            count.Times(() => _columns.Add(1));
         }
 
         public void AddColumn(string header)
         {
-            columns.Add(header.Length + 1);
-            data[0].Add(header);
+            _columns.Add(header.Length + 1);
+            _data[0].Add(header);
         }
 
         public void AddRow(params string[] text)
         {
-            data.Add(new List<string>(text));
+            _data.Add(new List<string>(text));
 
             for (int index = 0; index < text.Length; index++)
             {
-                columns[index] = Math.Max(columns[index], text[index].Length + 1);
+                _columns[index] = Math.Max(_columns[index], text[index].Length + 1);
             }
         }
 
@@ -62,22 +62,22 @@ namespace Plugin
         {
             var builder = new StringBuilder();
 
-            for (int rowIndex = 0; rowIndex < data.Count; rowIndex++)
+            for (int rowIndex = 0; rowIndex < _data.Count; rowIndex++)
             {
-                var row = data[rowIndex];
+                var row = _data[rowIndex];
 
                 for (int columnIndex = 0; columnIndex < row.Count; columnIndex++)
                 {
-                    builder.Append(Fixed(row[columnIndex], columns[columnIndex]));
+                    builder.Append(Fixed(row[columnIndex], _columns[columnIndex]));
                 }
 
-                if (rowIndex == 0 && hasHeader)
+                if (rowIndex == 0 && _hasHeader)
                 {
                     builder.AppendLine();
 
                     for (int columnIndex = 0; columnIndex < row.Count; columnIndex++)
                     {
-                        builder.Append(Line(columns[columnIndex]));
+                        builder.Append(Line(_columns[columnIndex]));
                     }
                 }
 

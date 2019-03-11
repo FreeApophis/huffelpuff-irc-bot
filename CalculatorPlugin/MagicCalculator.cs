@@ -26,20 +26,21 @@ namespace Plugin
 {
     class MagicCalculator
     {
-        private readonly List<WebCalculator> calculators = new List<WebCalculator>();
-        private readonly List<CalculationResult> results = new List<CalculationResult>();
+        private readonly List<ICalculator> _calculators = new List<ICalculator>();
+        private readonly List<CalculationResult> _results = new List<CalculationResult>();
 
         public MagicCalculator()
         {
-            calculators.Add(new GoogleCalculator());
-            calculators.Add(new BingCalculator());
-            calculators.Add(new OctaveCalculator());
+            _calculators.Add(new GoogleCalculator());
+            _calculators.Add(new BingCalculator());
+            _calculators.Add(new OctaveCalculator());
+            _calculators.Add(new ArithmeticParserCalculator());
         }
 
         public CalculationResult Calculate(string equation)
         {
             CalculateAll(equation);
-            foreach (var result in results.Where(result => result.HasResult))
+            foreach (var result in _results.Where(result => result.HasResult))
             {
                 return result;
             }
@@ -48,23 +49,23 @@ namespace Plugin
 
         public List<CalculationResult> CalculateAll(string equation)
         {
-            results.Clear();
-            foreach (var calc in calculators)
+            _results.Clear();
+            foreach (var calc in _calculators)
             {
-                ThreadPool.QueueUserWorkItem(CalulatorThreadStarter, new { Calc = calc, Eq = equation });
+                ThreadPool.QueueUserWorkItem(CalculatorThreadStarter, new { Calc = calc, Eq = equation });
             }
-            while (results.Count < calculators.Count)
+            while (_results.Count < _calculators.Count)
             {
                 Thread.Sleep(50);
             }
-            return results;
+            return _results;
 
         }
 
-        private void CalulatorThreadStarter(object state)
+        private void CalculatorThreadStarter(object state)
         {
-            var tState = Cast(state, new { Calc = (WebCalculator)new DummyCalculator(), Eq = "" });
-            results.Add(tState.Calc.Calculate(tState.Eq));
+            var tState = Cast(state, new { Calc = (ICalculator)new DummyCalculator(), Eq = "" });
+            _results.Add(tState.Calc.Calculate(tState.Eq));
         }
 
         private static T Cast<T>(object obj, T t)

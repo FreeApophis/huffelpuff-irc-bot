@@ -45,19 +45,19 @@ namespace Huffelpuff.AccessControl
             if ((e.Data.ReplyCode == ReplyCode.IdentifiedToServices) && (e.Data.RawMessageArray[3] == nick) && (e.Data.Message.StartsWith("is signed on as account")))
             {
                 bot.OnRawMessage -= BotOnRawMessage;
-                identity = e.Data.MessageArray[5];
+                _identity = e.Data.MessageArray[5];
                 lock (this) Monitor.Pulse(this);
             }
             if ((e.Data.ReplyCode == ReplyCode.IdentifiedFreenode) && (e.Data.RawMessageArray[3] == nick) && (e.Data.Message.StartsWith("is logged in as")))
             {
                 bot.OnRawMessage -= BotOnRawMessage;
-                identity = e.Data.RawMessageArray[4];
+                _identity = e.Data.RawMessageArray[4];
                 lock (this) Monitor.Pulse(this);
             }
             if ((e.Data.ReplyCode == ReplyCode.WhoIsRegistered) && (e.Data.RawMessageArray[3] == nick) && (e.Data.Message.StartsWith("is a registered nick")))
             {
                 bot.OnRawMessage -= BotOnRawMessage;
-                identity = e.Data.RawMessageArray[3];
+                _identity = e.Data.RawMessageArray[3];
                 lock (this) Monitor.Pulse(this);
             }
             if ((e.Data.ReplyCode == ReplyCode.EndOfWhoIs) && (e.Data.RawMessageArray[3] == nick))
@@ -72,12 +72,8 @@ namespace Huffelpuff.AccessControl
             }
         }
 
-        private string identity;
+        private string _identity;
 
-        public string Identity
-        {
-            get { return (identity != null) ? "ns/" + identity : null; }
-        }
-
+        public string Identity => _identity != null ? "ns/" + _identity : null;
     }
 }

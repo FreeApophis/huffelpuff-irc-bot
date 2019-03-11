@@ -31,52 +31,49 @@ namespace Huffelpuff.Plugins
     {
         protected IrcBot BotMethods;
         protected SharedClientSide BotEvents;
-        private bool ready;
-        private bool active;
+        private bool _ready;
+        private bool _active;
 
-        public const int MinTickIntervall = 30;
+        public const int MinTickInterval = 30;
 
-        private int tickInterval;
+        private int _tickInterval;
 
         /// <summary>
-        /// the OnTick Event is called every TickIntervall seconds. Tickinterval set to 0 (Standard) when you dont need a tick event.
+        /// the OnTick Event is called every TickInterval seconds. TickInterval set to 0 (Standard) when you don't need a tick event.
         /// </summary>
         public int TickInterval
         {
-            get
-            {
-                return tickInterval;
-            }
+            get => _tickInterval;
             protected set
             {
                 if (value <= 0)
                 {
-                    tickInterval = 0;
+                    _tickInterval = 0;
                 }
-                else if (value < MinTickIntervall)
+                else if (value < MinTickInterval)
                 {
-                    tickInterval = MinTickIntervall;
+                    _tickInterval = MinTickInterval;
                 }
                 else
                 {
-                    tickInterval = value - (value % MinTickIntervall);
+                    _tickInterval = value - (value % MinTickInterval);
                 }
             }
         }
 
-        private int timeUntilTick;
+        private int _timeUntilTick;
         public bool ShallITick(int secs)
         {
             if (!BotMethods.IsConnected)
                 return false;
 
-            if (tickInterval == 0)
+            if (_tickInterval == 0)
                 return false;
 
-            timeUntilTick -= secs;
-            if (timeUntilTick <= 0)
+            _timeUntilTick -= secs;
+            if (_timeUntilTick <= 0)
             {
-                timeUntilTick = tickInterval;
+                _timeUntilTick = _tickInterval;
                 return true;
             }
             return false;
@@ -111,7 +108,7 @@ namespace Huffelpuff.Plugins
 
             BotEvents.Unload();
 
-            if (active)
+            if (_active)
             {
                 Deactivate();
             }
@@ -122,14 +119,14 @@ namespace Huffelpuff.Plugins
         public void InvokeHandler(string handlerName, EventArgs e)
         {
             var ircEventParameters = new object[] { this, e };
-            Log.Instance.Log("InovkeHandler in " + GetType() + " calls " + handlerName);
+            Log.Instance.Log("Invoke handler in " + GetType() + " calls " + handlerName);
             try
             {
-                GetType().GetMethod(handlerName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Invoke(this, ircEventParameters);
+                GetType().GetMethod(handlerName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(this, ircEventParameters);
             }
             catch (Exception ex)
             {
-                Log.Instance.Log("Handler " + handlerName + "in" + GetType() + " has thrown an Exception: \n" + ex.Message + "\n" + ex.InnerException.Message, Level.Error, ConsoleColor.Red);
+                Log.Instance.Log("Handler " + handlerName + "in" + GetType() + " has thrown an Exception: \n" + ex.Message + "\n" + ex.InnerException?.Message, Level.Error, ConsoleColor.Red);
             }
         }
 
@@ -137,7 +134,7 @@ namespace Huffelpuff.Plugins
         {
             get
             {
-                string[] parts = FullName.Split(new[] { '.' });
+                string[] parts = FullName.Split('.');
                 return parts[parts.Length - 1];
             }
         }
@@ -145,71 +142,36 @@ namespace Huffelpuff.Plugins
         /// <summary>
         ///
         /// </summary>
-        public string FullName
-        {
-            get
-            {
-                return GetType().FullName;
-            }
-        }
+        public string FullName => GetType().FullName;
 
-        public string ShortName
-        {
-            get
-            {
-                return GetType().FullName;
-            }
-        }
+        public string ShortName => GetType().FullName;
 
-        public string AssemblyName
-        {
-            get
-            {
-                return GetType().Assembly.FullName;
-            }
-        }
+        public string AssemblyName => GetType().Assembly.FullName;
 
-        public virtual string Name
-        {
-            get
-            {
-                return GetType().Assembly.FullName;
-            }
-        }
+        public virtual string Name => GetType().Assembly.FullName;
 
-        public virtual bool Ready
-        {
-            get
-            {
-                return ready;
-            }
-        }
-        public virtual bool Active
-        {
-            get
-            {
-                return active;
-            }
-        }
+        public virtual bool Ready => _ready;
+
+        public virtual bool Active => _active;
 
         public virtual void Init()
         {
-            ready = true;
+            _ready = true;
         }
 
         public virtual void Activate()
         {
-            active = true;
+            _active = true;
         }
 
         public virtual void Deactivate()
         {
-            active = false;
+            _active = false;
         }
 
         public virtual void DeInit()
         {
-            ready = false;
+            _ready = false;
         }
 
         public virtual void OnTick()

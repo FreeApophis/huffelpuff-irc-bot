@@ -37,9 +37,7 @@ namespace Plugin
         {
             if (eventArgs.Data.MessageArray.Length == 2)
             {
-                int votingNumberTemp;
-
-                if (int.TryParse(eventArgs.Data.MessageArray[1], out votingNumberTemp))
+                if (int.TryParse(eventArgs.Data.MessageArray[1], out var votingNumberTemp))
                 {
                     if (votingNumberTemp >= 0)
                     {
@@ -142,18 +140,12 @@ namespace Plugin
             OnCompleted();
         }
 
-        public override string StatusMessage
-        {
-            get
-            {
-                return "Tallying : " +
-                  (Client.CurrentOperation == null ?
-                  "Unknown status." :
-                  Client.CurrentOperation.Text) +
-                  (Client.CurrentOperation.SubText.IsNullOrEmpty() ?
-                  string.Empty : " " +
-                  Client.CurrentOperation.SubText);
-            }
-        }
+        public override string StatusMessage => "Tallying : " +
+                                                (Client.CurrentOperation == null ?
+                                                    "Unknown status." :
+                                                    Client.CurrentOperation.Text) +
+                                                (Client.CurrentOperation.SubText.IsNullOrEmpty() ?
+                                                    string.Empty : " " +
+                                                                   Client.CurrentOperation.SubText);
     }
 }
